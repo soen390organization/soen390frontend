@@ -28,7 +28,7 @@ jobs:
         run: npm install
 
       - name: Creating an empty environment.ts file
-        run: touch src/environments/environment.ts
+        run: mkdir -p src/environments && touch src/environments/environment.ts
 
       - name: Build Ionic App
         run: npm run build --configuration=production
