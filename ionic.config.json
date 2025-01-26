@@ -1,0 +1,7 @@
+{
+  "name": "ConcordiaCompass",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}
