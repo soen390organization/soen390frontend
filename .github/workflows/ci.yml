@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - main
+      - workflow-setup
   pull_request:
     branches:
       - main
