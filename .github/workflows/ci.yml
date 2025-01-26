@@ -1,4 +1,3 @@
----
 name: Ionic CI/CD
 
 on:
@@ -22,8 +21,22 @@ jobs:
         with:
           node-version: 20.11.1
 
-      - name: Handle environment
-        run: echo "${{ secrets.ENVIRONMENT_VARS }}" > src/environments/environment.ts
+      - name: Handle environment (Generate environment.ts)
+        run: |
+          cat <<EOF > src/environments/environment.ts
+          export const environment = {
+            production: false,
+            firebaseConfig: {
+              apiKey: '${{ secrets.DEV_API_KEY }}',
+              authDomain: '${{ secrets.DEV_AUTH_DOMAIN }}',
+              projectId: '${{ secrets.DEV_PROJECT_ID }}',
+              storageBucket: '${{ secrets.DEV_STORAGE_BUCKET }}',
+              messagingSenderId: '${{ secrets.DEV_MESSAGING_SENDER_ID }}',
+              appId: '${{ secrets.DEV_APP_ID }}',
+              measurementId: '${{ secrets.DEV_MEASUREMENT_ID }}'
+            }
+          };
+          EOF
         shell: bash
 
       - name: Install Dependencies
