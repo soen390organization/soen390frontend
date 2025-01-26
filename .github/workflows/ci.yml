@@ -22,7 +22,7 @@ jobs:
           node-version: 20.11.1
 
       - name: Check if Secret exists
-        run: echo "API_KEY=${{ secrets.API_KEY }}"
+        run: echo "API_KEY=${{ secrets.FIREBASE_API_KEY }}"
 
       - name: Handle environment (Generate environment.ts)
         run: |
