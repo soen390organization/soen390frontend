@@ -3,10 +3,12 @@ name: Ionic CI/CD
 on:
   push:
     branches:
-      - workflow-setup
+      - main
+      - staging
   pull_request:
     branches:
       - main
+      - staging
 
 jobs:
   build:

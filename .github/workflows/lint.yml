@@ -1,6 +1,14 @@
 name: Lint Code
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - main
+      - staging
+  pull_request:
+    branches:
+      - main
+      - staging
 
 jobs:
   lint:
@@ -13,7 +21,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: 20.11.1
 
       - name: Install Dependencies
         run: npm install
