@@ -6,6 +6,7 @@ on:
     branches:
       - main
       - workflow-setup
+      - workflow-env
   pull_request:
     branches:
       - main
@@ -23,15 +24,13 @@ jobs:
         with:
           node-version: 20.11.1
 
-      - name: Handle environment
-        run: echo "${{ secrets.ENVIRONMENT_VARS }}" > src/environments/environment.ts
-        shell: bash
-
       - name: Install Dependencies
         run: npm install
 
       - name: Build Ionic App
-        run: npm run build
+        run: npm run build --configuration=production
+        env:
+          ENVIRONMENT_VARS: "${{ secrets.ENVIRONMENT_VARS }}"
 
       - name: Run Tests
         run: npm test -- --watch=false
