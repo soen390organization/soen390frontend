@@ -4,7 +4,7 @@ import * as path from "path";
 console.log("running environment building script");
 
 const dir = "src/environments";
-const prodEnv = "environment.prod.ts";
+const prodEnv = "environment.ts";
 
 const content = process.env["ENVIRONMENT_VARS"] || "Default content";
 const testVar = process.env["TEST_VAR"];
