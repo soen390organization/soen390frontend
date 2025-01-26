@@ -25,6 +25,7 @@ jobs:
 
       - name: Handle environment
         run: echo "${{ secrets.ENVIRONMENT_VARS }}" > src/environments/environment.ts
+        shell: bash
 
       - name: Install Dependencies
         run: npm install
