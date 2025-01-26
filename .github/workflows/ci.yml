@@ -27,13 +27,13 @@ jobs:
           export const environment = {
             production: false,
             firebaseConfig: {
-              apiKey: '${{ secrets.DEV_API_KEY }}',
-              authDomain: '${{ secrets.DEV_AUTH_DOMAIN }}',
-              projectId: '${{ secrets.DEV_PROJECT_ID }}',
-              storageBucket: '${{ secrets.DEV_STORAGE_BUCKET }}',
-              messagingSenderId: '${{ secrets.DEV_MESSAGING_SENDER_ID }}',
-              appId: '${{ secrets.DEV_APP_ID }}',
-              measurementId: '${{ secrets.DEV_MEASUREMENT_ID }}'
+              apiKey: '${{ secrets.FIREBASE_API_KEY }}',
+              authDomain: '${{ secrets.FIREBASE_AUTH_DOMAIN }}',
+              databaseURL: '${{ secrets.FIREBASE_DATABASE_URL }}',
+              projectId: '${{ secrets.FIREBASE_PROJECT_ID }}',
+              storageBucket: '${{ secrets.FIREBASE_STORAGE_BUCKET }}',
+              messagingSenderId: '${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}',
+              appId: '${{ secrets.FIREBASE_APP_ID }}',
             }
           };
           EOF
