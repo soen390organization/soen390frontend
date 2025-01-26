@@ -21,6 +21,9 @@ jobs:
         with:
           node-version: 20.11.1
 
+      - name: Check if Secret exists
+        run: echo "API_KEY=${{ secrets.API_KEY }}"
+
       - name: Handle environment (Generate environment.ts)
         run: |
           cat <<EOF > src/environments/environment.ts
