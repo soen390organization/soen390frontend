@@ -36,6 +36,7 @@
           },
           "configurations": {
             "production": {
+              "scripts":["environmentScript.ts"]
               "budgets": [
                 {
                   "type": "initial",
@@ -124,19 +125,14 @@
         "lint": {
           "builder": "@angular-eslint/builder:lint",
           "options": {
-            "lintFilePatterns": [
-              "src/**/*.ts",
-              "src/**/*.html"
-            ]
+            "lintFilePatterns": ["src/**/*.ts", "src/**/*.html"]
           }
         }
       }
     }
   },
   "cli": {
-    "schematicCollections": [
-      "@ionic/angular-toolkit"
-    ],
+    "schematicCollections": ["@ionic/angular-toolkit"],
     "analytics": "1f8cbd59-a57d-466a-b076-1e4c3cc50d90"
   },
   "schematics": {
