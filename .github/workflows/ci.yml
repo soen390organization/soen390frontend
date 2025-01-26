@@ -23,6 +23,9 @@ jobs:
         with:
           node-version: 18
 
+      - name: Handle environment
+        run: echo "${{ secrets.ENVIRONMENT_VARS }}" > src/environments/environment.ts
+
       - name: Install Dependencies
         run: npm install
 
