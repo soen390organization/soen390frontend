@@ -35,6 +35,17 @@ jobs:
         env:
           ENVIRONMENT_VARS: "${{ secrets.ENVIRONMENT_VARS }}"
 
+      - name: Echo Environment Files
+        run: |
+          for file in src/environments/environment.ts src/environments/environment.prod.ts; do
+            if [ -f "$file" ]; then
+              echo "Contents of $file:"
+              cat "$file"
+            else
+              echo "File does not exist: $file"
+            fi
+          done
+
       - name: Run Tests
         run: npm test -- --watch=false
         env:
