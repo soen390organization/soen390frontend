@@ -3,7 +3,7 @@
 ### Project Details
 Node Version: 20.11.1\
 Angular Version: 19.0\
-Ionic Version: 7.2.0\
+Ionic Version: 7.2.0
 
 ### Node Installation/Management
 **For Mac:**\
