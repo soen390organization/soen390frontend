@@ -5,6 +5,7 @@ import { ref, set, get, update, push, remove } from 'firebase/database';
 @Injectable({
   providedIn: 'root',
 })
+
 export class ApiService {
   private async generateUniqueId(route: string): Promise<string> {
     let uniqueId: string | null = null;
@@ -31,11 +32,11 @@ export class ApiService {
       if (!data.id) {
         data.id = await this.generateUniqueId(route);
       }
-  
+
       const { id, ...dataWithoutId } = data;
       const dataRef = ref(database, `${route}/${id}`);
       const snapshot = await get(dataRef);
-  
+
       if (snapshot.exists()) {
         // Update if the data already exists
         await update(dataRef, dataWithoutId);
