@@ -9,7 +9,7 @@ import { auth } from '../../firebase.config';
   providedIn: 'root',
 })
 export class AuthService {
-  constructor() { }
+  constructor() {}
 
   login(email: string, password: string) {
     return signInWithEmailAndPassword(auth, email, password);

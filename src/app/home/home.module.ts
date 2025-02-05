@@ -13,8 +13,8 @@ import { GoogleMapComponent } from '../components/google-map/google-map.componen
     CommonModule,
     FormsModule,
     IonicModule,
-    HomePageRoutingModule,
+    HomePageRoutingModule
   ],
-  declarations: [HomePage],
+  declarations: [HomePage]
 })
-export class HomePageModule { }
+export class HomePageModule {}
