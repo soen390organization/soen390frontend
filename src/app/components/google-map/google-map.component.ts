@@ -3,8 +3,6 @@ import { Component, AfterViewInit, ElementRef, ViewChild } from '@angular/core';
 import { PolygonBuilder } from 'src/app/builders/polygon.builder';
 import data from 'src/assets/ConcordiaData.json';
 
-console.log(data);
-
 declare var google: any;
 
 @Component({
@@ -16,8 +14,7 @@ export class GoogleMapComponent implements AfterViewInit {
   @ViewChild('mapContainer', { static: false }) mapContainer!: ElementRef;
   map!: google.maps.Map;
 
-  constructor() {}
-
+  constructor() { }
 
   ngAfterViewInit() {
     this.loadMap();
@@ -34,13 +31,11 @@ export class GoogleMapComponent implements AfterViewInit {
     data.buildings.forEach((building) => {
       let polygonBuilder = new PolygonBuilder();
       polygonBuilder.setMap(this.map);
-      console.log("building: ", building.name)
+      // add building title on map here
       building.boundaries.forEach((boundary) => {
-        console.log("boundary: ", boundary)
-        polygonBuilder.setLatLng({
-          lat: boundary.lat,
-          lng: boundary.lng,
-        });
+        polygonBuilder.setLatLng(
+          boundary
+        );
       });
       polygonBuilder.build();
     });

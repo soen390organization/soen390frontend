@@ -4,6 +4,7 @@
       "name": "Engineering and Visual Arts",
       "abreviation": "EV",
       "address": "TBD",
+      "campus": { "name": "Sir George William", "abreviation": "SGW" },
       "entrances": [],
       "boundaries": [
         {
@@ -60,6 +61,7 @@
       "name": "Hall",
       "abreviation": "H",
       "address": "TBD",
+      "campus": { "name": "Sir George William", "abreviation": "SGW" },
       "entrances": [],
       "boundaries": [
         {
@@ -84,6 +86,7 @@
       "name": "John Molson School of Business",
       "abreviation": "JMSB",
       "address": "TBD",
+      "campus": { "name": "Sir George William", "abreviation": "SGW" },
       "entrances": [],
       "boundaries": [
         {
@@ -128,6 +131,7 @@
       "name": "Webster Library",
       "abreviation": "LB",
       "address": "TBD",
+      "campus": { "name": "Sir George William", "abreviation": "SGW" },
       "entrances": [],
       "boundaries": [
         {
