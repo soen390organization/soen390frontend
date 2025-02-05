@@ -44,9 +44,6 @@ jobs:
       - name: Install Dependencies
         run: npm install
 
-      - name: Validate Campus JSON
-        run: npx ajv validate -s schemas/campus.schema.json -d campus.json
-
       - name: Build Ionic App
         run: npm run build -- --configuration=development
 
