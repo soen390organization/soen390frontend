@@ -12,23 +12,34 @@ getTestBed().initTestEnvironment(
   BrowserDynamicTestingModule,
   platformBrowserDynamicTesting(),
 );
-Object.defineProperty(window, 'google', {
-  value: {
-    maps: {
-      Polygon: class {
-        constructor() { }
-      },
-      LatLng: class {
-        constructor() { }
-      },
-      geometry: {
-        poly: {
-          containsLocation: jasmine
-            .createSpy('containsLocation')
-            .and.returnValue(false),
-        },
-      },
+(window as any).google = {
+  maps: {
+    Polygon: class {
+      paths: any;
+      constructor(options: any) { this.paths = options.paths; }
     },
-  },
-  writable: true,
-});
+    LatLng: class {
+      lat: number;
+      lng: number;
+      constructor({ lat, lng }: { lat: number; lng: number }) {
+        this.lat = lat;
+        this.lng = lng;
+      }
+    },
+    geometry: {
+      poly: {
+        containsLocation: (point: any, polygon: any) => {
+          // simple bounding box check for testing
+          const lats = polygon.paths.map((p: any) => p.lat);
+          const lngs = polygon.paths.map((p: any) => p.lng);
+          return (
+            point.lat >= Math.min(...lats) &&
+            point.lat <= Math.max(...lats) &&
+            point.lng >= Math.min(...lngs) &&
+            point.lng <= Math.max(...lngs)
+          );
+        }
+      }
+    }
+  }
+};

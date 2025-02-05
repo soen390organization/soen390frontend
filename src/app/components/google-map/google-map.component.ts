@@ -33,9 +33,7 @@ export class GoogleMapComponent implements AfterViewInit {
       polygonBuilder.setMap(this.map);
       // add building title on map here
       building.boundaries.forEach((boundary) => {
-        polygonBuilder.setLatLng(
-          boundary
-        );
+        polygonBuilder.setLatLng(boundary);
       });
       polygonBuilder.build();
     });
