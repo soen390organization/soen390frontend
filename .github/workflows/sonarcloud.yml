@@ -1,0 +1,58 @@
+name: SonarCloud Analysis
+
+on:
+  push:
+    branches: [main, staging]
+  pull_request:
+    branches: [main, staging]
+
+jobs:
+  sonarcloud:
+    name: SonarCloud Scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set Up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.11.1"
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Handle environment (Generate environment.ts)
+        run: |
+          cat <<EOF > src/environments/environment.ts
+          export const environment = {
+            production: false,
+            firebaseConfig: {
+              apiKey: '${{ secrets.FIREBASE_API_KEY }}',
+              authDomain: '${{ secrets.FIREBASE_AUTH_DOMAIN }}',
+              databaseURL: '${{ secrets.FIREBASE_DB_URL }}',
+              projectId: '${{ secrets.FIREBASE_PID }}',
+              storageBucket: '${{ secrets.FIREBASE_STORAGE_BUCKET }}',
+              messagingSenderId: '${{ secrets.FIREBASE_MESSENGER_SENDER_ID }}',
+              appId: '${{ secrets.FIREBASE_APP_ID }}',
+            }
+          };
+          EOF
+        shell: bash
+
+      - name: Run Tests & Generate Coverage Report
+        run: npm test -- --no-watch --code-coverage
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.projectKey=soen390organization_soen390frontend
+            -Dsonar.organization=soen390organization
+            -Dsonar.sources=src
+            -Dsonar.tests=src
+            -Dsonar.test.inclusions=**/*.spec.ts
+            -Dsonar.typescript.lcov.reportPaths=coverage/lcov-report/lcov.info

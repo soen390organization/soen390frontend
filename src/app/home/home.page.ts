@@ -3,7 +3,6 @@ import { Store, select } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { loadUser, UserState } from '../store/user';
 import { AuthService } from '../services/auth.service';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { UserService } from '../services/user.service';
 import { UserInterface } from '../interfaces/user.interface';
 
@@ -19,24 +18,13 @@ export class HomePage {
   password: string = '';
 
   constructor(
-    private store: Store<{ user: UserState }>,
-    private authService: AuthService,
-    private userService: UserService
+    private readonly store: Store<{ user: UserState }>,
+    private readonly authService: AuthService,
+    private readonly userService: UserService
   ) {}
 
   ngOnInit() {
     this.store.dispatch(loadUser());
-  }
-
-  handleUserTest() {
-    // this.userService.updateOrCreateUser('yanny@laurel.com');
-    const user: UserInterface = {
-      firstName: 'Noura',
-      lastName: 'Tabbara',
-      email: 'tabby@gmail.com',
-      password: 'fatberry'
-    }
-    this.userService.createUser(user).then((userData) => console.log(userData));
   }
 
   onLogin(event: Event) {
