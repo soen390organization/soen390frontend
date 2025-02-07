@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Geolocation } from '@capacitor/geolocation';
+import { Geo } from './geolocation-wrapper.service';
 
 @Injectable({
   providedIn: 'root',
@@ -14,7 +14,7 @@ export class CurrentLocationService {
    */
   async getCurrentLocation(): Promise<{ lat: number, lng: number } | null> {
     try {
-      const coordinates = await Geolocation.getCurrentPosition();
+      const coordinates = await Geo.getCurrentPosition();
       return {
         lat: coordinates.coords.latitude,
         lng: coordinates.coords.longitude,
@@ -31,7 +31,7 @@ export class CurrentLocationService {
    * @returns Watch ID (to stop watching later).
    */
   watchLocation(callback: (position: { lat: number, lng: number }) => void): Promise<string> {
-    const watchId = Geolocation.watchPosition({}, (position, err) => {
+    const watchId = Geo.watchPosition({}, (position, err) => {
       if (err) {
         console.error('Error watching location:', err);
         return;
@@ -52,7 +52,7 @@ export class CurrentLocationService {
    * @param watchId The ID of the watcher to clear.
    */
   clearWatch(watchId: string): void {
-    Geolocation.clearWatch({ id: watchId });
+    Geo.clearWatch({ id: watchId });
   }
 }
 
