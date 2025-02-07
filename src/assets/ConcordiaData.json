@@ -1,30 +1,5 @@
 {
   "buildings": [
-  {
-      "name": "ER Building",
-      "abreviation": "ER",
-      "address": "TBD",
-      "campus": { "name": "Sir George William", "abreviation": "SGW" },
-      "entrances": [],
-      "boundaries": [
-        {
-          "lat": 45.49629460652506,
-          "lng": -73.58044286126437
-        },
-        {
-          "lat": 45.496684411268284,
-          "lng": -73.58014363626059
-        },
-        {
-          "lat": 45.496530732225104,
-          "lng": -73.57966845190897
-        },
-        {
-          "lat": 45.496158734866206,
-          "lng": -73.58000531527546
-        }
-      ]
-    },
     {
       "name": "Engineering and Visual Arts",
       "abreviation": "EV",
@@ -280,6 +255,31 @@
         {
           "lat": 45.49701966382335,
           "lng": -73.57829434512279
+        }
+      ]
+    },
+    {
+      "name": "ER Building",
+      "abreviation": "ER",
+      "address": "TBD",
+      "campus": { "name": "Sir George William", "abreviation": "SGW" },
+      "entrances": [],
+      "boundaries": [
+        {
+          "lat": 45.49629460652506,
+          "lng": -73.58044286126437
+        },
+        {
+          "lat": 45.496684411268284,
+          "lng": -73.58014363626059
+        },
+        {
+          "lat": 45.496530732225104,
+          "lng": -73.57966845190897
+        },
+        {
+          "lat": 45.496158734866206,
+          "lng": -73.58000531527546
         }
       ]
     }

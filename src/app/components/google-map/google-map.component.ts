@@ -16,7 +16,7 @@ export class GoogleMapComponent implements AfterViewInit {
   currentLocationService: CurrentLocationService = new CurrentLocationService();
   geolocationService: GeolocationService = new GeolocationService();
 
-  constructor() {}
+  constructor() { }
 
   ngAfterViewInit() {
     this.loadMap();
@@ -35,16 +35,6 @@ export class GoogleMapComponent implements AfterViewInit {
     };
 
     this.map = new google.maps.Map(this.mapContainer.nativeElement, mapOptions);
-
-    // the below statement is deprecated, I will update soon - Franco
-    new google.maps.Marker({
-      position: userCurrentLocation,
-      map: this.map,
-      title: 'You are here',
-      icon: {
-        url: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
-      },
-    });
 
     data.buildings.forEach((building) => {
       let polygonBuilder = new PolygonBuilder();
