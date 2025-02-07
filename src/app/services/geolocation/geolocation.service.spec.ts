@@ -10,7 +10,6 @@ describe('GeoLocation Service...', () => {
     it("Should return 'Hall", async () => {
       const currentBuildingName =
         await service.getCurrentBuilding(currentLocation);
-      console.log('current building name: ', currentBuildingName, '...');
       expect(currentBuildingName).toBe('Hall');
     });
   });
@@ -19,11 +18,18 @@ describe('GeoLocation Service...', () => {
       lat: 45.495269700671045,
       lng: -73.57892221858457,
     };
-    it("Should return JMSB", async () => {
+    it('Should return JMSB', async () => {
       const currentBuildingName =
         await service.getCurrentBuilding(currentLocation);
-      console.log('current building name: ', currentBuildingName, '...');
       expect(currentBuildingName).toBe('John Molson School of Business');
+    });
+  });
+  describe('Given a null input', () => {
+    const currentLocation = null;
+    it('Should return null', async () => {
+      const currentBuildingName =
+        await service.getCurrentBuilding(currentLocation);
+      expect(currentBuildingName).toBeNull();
     });
   });
   describe('Given the user is not in a building', () => {

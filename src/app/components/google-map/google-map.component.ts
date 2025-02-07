@@ -2,8 +2,8 @@
 import { Component, AfterViewInit, ElementRef, ViewChild } from '@angular/core';
 import { PolygonBuilder } from 'src/app/builders/polygon.builder';
 import data from 'src/assets/ConcordiaData.json';
-
-declare var google: any;
+import { CurrentLocationService } from 'src/app/services/geolocation/current-location.service';
+import { GeolocationService } from 'src/app/services/geolocation/geolocation.service';
 
 @Component({
   selector: 'app-google-map',
@@ -13,6 +13,8 @@ declare var google: any;
 export class GoogleMapComponent implements AfterViewInit {
   @ViewChild('mapContainer', { static: false }) mapContainer!: ElementRef;
   map!: google.maps.Map;
+  currentLocationService: CurrentLocationService = new CurrentLocationService();
+  geolocationService: GeolocationService = new GeolocationService();
 
   constructor() {}
 
@@ -20,18 +22,37 @@ export class GoogleMapComponent implements AfterViewInit {
     this.loadMap();
   }
 
-  loadMap() {
+  async loadMap() {
+    const userCurrentLocation =
+      await this.currentLocationService.getCurrentLocation();
+    const userCurrentBuilding =
+      await this.geolocationService.getCurrentBuilding(userCurrentLocation);
+    console.log('user current building:\n', userCurrentBuilding);
+
     const mapOptions = {
-      center: { lat: 45.49508674774648, lng: -73.57795691041848 },
-      zoom: 17,
+      center: userCurrentLocation,
+      zoom: 18,
     };
 
     this.map = new google.maps.Map(this.mapContainer.nativeElement, mapOptions);
+
+    // the below statement is deprecated, I will update soon - Franco
+    new google.maps.Marker({
+      position: userCurrentLocation,
+      map: this.map,
+      title: 'You are here',
+      icon: {
+        url: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
+      },
+    });
 
     data.buildings.forEach((building) => {
       let polygonBuilder = new PolygonBuilder();
       polygonBuilder.setMap(this.map);
       // add building title on map here
+      if (building.name == userCurrentBuilding) {
+        polygonBuilder.setFillOutlineColor('#4287f5', '#074bb8');
+      }
       building.boundaries.forEach((boundary) => {
         polygonBuilder.setLatLng(boundary);
       });
