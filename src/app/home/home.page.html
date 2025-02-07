@@ -4,6 +4,7 @@
   </ion-toolbar>
 </ion-header>
 
+
 <ion-content [fullscreen]="true">
   <ion-header collapse="condense">
     <ion-toolbar>
@@ -13,38 +14,36 @@
     </ion-toolbar>
   </ion-header>
 
-  <ion-toolbar>
-    <ion-searchbar 
-    placeholder="Start" 
-    show-clear-button="always" 
-    value="Always Show"
-    (ionChange)="onSearchChangeStart($event)">
-  </ion-searchbar>
-  </ion-toolbar>
-  
-  <ion-toolbar>
-    <ion-searchbar 
-    placeholder="Destination" 
-    show-clear-button="always" 
-    value="Always Show"
-    (ionChange)="onSearchChangeDestination($event)">
-  </ion-searchbar>
-  </ion-toolbar>
-
-  <ion-list >
-    <ion-item >
-      <ion-icon ></ion-icon>
-      <ion-label>
-        <p>
-          <ion-text>
-          </ion-text>
-        </p>
-      </ion-label>
-    </ion-item>
-  </ion-list>
 
   <div id="container">
     <google-map></google-map>
+    <div id="search-bars-div">
+
+      <div class="search-box">
+
+        <div class="arrow-icon-button">
+          <ion-button class="arrow-button" aria-label="Back" fill="clear" slot="start">
+            <ion-icon name="arrow-back-outline" size="medium" color="medium"></ion-icon></ion-button>
+        </div>
+        <div class="search-bars-container">
+              <ion-searchbar
+                searchIcon="null"
+                class="custom" 
+                placeholder="Choose starting point" 
+                show-clear-button="never" 
+                (ionChange)="onSearchChangeStart($event)">
+              </ion-searchbar>
+        
+            <ion-searchbar
+              searchIcon="null"
+              class="custom" 
+              placeholder="Choose destination point" 
+              show-clear-button="never" 
+              (ionChange)="onSearchChangeDestination($event)">
+            </ion-searchbar>
+        </div>
+      </div>
+    </div>
 
     <!-- Uncomment these forms if needed for login/signup -->
     <!--
