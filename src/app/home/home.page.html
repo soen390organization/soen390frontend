@@ -7,16 +7,48 @@
 <ion-content [fullscreen]="true">
   <ion-header collapse="condense">
     <ion-toolbar>
-      <ion-title *ngIf="user$ | async as userState" size="large"
-        >Welcome, {{ userState.user?.name }}</ion-title
-      >
+      <ion-title *ngIf="user$ | async as userState" size="large">
+        Welcome, {{ userState.user?.name }}
+      </ion-title>
     </ion-toolbar>
   </ion-header>
-  <ion-searchbar></ion-searchbar>
-  <ion-searchbar></ion-searchbar>
+
+  <ion-toolbar>
+    <ion-searchbar 
+    placeholder="Start" 
+    show-clear-button="always" 
+    value="Always Show"
+    (ionChange)="onSearchChangeStart($event)">
+  </ion-searchbar>
+  </ion-toolbar>
+  
+  <ion-toolbar>
+    <ion-searchbar 
+    placeholder="Destination" 
+    show-clear-button="always" 
+    value="Always Show"
+    (ionChange)="onSearchChangeDestination($event)">
+  </ion-searchbar>
+  </ion-toolbar>
+
+  <ion-list >
+    <ion-item >
+      <ion-icon ></ion-icon>
+      <ion-label>
+        <p>
+          <ion-text>
+          </ion-text>
+        </p>
+      </ion-label>
+    </ion-item>
+  </ion-list>
 
   <div id="container">
-    <!-- <form (submit)="onLogin($event)">
+    <google-map></google-map>
+
+    <!-- Uncomment these forms if needed for login/signup -->
+    <!--
+    <form (submit)="onLogin($event)">
       <input
         type="email"
         [(ngModel)]="email"
@@ -32,8 +64,10 @@
         required
       />
       <button type="submit">Login</button>
-    </form> -->
-<!-- 
+    </form>
+    -->
+
+    <!--
     <form (submit)="onSignup($event)">
       <input
         type="email"
@@ -50,8 +84,9 @@
         required
       />
       <button type="submit">Sign Up</button>
-    </form> -->
-    <ion-button (click)="handleUserTest()">Test User</ion-button>
-    
+    </form>
+    -->
+
+    <!-- <ion-button (click)="handleUserTest()">Test User</ion-button> -->
   </div>
 </ion-content>

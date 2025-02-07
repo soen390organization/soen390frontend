@@ -18,6 +18,7 @@
     "@angular/compiler": "^19.0.0",
     "@angular/core": "^19.0.0",
     "@angular/forms": "^19.0.0",
+    "@angular/google-maps": "^19.1.2",
     "@angular/platform-browser": "^19.0.0",
     "@angular/platform-browser-dynamic": "^19.0.0",
     "@angular/router": "^19.0.0",
@@ -33,6 +34,7 @@
     "@ngrx/store-devtools": "^19.0.0",
     "firebase": "^11.2.0",
     "ionicons": "^7.0.0",
+    "karma-sabarivka-reporter": "^3.3.1",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.15.0"

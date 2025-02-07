@@ -9,7 +9,7 @@ import { EffectsModule } from '@ngrx/effects';
 import { reducers, effects } from './store';
 
 @NgModule({
-  declarations: [AppComponent],
+  declarations: [AppComponent, ],
   imports: [
     BrowserModule,
     StoreModule.forRoot(reducers),
