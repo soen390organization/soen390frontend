@@ -14,7 +14,7 @@ export class GoogleMapComponent implements AfterViewInit {
   @ViewChild('mapContainer', { static: false }) mapContainer!: ElementRef;
   map!: google.maps.Map;
 
-  constructor() { }
+  constructor() {}
 
   ngAfterViewInit() {
     this.loadMap();
