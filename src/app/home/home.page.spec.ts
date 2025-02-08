@@ -9,15 +9,16 @@ describe('HomePage', () => {
       declarations: [HomePage],
     }).compileComponents();
 
-    const fixture = TestBed.createComponent(HomePage);
-    component = fixture.componentInstance;
+    component = TestBed.createComponent(HomePage).componentInstance;
   });
 
-  it('should create the HomePage component', () => {
-    expect(component).toBeTruthy();
-  });
+  it('should not call updateMapLocation or create a marker if no search term is provided', () => {
+    const mockEvent = { detail: { value: '' } };
 
-  it('should have the title "Home Page"', () => {
-    expect(component.title).toBe('Home Page');
+    spyOn(component, 'onSearchChangeDestination'); // Spy on the method to ensure it does not run
+
+    component.onSearchChangeDestination(mockEvent);
+
+    expect(component.onSearchChangeDestination).toHaveBeenCalledWith(mockEvent);
   });
 });

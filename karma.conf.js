@@ -26,13 +26,17 @@ module.exports = function (config) {
       suppressAll: true, // removes the duplicated traces
     },
     coverageReporter: {
-      dir: require("path").join(__dirname, "./coverage/"),
-      type: "lcov",
-      subdir: "lcov-report",
-      includeAllSources: true,
-      include: ["src/**/*.(ts|js)"],
+      dir: require("path").join(__dirname, "./coverage"), // Coverage directory
+      subdir: ".",
+      reporters: [
+        { type: "text-summary" }, // ✅ Show a summary in the terminal
+        { type: "lcov", subdir: "lcov-report" }, // ✅ Generate LCOV report for CI/CD
+      ],
+      includeAllSources: true, // Ensure all source files are included in coverage
     },
-    reporters: ["sabarivka", "coverage", "progress", "kjhtml"],
+    
+ 
+    reporters: [ "coverage", "progress", "kjhtml"],
     port: 9876,
     colors: true,
     logLevel: config.LOG_INFO,
