@@ -6,9 +6,11 @@ import { HomePage } from './home.page';
 
 import { HomePageRoutingModule } from './home-routing.module';
 import { GoogleMapComponent } from '../components/google-map/google-map.component';
+import { DirectionsComponent } from '../components/directions/directions.component';
 
 @NgModule({
   imports: [
+    DirectionsComponent,
     GoogleMapComponent,
     CommonModule,
     FormsModule,
