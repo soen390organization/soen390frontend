@@ -41,22 +41,20 @@ export class GoogleMapComponent implements AfterViewInit {
   async loadSGW() {
     this.selectedCampus = 'SGW';
     // SGW: 45.49508674774648, -73.57795691041848
-    const mapOptions = {
-      ...this.mapOptions,
-      center: { lat: 45.49508674774648, lng: -73.57795691041848 },
-    };
-    this.map = new google.maps.Map(this.mapContainer.nativeElement, mapOptions);
+    this.map = new google.maps.Map(this.mapContainer.nativeElement,
+      { ...this.mapOptions,
+        ...(data.campuses.sgw.mapOptions as google.maps.MapOptions)
+      });
     await this.loadBuildings();
   }
 
   async loadLoyola() {
     this.selectedCampus = 'LOY';
     // Loyola: 45.45812810976341, -73.6393513063634
-    const mapOptions = {
-      ...this.mapOptions,
-      center: { lat: 45.45812810976341, lng: -73.6393513063634 },
-    };
-    this.map = new google.maps.Map(this.mapContainer.nativeElement, mapOptions);
+    this.map = new google.maps.Map(this.mapContainer.nativeElement,
+      { ...this.mapOptions,
+        ...(data.campuses.loy.mapOptions as google.maps.MapOptions)
+      });
     await this.loadBuildings();
   }
 

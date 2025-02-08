@@ -1,4 +1,16 @@
 {
+  "campuses": {
+    "sgw": {
+      "mapOptions": {
+        "center": { "lat": 45.49508674774648, "lng": -73.57795691041848 }
+      }
+    },
+    "loy": {
+      "mapOptions": {
+        "center": { "lat": 45.45812810976341, "lng": -73.6393513063634 }
+      }
+    }
+  },
   "buildings": [
     {
       "name": "Engineering and Visual Arts",
