@@ -58,6 +58,11 @@ export class GoogleMapComponent implements AfterViewInit {
     await this.loadBuildings();
   }
 
+  updateMapLocation(location: google.maps.LatLng) { 
+    this.map.setCenter(location);
+    this.map.setZoom(15);
+  }
+
   async loadBuildings() {
     const userCurrentLocation = await this.currentLocationService.getCurrentLocation();
     const userCurrentBuilding = await this.geolocationService.getCurrentBuilding(userCurrentLocation);

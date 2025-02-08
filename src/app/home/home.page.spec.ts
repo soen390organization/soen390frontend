@@ -1,6 +1,4 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { IonicModule } from '@ionic/angular';
-
+import { TestBed } from '@angular/core/testing';
 import { HomePage } from './home.page';
 import { provideMockStore } from '@ngrx/store/testing'; // ✅ Import mock store
 
@@ -36,8 +34,6 @@ describe('HomePage', () => {
 
     TestBed.configureTestingModule({
       declarations: [HomePage],
-      imports: [IonicModule.forRoot(), StoreModule.forRoot({})], // Optional: Provide root store if needed
-      providers: [provideMockStore()], // Provide a mock store
       providers: [
         provideMockStore({}), // ✅ Fix: Provide a mock store to prevent test failures
       ],
