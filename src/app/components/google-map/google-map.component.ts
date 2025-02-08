@@ -20,7 +20,7 @@ export class GoogleMapComponent implements AfterViewInit {
   currentLocationService: CurrentLocationService = new CurrentLocationService();
   geolocationService: GeolocationService = new GeolocationService();
   buildingPolygon!: google.maps.Polygon;
-  mapOptions: any = {
+  mapOptions: google.maps.MapOptions = {
     zoom: 18
   }
   selectedCampus = 'SGW';
