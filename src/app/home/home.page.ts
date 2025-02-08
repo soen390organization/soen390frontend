@@ -25,6 +25,7 @@ export class HomePage {
   user$: Observable<UserState> = this.store.pipe(select('user'));
   email: string = '';
   password: string = '';
+  startLocation: string = '';
 
   constructor(
     private store: Store<{ user: UserState }>,
@@ -140,21 +141,19 @@ onSearchChangeStartToCurrentLocation(event: any) {
           throw new Error("Current location's address cannot be read.")
         }
         searchTerm = results[0].formatted_address;
-      });
-    }).catch(error => {
-      console.error("Error getting location:", error);
-    });
-    console.log(searchTerm);
-    if (!searchTerm) return; // Exit if the search term is empty
-
+    if (searchTerm.length == 0) {
+      return; // Exit if the search term is empty
+    }
+    this.startLocation = searchTerm;
     const request = {
         query: searchTerm,
         fields: ['geometry'], // Request geometry to get location coordinates
     };
-
     const placesService = new google.maps.places.PlacesService(this.googleMap.map);
 
     placesService.findPlaceFromQuery(request, (results: any, status: any) => {
+        console.log(status);
+        console.log(results);
         if (status === google.maps.places.PlacesServiceStatus.OK && results.length > 0) {
             const place = results[0];
 
@@ -183,6 +182,10 @@ onSearchChangeStartToCurrentLocation(event: any) {
                 // =========================================
             }
         }
+    });
+      });
+    }).catch(error => {
+      console.error("Error getting location:", error);
     });
 }
 

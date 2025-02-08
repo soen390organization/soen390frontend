@@ -15,9 +15,9 @@
 
   <ion-toolbar>
     <ion-searchbar 
+    [value]="startLocation"
     placeholder="Start" 
     show-clear-button="always" 
-    value="Always Show"
     (ionChange)="onSearchChangeStart($event)">
   </ion-searchbar>
   </ion-toolbar>
