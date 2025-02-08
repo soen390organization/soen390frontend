@@ -4,7 +4,7 @@ import { PolygonBuilder } from 'src/app/builders/polygon.builder';
 declare var google: any;
 
 @Component({
-  selector: 'google-map',
+  selector: 'app-google-map',
   templateUrl: './google-map.component.html',
   styleUrls: ['./google-map.component.scss']
 })

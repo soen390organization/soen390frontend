@@ -8,15 +8,15 @@
 <ion-content [fullscreen]="true">
   <ion-header collapse="condense">
     <ion-toolbar>
-      <ion-title *ngIf="user$ | async as userState" size="large">
+      <!-- <ion-title *ngIf="user$ | async as userState" size="large">
         Welcome, {{ userState.user?.name }}
-      </ion-title>
+      </ion-title> -->
     </ion-toolbar>
   </ion-header>
 
 
   <div id="container">
-    <google-map></google-map>
+    <app-google-map></app-google-map>
     <div id="search-bars-div">
 
       <div class="search-box">
