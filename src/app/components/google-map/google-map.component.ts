@@ -6,7 +6,7 @@ import { CurrentLocationService } from 'src/app/services/geolocation/current-loc
 import { GeolocationService } from 'src/app/services/geolocation/geolocation.service';
 import { IonicModule } from '@ionic/angular';
 
-declare var google: any;
+declare const google: any;
 
 @Component({
   selector: 'app-google-map',
