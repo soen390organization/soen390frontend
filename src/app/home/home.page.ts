@@ -8,6 +8,7 @@ import { UserService } from '../services/user.service';
 import { UserInterface } from '../interfaces/user.interface';
 import { GoogleMapComponent } from '../components/google-map/google-map.component';
 import { ViewChild } from '@angular/core';
+import { OnInit } from '@angular/core';
 
 @Component({
   selector: 'app-home',
@@ -15,7 +16,7 @@ import { ViewChild } from '@angular/core';
   styleUrls: ['home.page.scss'],
   standalone: false,
 })
-export class HomePage {
+export class HomePage implements OnInit {
   title(title: any) {
     throw new Error('Method not implemented.');
   }
@@ -24,7 +25,6 @@ export class HomePage {
   startMarker: google.maps.Marker | null = null;
 // @ts-ignore: Suppress deprecated warning temporarily
   destinationMarker: google.maps.Marker | null = null;
-
 
   user$: Observable<UserState> = this.store.pipe(select('user'));
   email: string = '';
