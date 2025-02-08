@@ -5,14 +5,13 @@ import { Geo } from './geolocation-wrapper.service';
   providedIn: 'root',
 })
 export class CurrentLocationService {
-
   constructor() {}
 
   /**
    * Get the user's current location once.
    * @returns Promise<{ lat: number, lng: number }>
    */
-  async getCurrentLocation(): Promise<{ lat: number, lng: number } | null> {
+  async getCurrentLocation(): Promise<{ lat: number; lng: number } | null> {
     try {
       const coordinates = await Geo.getCurrentPosition();
       return {
@@ -31,7 +30,9 @@ export class CurrentLocationService {
    * @param callback Function to execute on location change.
    * @returns Watch ID (to stop watching later).
    */
-  watchLocation(callback: (position: { lat: number, lng: number }) => void): Promise<string> {
+  watchLocation(
+    callback: (position: { lat: number; lng: number }) => void,
+  ): Promise<string> {
     const watchId = Geo.watchPosition({}, (position, err) => {
       if (err) {
         console.error('Error watching location:', err);
@@ -56,4 +57,3 @@ export class CurrentLocationService {
     Geo.clearWatch({ id: watchId });
   }
 }
-

@@ -1,0 +1,61 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "buildings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "abreviation": { "type": "string" },
+          "address": { "type": "string" },
+          "campus": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "abreviation": { "type": "string" }
+            },
+            "required": ["name", "abreviation"],
+            "additionalProperties": false
+          },
+          "entrances": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "lat": { "type": "number" },
+                "lng": { "type": "number" }
+              },
+              "required": ["lat", "lng"],
+              "additionalProperties": false
+            }
+          },
+          "boundaries": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "lat": { "type": "number" },
+                "lng": { "type": "number" }
+              },
+              "required": ["lat", "lng"],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "name",
+          "abreviation",
+          "address",
+          "campus",
+          "entrances",
+          "boundaries"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": ["buildings"],
+  "additionalProperties": false
+}

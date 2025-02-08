@@ -8,7 +8,7 @@ import { GoogleMapComponent } from '../components/google-map/google-map.componen
 import { UserService } from '../services/user.service';
 import { UserInterface } from '../interfaces/user.interface';
 import { ViewChild } from '@angular/core';
-import { CurrentLocationService } from '../services/current-location.service'
+import { CurrentLocationService } from '../services/geolocation/current-location.service'
 import { environment } from 'src/environments/environment';
 
 @Component({
@@ -28,24 +28,13 @@ export class HomePage {
   startLocation: string = '';
 
   constructor(
-    private store: Store<{ user: UserState }>,
-    private authService: AuthService,
-    private userService: UserService
+    private readonly store: Store<{ user: UserState }>,
+    private readonly authService: AuthService,
+    private readonly userService: UserService
   ) {}
 
   ngOnInit() {
     this.store.dispatch(loadUser());
-  }
-
-  handleUserTest() {
-    // this.userService.updateOrCreateUser('yanny@laurel.com');
-    const user: UserInterface = {
-      firstName: 'Noura',
-      lastName: 'Tabbara',
-      email: 'tabby@gmail.com',
-      password: 'fatberry'
-    }
-    this.userService.createUser(user).then((userData) => console.log(userData));
   }
 
   onLogin(event: Event) {
