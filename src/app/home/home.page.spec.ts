@@ -1,26 +1,23 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { IonicModule } from '@ionic/angular';
-import { StoreModule } from '@ngrx/store';
-import { provideMockStore } from '@ngrx/store/testing'; // For a mock store if needed
+import { TestBed } from '@angular/core/testing';
 import { HomePage } from './home.page';
 
 describe('HomePage', () => {
   let component: HomePage;
-  let fixture: ComponentFixture<HomePage>;
 
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
+  beforeEach(() => {
+    TestBed.configureTestingModule({
       declarations: [HomePage],
-      imports: [IonicModule.forRoot(), StoreModule.forRoot({})], // Optional: Provide root store if needed
-      providers: [provideMockStore()], // Provide a mock store
     }).compileComponents();
 
-    fixture = TestBed.createComponent(HomePage);
+    const fixture = TestBed.createComponent(HomePage);
     component = fixture.componentInstance;
-    fixture.detectChanges();
   });
 
-  it('should create', () => {
+  it('should create the HomePage component', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('should have the title "Home Page"', () => {
+    expect(component.title).toBe('Home Page');
   });
 });

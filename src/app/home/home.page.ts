@@ -16,8 +16,13 @@ import { ViewChild } from '@angular/core';
   standalone: false,
 })
 export class HomePage {
+  title(title: any) {
+    throw new Error('Method not implemented.');
+  }
   @ViewChild(GoogleMapComponent) googleMap!: GoogleMapComponent; 
+// @ts-ignore: Suppress deprecated warning temporarily
   startMarker: google.maps.Marker | null = null;
+// @ts-ignore: Suppress deprecated warning temporarily
   destinationMarker: google.maps.Marker | null = null;
 
 
