@@ -15,5 +15,9 @@
   "include": [
     "src/**/*.spec.ts",
     "src/**/*.d.ts"
-  ]
+  ],
+  "paths": {
+    "@capacitor/*": ["__mocks__/@capacitor/*"]
+  }
+
 }

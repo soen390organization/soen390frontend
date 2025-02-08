@@ -5,7 +5,15 @@ module.exports = function (config) {
   config.set({
     basePath: "",
     frameworks: ["jasmine", "@angular-devkit/build-angular"],
+    basePath: "",
+    frameworks: ["jasmine", "@angular-devkit/build-angular"],
     plugins: [
+      require("karma-jasmine"),
+      require("karma-chrome-launcher"),
+      require("karma-jasmine-html-reporter"),
+      require("karma-coverage"),
+      require("@angular-devkit/build-angular/plugins/karma"),
+      require("karma-sabarivka-reporter"),
       require("karma-jasmine"),
       require("karma-chrome-launcher"),
       require("karma-jasmine-html-reporter"),
@@ -21,8 +29,10 @@ module.exports = function (config) {
         // or set a specific seed with `seed: 4321`
       },
       clearContext: false, // leave Jasmine Spec Runner output visible in browser
+      clearContext: false, // leave Jasmine Spec Runner output visible in browser
     },
     jasmineHtmlReporter: {
+      suppressAll: true, // removes the duplicated traces
       suppressAll: true, // removes the duplicated traces
     },
     coverageReporter: {
@@ -42,7 +52,9 @@ module.exports = function (config) {
     logLevel: config.LOG_INFO,
     autoWatch: true,
     browsers: process.env.CI ? ["ChromeHeadless"] : ["Chrome"],
+    browsers: process.env.CI ? ["ChromeHeadless"] : ["Chrome"],
     singleRun: false,
+    restartOnFileChange: true,
     restartOnFileChange: true,
   });
 };
