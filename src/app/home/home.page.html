@@ -13,8 +13,35 @@
     </ion-toolbar>
   </ion-header>
 
+  <ion-toolbar>
+    <ion-searchbar 
+    placeholder="Start" 
+    show-clear-button="always" 
+    value="Always Show"
+    (ionChange)="onSearchChangeStart($event)">
+  </ion-searchbar>
+  </ion-toolbar>
+
+  <ion-toolbar>
+    <ion-button
+    value="Always Show"
+    (click)="onSearchChangeStartToCurrentLocation($event)">
+    Set Start Location to Current Location
+  </ion-button>
+  </ion-toolbar>
+  
+  <ion-toolbar>
+    <ion-searchbar 
+    placeholder="Destination" 
+    show-clear-button="always" 
+    value="Always Show"
+    (ionChange)="onSearchChangeDestination($event)">
+  </ion-searchbar>
+  </ion-toolbar>
+
   <div id="container">
     <app-google-map></app-google-map>
+    <!-- Uncomment these forms if needed for login/signup -->
     <!-- <form (submit)="onLogin($event)">
       <input
         type="email"

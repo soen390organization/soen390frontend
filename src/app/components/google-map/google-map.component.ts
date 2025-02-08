@@ -20,6 +20,11 @@ export class GoogleMapComponent implements AfterViewInit {
     this.loadMap();
   }
 
+  updateMapLocation(location: google.maps.LatLng) { 
+    this.map.setCenter(location);
+    this.map.setZoom(15);
+  }
+
   loadMap() {
     const mapOptions = {
       center: { lat: 45.49508674774648, lng: -73.57795691041848 },

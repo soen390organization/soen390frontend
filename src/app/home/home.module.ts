@@ -15,6 +15,7 @@ import { GoogleMapComponent } from '../components/google-map/google-map.componen
     IonicModule,
     HomePageRoutingModule
   ],
-  declarations: [HomePage]
+  declarations: [HomePage],
+  exports: [GoogleMapComponent]
 })
 export class HomePageModule {}

@@ -1,4 +1,18 @@
 .map-container {
-  width: 100%;
-  height: 100vh;
+  width: 800px;
+  height: 500px;
+  border-radius: 15px; // Rounded edges
+  overflow: hidden;
+  align-items: center; 
+  margin: auto;
+  position: relative;
+  top: 80px;
+
+}
+.map-wrapper {
+  margin: auto;
+
+  //justify-content: center; // Centers horizontally
+  //align-items: center; // Centers vertically
+  //height: 100vh; // Makes it take full viewport height
 }

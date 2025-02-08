@@ -1,5 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Geolocation } from '@capacitor/geolocation';
+import { HttpClient } from '@angular/common/http';
+
 
 @Injectable({
   providedIn: 'root',
@@ -20,6 +22,7 @@ export class CurrentLocationService {
         lng: coordinates.coords.longitude,
       };
     } catch (error) {
+      console.log(error);
       console.error('Error getting location:', error);
       return null;
     }
