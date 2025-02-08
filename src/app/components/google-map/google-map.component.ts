@@ -36,11 +36,6 @@ export class GoogleMapComponent implements AfterViewInit {
 
     this.map = new google.maps.Map(this.mapContainer.nativeElement, mapOptions);
 
-    new google.maps.Marker({
-        position: userCurrentLocation,
-        map: this.map
-    });
-
     data.buildings.forEach((building) => {
       let polygonBuilder = new PolygonBuilder();
       polygonBuilder.setMap(this.map);
