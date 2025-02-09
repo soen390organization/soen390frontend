@@ -7,18 +7,23 @@ describe('SwitchCampusButtonComponent', () => {
   let component: SwitchCampusButtonComponent;
   let fixture: ComponentFixture<SwitchCampusButtonComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [ SwitchCampusButtonComponent ],
-      imports: [IonicModule.forRoot()]
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [IonicModule.forRoot(), SwitchCampusButtonComponent]
     }).compileComponents();
 
     fixture = TestBed.createComponent(SwitchCampusButtonComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
-  }));
+  });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
+  it('should switch campus correctly', () => {
+    expect(component.selectedCampus).toBe('SGW'); // Initial state
+
+    component.switchCampus();
+    expect(component.selectedCampus).toBe('LOY'); // After first switch
+
+    component.switchCampus();
+    expect(component.selectedCampus).toBe('SGW'); // After second switch
   });
 });
