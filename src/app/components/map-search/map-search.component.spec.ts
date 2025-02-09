@@ -1,3 +1,6 @@
+
+
+
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { MapSearchComponent } from './map-search.component';
 import { GoogleMapService } from 'src/app/services/googeMap.service';
@@ -7,8 +10,7 @@ import { IonicModule } from '@ionic/angular';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { CurrentLocationService } from 'src/app/services/geolocation/current-location.service';
 
-// --- Google Maps Stub Setup ---
-// Unconditionally override window.google so that our stub is used in tests.
+// Now assign these to window.google:
 declare var window: any;
 window.google = {
   maps: {
@@ -41,7 +43,10 @@ window.google = {
     places: {
       PlacesServiceStatus: { OK: 'OK' },
       PlacesService: function (map: any) {
-        (this as any).findPlaceFromQuery = function (request: any, callback: Function) {
+        (this as any).findPlaceFromQuery = function (
+          request: any,
+          callback: Function
+        ) {
           // Immediately call the callback with a fake place result.
           callback(
             [
@@ -54,14 +59,17 @@ window.google = {
         };
       },
     },
+    // Ensure LatLngBounds is correctly mocked as a constructor.
     LatLngBounds: function () {
       (this as any).extend = jasmine.createSpy('extend');
+      return this; // Return `this` for chaining.
     },
     Size: function (width: number, height: number) {
       return { width, height };
     },
   },
 };
+
 
 describe('MapSearchComponent', () => {
   let component: MapSearchComponent;
@@ -139,7 +147,6 @@ describe('MapSearchComponent', () => {
   // Tests for updateMapView()
   it('should update map view when both markers exist', () => {
     const fakeMap = googleMapServiceSpy.getMap();
-    // Create fake markers with getPosition methods.
     component.startMarker = { getPosition: () => ({ lat: 10, lng: 20 }) } as any;
     component.destinationMarker = { getPosition: () => ({ lat: 30, lng: 40 }) } as any;
     component.updateMapView();
@@ -166,10 +173,9 @@ describe('MapSearchComponent', () => {
 
   // Test for onSetUsersLocationAsStart()
   it('should create start marker in onSetUsersLocationAsStart', fakeAsync(() => {
-    // Spy on getCurrentLocation on the prototype of CurrentLocationService.
     spyOn(CurrentLocationService.prototype, 'getCurrentLocation').and.returnValue(Promise.resolve({ lat: 10, lng: 20 }));
     component.onSetUsersLocationAsStart();
-    tick(); // flush the promise
+    tick();
     expect(component.startMarker).toBeDefined();
     expect(googleMapServiceSpy.updateMapLocation).toHaveBeenCalled();
   }));
@@ -178,7 +184,7 @@ describe('MapSearchComponent', () => {
   it('should update marker in onSearch when valid search term is provided (start marker)', fakeAsync(() => {
     const fakeEvent = { target: { value: 'New York' } };
     component.onSearch(fakeEvent, 'https://upload.wikimedia.org/wikipedia/commons/8/8e/Icone_Verde.svg');
-    tick(); // flush asynchronous callback
+    tick();
     expect(googleMapServiceSpy.updateMapLocation).toHaveBeenCalled();
     expect(component.startMarker).toBeDefined();
   }));
@@ -186,7 +192,7 @@ describe('MapSearchComponent', () => {
   it('should update marker in onSearch when valid search term is provided (destination marker)', fakeAsync(() => {
     const fakeEvent = { target: { value: 'Los Angeles' } };
     component.onSearch(fakeEvent, 'https://upload.wikimedia.org/wikipedia/commons/6/64/Icone_Vermelho.svg');
-    tick(); // flush asynchronous callback
+    tick();
     expect(googleMapServiceSpy.updateMapLocation).toHaveBeenCalled();
     expect(component.destinationMarker).toBeDefined();
   }));
