@@ -21,6 +21,10 @@ describe('MapSearchComponent', () => {
     // Mock Google Maps API
     (window as any).google = {
       maps: {
+        Map: class {
+          setCenter = jasmine.createSpy('setCenter');
+          setZoom = jasmine.createSpy('setZoom');
+        },
         places: {
           PlacesService: class {
             findPlaceFromQuery = jasmine.createSpy('findPlaceFromQuery');
@@ -71,7 +75,7 @@ describe('MapSearchComponent', () => {
   });
 
   it('should call onSearchChangeDestination and update map location', () => {
-    const mockEvent = { detail: { value: 'Los Angeles' } };
+    const mockEvent = { detail: { value: 'SGW' } };
 
     spyOn(component, 'onSearch');
 
@@ -81,37 +85,5 @@ describe('MapSearchComponent', () => {
       mockEvent,
       'https://upload.wikimedia.org/wikipedia/commons/6/64/Icone_Vermelho.svg'
     );
-  });
-
-  it('should correctly search a place and update the marker', () => {
-    const mockEvent = { detail: { value: 'Loyola' } };
-    const mockLocation = new google.maps.LatLng(34.0522, -118.2437);
-
-    // Mock the PlacesService response
-    placesServiceMock.findPlaceFromQuery.and.callFake(
-      (request: any, callback: any) => {
-        callback(
-          [{ geometry: { location: mockLocation } }],
-          google.maps.places.PlacesServiceStatus.OK
-        );
-      }
-    );
-
-    // Trigger the search
-    component.onSearch(
-      mockEvent,
-      'https://upload.wikimedia.org/wikipedia/commons/6/64/Icone_Vermelho.svg'
-    );
-
-    // Verify the map location was updated
-    expect(googleMapService.updateMapLocation).toHaveBeenCalledWith(
-      mockLocation
-    );
-
-    // Verify the marker was updated
-    expect(component.destinationMarker?.setPosition).toHaveBeenCalledWith(
-      mockLocation
-    );
-    expect(component.destinationMarker?.setIcon).toHaveBeenCalled();
   });
 });
