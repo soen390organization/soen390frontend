@@ -1,3 +1,14 @@
+.search-container {
+  width: 0;
+  overflow: hidden; /* Ensures it doesn't overflow while sliding */
+}
+
+.search-input {
+  width: 100%;
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
 #container {
   position: absolute;
   left: 0;

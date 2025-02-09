@@ -1,65 +1,10 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title> Blank </ion-title>
-  </ion-toolbar>
-</ion-header>
-
+<div class="absolute top-[24px] left-1/2 transform -translate-x-1/2 z-[999] flex space-x-4">
+  <app-switch-campus-button></app-switch-campus-button>
+  <app-map-search></app-map-search>
+</div>
 
 <ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title *ngIf="user$ | async as userState" size="large">
-        Welcome, {{ userState.user?.name }}
-      </ion-title>
-    </ion-toolbar>
-  </ion-header>
-
-
   <div id="container">
     <app-google-map></app-google-map>
-    <app-map-search></app-map-search>
-
-    <!-- Uncomment these forms if needed for login/signup -->
-    <!--
-    <form (submit)="onLogin($event)">
-      <input
-        type="email"
-        [(ngModel)]="email"
-        placeholder="Email"
-        name="email"
-        required
-      />
-      <input
-        type="password"
-        [(ngModel)]="password"
-        placeholder="Password"
-        name="password"
-        required
-      />
-      <button type="submit">Login</button>
-    </form>
-    -->
-
-    <!--
-    <form (submit)="onSignup($event)">
-      <input
-        type="email"
-        [(ngModel)]="email"
-        placeholder="Email"
-        name="email"
-        required
-      />
-      <input
-        type="password"
-        [(ngModel)]="password"
-        placeholder="Password"
-        name="password"
-        required
-      />
-      <button type="submit">Sign Up</button>
-    </form>
-    -->
-
-    <!-- <ion-button (click)="handleUserTest()">Test User</ion-button> -->
   </div>
 </ion-content>

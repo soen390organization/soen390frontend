@@ -1,7 +1,5 @@
-<div id="search-bars-div">
-
+<!-- <div id="search-bars-div">
   <div class="search-box">
-
     <div class="arrow-icon-button">
       <ion-button class="arrow-button" aria-label="Back" fill="clear" slot="start">
         <ion-icon name="arrow-back-outline" size="medium" color="medium"></ion-icon></ion-button>
@@ -22,6 +20,20 @@
           show-clear-button="never" 
           (ionChange)="onSearchChangeDestination($event)">
         </ion-searchbar>
+    </div>
+  </div>
+</div> -->
+
+<div class="rounded-full flex text-black bg-white font-bold shadow-lg p-2">
+  <div (click)="toggleSearch()" class="h-[32px] w-[32px] pt-1 cursor-pointer">
+    <span class="material-symbols-outlined pl-1">
+      {{ isSearchVisible ? 'arrow_back' : 'search' }}
+    </span>
+  </div>
+
+  <div [@slideInOut]="isSearchVisible ? 'in' : 'out'" class="search-container">
+    <div class="bg-white active:bg-gray-200 w-[198px]">
+      Search goes here
     </div>
   </div>
 </div>

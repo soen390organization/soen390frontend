@@ -6,9 +6,11 @@ import { HomePage } from './home.page';
 import { HomePageRoutingModule } from './home-routing.module';
 import { GoogleMapComponent } from '../components/google-map/google-map.component';
 import { MapSearchComponent } from '../components/map-search/map-search.component';
+import { SwitchCampusButtonComponent } from '../components/switch-campus-button/switch-campus-button.component';
 
 @NgModule({
   imports: [
+    SwitchCampusButtonComponent,
     MapSearchComponent,
     GoogleMapComponent,
     CommonModule,
