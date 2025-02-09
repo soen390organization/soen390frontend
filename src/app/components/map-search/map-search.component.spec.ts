@@ -5,29 +5,51 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
 import { provideAnimations } from '@angular/platform-browser/animations';
+import { CurrentLocationService } from 'src/app/services/geolocation/current-location.service';
 
-// Unconditionally override window.google so our stub is used in tests.
+// --- Google Maps Stub Setup ---
+// Ensure that window.google and window.google.maps are always defined.
 declare var window: any;
-window.google = {
-  maps: {
-    Marker: function (options: any) {
-      (this as any).options = options;
-      (this as any).getPosition = () => options.position;
-      (this as any).setPosition = function (pos: any) {
-        (this as any).options.position = pos;
-      };
-      (this as any).setIcon = function (icon: any) {
-        (this as any).options.icon = icon;
-      };
-    },
-    Geocoder: function () {
+window.google = window.google || {};
+window.google.maps = {
+  Marker: function (options: any) {
+    (this as any).options = options;
+    (this as any).getPosition = () => options.position;
+    (this as any).setPosition = function (pos: any) {
+      (this as any).options.position = pos;
+    };
+    (this as any).setIcon = function (icon: any) {
+      (this as any).options.icon = icon;
+    };
+  },
+  Geocoder: function () {
+    return {
+      geocode: (request: any, callback: Function) => {
+        // Return a fake geocode result
+        callback(
+          [
+            {
+              formatted_address: 'Test Address',
+              geometry: { location: { lat: () => 10, lng: () => 20 } },
+            },
+          ],
+          'OK'
+        );
+      },
+    };
+  },
+  places: {
+    PlacesServiceStatus: { OK: 'OK' },
+    PlacesService: function (map: any) {
       return {
-        geocode: (request: any, callback: Function) => {
+        findPlaceFromQuery: function (request: any, callback: Function) {
+          // Return a fake place result
           callback(
             [
               {
-                formatted_address: 'Test Address',
-                geometry: { location: { lat: () => 10, lng: () => 20 } },
+                geometry: {
+                  location: { lat: () => 10, lng: () => 20 },
+                },
               },
             ],
             'OK'
@@ -35,31 +57,12 @@ window.google = {
         },
       };
     },
-    places: {
-      PlacesServiceStatus: { OK: 'OK' },
-      PlacesService: function (map: any) {
-        return {
-          findPlaceFromQuery: function (request: any, callback: Function) {
-            callback(
-              [
-                {
-                  geometry: {
-                    location: { lat: () => 10, lng: () => 20 },
-                  },
-                },
-              ],
-              'OK'
-            );
-          },
-        };
-      },
-    },
-    LatLngBounds: function () {
-      (this as any).extend = jasmine.createSpy('extend');
-    },
-    Size: function (width: number, height: number) {
-      return { width, height };
-    },
+  },
+  LatLngBounds: function () {
+    (this as any).extend = jasmine.createSpy('extend');
+  },
+  Size: function (width: number, height: number) {
+    return { width, height };
   },
 };
 
@@ -166,22 +169,16 @@ describe('MapSearchComponent', () => {
   });
 
   // Test for onSetUsersLocationAsStart()
-
   it('should create start marker in onSetUsersLocationAsStart', fakeAsync(() => {
-    // Stub getCurrentLocation to return a resolved promise.
-    spyOn((window as any).CurrentLocationService?.prototype || {}, 'getCurrentLocation')
-      .and.callFake(() => Promise.resolve({ lat: 10, lng: 20 }));
-
-    // Call the method (which uses the fake Geocoder stub above).
+    // Spy on the prototype of CurrentLocationService.
+    spyOn(CurrentLocationService.prototype, 'getCurrentLocation').and.returnValue(Promise.resolve({ lat: 10, lng: 20 }));
     component.onSetUsersLocationAsStart();
     tick(); // flush promise
-
     expect(component.startMarker).toBeDefined();
     expect(googleMapServiceSpy.updateMapLocation).toHaveBeenCalled();
   }));
 
   // Tests for onSearch()
-
   it('should update marker in onSearch when valid search term is provided (start marker)', fakeAsync(() => {
     const fakeEvent = { target: { value: 'New York' } };
     component.onSearch(fakeEvent, 'https://upload.wikimedia.org/wikipedia/commons/8/8e/Icone_Verde.svg');
