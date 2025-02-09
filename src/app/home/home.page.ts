@@ -7,6 +7,7 @@ import { UserService } from '../services/user.service';
 import { UserInterface } from '../interfaces/user.interface';
 import { GoogleMapComponent } from '../components/google-map/google-map.component';
 import { DirectionsComponent } from '../components/directions/directions.component';
+import { GoogleMapService } from '../services/googeMap.service';
 
 @Component({
   selector: 'app-home',
@@ -26,7 +27,8 @@ export class HomePage implements AfterViewInit {
   constructor(
     private readonly store: Store<{ user: UserState }>,
     private readonly authService: AuthService,
-    private readonly userService: UserService
+    private readonly userService: UserService,
+    private readonly googleMapService: GoogleMapService
   ) {}
 
   ngOnInit() {
@@ -38,11 +40,10 @@ export class HomePage implements AfterViewInit {
     const destinationAddress = '1515 Saint-Catherine St W #1428 Montreal, Quebec H3G 1S6 Canada';
 
     const checkMap = setInterval(() => {
-      // As soon as googleMapComp.map is defined, we can display the route
-      if (this.googleMapComp.map) {
+      if (this.googleMapService.getMap()) {
         clearInterval(checkMap);
         this.directionsComp.calculateRoute(
-          this.googleMapComp.map,
+          this.googleMapService.getMap(),
           startAddress,
           destinationAddress
         );
