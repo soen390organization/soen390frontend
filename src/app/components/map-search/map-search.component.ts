@@ -2,18 +2,19 @@ import { Component, OnInit, NgModule, ViewChild } from '@angular/core';
 import { GoogleMapComponent } from '../google-map/google-map.component';
 import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { GoogleMapService } from 'src/app/services/googeMap.service';
 import { animate, state, style, transition, trigger } from '@angular/animations';
 
 @Component({
   selector: 'app-map-search',
-  imports: [IonicModule, CommonModule],
+  imports: [IonicModule, CommonModule, FormsModule],
   templateUrl: './map-search.component.html',
   styleUrls: ['./map-search.component.scss'],
   animations: [
     trigger('slideInOut', [
       state('in', style({
-        width: '200px',
+        width: '360px',
         opacity: 1,
         transform: 'translateX(0)'
       })),
