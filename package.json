@@ -31,6 +31,7 @@
     "@ngrx/store-devtools": "^19.0.0",
     "@types/google-maps": "^3.2.6",
     "@types/googlemaps": "^3.39.13",
+    "ConcordiaCompass": "file:",
     "firebase": "^11.2.0",
     "ionicons": "^7.0.0",
     "karma-sabarivka-reporter": "^3.3.1",
