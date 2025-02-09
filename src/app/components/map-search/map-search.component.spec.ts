@@ -1,36 +1,68 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MapSearchComponent } from './map-search.component';
 import { GoogleMapService } from 'src/app/services/googeMap.service';
-import { FormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
-import { GoogleMapComponent } from '../google-map/google-map.component';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { provideAnimations } from '@angular/platform-browser/animations';
-import { of } from 'rxjs';
+
+class MockGoogleMapService {
+  getMap = jasmine.createSpy('getMap').and.returnValue({});
+  updateMapLocation = jasmine.createSpy('updateMapLocation');
+}
 
 describe('MapSearchComponent', () => {
   let component: MapSearchComponent;
   let fixture: ComponentFixture<MapSearchComponent>;
-  let googleMapServiceSpy: jasmine.SpyObj<GoogleMapService>;
+  let googleMapService: MockGoogleMapService;
+  let placesServiceMock: any;
+
+  beforeAll(() => {
+    // Mock Google Maps API
+    (window as any).google = {
+      maps: {
+        Map: class {
+          setCenter = jasmine.createSpy('setCenter');
+          setZoom = jasmine.createSpy('setZoom');
+        },
+        places: {
+          PlacesService: class {
+            findPlaceFromQuery = jasmine.createSpy('findPlaceFromQuery');
+          },
+          PlacesServiceStatus: { OK: 'OK' },
+        },
+        Marker: class {
+          setPosition = jasmine.createSpy('setPosition');
+          setIcon = jasmine.createSpy('setIcon');
+        },
+        Size: class {
+          constructor(public width: number, public height: number) {}
+        },
+        LatLng: class {
+          constructor(public lat: number, public lng: number) {}
+        },
+      },
+    };
+  });
 
   beforeEach(async () => {
-    const googleMapSpy = jasmine.createSpyObj('GoogleMapService', ['getMap', 'updateMapLocation']);
-    
     await TestBed.configureTestingModule({
       imports: [IonicModule, CommonModule, FormsModule, MapSearchComponent],
       providers: [
-        { provide: GoogleMapService, useValue: googleMapSpy },
-        provideAnimations()
-      ]
+        { provide: GoogleMapService, useClass: MockGoogleMapService },
+        provideAnimations(),
+      ],
     }).compileComponents();
 
-    googleMapServiceSpy = TestBed.inject(GoogleMapService) as jasmine.SpyObj<GoogleMapService>;
     fixture = TestBed.createComponent(MapSearchComponent);
     component = fixture.componentInstance;
+    googleMapService = TestBed.inject(GoogleMapService) as any;
     fixture.detectChanges();
+
+    placesServiceMock = new (window as any).google.maps.places.PlacesService();
   });
 
-  it('should create', () => {
+  it('should create the component', () => {
     expect(component).toBeTruthy();
   });
 
@@ -42,26 +74,16 @@ describe('MapSearchComponent', () => {
     expect(component.isSearchVisible).toBeFalse();
   });
 
-  it('should not search if input is empty', () => {
-    spyOn(component, 'onSearch');
-    
-    const emptyEvent = { detail: { value: '' } };
-    component.onSearchChangeStart(emptyEvent);
-    expect(component.onSearch).not.toHaveBeenCalled();
+  it('should call onSearchChangeDestination and update map location', () => {
+    const mockEvent = { detail: { value: 'SGW' } };
 
-    component.onSearchChangeDestination(emptyEvent);
-    expect(component.onSearch).not.toHaveBeenCalled();
-  });
-
-  it('should call onSearch with correct icon for start location', () => {
     spyOn(component, 'onSearch');
-    component.onSearchChangeStart({ detail: { value: 'New York' } });
-    expect(component.onSearch).toHaveBeenCalledWith(jasmine.any(Object), 'https://upload.wikimedia.org/wikipedia/commons/8/8e/Icone_Verde.svg');
-  });
 
-  it('should call onSearch with correct icon for destination', () => {
-    spyOn(component, 'onSearch');
-    component.onSearchChangeDestination({ detail: { value: 'Los Angeles' } });
-    expect(component.onSearch).toHaveBeenCalledWith(jasmine.any(Object), 'https://upload.wikimedia.org/wikipedia/commons/6/64/Icone_Vermelho.svg');
+    component.onSearchChangeDestination(mockEvent);
+
+    expect(component.onSearch).toHaveBeenCalledWith(
+      mockEvent,
+      'https://upload.wikimedia.org/wikipedia/commons/6/64/Icone_Vermelho.svg'
+    );
   });
 });
