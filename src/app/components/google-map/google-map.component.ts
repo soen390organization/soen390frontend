@@ -43,7 +43,7 @@ export class GoogleMapComponent implements AfterViewInit {
       (window as any).initMap = () => resolve(); // This is the callback from the script
       const script = document.createElement('script');
       // Old api key? - AIzaSyApYbY5rSV5IyZJ1WMLDMM-I3M5VZQTC9g
-      script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyApYbY5rSV5IyZJ1WMLDMM-I3M5VZQTC9g&callback=initMap&libraries=geometry,places';
+      script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyDrpAFoOmJewkHwhFjTa8CyR_ZYGuLnEXc&callback=initMap&libraries=geometry,places';
       script.async = true;
       script.defer = true;
       document.body.appendChild(script);
