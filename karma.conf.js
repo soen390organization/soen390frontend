@@ -26,12 +26,17 @@ module.exports = function (config) {
       suppressAll: true, // removes the duplicated traces
     },
     coverageReporter: {
-      dir: require("path").join(__dirname, "./coverage/"),
-      type: "lcov",
-      subdir: "lcov-report",
-      include: ["src/app/**/!(*.spec).{js,ts}"],
+      dir: require("path").join(__dirname, "./coverage"),
+      subdir: ".",
+      reporters: [
+        { type: "text-summary" },
+        { type: "lcov", subdir: "lcov-report" },
+      ],
+      includeAllSources: true,
     },
-    reporters: ["sabarivka", "coverage", "progress", "kjhtml"],
+    
+ 
+    reporters: [ "coverage", "progress", "kjhtml"],
     port: 9876,
     colors: true,
     logLevel: config.LOG_INFO,

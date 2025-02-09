@@ -1,0 +1,31 @@
+<div
+  class="rounded-3xl w-full flex text-black bg-white font-bold shadow-lg p-2"
+  [ngStyle]="{ 'height': isSearchVisible ? 'auto' : '48px' }"
+>
+  <div (click)="toggleSearch()" class="h-[32px] w-[32px] pt-1 rounded-full cursor-pointer">
+    <span class="material-symbols-outlined pl-1">
+      {{ isSearchVisible ? 'arrow_back' : 'search' }}
+    </span>
+  </div>
+
+  <div
+    [@slideInOut]="isSearchVisible ? 'in' : 'out'"
+    [ngStyle]="{ 'height': isSearchVisible ? 'auto' : '0', 'overflow': isSearchVisible ? 'visible' : 'hidden' }"
+  >
+    <ion-searchbar
+      searchIcon="null"
+      class="custom" 
+      placeholder="Choose starting point" 
+      show-clear-button="never" 
+      (ionChange)="onSearchChangeStart($event)">
+    </ion-searchbar>
+
+    <ion-searchbar
+      searchIcon="null"
+      class="custom"
+      placeholder="Choose destination point" 
+      show-clear-button="never" 
+      (ionChange)="onSearchChangeDestination($event)">
+    </ion-searchbar>
+  </div>
+</div>
