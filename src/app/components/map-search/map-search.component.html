@@ -1,5 +1,5 @@
 <div
-  class="rounded-3xl w-full flex text-black bg-white font-bold shadow-lg p-2"
+  class="rounded-3xl w-full flex text-black bg-white shadow-lg p-2 pb-3"
   [ngStyle]="{ 'height': isSearchVisible ? 'auto' : '48px' }"
 >
   <div (click)="toggleSearch()" class="h-[32px] w-[32px] pt-1 rounded-full cursor-pointer">
@@ -12,12 +12,40 @@
     [@slideInOut]="isSearchVisible ? 'in' : 'out'"
     [ngStyle]="{ 'height': isSearchVisible ? 'auto' : '0', 'overflow': isSearchVisible ? 'visible' : 'hidden' }"
   >
-    <ion-searchbar
+    <div class="pl-4">
+      <div class="relative w-full mt-1">
+        <input
+          [(ngModel)]="startLocationInput"
+          (keyup.enter)="onSearchChangeStart($event)"
+          type="text" 
+          placeholder="Choose starting point..." 
+          class="w-full bg-white px-4 py-3 rounded-full border border-gray-300 focus:outline-none pr-10"
+        />
+        <div 
+          (click)="onSetUsersLocationAsStart()"
+          class="absolute right-1.5 top-1/2 transform -translate-y-1/2 cursor-pointer bg-blue-500 p-2 rounded-full flex items-center justify-center"
+        >
+          <span class="material-symbols-outlined text-white">
+            near_me
+          </span>
+        </div>
+      </div>      
+  
+      <input
+        [(ngModel)]="destinationLocationInput"
+        (keyup.enter)="onSearchChangeDestination($event)"
+        type="text" 
+        placeholder="Choose destination point..." 
+        class="mt-2 w-full bg-white px-4 py-3 rounded-full border border-gray-300 focus:outline-none pr-10"
+      />
+    </div>
+    <!-- <ion-searchbar
       searchIcon="null"
       class="custom" 
       placeholder="Choose starting point" 
       show-clear-button="never" 
-      (ionChange)="onSearchChangeStart($event)">
+      (ionChange)="onSearchChangeStart($event)"
+    >
     </ion-searchbar>
 
     <ion-searchbar
@@ -25,7 +53,8 @@
       class="custom"
       placeholder="Choose destination point" 
       show-clear-button="never" 
-      (ionChange)="onSearchChangeDestination($event)">
-    </ion-searchbar>
+      (ionChange)="onSearchChangeDestination($event)"
+    >
+    </ion-searchbar> -->
   </div>
 </div>
