@@ -1,67 +1,67 @@
-import { TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MapSearchComponent } from './map-search.component';
-import { provideMockStore } from '@ngrx/store/testing';
+import { GoogleMapService } from 'src/app/services/googeMap.service';
+import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { IonicModule } from '@ionic/angular';
+import { GoogleMapComponent } from '../google-map/google-map.component';
+import { provideAnimations } from '@angular/platform-browser/animations';
+import { of } from 'rxjs';
 
 describe('MapSearchComponent', () => {
   let component: MapSearchComponent;
-  let mockGoogleMap: any;
-  let mockPlacesService: jasmine.SpyObj<any>;
+  let fixture: ComponentFixture<MapSearchComponent>;
+  let googleMapServiceSpy: jasmine.SpyObj<GoogleMapService>;
 
-  beforeEach(() => {
-    // Mock Google Map instance
-    mockGoogleMap = {
-      map: {},
-      updateMapLocation: jasmine.createSpy('updateMapLocation'),
-    };
-
-    // Mock Google PlacesService
-    mockPlacesService = jasmine.createSpyObj('PlacesService', ['findPlaceFromQuery']);
-
-    // Mock global Google Maps API
-    (window.google as any) = {
-      maps: {
-        PlacesService: jasmine.createSpy().and.returnValue(mockPlacesService),
-        Marker: jasmine.createSpy().and.callFake(() => ({
-          setPosition: jasmine.createSpy('setPosition'),
-          setIcon: jasmine.createSpy('setIcon'),
-        })),
-        Size: jasmine.createSpy().and.callFake((width, height) => ({ width, height })),
-        places: {
-          PlacesServiceStatus: { OK: 'OK' },
-        },
-      },
-    };
-
-    TestBed.configureTestingModule({
-      declarations: [MapSearchComponent],
+  beforeEach(async () => {
+    const googleMapSpy = jasmine.createSpyObj('GoogleMapService', ['getMap', 'updateMapLocation']);
+    
+    await TestBed.configureTestingModule({
+      imports: [IonicModule, CommonModule, FormsModule, MapSearchComponent],
       providers: [
-        provideMockStore({}), // ✅ Fix: Provide a mock store to prevent test failures
-      ],
+        { provide: GoogleMapService, useValue: googleMapSpy },
+        provideAnimations()
+      ]
     }).compileComponents();
 
-    component = TestBed.createComponent(MapSearchComponent).componentInstance;
-    component.googleMap = mockGoogleMap;
+    googleMapServiceSpy = TestBed.inject(GoogleMapService) as jasmine.SpyObj<GoogleMapService>;
+    fixture = TestBed.createComponent(MapSearchComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
   });
 
-  // ✅ Test: onSearchChangeDestination should do nothing if search term is empty
-  it('should not call updateMapLocation or create a marker if no search term is provided (onSearchChangeDestination)', () => {
-    const mockEvent = { detail: { value: '' } };
-
-    spyOn(component, 'onSearchChangeDestination');
-
-    component.onSearchChangeDestination(mockEvent);
-
-    expect(component.onSearchChangeDestination).toHaveBeenCalledWith(mockEvent);
+  it('should create', () => {
+    expect(component).toBeTruthy();
   });
 
-  // ✅ Test: onSearchChangeStart should do nothing if search term is empty
-  it('should not call updateMapLocation or create a marker if no search term is provided (onSearchChangeStart)', () => {
-    const mockEvent = { detail: { value: '' } };
+  it('should toggle search visibility', () => {
+    expect(component.isSearchVisible).toBeFalse();
+    component.toggleSearch();
+    expect(component.isSearchVisible).toBeTrue();
+    component.toggleSearch();
+    expect(component.isSearchVisible).toBeFalse();
+  });
 
-    spyOn(component, 'onSearchChangeStart');
+  it('should not search if input is empty', () => {
+    spyOn(component, 'onSearch');
+    
+    const emptyEvent = { detail: { value: '' } };
+    component.onSearchChangeStart(emptyEvent);
+    expect(component.onSearch).not.toHaveBeenCalled();
 
-    component.onSearchChangeStart(mockEvent);
+    component.onSearchChangeDestination(emptyEvent);
+    expect(component.onSearch).not.toHaveBeenCalled();
+  });
 
-    expect(component.onSearchChangeStart).toHaveBeenCalledWith(mockEvent);
+  it('should call onSearch with correct icon for start location', () => {
+    spyOn(component, 'onSearch');
+    component.onSearchChangeStart({ detail: { value: 'New York' } });
+    expect(component.onSearch).toHaveBeenCalledWith(jasmine.any(Object), 'https://upload.wikimedia.org/wikipedia/commons/8/8e/Icone_Verde.svg');
+  });
+
+  it('should call onSearch with correct icon for destination', () => {
+    spyOn(component, 'onSearch');
+    component.onSearchChangeDestination({ detail: { value: 'Los Angeles' } });
+    expect(component.onSearch).toHaveBeenCalledWith(jasmine.any(Object), 'https://upload.wikimedia.org/wikipedia/commons/6/64/Icone_Vermelho.svg');
   });
 });
