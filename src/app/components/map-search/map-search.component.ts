@@ -142,7 +142,7 @@ export class MapSearchComponent {
   }
 
   onSearchChangeStart(event: any) {
-    //if (!event.detail.value.trim()) return; // Ensure empty input is ignored
+    
     this.onSearch(
       event,
       'https://upload.wikimedia.org/wikipedia/commons/8/8e/Icone_Verde.svg'
@@ -150,7 +150,7 @@ export class MapSearchComponent {
   }
 
   onSearchChangeDestination(event: any) {
-    //if (!event.detail.value.trim()) return; // Ensure empty input is ignored
+   
     this.onSearch(
       event,
       'https://upload.wikimedia.org/wikipedia/commons/6/64/Icone_Vermelho.svg'
