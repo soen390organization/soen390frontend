@@ -1,4 +1,4 @@
-import { Component, OnInit, NgModule, ViewChild } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { GoogleMapComponent } from '../google-map/google-map.component';
 import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
@@ -28,7 +28,7 @@ import { animate, state, style, transition, trigger } from '@angular/animations'
     ])
   ]
 })
-export class MapSearchComponent  implements OnInit {
+export class MapSearchComponent {
   @ViewChild(GoogleMapComponent) googleMap!: GoogleMapComponent; 
   // @ts-ignore: Suppress deprecated warning temporarily
   startMarker: google.maps.Marker | null = null;
@@ -37,8 +37,6 @@ export class MapSearchComponent  implements OnInit {
   isSearchVisible = false;  // Initially the search input is hidden
 
   constructor(private googleMapService: GoogleMapService) { }
-
-  ngOnInit() {}
 
   toggleSearch() {
     this.isSearchVisible = !this.isSearchVisible;

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { GoogleMapService } from 'src/app/services/googeMap.service';
 import data from 'src/assets/ConcordiaData.json';
 
@@ -7,15 +7,13 @@ import data from 'src/assets/ConcordiaData.json';
   templateUrl: './switch-campus-button.component.html',
   styleUrls: ['./switch-campus-button.component.scss'],
 })
-export class SwitchCampusButtonComponent  implements OnInit {
+export class SwitchCampusButtonComponent {
   selectedCampus = 'SGW';
   sgwLocation = { lat: data.campuses.sgw.mapOptions.center.lat, lng: data.campuses.sgw.mapOptions.center.lng };
   loyLocation = { lat: data.campuses.loy.mapOptions.center.lat, lng: data.campuses.loy.mapOptions.center.lng };
 
 
   constructor(private googleMapService: GoogleMapService) { }
-
-  ngOnInit() {}
 
   switchCampus() {
     let location;
