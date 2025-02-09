@@ -22,6 +22,7 @@ export class HomePage implements AfterViewInit {
   email: string = '';
   password: string = '';
 
+
   constructor(
     private readonly store: Store<{ user: UserState }>,
     private readonly authService: AuthService,
@@ -31,10 +32,10 @@ export class HomePage implements AfterViewInit {
   ngOnInit() {
     this.store.dispatch(loadUser());
   }
-
+  //map not working after merging, says component undefined in map component
   ngAfterViewInit() {
-    const startAddress = 'New York, NY';
-    const destinationAddress = 'Philadelphia, PA';
+    const startAddress = '7141 Rue Sherbrooke O Montréal, QC H4B 2A7 Canada';
+    const destinationAddress = '1515 Saint-Catherine St W #1428 Montreal, Quebec H3G 1S6 Canada';
 
     const checkMap = setInterval(() => {
       // As soon as googleMapComp.map is defined, we can display the route
@@ -48,6 +49,8 @@ export class HomePage implements AfterViewInit {
       }
     }, 500);
   }
+
+
 
   onLogin(event: Event) {
     event.preventDefault(); // Prevent form submission
