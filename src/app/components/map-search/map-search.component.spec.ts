@@ -8,24 +8,24 @@ import { provideAnimations } from '@angular/platform-browser/animations';
 import { CurrentLocationService } from 'src/app/services/geolocation/current-location.service';
 
 // --- Google Maps Stub Setup ---
-// Ensure that window.google and window.google.maps are always defined.
+// Unconditionally override window.google so that our stub is used in tests.
 declare var window: any;
-window.google = window.google || {};
-window.google.maps = {
-  Marker: function (options: any) {
-    (this as any).options = options;
-    (this as any).getPosition = () => options.position;
-    (this as any).setPosition = function (pos: any) {
-      (this as any).options.position = pos;
-    };
-    (this as any).setIcon = function (icon: any) {
-      (this as any).options.icon = icon;
-    };
-  },
-  Geocoder: function () {
-    return {
-      geocode: (request: any, callback: Function) => {
-        // Return a fake geocode result
+window.google = {
+  maps: {
+    Marker: function (options: any) {
+      (this as any).options = options;
+      (this as any).getPosition = () => options.position;
+      (this as any).setPosition = function (pos: any) {
+        (this as any).options.position = pos;
+      };
+      (this as any).setIcon = function (icon: any) {
+        (this as any).options.icon = icon;
+      };
+    },
+    // Define Geocoder as a constructor and assign its instance method.
+    Geocoder: function () {
+      (this as any).geocode = function (request: any, callback: Function) {
+        // Immediately call the callback with a fake geocode result.
         callback(
           [
             {
@@ -35,34 +35,31 @@ window.google.maps = {
           ],
           'OK'
         );
-      },
-    };
-  },
-  places: {
-    PlacesServiceStatus: { OK: 'OK' },
-    PlacesService: function (map: any) {
-      return {
-        findPlaceFromQuery: function (request: any, callback: Function) {
-          // Return a fake place result
+      };
+    },
+    // Define places with a constructor for PlacesService.
+    places: {
+      PlacesServiceStatus: { OK: 'OK' },
+      PlacesService: function (map: any) {
+        (this as any).findPlaceFromQuery = function (request: any, callback: Function) {
+          // Immediately call the callback with a fake place result.
           callback(
             [
               {
-                geometry: {
-                  location: { lat: () => 10, lng: () => 20 },
-                },
+                geometry: { location: { lat: () => 10, lng: () => 20 } },
               },
             ],
             'OK'
           );
-        },
-      };
+        };
+      },
     },
-  },
-  LatLngBounds: function () {
-    (this as any).extend = jasmine.createSpy('extend');
-  },
-  Size: function (width: number, height: number) {
-    return { width, height };
+    LatLngBounds: function () {
+      (this as any).extend = jasmine.createSpy('extend');
+    },
+    Size: function (width: number, height: number) {
+      return { width, height };
+    },
   },
 };
 
@@ -140,7 +137,6 @@ describe('MapSearchComponent', () => {
   });
 
   // Tests for updateMapView()
-
   it('should update map view when both markers exist', () => {
     const fakeMap = googleMapServiceSpy.getMap();
     // Create fake markers with getPosition methods.
@@ -170,10 +166,10 @@ describe('MapSearchComponent', () => {
 
   // Test for onSetUsersLocationAsStart()
   it('should create start marker in onSetUsersLocationAsStart', fakeAsync(() => {
-    // Spy on the prototype of CurrentLocationService.
+    // Spy on getCurrentLocation on the prototype of CurrentLocationService.
     spyOn(CurrentLocationService.prototype, 'getCurrentLocation').and.returnValue(Promise.resolve({ lat: 10, lng: 20 }));
     component.onSetUsersLocationAsStart();
-    tick(); // flush promise
+    tick(); // flush the promise
     expect(component.startMarker).toBeDefined();
     expect(googleMapServiceSpy.updateMapLocation).toHaveBeenCalled();
   }));
