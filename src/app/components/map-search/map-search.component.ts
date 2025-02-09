@@ -84,7 +84,7 @@ export class MapSearchComponent {
             throw new Error("Current location's address cannot be read.");
           }
           searchTerm = results[0].formatted_address;
-          if (searchTerm.length == 0) {
+          if (searchTerm.length === 0) {
             return; // Exit if the search term is empty
           }
           const request = {
@@ -114,22 +114,21 @@ export class MapSearchComponent {
 
                   // ========== ADD BLUE DOT MARKER ==========
                   const blueDotIcon = {
-                    url: 'https://upload.wikimedia.org/wikipedia/commons/8/8e/Icone_Verde.svg', // Google Maps built-in blue dot icon
-                    scaledSize: new google.maps.Size(40, 40), // Adjust size if needed
+                    url: 'https://upload.wikimedia.org/wikipedia/commons/8/8e/Icone_Verde.svg',
+                    scaledSize: new google.maps.Size(40, 40),
                   };
 
                   if (!this.startMarker) {
-                    // Create a new marker if it doesn't exist
                     this.startMarker = new google.maps.Marker({
                       position: place.geometry.location,
-                      map: this.googleMapService.getMap(), // Attach marker to the map
-                      icon: blueDotIcon, // Use blue dot icon
+                      map: this.googleMapService.getMap(),
+                      icon: blueDotIcon,
                     });
                   } else {
-                    // Update existing marker position
                     this.startMarker.setPosition(place.geometry.location);
-                    this.startMarker.setIcon(blueDotIcon); // Ensure marker remains a blue dot
+                    this.startMarker.setIcon(blueDotIcon);
                   }
+                  this.updateMapView();
                 }
               }
             }
@@ -142,7 +141,10 @@ export class MapSearchComponent {
   }
 
   onSearchChangeStart(event: any) {
-    
+    // Only search if the input value is not empty.
+    if (!event.target?.value) {
+      return;
+    }
     this.onSearch(
       event,
       'https://upload.wikimedia.org/wikipedia/commons/8/8e/Icone_Verde.svg'
@@ -150,7 +152,10 @@ export class MapSearchComponent {
   }
 
   onSearchChangeDestination(event: any) {
-   
+    // Only search if the input value is not empty.
+    if (!event.target?.value) {
+      return;
+    }
     this.onSearch(
       event,
       'https://upload.wikimedia.org/wikipedia/commons/6/64/Icone_Vermelho.svg'
@@ -163,7 +168,7 @@ export class MapSearchComponent {
 
     const request = {
       query: searchTerm,
-      fields: ['geometry'], // Request geometry to get location coordinates
+      fields: ['geometry'],
     };
 
     const placesService = new google.maps.places.PlacesService(
@@ -181,26 +186,54 @@ export class MapSearchComponent {
           // Update map location
           this.googleMapService.updateMapLocation(place.geometry.location);
 
-          // ========== ADD MARKER ==========
-          const blueDotIcon = {
+          // ========== ADD/UPDATE MARKER ==========
+          const markerIcon = {
             url: iconUrl,
-            scaledSize: new google.maps.Size(40, 40), // Adjust size if needed
+            scaledSize: new google.maps.Size(40, 40),
           };
 
-          if (!this.destinationMarker) {
-            // Create a new marker if it doesn't exist
-            this.destinationMarker = new google.maps.Marker({
-              position: place.geometry.location,
-              map: this.googleMapService.getMap(), // Attach marker to the map
-              icon: blueDotIcon, // Use blue dot icon
-            });
-          } else {
-            // Update existing marker position
-            this.destinationMarker.setPosition(place.geometry.location);
-            this.destinationMarker.setIcon(blueDotIcon); // Ensure marker remains a blue dot
+          if (iconUrl.includes('Icone_Verde.svg')) {
+            if (!this.startMarker) {
+              this.startMarker = new google.maps.Marker({
+                position: place.geometry.location,
+                map: this.googleMapService.getMap(),
+                icon: markerIcon,
+              });
+            } else {
+              this.startMarker.setPosition(place.geometry.location);
+              this.startMarker.setIcon(markerIcon);
+            }
+          } else if (iconUrl.includes('Icone_Vermelho.svg')) {
+            if (!this.destinationMarker) {
+              this.destinationMarker = new google.maps.Marker({
+                position: place.geometry.location,
+                map: this.googleMapService.getMap(),
+                icon: markerIcon,
+              });
+            } else {
+              this.destinationMarker.setPosition(place.geometry.location);
+              this.destinationMarker.setIcon(markerIcon);
+            }
           }
+          this.updateMapView();
         }
       }
     });
+  }
+
+  updateMapView() {
+    const map = this.googleMapService.getMap();
+    if (this.startMarker && this.destinationMarker) {
+      const bounds = new google.maps.LatLngBounds();
+      bounds.extend(this.startMarker.getPosition()!);
+      bounds.extend(this.destinationMarker.getPosition()!);
+      map.fitBounds(bounds);
+    } else if (this.startMarker) {
+      map.setCenter(this.startMarker.getPosition()!);
+      map.setZoom(15);
+    } else if (this.destinationMarker) {
+      map.setCenter(this.destinationMarker.getPosition()!);
+      map.setZoom(15);
+    }
   }
 }
