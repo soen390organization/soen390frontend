@@ -13,7 +13,7 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "sourceMap": true,
-    "types": ["google.maps"],
+    "types": ["google.maps", "jasmine"],
     "declaration": false,
     "downlevelIteration": true,
     "experimentalDecorators": true,
@@ -22,17 +22,15 @@
     "target": "es2022",
     "module": "es2020",
     "allowSyntheticDefaultImports": true,
-   
+
     "lib": ["es2018", "dom"],
     "useDefineForClassFields": false
   },
 
-  
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,
     "strictInjectionParameters": true,
     "strictInputAccessModifiers": true,
     "strictTemplates": true
   }
-
 }
