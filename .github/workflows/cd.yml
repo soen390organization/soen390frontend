@@ -54,7 +54,6 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-
       - name: Deploy to Firebase Hosting
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
@@ -62,6 +61,3 @@ jobs:
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_SOEN390_AAB1A }}
           channelId: live
           projectId: soen390-aab1a
-
-
-

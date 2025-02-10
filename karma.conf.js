@@ -34,8 +34,8 @@ module.exports = function (config) {
       ],
       includeAllSources: true,
     },
-
-
+    
+ 
     reporters: [ "coverage", "progress", "kjhtml"],
     port: 9876,
     colors: true,
