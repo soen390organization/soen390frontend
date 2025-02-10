@@ -1,17 +1,17 @@
-name: Ionic CI/CD with Firebase Hosting Deployment
+name: Run Cypress Tests
 
 on:
   push:
     branches:
       - main
+      - staging
+  pull_request:
+    branches:
+      - main
+      - staging
 
 jobs:
-  build:
-    permissions:
-      contents: read
-      checks: write
-      pull-requests: write
-
+  cypress-run:
     runs-on: ubuntu-latest
 
     steps:
@@ -19,9 +19,15 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: 20.11.1
+          node-version: "20.11.1"
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Install Ionic CLI
+        run: npm install -g @ionic/cli
 
       - name: Handle environment (Generate environment.ts)
         run: |
@@ -41,26 +47,11 @@ jobs:
           EOF
         shell: bash
 
-      - name: Install Dependencies
-        run: npm install
+      - name: Start the Application
+        run: ionic serve --no-open &
 
-      - name: Build Ionic App
-        run: npm run build -- --configuration=development
+      - name: Wait for App to be Ready
+        run: npx wait-on http://localhost:8100
 
-      - name: Run Tests
-        run: npm test -- --configuration=ci
-        env:
-          CI: true
-
-      - name: Debug - List Files
-        run: ls -la
-
-      - name: Deploy to Firebase Hosting
-        uses: FirebaseExtended/action-hosting-deploy@v0
-        with:
-          entryPoint: ./
-          repoToken: ${{ secrets.GITHUB_TOKEN }}
-          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_SOEN390_AAB1A }}
-          channelId: live
-          projectId: soen390-aab1a
-
+      - name: Run Cypress Tests
+        run: npx cypress run
