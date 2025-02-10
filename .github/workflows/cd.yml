@@ -50,11 +50,15 @@ jobs:
         env:
           CI: true
 
+      - name: Confirm firebase.json existance
+        run: ls -la
+
   deploy:
     permissions:
       contents: read
       checks: write
       pull-requests: write
+
 
     needs: build
     runs-on: ubuntu-latest
@@ -62,6 +66,7 @@ jobs:
       - name: Deploy to Firebase Hosting
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
+          entryPoint: ./
           repoToken: ${{ secrets.GITHUB_TOKEN }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_SOEN390_AAB1A }}
           channelId: live
