@@ -53,13 +53,12 @@ jobs:
       - name: Confirm firebase.json existance
         run: ls -la
 
+
   deploy:
     permissions:
       contents: read
       checks: write
       pull-requests: write
-
-
     needs: build
     runs-on: ubuntu-latest
     steps:
