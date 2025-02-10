@@ -12,3 +12,10 @@ const app = initializeApp(firebaseConfig);
 // Export individual Firebase services
 export const auth = getAuth(app);
 export const db = getDatabase(app);
+
+// Attach Firebase to window for Cypress testing
+if (typeof window !== 'undefined') {
+    (window as any).firebaseApp = app;
+    (window as any).firebaseAuth = auth;
+    (window as any).firebaseDB = db;
+  }
