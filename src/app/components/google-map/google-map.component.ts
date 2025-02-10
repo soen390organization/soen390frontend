@@ -57,6 +57,10 @@ export class GoogleMapComponent implements AfterViewInit {
       ...(data.campuses.sgw.mapOptions as google.maps.MapOptions),
     }));
     await this.loadBuildings();
+
+    const startAddress = '7141 Rue Sherbrooke O Montréal, QC H4B 2A7 Canada';
+    const destinationAddress = '1515 Saint-Catherine St W #1428 Montreal, Quebec H3G 1S6 Canada';
+    this.googleMapService.calculateRoute(startAddress, destinationAddress);
   }
 
   async loadBuildings() {

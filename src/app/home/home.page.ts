@@ -1,4 +1,4 @@
-import { Component, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, ViewChild, AfterViewInit, OnInit } from '@angular/core';
 import { Store, select } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { loadUser, UserState } from '../store/user';
@@ -15,7 +15,7 @@ import { GoogleMapService } from '../services/googeMap.service';
   styleUrls: ['home.page.scss'],
   standalone: false,
 })
-export class HomePage implements AfterViewInit {
+export class HomePage implements AfterViewInit, OnInit {
   @ViewChild(GoogleMapComponent) googleMapComp!: GoogleMapComponent;
   @ViewChild(DirectionsComponent) directionsComp!: DirectionsComponent;
 
@@ -53,7 +53,7 @@ export class HomePage implements AfterViewInit {
 
 
 
-  onLogin(event: Event) {
+/*   onLogin(event: Event) {
     event.preventDefault(); // Prevent form submission
     this.authService
       .login(this.email, this.password)
@@ -79,5 +79,5 @@ export class HomePage implements AfterViewInit {
         console.error('Signup failed:', error.message);
         // Handle signup error (e.g., show an error message)
       });
-  }
+  } */
 }
