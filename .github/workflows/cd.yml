@@ -54,10 +54,6 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: Debug Secrets
-        run: echo "GITHUB_TOKEN is available"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Deploy to Firebase Hosting
         uses: FirebaseExtended/action-hosting-deploy@v0
