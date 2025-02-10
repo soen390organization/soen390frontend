@@ -10,6 +10,10 @@ on:
 
 jobs:
   build:
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: write
     runs-on: ubuntu-latest
 
     steps:
@@ -50,18 +54,9 @@ jobs:
         env:
           CI: true
 
-      - name: Confirm firebase.json existance
+      - name: Debug - List Files
         run: ls -la
 
-
-  deploy:
-    permissions:
-      contents: read
-      checks: write
-      pull-requests: write
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
       - name: Deploy to Firebase Hosting
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
@@ -70,3 +65,4 @@ jobs:
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_SOEN390_AAB1A }}
           channelId: live
           projectId: soen390-aab1a
+
