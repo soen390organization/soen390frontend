@@ -2,34 +2,32 @@ import { DirectionsComponent } from './directions.component';
 
 declare var google: any;
 
-const mockGoogle = {
-  maps: {
-    TravelMode: {
-      DRIVING: 'DRIVING',
-    },
-    DirectionsService: class {
-      route(request: any, callback: (result: any, status: string) => void): void {
-        if (request.origin === 'Unknown Location' && request.destination === 'Nowhere') {
-          callback(null, 'ZERO_RESULTS');
-        } else {
-          callback({}, 'OK');
-        }
-      }
-    },
-    DirectionsRenderer: class {
-      setMap(map: any): void {}
-      setDirections(response: any): void {}
-    },
-  },
-};
-
-(window as any).google = mockGoogle;
-
-
-
 describe('DirectionsComponent', () => {
   let component: DirectionsComponent;
   const validMap = {} as any;
+
+  beforeAll(() => {
+    (window as any).google = {
+      maps: {
+        TravelMode: {
+          DRIVING: 'DRIVING',
+        },
+        DirectionsService: class {
+          route(request: any, callback: (result: any, status: string) => void): void {
+            if (request.origin === 'Unknown Location' && request.destination === 'Nowhere') {
+              callback(null, 'ZERO_RESULTS');
+            } else {
+              callback({}, 'OK');
+            }
+          }
+        },
+        DirectionsRenderer: class {
+          setMap(map: any): void {}
+          setDirections(response: any): void {}
+        },
+      },
+    };
+  });
 
   beforeEach(() => {
     component = new DirectionsComponent();
@@ -39,37 +37,27 @@ describe('DirectionsComponent', () => {
 
   describe('ngOnInit', () => {
     it('should initialize directionsService and directionsRenderer', () => {
-      const comp = new DirectionsComponent();
-      comp.ngOnInit();
-      expect((comp as any).directionsService).toBeDefined();
-      expect((comp as any).directionsRenderer).toBeDefined();
+      component.ngOnInit();
+      expect((component as any).directionsService).toBeDefined();
+      expect((component as any).directionsRenderer).toBeDefined();
     });
 
     it('should initialize directionsService and directionsRenderer with correct instances', () => {
-      const comp = new DirectionsComponent();
-      comp.ngOnInit();
-      expect((comp as any).directionsService).toBeInstanceOf(google.maps.DirectionsService);
-      expect((comp as any).directionsRenderer).toBeInstanceOf(google.maps.DirectionsRenderer);
+      component.ngOnInit();
+      expect((component as any).directionsService).toBeInstanceOf(google.maps.DirectionsService);
+      expect((component as any).directionsRenderer).toBeInstanceOf(google.maps.DirectionsRenderer);
     });
   });
 
-
   describe('DirectionsComponent Constructor', () => {
-    let component: DirectionsComponent;
-  
-    beforeEach(() => {
-      // Create an instance of the component. Note that we are not calling ngOnInit.
-      component = new DirectionsComponent();
-    });
-  
     it('should create an instance of DirectionsComponent', () => {
       expect(component).toBeTruthy();
     });
-  
+
     it('should have undefined directionsService and directionsRenderer before ngOnInit is called', () => {
-      // Accessing the properties via bracket notation bypasses TypeScript's visibility checks.
-      expect(component['directionsService']).toBeUndefined();
-      expect(component['directionsRenderer']).toBeUndefined();
+      const newComponent = new DirectionsComponent();
+      expect(newComponent['directionsService']).toBeUndefined();
+      expect(newComponent['directionsRenderer']).toBeUndefined();
     });
   });
 
@@ -104,9 +92,7 @@ describe('DirectionsComponent', () => {
 
     it('should log an error when ZERO_RESULTS is returned', () => {
       spyOn(console, 'error');
-
       component.calculateRoute(validMap, 'Unknown Location', 'Nowhere');
-
       expect(console.error).toHaveBeenCalledWith('Directions request failed due to', 'ZERO_RESULTS');
     });
 
