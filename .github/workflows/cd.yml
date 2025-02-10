@@ -51,6 +51,11 @@ jobs:
           CI: true
 
   deploy:
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: write
+
     needs: build
     runs-on: ubuntu-latest
     steps:
@@ -66,6 +71,3 @@ jobs:
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_SOEN390_AAB1A }}
           channelId: live
           projectId: soen390-aab1a
-
-
-
