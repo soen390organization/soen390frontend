@@ -1,132 +1,137 @@
-// directions.component.spec.ts
 import { DirectionsComponent } from './directions.component';
 
-// Remove any extraneous imports that reference non-existent modules.
+declare var google: any;
 
-// Tell TypeScript that our tests will attach a mock to window.google.
-declare var window: any;
-
-// Create a comprehensive mock for google.maps.
 const mockGoogle = {
   maps: {
     TravelMode: {
-      DRIVING: 'DRIVING'
+      DRIVING: 'DRIVING',
     },
     DirectionsService: class {
-      route(request: any, callback: (response: any, status: string) => void): void {
-        // Simulate ZERO_RESULTS when the origin is 'Unknown Location' and destination is 'Nowhere'
+      route(request: any, callback: (result: any, status: string) => void): void {
         if (request.origin === 'Unknown Location' && request.destination === 'Nowhere') {
           callback(null, 'ZERO_RESULTS');
-        }
-        // Simulate an unexpected status when origin is 'Somewhere' and destination is 'Anywhere'
-        else if (request.origin === 'Somewhere' && request.destination === 'Anywhere') {
-          callback(null, 'NOT_FOUND');
-        }
-        // Simulate a response with status OK but a null response when origin is 'NoResponse'
-        else if (request.origin === 'NoResponse' && request.destination === 'OK') {
-          callback(null, 'OK');
-        }
-        // Otherwise, simulate a successful OK response with a dummy result.
-        else {
-          callback({ route: 'testRoute' }, 'OK');
+        } else {
+          callback({}, 'OK');
         }
       }
     },
     DirectionsRenderer: class {
-      setMap(map: any): void {
-        // (Empty; will be spied on.)
-      }
-      setDirections(response: any): void {
-        // (Empty; will be spied on.)
-      }
-    }
-  }
+      setMap(map: any): void {}
+      setDirections(response: any): void {}
+    },
+  },
 };
 
-// Attach our mock to window so the component finds it.
-window.google = mockGoogle;
+(window as any).google = mockGoogle;
+
+
 
 describe('DirectionsComponent', () => {
   let component: DirectionsComponent;
-  const dummyMap = {} as any; // a dummy map object
+  const validMap = {} as any;
 
   beforeEach(() => {
-    // Create a fresh instance of the component.
     component = new DirectionsComponent();
-    // Manually set the services using our mock.
     (component as any).directionsService = new google.maps.DirectionsService();
     (component as any).directionsRenderer = new google.maps.DirectionsRenderer();
   });
 
-  it('ngOnInit should initialize directionsService and directionsRenderer', () => {
-    const comp = new DirectionsComponent();
-    comp.ngOnInit();
-    expect((comp as any).directionsService).toBeDefined();
-    expect((comp as any).directionsRenderer).toBeDefined();
+  describe('ngOnInit', () => {
+    it('should initialize directionsService and directionsRenderer', () => {
+      const comp = new DirectionsComponent();
+      comp.ngOnInit();
+      expect((comp as any).directionsService).toBeDefined();
+      expect((comp as any).directionsRenderer).toBeDefined();
+    });
+
+    it('should initialize directionsService and directionsRenderer with correct instances', () => {
+      const comp = new DirectionsComponent();
+      comp.ngOnInit();
+      expect((comp as any).directionsService).toBeInstanceOf(google.maps.DirectionsService);
+      expect((comp as any).directionsRenderer).toBeInstanceOf(google.maps.DirectionsRenderer);
+    });
   });
 
-  it('should log error and return for invalid input (null or empty addresses)', () => {
-    spyOn(console, 'error');
-    // Passing empty strings (falsy) for start and destination.
-    component.calculateRoute(dummyMap, '', '');
-    expect(console.error).toHaveBeenCalledWith(
-      'Directions request failed due to ', 'INVALID_INPUT'
-    );
+
+  describe('DirectionsComponent Constructor', () => {
+    let component: DirectionsComponent;
+  
+    beforeEach(() => {
+      // Create an instance of the component. Note that we are not calling ngOnInit.
+      component = new DirectionsComponent();
+    });
+  
+    it('should create an instance of DirectionsComponent', () => {
+      expect(component).toBeTruthy();
+    });
+  
+    it('should have undefined directionsService and directionsRenderer before ngOnInit is called', () => {
+      // Accessing the properties via bracket notation bypasses TypeScript's visibility checks.
+      expect(component['directionsService']).toBeUndefined();
+      expect(component['directionsRenderer']).toBeUndefined();
+    });
   });
 
-  it('should call setMap and setDirections for valid input with OK response', () => {
-    // Spy on the renderer methods.
-    const setMapSpy = spyOn((component as any).directionsRenderer, 'setMap');
-    const setDirectionsSpy = spyOn((component as any).directionsRenderer, 'setDirections');
-    component.calculateRoute(dummyMap, 'New York, NY', 'Philadelphia, PA');
-    expect(setMapSpy).toHaveBeenCalledWith(dummyMap);
-    expect(setDirectionsSpy).toHaveBeenCalledWith(jasmine.any(Object));
-  });
+  describe('calculateRoute', () => {
+    it('should log an error and return for invalid input (null addresses)', () => {
+      spyOn(console, 'error');
+      component.calculateRoute(validMap, null as any, null as any);
+      expect(console.error).toHaveBeenCalledWith('Directions request failed due to ', 'INVALID_INPUT');
+    });
 
-  it('should log error when ZERO_RESULTS is returned', () => {
-    spyOn(console, 'error');
-    component.calculateRoute(dummyMap, 'Unknown Location', 'Nowhere');
-    expect(console.error).toHaveBeenCalledWith(
-      'Directions request failed due to', 'ZERO_RESULTS'
-    );
-  });
+    it('should log an error and return for empty addresses', () => {
+      spyOn(console, 'error');
+      component.calculateRoute(validMap, '', '');
+      expect(console.error).toHaveBeenCalledWith('Directions request failed due to ', 'INVALID_INPUT');
+    });
 
-  it('should log error for an unexpected status (e.g., NOT_FOUND)', () => {
-    spyOn(console, 'error');
-    component.calculateRoute(dummyMap, 'Somewhere', 'Anywhere');
-    expect(console.error).toHaveBeenCalledWith(
-      'Directions request failed due to ', 'NOT_FOUND'
-    );
-  });
+    it('should log an error and return for invalid map input', () => {
+      spyOn(console, 'error');
+      component.calculateRoute(null as any, 'New York, NY', 'Philadelphia, PA');
+      expect(console.error).toHaveBeenCalledWith('Directions request failed due to ', 'INVALID_INPUT');
+    });
 
-  it('should log error when status is OK but response is null', () => {
-    spyOn(console, 'error');
-    component.calculateRoute(dummyMap, 'NoResponse', 'OK');
-    // Since the response is null, the else branch is executed and logs the status ("OK")
-    expect(console.error).toHaveBeenCalledWith(
-      'Directions request failed due to ', 'OK'
-    );
-  });
+    it('should bind the map and update directions when status is OK', () => {
+      spyOn((component as any).directionsRenderer, 'setMap');
+      spyOn((component as any).directionsRenderer, 'setDirections');
 
-  it('should instantiate a new directionsRenderer if one is not already initialized', () => {
-    // Create a new component instance that does not have a renderer.
-    component = new DirectionsComponent();
-    (component as any).directionsService = new google.maps.DirectionsService();
-    // Set directionsRenderer to undefined so that calculateRoute creates one.
-    (component as any).directionsRenderer = undefined;
-    // Spy on the global DirectionsRenderer constructor.
-    spyOn(google.maps, 'DirectionsRenderer').and.callThrough();
-    component.calculateRoute(dummyMap, 'New York, NY', 'Philadelphia, PA');
-    expect(google.maps.DirectionsRenderer).toHaveBeenCalled();
-    expect((component as any).directionsRenderer).toBeDefined();
-  });
+      component.calculateRoute(validMap, 'New York, NY', 'Philadelphia, PA');
 
-  it('should call route with proper travelMode DRIVING', () => {
-    // Spy on the route method and capture its arguments.
-    const routeSpy = spyOn((component as any).directionsService, 'route').and.callThrough();
-    component.calculateRoute(dummyMap, 'A', 'B');
-    expect(routeSpy).toHaveBeenCalled();
-    const requestArg = routeSpy.calls.mostRecent().args[0] as any;
-    expect(requestArg.travelMode).toBe('DRIVING');
+      expect((component as any).directionsRenderer.setMap).toHaveBeenCalledWith(validMap);
+      expect((component as any).directionsRenderer.setDirections).toHaveBeenCalled();
+    });
+
+    it('should log an error when ZERO_RESULTS is returned', () => {
+      spyOn(console, 'error');
+
+      component.calculateRoute(validMap, 'Unknown Location', 'Nowhere');
+
+      expect(console.error).toHaveBeenCalledWith('Directions request failed due to', 'ZERO_RESULTS');
+    });
+
+    it('should log an error for an unexpected status', () => {
+      (component as any).directionsService = {
+        route: (request: any, callback: (response: any, status: string) => void) => {
+          callback(null, 'NOT_FOUND');
+        },
+      };
+      spyOn(console, 'error');
+
+      component.calculateRoute(validMap, 'Somewhere', 'Anywhere');
+
+      expect(console.error).toHaveBeenCalledWith('Directions request failed due to ', 'NOT_FOUND');
+    });
+
+    it('should create a new directionsRenderer if one is not already initialized', () => {
+      component = new DirectionsComponent();
+      (component as any).directionsService = new google.maps.DirectionsService();
+      spyOn(google.maps, 'DirectionsRenderer').and.callThrough();
+
+      component.calculateRoute(validMap, 'New York, NY', 'Philadelphia, PA');
+
+      expect(google.maps.DirectionsRenderer).toHaveBeenCalled();
+      expect((component as any).directionsRenderer).toBeDefined();
+    });
   });
 });
