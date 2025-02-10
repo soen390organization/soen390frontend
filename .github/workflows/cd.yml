@@ -51,6 +51,11 @@ jobs:
           CI: true
 
   deploy:
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: write
+
     needs: build
     runs-on: ubuntu-latest
     steps:
