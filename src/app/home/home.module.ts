@@ -7,6 +7,9 @@ import { HomePageRoutingModule } from './home-routing.module';
 import { GoogleMapComponent } from '../components/google-map/google-map.component';
 import { MapSearchComponent } from '../components/map-search/map-search.component';
 import { SwitchCampusButtonComponent } from '../components/switch-campus-button/switch-campus-button.component';
+import { InteractionBarComponent } from "../components/interaction-bar/interaction-bar.component";
+
+
 
 @NgModule({
   imports: [
@@ -16,8 +19,9 @@ import { SwitchCampusButtonComponent } from '../components/switch-campus-button/
     CommonModule,
     FormsModule,
     IonicModule,
-    HomePageRoutingModule
-  ],
+    HomePageRoutingModule,
+    InteractionBarComponent
+],
   declarations: [HomePage],
   exports: [GoogleMapComponent]
 })

@@ -1,0 +1,40 @@
+
+
+<div class="interaction-bar">
+  <!-- Wrapper to ensure "Directions" stays at the top -->
+
+      <div style="position: absolute; top: 0;">Directions</div>
+    
+  
+    <!-- make on click events for my placeholder buttons in interactionbar.ts -->
+    <!-- <ion-button fill="solid" color="danger" class="end-btn" (click)="onEndClick()">End</ion-button> -->
+
+  <!-- Transport mode selection using ion-tabs -->
+  <ion-tabs>
+    <ion-tab-bar slot="bottom"> 
+      <ion-tab-button tab="walk">
+        <ion-icon name="walk-outline"></ion-icon>
+      </ion-tab-button>
+
+      <ion-tab-button tab="bus">
+        <ion-icon name="bus-outline"></ion-icon>
+      </ion-tab-button>
+
+      <ion-tab-button tab="transit">
+        <ion-icon name="train-outline"></ion-icon>
+      </ion-tab-button>
+
+      <ion-tab-button tab="car">
+        <ion-icon name="car-outline"></ion-icon>
+      </ion-tab-button>
+
+    <!-- Red End Button -->
+    <ion-tab-button tab="end"  class="end-tab">
+      <ion-icon name="close-circle" style="color: red;"></ion-icon>
+    </ion-tab-button>
+  </ion-tab-bar>
+
+  </ion-tabs>
+</div>
+
+
