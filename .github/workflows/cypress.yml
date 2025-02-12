@@ -1,0 +1,57 @@
+name: Run Cypress Tests
+
+on:
+  push:
+    branches:
+      - main
+      - staging
+  pull_request:
+    branches:
+      - main
+      - staging
+
+jobs:
+  cypress-run:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.11.1"
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Install Ionic CLI
+        run: npm install -g @ionic/cli
+
+      - name: Handle environment (Generate environment.ts)
+        run: |
+          cat <<EOF > src/environments/environment.ts
+          export const environment = {
+            production: false,
+            firebaseConfig: {
+              apiKey: '${{ secrets.FIREBASE_API_KEY }}',
+              authDomain: '${{ secrets.FIREBASE_AUTH_DOMAIN }}',
+              databaseURL: '${{ secrets.FIREBASE_DB_URL }}',
+              projectId: '${{ secrets.FIREBASE_PID }}',
+              storageBucket: '${{ secrets.FIREBASE_STORAGE_BUCKET }}',
+              messagingSenderId: '${{ secrets.FIREBASE_MESSENGER_SENDER_ID }}',
+              appId: '${{ secrets.FIREBASE_APP_ID }}',
+            }
+          };
+          EOF
+        shell: bash
+
+      - name: Start the Application
+        run: ionic serve --no-open &
+
+      - name: Wait for App to be Ready
+        run: npx wait-on http://localhost:8100
+
+      - name: Run Cypress Tests
+        run: npx cypress run

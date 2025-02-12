@@ -1,12 +1,4 @@
-import { Component, ViewChild, AfterViewInit } from '@angular/core';
-import { Store, select } from '@ngrx/store';
-import { Observable } from 'rxjs';
-import { loadUser, UserState } from '../store/user';
-import { AuthService } from '../services/auth.service';
-import { UserService } from '../services/user.service';
-import { UserInterface } from '../interfaces/user.interface';
-import { GoogleMapComponent } from '../components/google-map/google-map.component';
-import { DirectionsComponent } from '../components/directions/directions.component';
+import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-home',
@@ -14,66 +6,6 @@ import { DirectionsComponent } from '../components/directions/directions.compone
   styleUrls: ['home.page.scss'],
   standalone: false,
 })
-export class HomePage implements AfterViewInit {
-  @ViewChild(GoogleMapComponent) googleMapComp!: GoogleMapComponent;
-  @ViewChild(DirectionsComponent) directionsComp!: DirectionsComponent;
-
-  user$: Observable<UserState> = this.store.pipe(select('user'));
-  email: string = '';
-  password: string = '';
-
-  constructor(
-    private readonly store: Store<{ user: UserState }>,
-    private readonly authService: AuthService,
-    private readonly userService: UserService
-  ) {}
-
-  ngOnInit() {
-    this.store.dispatch(loadUser());
-  }
-
-  ngAfterViewInit() {
-    const startAddress = 'New York, NY';
-    const destinationAddress = 'Philadelphia, PA';
-
-    const checkMap = setInterval(() => {
-      // As soon as googleMapComp.map is defined, we can display the route
-      if (this.googleMapComp.map) {
-        clearInterval(checkMap);
-        this.directionsComp.calculateRoute(
-          this.googleMapComp.map,
-          startAddress,
-          destinationAddress
-        );
-      }
-    }, 500);
-  }
-
-  onLogin(event: Event) {
-    event.preventDefault(); // Prevent form submission
-    this.authService
-      .login(this.email, this.password)
-      .then((userCredential) => {
-        console.log('Login successful:', userCredential);
-        // Handle successful login (e.g., navigate to a different page)
-      })
-      .catch((error) => {
-        console.error('Login failed:', error.message);
-        // Handle login error (e.g., show an error message)
-      });
-  }
-
-  onSignup(event: Event) {
-    event.preventDefault(); // Prevent form submission
-    this.authService
-      .signup(this.email, this.password)
-      .then((userCredential) => {
-        console.log('Signup successful:', userCredential);
-        // Handle successful signup (e.g., navigate or show success message)
-      })
-      .catch((error) => {
-        console.error('Signup failed:', error.message);
-        // Handle signup error (e.g., show an error message)
-      });
-  }
+export class HomePage {
+  constructor() {}
 }
