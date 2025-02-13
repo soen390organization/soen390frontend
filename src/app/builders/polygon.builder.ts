@@ -6,10 +6,6 @@ import { Injectable } from '@angular/core';
 export class PolygonBuilder {
   map!: google.maps.Map;
   latLngCoords: google.maps.LatLngLiteral[] = [];
-  userCurrentLocation: google.maps.LatLngLiteral = {
-    lat: 45.49642480687637,
-    lng: -73.57900125553724,
-  };
   fill: string = '#FF0000';
   outline: string = '#FF0000';
 
@@ -24,10 +20,6 @@ export class PolygonBuilder {
     }
     this.latLngCoords.push(latLng);
     return this;
-  }
-
-  setUserCurrentLocation(userCurrentLocation: google.maps.LatLngLiteral) {
-    this.userCurrentLocation = userCurrentLocation;
   }
 
   setFillOutlineColor(fill: string, outline: string) {
