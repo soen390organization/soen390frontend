@@ -54,7 +54,7 @@ export class GoogleMapComponent implements AfterViewInit {
     if (!this.mapContainer) return;
     this.googleMapService.initialize(new google.maps.Map(this.mapContainer.nativeElement, {
       ...this.mapOptions,
-      ...(data.campuses.sgw.mapOptions as google.maps.MapOptions),
+      center: data.sgw.coordinates
     }));
     await this.loadBuildings();
   }
@@ -63,7 +63,12 @@ export class GoogleMapComponent implements AfterViewInit {
     const userCurrentLocation = await this.currentLocationService.getCurrentLocation();
     const userCurrentBuilding = await this.geolocationService.getCurrentBuilding(userCurrentLocation);
 
-    data.buildings.forEach((building) => {
+    const buildings = [
+      ...data.sgw.buildings,
+      ...data.loy.buildings
+    ];
+
+    buildings.forEach((building) => {
       let polygonBuilder = new PolygonBuilder();
       polygonBuilder.setMap(this.googleMapService.getMap());
       if (building.name == userCurrentBuilding) {

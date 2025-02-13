@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { GoogleMapService } from 'src/app/services/googeMap.service';
+import { PlacesService } from 'src/app/services/places.service';
 import data from 'src/assets/ConcordiaData.json';
 
 @Component({
@@ -9,22 +10,20 @@ import data from 'src/assets/ConcordiaData.json';
 })
 export class SwitchCampusButtonComponent {
   selectedCampus = 'SGW';
-  sgwLocation = { lat: data.campuses.sgw.mapOptions.center.lat, lng: data.campuses.sgw.mapOptions.center.lng };
-  loyLocation = { lat: data.campuses.loy.mapOptions.center.lat, lng: data.campuses.loy.mapOptions.center.lng };
 
-
-  constructor(private googleMapService: GoogleMapService) { }
+  constructor(private googleMapService: GoogleMapService, private placesService: PlacesService) { }
 
   switchCampus() {
     let location;
     if (this.selectedCampus === 'SGW') {
       this.selectedCampus = "LOY"
-      location = new google.maps.LatLng(this.loyLocation.lat, this.loyLocation.lng);
+      location = new google.maps.LatLng(data.loy.coordinates);
     } else {
       this.selectedCampus = "SGW"
-      location = new google.maps.LatLng(this.sgwLocation.lat, this.sgwLocation.lng);
+      location = new google.maps.LatLng(data.sgw.coordinates);
     }
 
     this.googleMapService.updateMapLocation(location);
+    // this.placesService.getPointsOfInterest(location);
   }
 }
