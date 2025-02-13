@@ -9,8 +9,6 @@ import { MapSearchComponent } from '../components/map-search/map-search.componen
 import { SwitchCampusButtonComponent } from '../components/switch-campus-button/switch-campus-button.component';
 import { InteractionBarComponent } from "../components/interaction-bar/interaction-bar.component";
 
-
-
 @NgModule({
   imports: [
     SwitchCampusButtonComponent,

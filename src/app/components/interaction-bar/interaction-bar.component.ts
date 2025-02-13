@@ -1,37 +1,48 @@
-import { IonicModule } from '@ionic/angular';
-import { Component } from '@angular/core';
+import { Component, ElementRef, Renderer2 } from '@angular/core';
+import { GestureController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
+import { IonicModule } from '@ionic/angular';
 
 @Component({
   selector: 'app-interaction-bar',
-  standalone: true,
-  imports: [IonicModule, CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule, IonicModule],
   templateUrl: './interaction-bar.component.html',
-  styleUrls: ['./interaction-bar.component.scss'],
+  styleUrls: ['./interaction-bar.component.scss']
 })
 export class InteractionBarComponent {
-  selectedMode = 'bus';
-  navigationInstruction = 'Get off at Loyola Campus';
+  isExpanded = false;
 
-  selectMode(mode: string) {
-    this.selectedMode = mode;
-    this.updateInstruction();
+  constructor(
+    private gestureCtrl: GestureController,
+    private el: ElementRef,
+    private renderer: Renderer2
+  ) {}
+
+  ngAfterViewInit() {
+    const gesture = this.gestureCtrl.create({
+      el: this.el.nativeElement.querySelector('.swipe-footer-container'),
+      gestureName: 'swipe-footer',
+      onMove: (detail) => {
+        if (this.isExpanded) return;
+        const offset = Math.max(0, -detail.deltaY);
+        this.renderer.setStyle(
+          this.el.nativeElement.querySelector('.swipe-footer-container'),
+          'height',
+          `${300 + offset}px`
+        );
+      },
+      onEnd: (detail) => {
+        const shouldExpand = detail.deltaY < -50;
+        this.isExpanded = shouldExpand;
+      },
+    });
+
+    gesture.enable(true);
   }
 
-  updateInstruction() {
-    if (this.selectedMode === 'walk') {
-      this.navigationInstruction = 'Walk to your destination';
-    } else if (this.selectedMode === 'bus') {
-      this.navigationInstruction = 'Get off at Loyola Campus';
-    } else if (this.selectedMode === 'transit') {
-      this.navigationInstruction = 'Take the metro to your stop';
-    } else if (this.selectedMode === 'car') {
-      this.navigationInstruction = 'Drive to your destination';
-    }
-  }
-
-  endNavigation() {
-    this.navigationInstruction = 'Navigation ended.';
+  toggleExpand() {
+    this.isExpanded = !this.isExpanded;
   }
 }
