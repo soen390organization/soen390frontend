@@ -52,7 +52,7 @@ export class GoogleMapComponent implements AfterViewInit {
 
   async initMap() {
     if (!this.mapContainer) return;
-    this.googleMapService.setMap(new google.maps.Map(this.mapContainer.nativeElement, {
+    this.googleMapService.initialize(new google.maps.Map(this.mapContainer.nativeElement, {
       ...this.mapOptions,
       ...(data.campuses.sgw.mapOptions as google.maps.MapOptions),
     }));
