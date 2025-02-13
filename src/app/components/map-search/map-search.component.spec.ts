@@ -31,14 +31,22 @@ describe('MapSearchComponent', () => {
         },
         Marker: class {
           position: any;
+          icon: any;
           constructor(options: any) {
             this.position = options.position;
+            this.icon = options.icon || 'default-icon.svg';
           }
           getPosition() {
             return this.position;
           }
           setPosition(pos: any) {
             this.position = pos;
+          }
+          getIcon() {
+            return this.icon;
+          }
+          setIcon(icon: any) {
+            this.icon = icon;
           }
         },
         Geocoder: class {
@@ -90,8 +98,8 @@ describe('MapSearchComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [IonicModule, CommonModule, FormsModule], // FIX: Removed MapSearchComponent from imports
-      declarations: [MapSearchComponent], // FIX: MapSearchComponent should be declared here
+      imports: [IonicModule, CommonModule, FormsModule, MapSearchComponent], // FIX: Removed MapSearchComponent from imports
+      //declarations: [MapSearchComponent], // FIX: MapSearchComponent should be declared here
       providers: [
         { provide: GoogleMapService, useClass: MockGoogleMapService },
         provideAnimations(),
@@ -118,16 +126,14 @@ describe('MapSearchComponent', () => {
   });
 
   it('should not search if input is empty', fakeAsync(() => {
-    spyOn(component, 'onSearchChangeStart');
-    spyOn(component, 'onSearchChangeDestination');
+    component.findPlace = jasmine.createSpy('findPlace');
 
     const emptyEvent = { target: { value: '' } };
     component.onSearchChangeStart(emptyEvent);
     component.onSearchChangeDestination(emptyEvent);
 
     tick();
-    expect(component.onSearchChangeStart).not.toHaveBeenCalled();
-    expect(component.onSearchChangeDestination).not.toHaveBeenCalled();
+    expect(component.findPlace).not.toHaveBeenCalled();
   }));
 
   it('should call onSearchChangeStart with correct icon for start location', fakeAsync(() => {
@@ -138,7 +144,14 @@ describe('MapSearchComponent', () => {
     tick();
     expect(component.onSearchChangeStart).toHaveBeenCalledWith(event);
     // Ensure correct marker icon is passed
-    expect(component.startLocation?.marker.getIcon()).toEqual('https://upload.wikimedia.org/wikipedia/commons/8/8e/Icone_Verde.svg');
+    expect(component.startLocation?.marker).toBeDefined()
+    
+    const icon = component.startLocation?.marker.getIcon();
+    const iconUrl = typeof icon === 'object' && icon !== null && 'url' in icon ? (icon as { url: string }).url : icon;
+  
+    expect(iconUrl).toEqual('https://upload.wikimedia.org/wikipedia/commons/8/8e/Icone_Verde.svg');
+  
+    
   }));
 
   it('should call onSearchChangeDestination with correct icon for destination', fakeAsync(() => {
@@ -148,8 +161,15 @@ describe('MapSearchComponent', () => {
 
     tick();
     expect(component.onSearchChangeDestination).toHaveBeenCalledWith(event);
+    expect(component.destinationLocation?.marker).toBeDefined();
     // Ensure correct marker icon is passed
-    expect(component.destinationLocation?.marker.getIcon()).toEqual('https://upload.wikimedia.org/wikipedia/commons/6/64/Icone_Vermelho.svg');
+    //expect(component.destinationLocation?.marker.getIcon()).toEqual('https://upload.wikimedia.org/wikipedia/commons/6/64/Icone_Vermelho.svg');
+    const icon = component.destinationLocation?.marker.getIcon();
+    const iconUrl = typeof icon === 'object' && icon !== null && 'url' in icon ? (icon as { url: string }).url : icon;
+  
+    expect(iconUrl).toEqual('https://upload.wikimedia.org/wikipedia/commons/6/64/Icone_Vermelho.svg');
+  
+ 
   }));
 
   it('should create start marker in onSetUsersLocationAsStart', fakeAsync(() => {
