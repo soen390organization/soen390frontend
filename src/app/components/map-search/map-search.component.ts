@@ -12,6 +12,7 @@ import {
   transition,
   trigger,
 } from '@angular/animations';
+import { DirectionsService } from 'src/app/services/directions.service';
 
 @Component({
   selector: 'app-map-search',
@@ -44,12 +45,27 @@ import {
 export class MapSearchComponent {
   @ViewChild(GoogleMapComponent) googleMap!: GoogleMapComponent;
   startLocationInput = '';
-  startLocation: { address: string; coordinates: google.maps.LatLng, marker: google.maps.Marker } | undefined
+  startLocation:
+    | {
+        address: string;
+        coordinates: google.maps.LatLng;
+        marker: google.maps.Marker;
+      }
+    | undefined;
   destinationLocationInput = '';
-  destinationLocation: { address: string; coordinates: google.maps.LatLng, marker: google.maps.Marker  } | undefined
+  destinationLocation:
+    | {
+        address: string;
+        coordinates: google.maps.LatLng;
+        marker: google.maps.Marker;
+      }
+    | undefined;
   isSearchVisible = false;
 
-  constructor(private googleMapService: GoogleMapService) {}
+  constructor(
+    private googleMapService: GoogleMapService,
+    private directionsServive: DirectionsService
+  ) {}
 
   toggleSearch() {
     this.isSearchVisible = !this.isSearchVisible;
@@ -57,28 +73,31 @@ export class MapSearchComponent {
 
   onSetUsersLocationAsStart() {
     const currentLocationService = new CurrentLocationService();
-    currentLocationService.getCurrentLocation()
-      .then((position) => {
-        if (position == null)
-          throw new Error('Current location is null.');
+    currentLocationService.getCurrentLocation().then((position) => {
+      if (position == null) throw new Error('Current location is null.');
 
-        const geocoder = new google.maps.Geocoder();
+      const geocoder = new google.maps.Geocoder();
 
-        geocoder.geocode({ location: position }, (results, status) => {
-          if (results == null)
-            throw new Error("Current location's address cannot be read.");
+      geocoder.geocode({ location: position }, (results, status) => {
+        if (results == null)
+          throw new Error("Current location's address cannot be read.");
 
-          const result = results[0];
-          this.startLocation = {
-            address: result.formatted_address,
-            coordinates: result.geometry.location,
-            marker: this.startLocation?.marker ?? this.createMarker(result.geometry.location, 'https://upload.wikimedia.org/wikipedia/commons/8/8e/Icone_Verde.svg')
-          }
-          this.startLocation.marker.setPosition(result.geometry.location);
-          this.startLocationInput = 'Your Location';
-          this.updateMapView();
-        })
-      })
+        const result = results[0];
+        this.startLocation = {
+          address: result.formatted_address,
+          coordinates: result.geometry.location,
+          marker:
+            this.startLocation?.marker ??
+            this.createMarker(
+              result.geometry.location,
+              'https://upload.wikimedia.org/wikipedia/commons/8/8e/Icone_Verde.svg'
+            ),
+        };
+        this.startLocation.marker.setPosition(result.geometry.location);
+        this.startLocationInput = 'Your Location';
+        this.updateMapView();
+      });
+    });
   }
 
   async onSearchChangeStart(event: any) {
@@ -92,12 +111,20 @@ export class MapSearchComponent {
     this.startLocation = {
       address: result.formatted_address,
       coordinates: result.geometry.location,
-      marker: this.startLocation?.marker ?? this.createMarker(result.geometry.location, 'https://upload.wikimedia.org/wikipedia/commons/8/8e/Icone_Verde.svg')
-    }
+      marker:
+        this.startLocation?.marker ??
+        this.createMarker(
+          result.geometry.location,
+          'https://upload.wikimedia.org/wikipedia/commons/8/8e/Icone_Verde.svg'
+        ),
+    };
     this.startLocation.marker.setPosition(result.geometry.location);
 
     if (this.destinationLocation)
-      this.googleMapService.calculateRoute(this.startLocation.address, this.destinationLocation.address);
+      this.directionsServive.calculateRoute(
+        this.startLocation.address,
+        this.destinationLocation.address
+      );
 
     this.updateMapView();
   }
@@ -112,12 +139,20 @@ export class MapSearchComponent {
     this.destinationLocation = {
       address: result.formatted_address,
       coordinates: result.geometry.location,
-      marker: this.destinationLocation?.marker ?? this.createMarker(result.geometry.location, 'https://upload.wikimedia.org/wikipedia/commons/6/64/Icone_Vermelho.svg')
-    }
+      marker:
+        this.destinationLocation?.marker ??
+        this.createMarker(
+          result.geometry.location,
+          'https://upload.wikimedia.org/wikipedia/commons/6/64/Icone_Vermelho.svg'
+        ),
+    };
     this.destinationLocation.marker.setPosition(result.geometry.location);
 
     if (this.startLocation)
-      this.googleMapService.calculateRoute(this.startLocation.address, this.destinationLocation.address);
+      this.directionsServive.calculateRoute(
+        this.startLocation.address,
+        this.destinationLocation.address
+      );
 
     this.updateMapView();
   }
@@ -126,13 +161,18 @@ export class MapSearchComponent {
     return new Promise((resolve, reject) => {
       const request = {
         query: searchTerm,
-        fields: ['geometry', 'formatted_address']
+        fields: ['geometry', 'formatted_address'],
       };
-  
-      const placesService = new google.maps.places.PlacesService(this.googleMapService.getMap());
-  
+
+      const placesService = new google.maps.places.PlacesService(
+        this.googleMapService.getMap()
+      );
+
       placesService.findPlaceFromQuery(request, (results: any, status: any) => {
-        if (status === google.maps.places.PlacesServiceStatus.OK && results.length > 0) {
+        if (
+          status === google.maps.places.PlacesServiceStatus.OK &&
+          results.length > 0
+        ) {
           resolve(results[0]);
         } else {
           reject(null);
@@ -142,11 +182,14 @@ export class MapSearchComponent {
   }
 
   // To be moved to google map service
-  createMarker(position: google.maps.LatLng, iconUrl: string): google.maps.Marker {
+  createMarker(
+    position: google.maps.LatLng,
+    iconUrl: string
+  ): google.maps.Marker {
     return new google.maps.Marker({
       position,
       map: this.googleMapService.getMap(),
-      icon: { url: iconUrl, scaledSize: new google.maps.Size(40, 40) }
+      icon: { url: iconUrl, scaledSize: new google.maps.Size(40, 40) },
     });
   }
 
