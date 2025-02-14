@@ -7,7 +7,6 @@ import { Step } from '../interfaces/step.interface';
 export class DirectionsService {
   private directionsService!: google.maps.DirectionsService;
   private directionsRenderer!: google.maps.DirectionsRenderer;
-  // private map!: google.maps.Map;
 
   constructor() {}
 
@@ -19,18 +18,6 @@ export class DirectionsService {
       this.directionsRenderer.setMap(map)
     }
   }
-
-  // constructor(private googleMapService: GoogleMapService) {
-  //   this.initializeServices();
-  // }
-
-  // private async initializeServices() {
-  //   await this.googleMapService.waitForApiLoad();
-  //   this.directionsService = new google.maps.DirectionsService();
-  //   this.directionsRenderer = new google.maps.DirectionsRenderer();
-  //   this.map = this.googleMapService.getMap();
-  //   this.directionsRenderer.setMap(this.map);
-  // }
 
   getDirectionsService(): google.maps.DirectionsService {
     return this.directionsService;

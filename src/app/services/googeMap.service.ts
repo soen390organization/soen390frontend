@@ -6,24 +6,10 @@ import { DirectionsService } from './directions.service';
 })
 export class GoogleMapService {
   private map!: google.maps.Map;
-  private apiLoaded = false;
 
-  constructor(private directionsService: DirectionsService) {
-    this.apiLoaded = true;
-  }
+  constructor(private directionsService: DirectionsService) {}
 
-  waitForApiLoad(): Promise<void> {
-    return new Promise((resolve) => {
-      const checkInterval = setInterval(() => {
-        if (this.apiLoaded) {
-          clearInterval(checkInterval);
-          resolve();
-        }
-      }, 100);
-    });
-  }
-
-  setMap(map: google.maps.Map) {
+  initialize(map: google.maps.Map) {
     this.map = map;
     this.directionsService.initialize(map);
   }
