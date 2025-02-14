@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { GoogleMapService } from './googeMap.service';
+// import { GoogleMapService } from './googeMap.service';
 
 @Injectable({
   providedIn: 'root',
@@ -7,19 +7,30 @@ import { GoogleMapService } from './googeMap.service';
 export class DirectionsService {
   private directionsService!: google.maps.DirectionsService;
   private directionsRenderer!: google.maps.DirectionsRenderer;
-  private map!: google.maps.Map;
+  // private map!: google.maps.Map;
 
-  constructor(private googleMapService: GoogleMapService) {
-    this.initializeServices();
+  constructor() {}
+
+  public initialize(map: google.maps.Map): void {
+    if (!this.directionsService)
+      this.directionsService = new google.maps.DirectionsService();
+    if (!this.directionsRenderer) {
+      this.directionsRenderer = new google.maps.DirectionsRenderer();
+      this.directionsRenderer.setMap(map)
+    }
   }
 
-  private async initializeServices() {
-    await this.googleMapService.waitForApiLoad();
-    this.directionsService = new google.maps.DirectionsService();
-    this.directionsRenderer = new google.maps.DirectionsRenderer();
-    this.map = this.googleMapService.getMap();
-    this.directionsRenderer.setMap(this.map);
-  }
+  // constructor(private googleMapService: GoogleMapService) {
+  //   this.initializeServices();
+  // }
+
+  // private async initializeServices() {
+  //   await this.googleMapService.waitForApiLoad();
+  //   this.directionsService = new google.maps.DirectionsService();
+  //   this.directionsRenderer = new google.maps.DirectionsRenderer();
+  //   this.map = this.googleMapService.getMap();
+  //   this.directionsRenderer.setMap(this.map);
+  // }
 
   getDirectionsService(): google.maps.DirectionsService {
     return this.directionsService;
@@ -59,7 +70,7 @@ export class DirectionsService {
     eta: string | null;
   }> {
     return new Promise((resolve, reject) => {
-      this.directionsRenderer.setMap(this.map);
+      // this.directionsRenderer.setMap(this.map);
 
       this.setRouteColor(travelMode);
 

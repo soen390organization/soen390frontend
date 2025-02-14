@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { DirectionsService } from './directions.service';
 
 @Injectable({
   providedIn: 'root',
@@ -7,7 +8,7 @@ export class GoogleMapService {
   private map!: google.maps.Map;
   private apiLoaded = false;
 
-  constructor() {
+  constructor(private directionsService: DirectionsService) {
     this.apiLoaded = true;
   }
 
@@ -24,6 +25,7 @@ export class GoogleMapService {
 
   setMap(map: google.maps.Map) {
     this.map = map;
+    this.directionsService.initialize(map);
   }
 
   getMap(): google.maps.Map {
