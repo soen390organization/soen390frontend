@@ -17,6 +17,8 @@ import { selectSelectedCampus } from 'src/app/store/app';
 })
 export class InteractionBarComponent implements OnInit, AfterViewInit {
   isExpanded = false;
+  buildings: any = [];
+  pos: any = [];
 
   constructor(
     private gestureCtrl: GestureController,
@@ -33,10 +35,10 @@ export class InteractionBarComponent implements OnInit, AfterViewInit {
       if (ready) {
         this.store.select(selectSelectedCampus).subscribe(async (campus) => {
           console.log('Selected campus changed:', campus);
-          const buildingResults = await this.placesService.getCampusBuildings();
-          const posResults = await this.placesService.getPointsOfInterest();
-          console.log('Campus Buildings:', buildingResults);
-          console.log('Points of Interest:', posResults);
+          this.buildings = await this.placesService.getCampusBuildings();
+          this.pos = await this.placesService.getPointsOfInterest();
+          // console.log('Campus Buildings:', buildingResults);
+          // console.log('Points of Interest:', posResults);
         });
       }
     });

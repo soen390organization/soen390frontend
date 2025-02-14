@@ -64,7 +64,7 @@ export class PlacesService {
       name: place.name ?? 'No name available',
       coordinates: place.geometry?.location as google.maps.LatLng, 
       address: place.vicinity ?? 'No address available',
-      image: place.photos?.[0]?.getUrl() ?? 'default-image-url.jpg'
+      image: place.photos?.[0]?.getUrl() ?? ''
     }));
   }  
 
