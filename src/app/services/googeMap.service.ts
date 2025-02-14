@@ -1,15 +1,20 @@
 import { Injectable } from '@angular/core';
+import { PlacesService } from './places.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class GoogleMapService {
   private map!: google.maps.Map;
+
   private directionsService!: google.maps.DirectionsService;
   private directionsRenderer!: google.maps.DirectionsRenderer;
 
-  setMap(map: google.maps.Map) {
+  constructor(private placesService: PlacesService) {}
+
+  initialize(map: google.maps.Map) {
     this.map = map;
+    this.placesService.initialize(this.map);
   }
 
   getMap(): google.maps.Map {
