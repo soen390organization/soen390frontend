@@ -4,10 +4,11 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
+import { LocationCardsComponent } from '../location-cards/location-cards.component';
 
 @Component({
   selector: 'app-interaction-bar',
-  imports: [CommonModule, FormsModule, RouterModule, IonicModule],
+  imports: [CommonModule, FormsModule, RouterModule, IonicModule, LocationCardsComponent],
   templateUrl: './interaction-bar.component.html',
   styleUrls: ['./interaction-bar.component.scss']
 })
