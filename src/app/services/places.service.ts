@@ -42,11 +42,6 @@ export class PlacesService {
   public async getCampusBuildings(): Promise<LocationCard[]> {
     const campusKey = await firstValueFrom(this.store.select(selectSelectedCampus));
 
-    if (!campusKey || !this.campusData[campusKey]) {
-      console.error('Invalid campus key or campus data not found.');
-      return [];
-    }
-
     return this.campusData[campusKey].buildings.map((building: LocationCard) => ({
       name: building.name,
       coordinates: new google.maps.LatLng(building.coordinates),
@@ -64,7 +59,6 @@ export class PlacesService {
   public async getPointsOfInterest(): Promise<LocationCard[]> {
     // @TODO - Add so it prioritizes users location instead if they are on campus.
     const campusKey = await firstValueFrom(this.store.select(selectSelectedCampus));
-
     const places = await this.getPlaces(this.campusData[campusKey].coordinates, 250, 'restaurant');
   
     return places.map(place => ({
