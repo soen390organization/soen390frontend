@@ -7,7 +7,9 @@
       {
         "name": "Engineering and Visual Arts",
         "abreviation": "EV",
-        "address": "",
+        "address": "1515 Saint-Catherine St W #1428, Montreal, Quebec H3G 1S6",
+        "coordinates": { "lat": 45.49541909930391, "lng": -73.57769260301784 },
+        "image": "https://lh3.googleusercontent.com/p/AF1QipPdcC9aj620AW078WET7MWOA9X8J6ZrRBX9gDdM=s1360-w1360-h1020",
         "entrances": [],
         "boundaries": [
           {
@@ -63,7 +65,9 @@
       {
         "name": "ER Building",
         "abreviation": "ER",
-        "address": "",
+        "address": "2155 Guy St, Montreal, Quebec H3H 2L9",
+        "coordinates": { "lat": 45.49619913491374, "lng": -73.58013324104284 },
+        "image": "",
         "entrances": [],
         "boundaries": [
           {
@@ -87,7 +91,9 @@
       {
         "name": "Webster Library",
         "abreviation": "LB",
-        "address": "",
+        "address": "1400 Blvd. De Maisonneuve Ouest, Montreal, Quebec H3G 2V8",
+        "coordinates": { "lat": 45.496856674256634, "lng": -73.57802308456793 },
+        "image": "",
         "entrances": [],
         "boundaries": [
           {
@@ -215,7 +221,9 @@
       {
         "name": "Hall",
         "abreviation": "H",
-        "address": "",
+        "address": "1455 Blvd. De Maisonneuve Ouest, Montreal, Quebec H3G 1M8",
+        "coordinates": { "lat": 45.49732887794189, "lng": -73.5790258502087 },
+        "image": "",
         "entrances": [],
         "boundaries": [
           {
@@ -239,7 +247,9 @@
       {
         "name": "John Molson School of Business",
         "abreviation": "JMSB",
-        "address": "",
+        "address": "1450 Guy St, Montreal, Quebec H3H 0A1",
+        "coordinates": { "lat": 45.49549521890683, "lng": -73.57917148051556 },
+        "image": "https://lh5.googleusercontent.com/p/AF1QipPTVnfU7Qp7P8q3Jx3MMEmU37vy9tWHQDVUc1xa=w408-h544-k-no",
         "entrances": [],
         "boundaries": [
           {
@@ -290,7 +300,9 @@
       {
         "name": "Central Building",
         "abreviation": "CC",
-        "address": "",
+        "address": "7141 Sherbrooke St W, Montreal, Quebec H4B 1R6",
+        "coordinates": { "lat": 45.45849007178699, "lng": -73.64064018870205 },
+        "image": "",
         "entrances": [],
         "boundaries": [
           {
@@ -370,7 +382,9 @@
       {
         "name": "Richard J. Renaud Science Complex",
         "abreviation": "SP",
-        "address": "",
+        "address": "3475 Rue West Broadway, Montréal, QC H4B 2A7",
+        "coordinates": { "lat": 45.45784653344979, "lng": -73.64157117911424 },
+        "image": "",
         "entrances": [],
         "boundaries": [
           {

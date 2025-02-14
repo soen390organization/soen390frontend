@@ -13,7 +13,7 @@ export class SwitchCampusButtonComponent {
 
   constructor(private googleMapService: GoogleMapService, private placesService: PlacesService) { }
 
-  switchCampus() {
+  async switchCampus() {
     let location;
     if (this.selectedCampus === 'SGW') {
       this.selectedCampus = "LOY"
@@ -24,6 +24,8 @@ export class SwitchCampusButtonComponent {
     }
 
     this.googleMapService.updateMapLocation(location);
-    // this.placesService.getPointsOfInterest(location);
+    // const result = await this.placesService.getPointsOfInterest(location);
+    // const result = await this.placesService.getCampusBuildings('loy');
+    // console.log(result)
   }
 }

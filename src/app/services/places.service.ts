@@ -7,6 +7,7 @@ import data from 'src/assets/ConcordiaData.json';
 })
 export class PlacesService {
   private placesService!: google.maps.places.PlacesService;
+  private campusData: any = data;
 
   /**
    * Initializes the PlacesService with a given Google Map instance.
@@ -17,7 +18,20 @@ export class PlacesService {
       this.placesService = new google.maps.places.PlacesService(map);
   }
 
-  public async getCampusBuildings(campus: string) {
+/**
+ * Retrieves the buildings on a specified campus.
+ * @param campusKey The unique key identifying the campus.
+ * @returns A promise resolving to an array of LocationCard objects representing campus buildings.
+ */
+  public async getCampusBuildings(campusKey: string): Promise<LocationCard[]> {
+    const campus = this.campusData[campusKey];
+
+    return campus.buildings.map((building: LocationCard) => ({
+      name: building.name,
+      coordinates: building.coordinates,
+      address: building.address,
+      image: building.image
+    }))
   }
   
   /**
