@@ -57,7 +57,6 @@ export class PlacesService {
    * @returns A promise resolving to an array of LocationCard objects representing points of interest.
    */
   public async getPointsOfInterest(): Promise<LocationCard[]> {
-    // @TODO - Add so it prioritizes users location instead if they are on campus.
     const campusKey = await firstValueFrom(this.store.select(selectSelectedCampus));
     const places = await this.getPlaces(this.campusData[campusKey].coordinates, 250, 'restaurant');
   
