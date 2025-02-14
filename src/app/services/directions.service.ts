@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { GoogleMapService } from './googeMap.service';
-import { Step } from '../interfaces/step.interface';
 
 @Injectable({
   providedIn: 'root',
@@ -16,9 +15,18 @@ export class DirectionsService {
 
   private async initializeServices() {
     await this.googleMapService.waitForApiLoad();
-    this.directionsService = this.googleMapService.getDirectionsService();
-    this.directionsRenderer = this.googleMapService.getDirectionsRenderer();
+    this.directionsService = new google.maps.DirectionsService();
+    this.directionsRenderer = new google.maps.DirectionsRenderer();
     this.map = this.googleMapService.getMap();
+    this.directionsRenderer.setMap(this.map);
+  }
+
+  getDirectionsService(): google.maps.DirectionsService {
+    return this.directionsService;
+  }
+
+  getDirectionsRenderer(): google.maps.DirectionsRenderer {
+    return this.directionsRenderer;
   }
 
   /**
@@ -45,18 +53,15 @@ export class DirectionsService {
   calculateRoute(
     startAddress: string,
     destinationAddress: string,
-    travelMode: google.maps.TravelMode = google.maps.TravelMode.DRIVING
+    travelMode: google.maps.TravelMode = google.maps.TravelMode.WALKING
   ): Promise<{
-    steps: Step[];
+    steps: Partial<google.maps.DirectionsStep>[];
     eta: string | null;
   }> {
     return new Promise((resolve, reject) => {
-      if (!this.directionsService || !this.directionsRenderer) {
-        reject('Google Maps services are not ready.');
-        return;
-      }
-
       this.directionsRenderer.setMap(this.map);
+
+      this.setRouteColor(travelMode);
 
       const request: google.maps.DirectionsRequest = {
         origin: startAddress,
@@ -68,7 +73,7 @@ export class DirectionsService {
         if (status === google.maps.DirectionsStatus.OK && response) {
           this.directionsRenderer.setDirections(response);
 
-          const steps: Step[] = [];
+          const steps: Partial<google.maps.DirectionsStep>[] = [];
           let eta: string | null = null;
 
           if (response.routes.length > 0) {
@@ -80,10 +85,11 @@ export class DirectionsService {
 
               leg.steps.forEach((step) => {
                 steps.push({
-                  instruction: step.instructions, // "Turn right onto Main St."
-                  location: step.start_location, // Google Maps LatLng object
+                  instructions: step.instructions, // "Turn right onto Main St."
+                  start_location: step.start_location,
                   distance: step.distance,
                   duration: step.duration,
+                  transit_details: step.transit_details,
                 });
               });
             }
@@ -95,5 +101,44 @@ export class DirectionsService {
         }
       });
     });
+  }
+
+  setRouteColor(travelMode: google.maps.TravelMode) {
+    const walkingLineSymbol = {
+      path: google.maps.SymbolPath.CIRCLE,
+      fillOpacity: 1,
+      scale: 3,
+    };
+
+    switch (travelMode) {
+      case google.maps.TravelMode.DRIVING:
+        this.directionsRenderer.setOptions({
+          polylineOptions: {
+            strokeColor: 'red',
+          },
+        });
+        break;
+      case google.maps.TravelMode.TRANSIT:
+        this.directionsRenderer.setOptions({
+          polylineOptions: {
+            strokeColor: 'green',
+          },
+        });
+        break;
+      case google.maps.TravelMode.WALKING:
+        this.directionsRenderer.setOptions({
+          polylineOptions: {
+            strokeColor: '#0096FF',
+            strokeOpacity: 0,
+            icons: [
+              {
+                icon: walkingLineSymbol,
+                offset: '0',
+                repeat: '10px',
+              },
+            ],
+          },
+        });
+    }
   }
 }
