@@ -13,7 +13,7 @@
   z-index: 1000;
 
   &.expanded {
-    height: calc(100vh - 96px); // Leave a 24px gap at the top
+    height: calc(100vh - 96px);
   }
 }
 
@@ -27,6 +27,5 @@
 }
 
 .footer-content {
-  padding: 20px;
   text-align: center;
 }
