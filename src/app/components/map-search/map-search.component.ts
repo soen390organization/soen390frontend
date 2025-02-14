@@ -64,7 +64,7 @@ export class MapSearchComponent {
 
   constructor(
     private googleMapService: GoogleMapService,
-    private directionsServive: DirectionsService
+    private directionsService: DirectionsService
   ) {}
 
   toggleSearch() {
@@ -88,7 +88,7 @@ export class MapSearchComponent {
           coordinates: result.geometry.location,
           marker:
             this.startLocation?.marker ??
-            this.createMarker(
+            this.googleMapService.createMarker(
               result.geometry.location,
               'https://upload.wikimedia.org/wikipedia/commons/8/8e/Icone_Verde.svg'
             ),
@@ -113,7 +113,7 @@ export class MapSearchComponent {
       coordinates: result.geometry.location,
       marker:
         this.startLocation?.marker ??
-        this.createMarker(
+        this.googleMapService.createMarker(
           result.geometry.location,
           'https://upload.wikimedia.org/wikipedia/commons/8/8e/Icone_Verde.svg'
         ),
@@ -121,7 +121,7 @@ export class MapSearchComponent {
     this.startLocation.marker.setPosition(result.geometry.location);
 
     if (this.destinationLocation)
-      this.directionsServive.calculateRoute(
+      this.directionsService.calculateRoute(
         this.startLocation.address,
         this.destinationLocation.address
       );
@@ -141,7 +141,7 @@ export class MapSearchComponent {
       coordinates: result.geometry.location,
       marker:
         this.destinationLocation?.marker ??
-        this.createMarker(
+        this.googleMapService.createMarker(
           result.geometry.location,
           'https://upload.wikimedia.org/wikipedia/commons/6/64/Icone_Vermelho.svg'
         ),
@@ -149,7 +149,7 @@ export class MapSearchComponent {
     this.destinationLocation.marker.setPosition(result.geometry.location);
 
     if (this.startLocation)
-      this.directionsServive.calculateRoute(
+      this.directionsService.calculateRoute(
         this.startLocation.address,
         this.destinationLocation.address
       );
@@ -182,16 +182,7 @@ export class MapSearchComponent {
   }
 
   // To be moved to google map service
-  createMarker(
-    position: google.maps.LatLng,
-    iconUrl: string
-  ): google.maps.Marker {
-    return new google.maps.Marker({
-      position,
-      map: this.googleMapService.getMap(),
-      icon: { url: iconUrl, scaledSize: new google.maps.Size(40, 40) },
-    });
-  }
+
 
   updateMapView() {
     const map = this.googleMapService.getMap();

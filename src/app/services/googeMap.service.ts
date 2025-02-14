@@ -38,4 +38,15 @@ export class GoogleMapService {
       this.map.setZoom(18);
     }
   }
+
+  createMarker(
+    position: google.maps.LatLng,
+    iconUrl: string
+  ): google.maps.Marker {
+    return new google.maps.Marker({
+      position,
+      map: this.map,
+      icon: { url: iconUrl, scaledSize: new google.maps.Size(40, 40) }
+    });
+  }
 }

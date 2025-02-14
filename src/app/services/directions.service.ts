@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-// import { GoogleMapService } from './googeMap.service';
+import { Step } from '../interfaces/step.interface';
 
 @Injectable({
   providedIn: 'root',
@@ -66,7 +66,7 @@ export class DirectionsService {
     destinationAddress: string,
     travelMode: google.maps.TravelMode = google.maps.TravelMode.WALKING
   ): Promise<{
-    steps: Partial<google.maps.DirectionsStep>[];
+    steps: Step[];
     eta: string | null;
   }> {
     return new Promise((resolve, reject) => {
@@ -84,7 +84,7 @@ export class DirectionsService {
         if (status === google.maps.DirectionsStatus.OK && response) {
           this.directionsRenderer.setDirections(response);
 
-          const steps: Partial<google.maps.DirectionsStep>[] = [];
+          const steps: Step[] = [];
           let eta: string | null = null;
 
           if (response.routes.length > 0) {
