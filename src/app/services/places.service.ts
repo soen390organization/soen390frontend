@@ -90,7 +90,7 @@ export class PlacesService {
       };
   
       this.placesService.nearbySearch(request, (results, status) => {
-        if (status === google.maps.places.PlacesServiceStatus.OK && results) {
+        if (status === "OK" && results) {
           const operationalResults = results.filter(place => 
             place.business_status === 'OPERATIONAL'
           );
