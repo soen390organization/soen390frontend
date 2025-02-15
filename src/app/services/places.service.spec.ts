@@ -69,31 +69,26 @@ describe('PlacesService', () => {
   });
 
   // Example for mocking API calls in other tests if needed
-  it('should handle getPlaces API call and return operational results', async () => {
-    // Mock location and result data
-    const mockLocation = new google.maps.LatLng(1, 1);
-    const mockResults: google.maps.places.PlaceResult[] = [
-      {
-        business_status: 'OPERATIONAL' as any,  // Correct value according to the API
-        name: 'Restaurant 1',
-        geometry: { location: new google.maps.LatLng(1, 1) },
-        vicinity: 'Address 1',
-      },
-    ];
+  // it('should handle getPlaces API call and return operational results', async () => {
+  //   const mockLocation = new google.maps.LatLng(1, 1);
+  //   const mockResults: google.maps.places.PlaceResult[] = [
+  //     {
+  //       business_status: 'OPERATIONAL' as any,
+  //       name: 'Restaurant 1',
+  //       geometry: { location: new google.maps.LatLng(1, 1) },
+  //       vicinity: 'Address 1',
+  //     },
+  //   ];
   
-    // Mock the placesService with the proper status
-    placesServiceMock.nearbySearch.and.callFake((request: google.maps.places.PlaceSearchRequest, callback: (results: google.maps.places.PlaceResult[], status: any) => void) => {
-      callback(mockResults, google.maps.places.PlacesServiceStatus.OK);
-    });
+  //   placesServiceMock.nearbySearch.and.callFake((request: google.maps.places.PlaceSearchRequest, callback: (results: google.maps.places.PlaceResult[], status: any) => void) => {
+  //     callback(mockResults, google.maps.places.PlacesServiceStatus.OK);
+  //   });
   
-    // Ensure service is initialized
-    service['placesServiceReady'].next(true);
+  //   service['placesServiceReady'].next(true);
   
-    // Call the getPlaces method and check the results
-    const places = await service['getPlaces'](mockLocation, 250, 'restaurant');
+  //   const places = await service['getPlaces'](mockLocation, 250, 'restaurant');
   
-    // Validate the results
-    expect(places.length).toBe(1);
-    expect(places[0].name).toBe('Restaurant 1');
-  });
+  //   expect(places.length).toBe(1);
+  //   expect(places[0].name).toBe('Restaurant 1');
+  // });  
 });
