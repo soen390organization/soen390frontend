@@ -81,16 +81,9 @@ describe('PlacesService', () => {
       },
     ];
   
-    // Mock PlacesServiceStatus if not already available
-    const mockPlacesServiceStatus = {
-      OK: 'OK',
-      ZERO_RESULTS: 'ZERO_RESULTS',
-      ERROR: 'ERROR',
-    };
-  
     // Mock the placesService with the proper status
     placesServiceMock.nearbySearch.and.callFake((request: google.maps.places.PlaceSearchRequest, callback: (results: google.maps.places.PlaceResult[], status: any) => void) => {
-      callback(mockResults, mockPlacesServiceStatus.OK);
+      callback(mockResults, google.maps.places.PlacesServiceStatus.OK);
     });
   
     // Ensure service is initialized
@@ -102,5 +95,5 @@ describe('PlacesService', () => {
     // Validate the results
     expect(places.length).toBe(1);
     expect(places[0].name).toBe('Restaurant 1');
-  });  
+  });
 });
