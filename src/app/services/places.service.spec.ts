@@ -175,6 +175,19 @@ describe('PlacesService', () => {
     expect(places[0].name).toBe('Restaurant 1');
   });
 
+   // Test coverage for failed getPlaces (rejects with error)
+   it('should handle failure in getPlaces and return empty array', async () => {
+    const mockLocation = new google.maps.LatLng(1, 1);
+  
+    // Simulate rejection by mocking getPlaces to reject
+    spyOn(service as any, 'getPlaces').and.returnValue(Promise.reject('Failed to get places'));
+  
+    // Call getPointsOfInterest and verify that the result is an empty array when failure occurs
+    const places = await service.getPointsOfInterest();
+    console.log('VALUES: ', places)
+    expect(places).toEqual([]);
+  });
+
   // Test coverage for lines 23-25: Ensure campus data is fetched correctly
   it('should fetch campus buildings based on store value', async () => {
     const mockCampusData = {
