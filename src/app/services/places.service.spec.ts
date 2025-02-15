@@ -68,6 +68,47 @@ describe('PlacesService', () => {
     expect(buildings[0].name).toBe('Building 1');
   });
 
+  it('should fetch points of interest correctly from getPointsOfInterest', async () => {
+    // Mock the campus data and store behavior
+    const mockCampusData = {
+      campusKey: {
+        coordinates: new google.maps.LatLng(1, 1),
+      },
+    };
+    service['campusData'] = mockCampusData;
+
+    // Mock the places service API call to return restaurant data
+    const mockResults: google.maps.places.PlaceResult[] = [
+      {
+        business_status: 'OPERATIONAL' as any,
+        name: 'Restaurant 1',
+        geometry: { location: new google.maps.LatLng(1, 1) },
+        vicinity: 'Address 1',
+        photos: [{
+          getUrl: () => 'image-url',
+          height: 0,
+          html_attributions: [],
+          width: 0
+        }],
+      },
+    ];
+  
+    placesServiceMock.nearbySearch.and.callFake((request: google.maps.places.PlaceSearchRequest, callback: (results: google.maps.places.PlaceResult[], status: any) => void) => {
+      callback(mockResults, "OK");
+    });
+  
+    service['placesServiceReady'].next(true);
+  
+    const places = await service.getPointsOfInterest();
+
+    // Assertions for mapping the places to LocationCard objects
+    expect(places.length).toBe(1);
+    expect(places[0].name).toBe('Restaurant 1');
+    expect(places[0].coordinates instanceof google.maps.LatLng).toBeTrue();
+    expect(places[0].address).toBe('Address 1');
+    expect(places[0].image).toBe('image-url');
+  });
+
   // Example for mocking API calls in other tests if needed
   it('should handle getPlaces API call and return operational results', async () => {
     const mockLocation = new google.maps.LatLng(1, 1);
