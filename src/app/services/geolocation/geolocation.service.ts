@@ -17,7 +17,12 @@ export class GeolocationService {
     if (currentLocation == null) {
       return null;
     }
-    const foundBuilding = data.buildings.find((building) => {
+    const buildings = [
+      ...data.sgw.buildings,
+      ...data.loy.buildings
+    ];
+
+    const foundBuilding = buildings.find((building) => {
       const outline = new google.maps.Polygon({ paths: building.boundaries });
       const point = new google.maps.LatLng(currentLocation);
       return google.maps.geometry.poly.containsLocation(point, outline);

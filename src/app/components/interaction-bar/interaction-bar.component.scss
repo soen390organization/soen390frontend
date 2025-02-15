@@ -1,0 +1,5 @@
+.swipe-footer-container {
+  &.expanded {
+    height: calc(100vh - 96px); // Leave a 24px gap at the top
+  }
+}
