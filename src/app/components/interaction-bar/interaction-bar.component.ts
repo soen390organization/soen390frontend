@@ -13,7 +13,7 @@ import { IonicModule } from '@ionic/angular';
   templateUrl: './interaction-bar.component.html',
   styleUrls: ['./interaction-bar.component.scss']
 })
-export class InteractionBarComponent implements OnInit {
+export class InteractionBarComponent {
   isExpanded = false;
 
   constructor(
@@ -23,7 +23,7 @@ export class InteractionBarComponent implements OnInit {
     
   }
 
-  ngOnInit() {
+  // ngOnInit() {
     // this.placesService.isInitialized().subscribe((ready) => {
     //   if (ready) {
     //     this.store.select(selectSelectedCampus).subscribe(async (campus) => {
@@ -33,7 +33,7 @@ export class InteractionBarComponent implements OnInit {
     //     });
     //   }
     // });
-  }
+  // }
 
   toggleExpand() {
     this.isExpanded = !this.isExpanded;
