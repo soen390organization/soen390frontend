@@ -1,7 +1,7 @@
-<div class="swipe-footer-container text-black" [class.expanded]="isExpanded">
-  <div class="footer-handle" (click)="toggleExpand()"></div>
+<div class="swipe-footer-container text-black fixed bottom-0 left-0 w-full h-[300px] bg-white shadow-[0_-2px_10px_rgba(0,0,0,0.1)] transition-all duration-300 ease-in-out rounded-tl-2xl rounded-tr-2xl overflow-hidden z-50" [class.expanded]="isExpanded">
+  <div class="footer-handle w-[100px] h-[10px] bg-[#d5d5d5] my-[10px] mx-auto rounded-full cursor-pointer" (click)="toggleExpand()"></div>
   
-  <div class="footer-content">
+  <div class="footer-content p-[20px] text-center">
     <p>Footer Content</p>
   </div>
 </div>
