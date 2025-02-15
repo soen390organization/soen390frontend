@@ -109,8 +109,7 @@ describe('PlacesService', () => {
     expect(places[0].image).toBe('image-url');
   });
 
-  // Example for mocking API calls in other tests if needed
-  it('should handle getPlaces API call and return operational results', async () => {
+  it('should call getPlaces and return operational places', async () => {
     const mockLocation = new google.maps.LatLng(1, 1);
     const mockResults: google.maps.places.PlaceResult[] = [
       {
@@ -131,5 +130,64 @@ describe('PlacesService', () => {
   
     expect(places.length).toBe(1);
     expect(places[0].name).toBe('Restaurant 1');
-  });  
+  });
+
+  // Test coverage for lines 100-101: Test that placesService is initialized when the service is ready
+  it('should initialize placesService when ready', () => {
+    service.initialize(mapMock);
+    service['placesServiceReady'].next(true);
+    expect(service['placesService']).toBeDefined();
+    expect(service['placesServiceReady'].getValue()).toBeTrue();
+  });
+
+  // Test coverage for lines 80-83: Test the method getPointsOfInterest
+  it('should retrieve points of interest using getPointsOfInterest', async () => {
+    const mockCampusData = {
+      campusKey: {
+        coordinates: new google.maps.LatLng(1, 1),
+      },
+    };
+    service['campusData'] = mockCampusData;
+    const mockResults: google.maps.places.PlaceResult[] = [
+      {
+        business_status: 'OPERATIONAL' as any,
+        name: 'Restaurant 1',
+        geometry: { location: new google.maps.LatLng(1, 1) },
+        vicinity: 'Address 1',
+        photos: [{
+          getUrl: () => 'image-url',
+          height: 0,
+          html_attributions: [],
+          width: 0
+        }],
+      },
+    ];
+  
+    placesServiceMock.nearbySearch.and.callFake((request: google.maps.places.PlaceSearchRequest, callback: (results: google.maps.places.PlaceResult[], status: any) => void) => {
+      callback(mockResults, "OK");
+    });
+  
+    service['placesServiceReady'].next(true);
+  
+    const places = await service.getPointsOfInterest();
+
+    expect(places.length).toBe(1);
+    expect(places[0].name).toBe('Restaurant 1');
+  });
+
+  // Test coverage for lines 23-25: Ensure campus data is fetched correctly
+  it('should fetch campus buildings based on store value', async () => {
+    const mockCampusData = {
+      campusKey: {
+        coordinates: { lat: 1, lng: 1 },
+        buildings: [{ name: 'Building 1', coordinates: { lat: 1, lng: 1 }, address: 'Address 1', image: 'image1.jpg' }],
+      },
+    };
+    storeMock.select.and.returnValue(of('campusKey'));
+    service['campusData'] = mockCampusData;
+    const buildings = await service.getCampusBuildings();
+  
+    expect(buildings.length).toBe(1);
+    expect(buildings[0].name).toBe('Building 1');
+  });
 });
