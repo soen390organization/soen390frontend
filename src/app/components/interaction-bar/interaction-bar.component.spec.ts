@@ -8,7 +8,7 @@ describe('InteractionBarComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [InteractionBarComponent], // ✅ Fix: Use imports for standalone component
+      imports: [InteractionBarComponent], // Fix: Use imports for standalone component
     }).compileComponents();
   });
 
@@ -22,16 +22,14 @@ describe('InteractionBarComponent', () => {
   });
 
   it('should create the component', () => {
-    expect(component).toBeDefined(); // ✅ Fixed for Jasmine
+    expect(component).toBeDefined(); // Fixed for Jasmine
   });
 
   it('should initialize as collapsed', () => {
-    expect(component.isExpanded).toBe(false); // ✅ Fixed assertion
+    expect(component.isExpanded).toBe(false); // Fixed assertion
   });
 
-  // ❌ Removed failing touch event test
-  // it('should start dragging on touchstart', () => { });
-
+  // Removed failing touch event test
   it('should move footer on touchmove', () => {
     component.isDragging = true;
     component.startY = 300;
@@ -49,7 +47,7 @@ describe('InteractionBarComponent', () => {
     component.currentY = 200; 
 
     (component as any).onDragEnd(); 
-    expect(component.isExpanded).toBe(true); // ✅ Use `toBe()`
+    expect(component.isExpanded).toBe(true); // Use `toBe()`
   });
 
   it('should collapse on swipe down', () => {
@@ -59,7 +57,7 @@ describe('InteractionBarComponent', () => {
     component.isExpanded = true; 
 
     (component as any).onDragEnd(); 
-    expect(component.isExpanded).toBe(false); // ✅ Use `toBe()`
+    expect(component.isExpanded).toBe(false); // Use `toBe()`
   });
 
   it('should prevent scrolling while swiping', () => {
@@ -75,15 +73,15 @@ describe('InteractionBarComponent', () => {
     component.isDragging = true;
     (component as any).onDragEnd();
 
-    expect(component.isDragging).toBe(false); // ✅ Use `toBe()`
+    expect(component.isDragging).toBe(false); // Use `toBe()`
   });
 
   it('should transition smoothly when expanded', () => {
-    component.footerContainer.nativeElement.style.transition = 'transform 0.3s ease-out'; // ✅ Manually set transition
+    component.footerContainer.nativeElement.style.transition = 'transform 0.3s ease-out'; // Manually set transition
 
     component.isExpanded = true;
     (component as any).onDragEnd();
 
-    expect(component.footerContainer.nativeElement.style.transition).toContain('transform 0.3s ease-out'); // ✅ Fixed assertion
+    expect(component.footerContainer.nativeElement.style.transition).toContain('transform 0.3s ease-out'); // Fixed assertion
   });
 });
