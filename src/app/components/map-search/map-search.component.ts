@@ -60,12 +60,13 @@ startMarker: google.maps.Marker | null = null;
   constructor(private googleMapService: GoogleMapService, private zone: NgZone) {}
 
   ngOnInit(): void {
-  // This method is required for predictive feature
+    console.log('ngOnInit called');
   }
 
   ngOnDestroy(): void {
-  // This method is required for predictive feature
+    console.log('ngOnDestroy called');
   }
+  
   toggleSearch() {
     this.isSearchVisible = !this.isSearchVisible;
   }
