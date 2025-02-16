@@ -1,9 +1,11 @@
 import { Component, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
+import { DirectionsComponent } from '../directions/directions.component';
 
 @Component({
   selector: 'app-interaction-bar',
   templateUrl: './interaction-bar.component.html',
-  styleUrls: ['./interaction-bar.component.scss']
+  styleUrls: ['./interaction-bar.component.scss'],
+  imports: [DirectionsComponent]
 })
 export class InteractionBarComponent implements AfterViewInit {
   @ViewChild('footerContainer', { static: false }) footerContainer!: ElementRef;
