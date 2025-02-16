@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input} from '@angular/core';
 import { LocationCard } from 'src/app/interfaces/location-card.interface';
 
 @Component({
@@ -8,12 +8,11 @@ import { LocationCard } from 'src/app/interfaces/location-card.interface';
   templateUrl: './location-cards.component.html',
   styleUrls: ['./location-cards.component.scss'],
 })
-export class LocationCardsComponent  implements OnInit {
+export class LocationCardsComponent{
   @Input() locations: LocationCard[] = [];
   @Input() loading: boolean = false;
 
   constructor() { }
 
-  ngOnInit() {}
 
 }
