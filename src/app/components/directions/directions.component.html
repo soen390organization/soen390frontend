@@ -1,12 +1,7 @@
-  <div class="flex justify-between items-center mb-2">
-    <h2 class="text-2xl font-semibold">Directions</h2>
-    <button class="bg-red-500 text-white text-sm px-3 py-1 rounded-lg">
-      End
-    </button>
-  </div>
-
-  <!-- Transportation Mode Selector -->
-  <div class="flex space-x-2 mb-3">
+<!-- Transportation Mode Selector -->
+<div class="flex items-center space-x-2 mb-3">
+  <!-- Transportation Buttons Wrapper -->
+  <div class="flex space-x-2 flex-grow">
     <button
       class="px-3 py-2 rounded-md"
       [ngClass]="selectedMode === 'walk' ? 'bg-black' : 'bg-gray-200'"
@@ -27,48 +22,53 @@
       (click)="setMode('bus')"
     >
       <span 
-      class="material-symbols-outlined"
-      [ngClass]="selectedMode === 'bus' ? 'text-white' : 'text-black'"
-      [style.color]="selectedMode === 'bus' ? 'white' : 'black'"
+        class="material-symbols-outlined"
+        [ngClass]="selectedMode === 'bus' ? 'text-white' : 'text-black'"
+        [style.color]="selectedMode === 'bus' ? 'white' : 'black'"
       >
-      directions_bus
+        directions_bus
       </span>
     </button>
+
     <button
       class="px-3 py-2 rounded-md"
       [ngClass]="selectedMode === 'transit' ? 'bg-black' : 'bg-gray-200'"
       (click)="setMode('transit')"
     >
       <span 
-      class="material-symbols-outlined"
-      [ngClass]="selectedMode === 'transit' ? 'text-white' : 'text-black'"
-      [style.color]="selectedMode === 'transit' ? 'white' : 'black'"
+        class="material-symbols-outlined"
+        [ngClass]="selectedMode === 'transit' ? 'text-white' : 'text-black'"
+        [style.color]="selectedMode === 'transit' ? 'white' : 'black'"
       >
-      directions_transit
+        directions_transit
       </span>
     </button>
+
     <button
       class="px-3 py-2 rounded-md"
       [ngClass]="selectedMode === 'car' ? 'bg-black' : 'bg-gray-200'"
       (click)="setMode('car')"
     >
       <span 
-      class="material-symbols-outlined"
-      [ngClass]="selectedMode === 'car' ? 'text-white' : 'text-black'"
-      [style.color]="selectedMode === 'car' ? 'white' : 'black'"
+        class="material-symbols-outlined"
+        [ngClass]="selectedMode === 'car' ? 'text-white' : 'text-black'"
+        [style.color]="selectedMode === 'car' ? 'white' : 'black'"
       >
-      directions_car
+        directions_car
       </span>
-    </button>
-    <button 
-    class="bg-red-600 text-white px-3 py-2 rounded-md shadow-md hover:bg-red-700 transition ml-auto"
-    >
-      End
     </button>
   </div>
 
-  <!-- Navigation Instruction -->
-  <div class="flex items-center">
-    <span class="material-symbols-outlined md-48">turn_left</span>
-    <span class="ml-3 text-xl font-semibold">Keep Straight on Guy St</span>
-  </div>
+  <!-- End Button -->
+  <button 
+    class="bg-red-600 text-white px-3 py-2 rounded-md hover:bg-red-700 transition ml-auto"
+  >
+    End
+  </button>
+</div>
+
+<!-- Navigation Instruction -->
+<div class="flex items-center">
+  <span class="material-symbols-outlined md-48">turn_left</span>
+  <span class="ml-3 text-xl font-semibold">Keep Straight on Guy St</span>
+</div>
