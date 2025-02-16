@@ -8,13 +8,13 @@
   <div class="flex space-x-2 flex-grow">
     <button
       class="px-3 py-2 rounded-md"
-      [ngClass]="selectedMode === 'walk' ? 'bg-black' : 'bg-gray-200'"
-      (click)="setMode('walk')"
+      [ngClass]="selectedMode === 'WALKING' ? 'bg-black' : 'bg-gray-200'"
+      (click)="setMode('WALKING')"
     >
-      <span 
+      <span
         class="material-symbols-outlined"
-        [ngClass]="selectedMode === 'walk' ? 'text-white' : 'text-black'"
-        [style.color]="selectedMode === 'walk' ? 'white' : 'black'"
+        [ngClass]="selectedMode === 'WALKING' ? 'text-white' : 'text-black'"
+        [style.color]="selectedMode === 'WALKING' ? 'white' : 'black'"
       >
         directions_walk
       </span>
@@ -22,13 +22,13 @@
 
     <button
       class="px-3 py-2 rounded-md"
-      [ngClass]="selectedMode === 'bus' ? 'bg-black' : 'bg-gray-200'"
-      (click)="setMode('bus')"
+      [ngClass]="selectedMode === 'TRANSIT' ? 'bg-black' : 'bg-gray-200'"
+      (click)="setMode('TRANSIT')"
     >
-      <span 
+      <span
         class="material-symbols-outlined"
-        [ngClass]="selectedMode === 'bus' ? 'text-white' : 'text-black'"
-        [style.color]="selectedMode === 'bus' ? 'white' : 'black'"
+        [ngClass]="selectedMode === 'TRANSIT' ? 'text-white' : 'text-black'"
+        [style.color]="selectedMode === 'TRANSIT' ? 'white' : 'black'"
       >
         directions_bus
       </span>
@@ -36,13 +36,13 @@
 
     <button
       class="px-3 py-2 rounded-md"
-      [ngClass]="selectedMode === 'transit' ? 'bg-black' : 'bg-gray-200'"
-      (click)="setMode('transit')"
+      [ngClass]="selectedMode === 'SHUTTLE' ? 'bg-black' : 'bg-gray-200'"
+      (click)="setMode('SHUTTLE')"
     >
-      <span 
+      <span
         class="material-symbols-outlined"
-        [ngClass]="selectedMode === 'transit' ? 'text-white' : 'text-black'"
-        [style.color]="selectedMode === 'transit' ? 'white' : 'black'"
+        [ngClass]="selectedMode === 'SHUTTLE' ? 'text-white' : 'text-black'"
+        [style.color]="selectedMode === 'SHUTTLE' ? 'white' : 'black'"
       >
         directions_transit
       </span>
@@ -50,13 +50,13 @@
 
     <button
       class="px-3 py-2 rounded-md"
-      [ngClass]="selectedMode === 'car' ? 'bg-black' : 'bg-gray-200'"
-      (click)="setMode('car')"
+      [ngClass]="selectedMode === 'DRIVING' ? 'bg-black' : 'bg-gray-200'"
+      (click)="setMode('DRIVING')"
     >
-      <span 
+      <span
         class="material-symbols-outlined"
-        [ngClass]="selectedMode === 'car' ? 'text-white' : 'text-black'"
-        [style.color]="selectedMode === 'car' ? 'white' : 'black'"
+        [ngClass]="selectedMode === 'DRIVING' ? 'text-white' : 'text-black'"
+        [style.color]="selectedMode === 'DRIVING' ? 'white' : 'black'"
       >
         directions_car
       </span>
@@ -64,15 +64,28 @@
   </div>
 
   <!-- End Button -->
-  <button 
+  <button
     class="bg-red-600 text-white px-3 py-2 rounded-md hover:bg-red-700 transition ml-auto w-[48px] h-[45px] flex items-center justify-center"
     >
     End
   </button>
 </div>
 
+ <!-- Loading State -->
+ <div *ngIf="isLoading" class="flex justify-center items-center mt-3">
+  <span class="material-symbols-outlined animate-spin text-3xl">hourglass_empty</span>
+  <span class="ml-2 text-lg text-gray-600">Loading directions...</span>
+</div>
+
 <!-- Navigation Instruction -->
-<div class="flex items-center">
-  <span class="material-symbols-outlined md-48">turn_left</span>
-  <span class="ml-3 text-xl font-semibold">Keep Straight on Guy St</span>
+<div *ngIf="!isLoading && steps.length > 0">
+  <div class="flex items-center">
+    <span class="material-symbols-outlined md-48">turn_left</span>
+    <span class="ml-3 text-xl font-semibold">{{ steps[0].instructions }}</span>
+  </div>
+</div>
+
+<!-- No Directions Available -->
+<div *ngIf="!isLoading && steps.length === 0" class="text-gray-500 text-center mt-3">
+  No directions available.
 </div>
