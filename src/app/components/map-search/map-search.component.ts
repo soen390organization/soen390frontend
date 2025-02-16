@@ -50,12 +50,11 @@ startMarker: google.maps.Marker | null = null;
   startLocationInput = '';
   startLocation: { address: string; coordinates: google.maps.LatLng, marker: google.maps.Marker } | undefined
   destinationLocationInput = '';
-  places: any[]=[];
-  query: string;
-  isSearchingFromStart: boolean = false;
   destinationLocation: { address: string; coordinates: google.maps.LatLng, marker: google.maps.Marker  } | undefined
   isSearchVisible = false;
-
+  places: any[]=[]; // Array to store the search suggestions
+  query: string; // Query for the search bar
+  isSearchingFromStart: boolean = false; // Flag to determine if the search is for the start or destination location
 
   constructor(private googleMapService: GoogleMapService, private zone: NgZone) {}
 
@@ -66,7 +65,7 @@ startMarker: google.maps.Marker | null = null;
   ngOnDestroy(): void {
     console.log('ngOnDestroy called');
   }
-  
+
   toggleSearch() {
     this.isSearchVisible = !this.isSearchVisible;
   }
@@ -97,6 +96,9 @@ startMarker: google.maps.Marker | null = null;
       })
   }
 
+  //This method is called when the user types in the search bar, tracking every key stroke and updating the search results by calling getPlaces(). 
+  //It also sets the flag to determine if the search is for the start or destination location.
+  //It clears the places array if the search query is empty, so that the suggestions are hidden.
   async onSearchChange(event: any, type: 'start' | 'destination') {
     this.isSearchingFromStart = type === 'start'; // Set the flag to 'start' or 'destination'
     this.query = event.target.value.trim(); 
@@ -107,6 +109,10 @@ startMarker: google.maps.Marker | null = null;
     await this.getPlaces(); 
   }
 
+  //This method is called when the user selects a place from the search suggestions or presses enter on their own search.
+  //It sets the start or destination location based on the type parameter and clears the places array.
+  //It then calls the findPlace() method to get the place details and sets the address, coordinates, and marker for the location.
+  //It then calls the calculateRoute() method from the GoogleMapService to calculate the route between the start and destination locations.
   async onSearchFromInput(value: string, event: any, type: 'start' | 'destination') {
     let searchTerm = value || event?.target?.value?.trim();
     if (!searchTerm) return; // Prevent empty search
@@ -124,7 +130,6 @@ startMarker: google.maps.Marker | null = null;
         this.googleMapService.calculateRoute(this.startLocation.address, this.destinationLocation.address); 
     
     } else{
-
       const result = await this.findPlace(searchTerm);
       this.destinationLocation = {
         address: result.formatted_address,
@@ -134,15 +139,17 @@ startMarker: google.maps.Marker | null = null;
       this.destinationLocation.marker.setPosition(result.geometry.location);
       if (this.startLocation)
         this.googleMapService.calculateRoute(this.startLocation.address, this.destinationLocation.address);
-
     }
       this.updateMapView();
   }   
 
+  //This method clears the places array for the search suggestions.
   clearPlaces() {
     this.places = [];
   }
 
+  //This method is called when the user selects a place from the search suggestions.
+  //It sets the address in the input field and calls the onSearchFromInput() method to get the place details.
   selectPlace(place: any, type: 'start' | 'destination') {
     if (type === 'start') {
       this.startLocationInput = place.address;
@@ -153,7 +160,9 @@ startMarker: google.maps.Marker | null = null;
     this.onSearchFromInput(place.address, null, type);
   }
   
-
+//This method is used to get the suggestions for the search bar. It uses the Google Places API to get the predictions for the search query.
+//It then calls the geoCode() method to get the latitude and longitude for each prediction.
+//It then adds the title, address, latitude, and longitude to the places array.
   async getPlaces(){
     console.log('getPlaces method called');
     try{
@@ -187,11 +196,10 @@ startMarker: google.maps.Marker | null = null;
   });
     } catch(e){
       console.log("Cannot get places. "+e)
-
     }
-
   }
 
+  //This method is used to get the latitude and longitude for a given address using the Google Geocoding API.
   geoCode(address: any) {
     let latlng = {lat: '', lng: ''};
     return new Promise((resolve,reject) => {
@@ -207,6 +215,8 @@ startMarker: google.maps.Marker | null = null;
     });
   }
 
+  //This method is used to get the place details for a given search term using the Google Places API.
+  //It returns a promise that resolves with the place details.
   findPlace(searchTerm: string): Promise<any> {
     return new Promise((resolve, reject) => {
     const request = {
