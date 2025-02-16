@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Step } from '../interfaces/step.interface';
+import { Step } from '../../interfaces/step.interface';
 
 @Injectable({
   providedIn: 'root',
@@ -15,7 +15,7 @@ export class DirectionsService {
       this.directionsService = new google.maps.DirectionsService();
     if (!this.directionsRenderer) {
       this.directionsRenderer = new google.maps.DirectionsRenderer();
-      this.directionsRenderer.setMap(map)
+      this.directionsRenderer.setMap(map);
     }
   }
 
@@ -51,7 +51,7 @@ export class DirectionsService {
   calculateRoute(
     startAddress: string,
     destinationAddress: string,
-    travelMode: google.maps.TravelMode = google.maps.TravelMode.WALKING
+    travelMode: google.maps.TravelMode = google.maps.TravelMode.WALKING,
   ): Promise<{
     steps: Step[];
     eta: string | null;
@@ -107,36 +107,27 @@ export class DirectionsService {
       fillOpacity: 1,
       scale: 3,
     };
+    const polylineOptions: google.maps.PolylineOptions = {};
 
     switch (travelMode) {
       case google.maps.TravelMode.DRIVING:
-        this.directionsRenderer.setOptions({
-          polylineOptions: {
-            strokeColor: 'red',
-          },
-        });
+        polylineOptions['strokeColor'] = 'red';
         break;
       case google.maps.TravelMode.TRANSIT:
-        this.directionsRenderer.setOptions({
-          polylineOptions: {
-            strokeColor: 'green',
-          },
-        });
+        polylineOptions['strokeColor'] = 'green';
         break;
       case google.maps.TravelMode.WALKING:
-        this.directionsRenderer.setOptions({
-          polylineOptions: {
-            strokeColor: '#0096FF',
-            strokeOpacity: 0,
-            icons: [
-              {
-                icon: walkingLineSymbol,
-                offset: '0',
-                repeat: '10px',
-              },
-            ],
+        polylineOptions['strokeColor'] = '#0096FF';
+        polylineOptions['strokeOpacity'] = 0;
+        polylineOptions['icons'] = [
+          {
+            icon: walkingLineSymbol,
+            offset: '0',
+            repeat: '10px',
           },
-        });
+        ];
     }
+    this.directionsRenderer.setOptions({ polylineOptions });
+    return polylineOptions;
   }
 }

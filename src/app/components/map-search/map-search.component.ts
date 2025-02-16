@@ -12,7 +12,7 @@ import {
   transition,
   trigger,
 } from '@angular/animations';
-import { DirectionsService } from 'src/app/services/directions.service';
+import { DirectionsService } from 'src/app/services/directions/directions.service';
 
 @Component({
   selector: 'app-map-search',

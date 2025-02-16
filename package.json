@@ -8,7 +8,7 @@
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test --watch=false",
+    "test": "ng test --watch=false --reporters=spec",
     "lint": "ng lint"
   },
   "private": true,

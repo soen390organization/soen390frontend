@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { DirectionsService } from './directions.service';
+import { DirectionsService } from './directions/directions.service';
 
 @Injectable({
   providedIn: 'root',

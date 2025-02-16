@@ -3,9 +3,11 @@
 
 module.exports = function (config) {
   config.set({
+    reporters: ["spec"],
     basePath: "",
     frameworks: ["jasmine", "@angular-devkit/build-angular"],
     plugins: [
+      require("karma-spec-reporter"),
       require("karma-jasmine"),
       require("karma-chrome-launcher"),
       require("karma-jasmine-html-reporter"),
@@ -34,9 +36,8 @@ module.exports = function (config) {
       ],
       includeAllSources: true,
     },
-    
- 
-    reporters: [ "coverage", "progress", "kjhtml"],
+
+    reporters: ["coverage", "progress", "kjhtml"],
     port: 9876,
     colors: true,
     logLevel: config.LOG_INFO,
