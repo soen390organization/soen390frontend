@@ -1,20 +1,20 @@
 import { Injectable } from '@angular/core';
 import { PlacesService } from './places.service';
+import { DirectionsService } from './directions/directions.service';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class GoogleMapService {
   private map!: google.maps.Map;
 
-  private directionsService!: google.maps.DirectionsService;
-  private directionsRenderer!: google.maps.DirectionsRenderer;
 
-  constructor(private placesService: PlacesService) {}
+  constructor(private directionsService: DirectionsService, private placesService: PlacesService) {}
 
   initialize(map: google.maps.Map) {
     this.map = map;
     this.placesService.initialize(this.map);
+    this.directionsService.initialize(map);
   }
 
   getMap(): google.maps.Map {
@@ -28,28 +28,14 @@ export class GoogleMapService {
     }
   }
 
-  // Add params for walk, drive, bus
-  calculateRoute(startAddress: string, destinationAddress: string) {
-    if (!this.directionsService)
-      this.directionsService = new google.maps.DirectionsService();
-    if (!this.directionsRenderer)
-      this.directionsRenderer = new google.maps.DirectionsRenderer();
-
-    // Bind the directions display to the given map
-    this.directionsRenderer.setMap(this.map);
-
-    const request: google.maps.DirectionsRequest = {
-      origin: startAddress,
-      destination: destinationAddress,
-      travelMode: google.maps.TravelMode.DRIVING,
-    };
-
-    this.directionsService.route(request, (response, status) => {
-      if (status === 'OK' && response) {
-        this.directionsRenderer.setDirections(response);
-      } else {
-        console.error('Directions request failed due to ', status);
-      }
+  createMarker(
+    position: google.maps.LatLng,
+    iconUrl: string
+  ): google.maps.Marker {
+    return new google.maps.Marker({
+      position,
+      map: this.map,
+      icon: { url: iconUrl, scaledSize: new google.maps.Size(40, 40) }
     });
   }
 }
