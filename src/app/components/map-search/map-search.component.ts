@@ -53,10 +53,10 @@ startMarker: google.maps.Marker | null = null;
   places: any[]=[];
   query: string;
   isSearchingFromStart: boolean = false;
-
   destinationLocation: { address: string; coordinates: google.maps.LatLng, marker: google.maps.Marker  } | undefined
   isSearchVisible = false;
 
+  
   constructor(private googleMapService: GoogleMapService, private zone: NgZone) {}
 
   ngOnInit(): void {
@@ -66,11 +66,10 @@ startMarker: google.maps.Marker | null = null;
   ngOnDestroy(): void {
       
   }
-// tested
   toggleSearch() {
     this.isSearchVisible = !this.isSearchVisible;
   }
-
+  
   onSetUsersLocationAsStart() {
     const currentLocationService = new CurrentLocationService();
     currentLocationService.getCurrentLocation()
@@ -97,7 +96,6 @@ startMarker: google.maps.Marker | null = null;
       })
   }
 
-//tested
   async onSearchChange(event: any, type: 'start' | 'destination') {
     this.isSearchingFromStart = type === 'start'; // Set the flag to 'start' or 'destination'
     this.query = event.target.value.trim(); 
@@ -143,7 +141,7 @@ startMarker: google.maps.Marker | null = null;
   clearPlaces() {
     this.places = [];
   }
-//tested
+
   selectPlace(place: any, type: 'start' | 'destination') {
     if (type === 'start') {
       this.startLocationInput = place.address;
@@ -151,7 +149,6 @@ startMarker: google.maps.Marker | null = null;
       this.destinationLocationInput = place.address;
     }
     this.clearPlaces(); // Hide suggestions
-  
     this.onSearchFromInput(place.address, null, type);
   }
   
@@ -208,7 +205,7 @@ startMarker: google.maps.Marker | null = null;
       });
     });
   }
-//tested
+
   findPlace(searchTerm: string): Promise<any> {
     return new Promise((resolve, reject) => {
     const request = {
