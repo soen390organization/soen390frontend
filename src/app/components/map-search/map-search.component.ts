@@ -56,15 +56,15 @@ startMarker: google.maps.Marker | null = null;
   destinationLocation: { address: string; coordinates: google.maps.LatLng, marker: google.maps.Marker  } | undefined
   isSearchVisible = false;
 
-  
+
   constructor(private googleMapService: GoogleMapService, private zone: NgZone) {}
 
   ngOnInit(): void {
-
+  // This method is required for predictive feature
   }
 
   ngOnDestroy(): void {
-      
+  // This method is required for predictive feature
   }
   toggleSearch() {
     this.isSearchVisible = !this.isSearchVisible;
