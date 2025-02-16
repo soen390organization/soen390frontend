@@ -3,13 +3,14 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
+import { DirectionsComponent } from '../directions/directions.component';
 // import { Store } from '@ngrx/store';
 // import { PlacesService } from 'src/app/services/places.service';
 // import { selectSelectedCampus } from 'src/app/store/app';
 
 @Component({
   selector: 'app-interaction-bar',
-  imports: [CommonModule, FormsModule, RouterModule, IonicModule],
+  imports: [CommonModule, FormsModule, RouterModule, IonicModule, DirectionsComponent],
   templateUrl: './interaction-bar.component.html',
   styleUrls: ['./interaction-bar.component.scss']
 })
@@ -20,7 +21,7 @@ export class InteractionBarComponent {
     // private store: Store,
     // private placesService: PlacesService
   ) {
-    
+
   }
 
   // ngOnInit() {

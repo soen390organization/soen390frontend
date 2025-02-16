@@ -1,3 +1,47 @@
-<p>
-  directions works!
-</p>
+<div class="flex flex-col w-full bg-white shadow-md rounded-t-2xl p-4">
+  <!-- Header -->
+  <div class="flex justify-between items-center mb-2">
+    <h2 class="text-lg font-semibold">Directions</h2>
+    <button class="bg-red-500 text-white text-sm px-3 py-1 rounded-lg">
+      End
+    </button>
+  </div>
+
+  <!-- Transportation Mode Selector -->
+  <div class="flex space-x-2 mb-3">
+    <button
+      class="px-3 py-2 rounded-md"
+      [ngClass]="selectedMode === 'walk' ? 'bg-black text-white' : 'bg-gray-200'"
+      (click)="setMode('walk')"
+    >
+      <span class="material-symbols-outlined">directions_walk</span>
+    </button>
+    <button
+      class="px-3 py-2 rounded-md"
+      [ngClass]="selectedMode === 'bus' ? 'bg-black text-white' : 'bg-gray-200'"
+      (click)="setMode('bus')"
+    >
+      <span class="material-symbols-outlined">directions_bus</span>
+    </button>
+    <button
+      class="px-3 py-2 rounded-md"
+      [ngClass]="selectedMode === 'transit' ? 'bg-black text-white' : 'bg-gray-200'"
+      (click)="setMode('transit')"
+    >
+      <span class="material-symbols-outlined">directions_transit</span>
+    </button>
+    <button
+      class="px-3 py-2 rounded-md"
+      [ngClass]="selectedMode === 'car' ? 'bg-black text-white' : 'bg-gray-200'"
+      (click)="setMode('car')"
+    >
+      <span class="material-symbols-outlined">directions_car</span>
+    </button>
+  </div>
+
+  <!-- Navigation Instruction -->
+  <div class="flex items-center">
+    <span class="material-symbols-outlined text-2xl">turn_left</span>
+    <span class="ml-3 text-lg font-semibold">Keep Straight on Guy St</span>
+  </div>
+</div>

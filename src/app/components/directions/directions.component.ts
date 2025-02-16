@@ -1,14 +1,18 @@
-import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-directions',
   templateUrl: './directions.component.html',
   styleUrls: ['./directions.component.scss'],
+  imports: [CommonModule],
+
 })
-export class DirectionsComponent  implements OnInit {
+export class DirectionsComponent {
+  selectedMode = 'walk'; // Default mode
 
-  constructor() { }
-
-  ngOnInit() {}
-
+  // Method to change selected mode
+  setMode(mode: string) {
+    this.selectedMode = mode;
+  }
 }
