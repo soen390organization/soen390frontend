@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input, OnInit } from '@angular/core';
+import { LocationCard } from 'src/app/interfaces/location-card.interface';
 
 @Component({
   selector: 'app-location-cards',
@@ -8,7 +9,7 @@ import { Component, Input, OnInit } from '@angular/core';
   styleUrls: ['./location-cards.component.scss'],
 })
 export class LocationCardsComponent  implements OnInit {
-  @Input() locations: { name: string; address: string; image: string }[] = [];
+  @Input() locations: LocationCard[] = [];
   @Input() loading: boolean = false;
 
   constructor() { }

@@ -8,6 +8,7 @@ import { LocationCardsComponent } from '../location-cards/location-cards.compone
 import { Store } from '@ngrx/store';
 import { PlacesService } from 'src/app/services/places.service';
 import { selectSelectedCampus } from 'src/app/store/app';
+import { LocationCard } from 'src/app/interfaces/location-card.interface';
 
 @Component({
   selector: 'app-interaction-bar',
@@ -17,8 +18,11 @@ import { selectSelectedCampus } from 'src/app/store/app';
 })
 export class InteractionBarComponent implements OnInit, AfterViewInit {
   isExpanded = false;
-  buildings: any = [];
-  pos: any = [];
+  selectedCampusBuildings: LocationCard[] = [];
+  selectedCampusPointsOfInterest: LocationCard[] = [];
+  loadingBuildings = true;
+  loadingPointsOfInterest = true;
+
 
   constructor(
     private gestureCtrl: GestureController,
@@ -27,7 +31,7 @@ export class InteractionBarComponent implements OnInit, AfterViewInit {
     private store: Store,
     private placesService: PlacesService
   ) {
-    
+
   }
 
   ngOnInit() {
@@ -35,8 +39,10 @@ export class InteractionBarComponent implements OnInit, AfterViewInit {
       if (ready) {
         this.store.select(selectSelectedCampus).subscribe(async (campus) => {
           console.log('Selected campus changed:', campus);
-          this.buildings = await this.placesService.getCampusBuildings();
-          this.pos = await this.placesService.getPointsOfInterest();
+          this.selectedCampusBuildings = await this.placesService.getCampusBuildings();
+          this.selectedCampusPointsOfInterest = await this.placesService.getPointsOfInterest();
+          this.loadingBuildings = false;
+          this.loadingPointsOfInterest = false;
           // console.log('Campus Buildings:', buildingResults);
           // console.log('Points of Interest:', posResults);
         });

@@ -3,9 +3,9 @@
 
   <div class="footer-content px-6 flex flex-col">
     <h2 class="flex text-2xl font-bold text-gray-900 mb-4">Buildings</h2>
-    <app-location-cards [locations]="buildings"></app-location-cards>
+    <app-location-cards [locations]="selectedCampusBuildings" [loading] = "loadingBuildings"></app-location-cards>
 
     <h2 class="flex text-2xl font-bold text-gray-900 my-4">Points of Interest</h2>
-    <app-location-cards [locations]="pos"></app-location-cards>
-  </div>  
+    <app-location-cards [locations]="selectedCampusPointsOfInterest" [loading] = "loadingPointsOfInterest" ></app-location-cards>
+  </div>
 </div>
