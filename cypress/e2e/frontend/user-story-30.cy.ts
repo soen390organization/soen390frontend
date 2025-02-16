@@ -16,16 +16,14 @@
 
     // Enter "Hall" in the start location input and press Enter
     cy.get('input[placeholder="Choose starting point..."]')
-      .type('Hall')
-      .type('{enter}') // Simulate Enter key
-      .blur(); 
+      .type('Hall{enter}');
 
     // Wait for the first pin (start location) to be added
     cy.wait(2000);
 
     // Enter "JMSB" in the destination input and press Enter
     cy.get('input[placeholder="Choose destination point..."]')
-      .type('JMSB{enter}');
+    .type('JMSB{enter}', { force: true });
 
     // Wait for the second pin (destination location) to be added
     cy.wait(2000);
