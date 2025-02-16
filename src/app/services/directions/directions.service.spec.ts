@@ -1,7 +1,7 @@
 import { DirectionsService } from './directions.service';
 import { TestBed } from '@angular/core/testing';
 
-fdescribe('Directions Service', () => {
+describe('Directions Service', () => {
   let service: DirectionsService;
   let origin =
     '1455 Blvd. De Maisonneuve Ouest, Montreal, Quebec H3G 1M8, Canada';

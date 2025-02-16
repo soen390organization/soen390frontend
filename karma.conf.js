@@ -7,7 +7,6 @@ module.exports = function (config) {
     basePath: "",
     frameworks: ["jasmine", "@angular-devkit/build-angular"],
     plugins: [
-      require("karma-spec-reporter"),
       require("karma-jasmine"),
       require("karma-chrome-launcher"),
       require("karma-jasmine-html-reporter"),
