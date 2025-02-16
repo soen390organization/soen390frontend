@@ -59,7 +59,7 @@ export class PlacesService {
   public async getPointsOfInterest(): Promise<LocationCard[]> {
     const campusKey = await firstValueFrom(this.store.select(selectSelectedCampus));
     
-    const places = await this.getPlaces(this.campusData[campusKey].coordinates, 250, 'restaurant')
+    const places = await this.getPlaces(this.campusData[campusKey]?.coordinates, 250, 'restaurant')
       .catch(() => []); // Catch any error and return an empty array
 
     return places.map(place => ({

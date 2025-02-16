@@ -9,6 +9,7 @@ import { Store } from '@ngrx/store';
 import { PlacesService } from 'src/app/services/places.service';
 import { selectSelectedCampus } from 'src/app/store/app';
 import { LocationCard } from 'src/app/interfaces/location-card.interface';
+import { filter, forkJoin, switchMap } from 'rxjs';
 
 @Component({
   selector: 'app-interaction-bar',
@@ -25,24 +26,27 @@ export class InteractionBarComponent implements AfterViewInit {
   public threshold = 50; // Minimum swipe distance to trigger action
 
   isExpanded = false; // Track the footer's state
-  selectedCampusBuildings: LocationCard[] = [];
-  selectedCampusPointsOfInterest: LocationCard[] = [];
-  loadingBuildings = true;
-  loadingPointsOfInterest = true;
+  campusBuildings = { locations: [] as LocationCard[], loading: true }
+  pointsOfInterest = { locations: [] as LocationCard[], loading: true }
 
   constructor(private store: Store, private placesService: PlacesService) {}
 
   ngOnInit() {
-    this.placesService.isInitialized().subscribe((ready) => {
-      if (ready) {
-        this.store.select(selectSelectedCampus).subscribe(async (campus) => {
-          this.selectedCampusBuildings = await this.placesService.getCampusBuildings();
-          this.loadingBuildings = false;
-          this.selectedCampusPointsOfInterest = await this.placesService.getPointsOfInterest();
-          this.loadingPointsOfInterest = false;
-        });
-      }
-    });
+    this.placesService.isInitialized()
+      .pipe(
+        filter(ready => ready), // Only proceed when `ready` is true
+        switchMap(() => this.store.select(selectSelectedCampus)), // Wait for campus selection
+        switchMap(() =>
+          forkJoin({
+            campusBuildings: this.placesService.getCampusBuildings(),
+            pointsOfInterest: this.placesService.getPointsOfInterest(),
+          })
+        )
+      )
+      .subscribe(({ campusBuildings, pointsOfInterest }) => {
+        this.campusBuildings = { locations: campusBuildings, loading: false };
+        this.pointsOfInterest = { locations: pointsOfInterest, loading: false };
+      });
   }
 
   ngAfterViewInit(): void {

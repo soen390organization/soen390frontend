@@ -1,14 +1,23 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { InteractionBarComponent } from './interaction-bar.component';
 import { ElementRef } from '@angular/core';
+import { Store } from '@ngrx/store';
 
 describe('InteractionBarComponent', () => {
   let component: InteractionBarComponent;
   let fixture: ComponentFixture<InteractionBarComponent>;
+  let store: jasmine.SpyObj<Store>;
+
 
   beforeEach(async () => {
+    const mockStore = jasmine.createSpyObj<Store>('Store', ['select', 'dispatch']);
+    // mockStore.select.and.returnValue(of('sgw')); // Default return value for store.select
+
     await TestBed.configureTestingModule({
-      imports: [InteractionBarComponent], // Fix: Use imports for standalone component
+      imports: [InteractionBarComponent], // For standalone components
+      providers: [
+        { provide: Store, useValue: mockStore },
+      ],
     }).compileComponents();
   });
 
@@ -16,6 +25,7 @@ describe('InteractionBarComponent', () => {
     fixture = TestBed.createComponent(InteractionBarComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
+    store = TestBed.inject(Store) as jasmine.SpyObj<Store>;
 
     // Mock the footer container ElementRef
     component.footerContainer = new ElementRef(document.createElement('div'));
