@@ -3,7 +3,6 @@
 
 module.exports = function (config) {
   config.set({
-    reporters: ["spec"],
     basePath: "",
     frameworks: ["jasmine", "@angular-devkit/build-angular"],
     plugins: [

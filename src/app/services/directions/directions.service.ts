@@ -56,10 +56,12 @@ export class DirectionsService {
     steps: Step[];
     eta: string | null;
   }> {
+    console.log('running');
     return new Promise((resolve, reject) => {
       // this.directionsRenderer.setMap(this.map);
 
       this.setRouteColor(travelMode);
+      console.log('route color has been set');
 
       const request: google.maps.DirectionsRequest = {
         origin: startAddress,
@@ -68,6 +70,7 @@ export class DirectionsService {
       };
 
       this.directionsService.route(request, (response, status) => {
+        console.log('here!');
         if (status === google.maps.DirectionsStatus.OK && response) {
           this.directionsRenderer.setDirections(response);
 
@@ -92,9 +95,11 @@ export class DirectionsService {
               });
             }
           }
+          console.log(steps);
 
           resolve({ steps, eta });
         } else {
+          console.log('rejected');
           reject(status);
         }
       });
@@ -102,11 +107,6 @@ export class DirectionsService {
   }
 
   setRouteColor(travelMode: google.maps.TravelMode) {
-    const walkingLineSymbol = {
-      path: google.maps.SymbolPath.CIRCLE,
-      fillOpacity: 1,
-      scale: 3,
-    };
     const polylineOptions: google.maps.PolylineOptions = {};
 
     switch (travelMode) {
@@ -121,7 +121,11 @@ export class DirectionsService {
         polylineOptions['strokeOpacity'] = 0;
         polylineOptions['icons'] = [
           {
-            icon: walkingLineSymbol,
+            icon: {
+              path: google.maps.SymbolPath.CIRCLE,
+              fillOpacity: 1,
+              scale: 3,
+            },
             offset: '0',
             repeat: '10px',
           },

@@ -1,11 +1,11 @@
 import { DirectionsService } from './directions.service';
 import { TestBed } from '@angular/core/testing';
+import Joi from 'joi';
 
 describe('Directions Service', () => {
   let service: DirectionsService;
-  let origin =
-    '1455 Blvd. De Maisonneuve Ouest, Montreal, Quebec H3G 1M8, Canada';
-  let destination = '1450 Guy St, Montreal, Quebec H3H 0A1, Canada';
+  let origin = 'Hall Building Concordia';
+  let destination = 'John Molson School of Business';
 
   beforeAll(() => {
     class MockDirectionsService {
@@ -27,6 +27,10 @@ describe('Directions Service', () => {
           TRANSIT: 'TRANSIT',
           WALKING: 'WALKING',
         },
+        DirectionsStatus: {
+          OK: 'OK', // <-- Define this to fix the issue
+        },
+
         SymbolPath: { CIRCLE: 'CIRCLE' },
       },
     } as any;
@@ -42,6 +46,70 @@ describe('Directions Service', () => {
 
   it('should be created', () => {
     expect(service).toBeTruthy();
+  });
+
+  describe('calculateRoute()', () => {
+    describe('given a valid origin and destination', () => {
+      it('should return a valid json', async () => {
+        (service as any).directionsService.route.and.callFake(
+          (
+            request: google.maps.DirectionsRequest,
+            callback: (
+              result: google.maps.DirectionsResult,
+              status: google.maps.DirectionsStatus,
+            ) => void,
+          ) => {
+            const mockResponse = {
+              routes: [
+                {
+                  legs: [
+                    {
+                      duration: { text: '5 mins', value: 300 },
+                      steps: [
+                        {
+                          instructions: 'Head north',
+                          start_location: { lat: () => 45, lng: () => -73 }, // Mocking LatLng functions
+                          distance: { text: '1 km', value: 1000 },
+                          duration: { text: '10 mins', value: 600 },
+                          transit_details: null,
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            } as unknown as google.maps.DirectionsResult;
+
+            callback(mockResponse, google.maps.DirectionsStatus.OK);
+          },
+        );
+
+        const schema = Joi.object({
+          steps: Joi.array()
+            .items(
+              Joi.object({
+                instructions: Joi.string().required(),
+                start_location: Joi.any().required(),
+                distance: Joi.object({
+                  text: Joi.string().required(),
+                  value: Joi.number().required(),
+                }).optional(),
+                duration: Joi.object({
+                  text: Joi.string().required(),
+                  value: Joi.number().required(),
+                }).optional(),
+                transit_details: Joi.any().optional(),
+              }),
+            )
+            .required(),
+          eta: Joi.string().allow(null).required(),
+        });
+
+        spyOn(service, 'calculateRoute').and.callThrough();
+        const response = await service.calculateRoute(origin, destination);
+        expect(schema.validate(response).error).toBeUndefined();
+      });
+    });
   });
 
   describe('setRouteColor() function', () => {

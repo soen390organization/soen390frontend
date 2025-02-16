@@ -1,5 +1,7 @@
 /* To learn more about this file see: https://angular.io/config/tsconfig. */
 {
+  "exclude": ["cypress.config.ts"],
+  "files": ["cypress.config.ts"],
   "compileOnSave": false,
   "compilerOptions": {
     "resolveJsonModule": true,
@@ -13,7 +15,7 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "sourceMap": true,
-    "types": ["google.maps", "jasmine"],
+    "types": ["google.maps", "jasmine", "node"],
     "declaration": false,
     "downlevelIteration": true,
     "experimentalDecorators": true,
