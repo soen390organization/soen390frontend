@@ -11,94 +11,111 @@ import { Step } from 'src/app/interfaces/step.interface';
 
 })
 
-export class DirectionsComponent implements AfterViewInit {
+export class DirectionsComponent implements OnInit {
   steps: Step[] = [];
   eta: string | null = null;
-  selectedMode: string = 'WALKING'; // Store as a string
+  selectedMode: string = 'WALKING';
   isLoading: boolean = false;
 
   constructor() {}
 
-  ngAfterViewInit(): void {
-    this.loadDirections('Start Location', 'Destination', this.getTravelMode(this.selectedMode));
+  ngOnInit(): void {
+    this.setMode('WALKING'); // Automatically loads walking directions
   }
 
   /**
-   * Maps the selected mode string to `google.maps.TravelMode`
+   * Calls a simulated API to fetch hardcoded routes.
    */
-  getTravelMode(mode: string): google.maps.TravelMode {
-    switch (mode) {
-      case 'WALKING':
-        return google.maps.TravelMode.WALKING;
-      case 'TRANSIT':
-        return google.maps.TravelMode.TRANSIT;
-      case 'DRIVING':
-        return google.maps.TravelMode.DRIVING;
-      default:
-        return google.maps.TravelMode.WALKING;
-    }
-  }
-
-  /**
-   * Calls calculateRoute as if it's from an external API.
-   */
-  loadDirections(startAddress: string, destinationAddress: string, travelMode: google.maps.TravelMode) {
+  loadDirections(mode: string) {
     this.isLoading = true;
 
-    calculateRoute(startAddress, destinationAddress, travelMode)
+    calculateRoute(mode)
       .then(({ steps, eta }) => {
         this.steps = steps;
         this.eta = eta;
         this.isLoading = false;
       })
-      .catch((error) => {
-        console.error('Error fetching directions:', error);
+      .catch(() => {
         this.isLoading = false;
       });
   }
 
   /**
-   * Updates travel mode and fetches new directions.
+   * Updates the travel mode and loads new hardcoded directions.
    */
   setMode(mode: string) {
-    this.selectedMode = mode; // Store as string
-    this.loadDirections('Start Location', 'Destination', this.getTravelMode(mode));
+    this.selectedMode = mode;
+    this.loadDirections(mode);
   }
 }
 
 /**
- * Simulated external API function.
+ * Simulated API function returning hardcoded steps for each mode.
  */
-function calculateRoute(
-  startAddress: string,
-  destinationAddress: string,
-  travelMode: google.maps.TravelMode = google.maps.TravelMode.WALKING
-): Promise<{ steps: Step[]; eta: string | null }> {
+function calculateRoute(mode: string): Promise<{ steps: Step[]; eta: string | null }> {
   return new Promise((resolve) => {
     setTimeout(() => {
       let response: { steps: Step[]; eta: string | null } = { steps: [], eta: null };
 
-      if (travelMode === google.maps.TravelMode.WALKING) {
+      if (mode === 'WALKING') {
         response = {
           steps: [
-            { instructions: 'Walk north on Main St.', start_location: new google.maps.LatLng(45.5017, -73.5673), distance: { text: '200 m', value: 200 }, duration: { text: '2 mins', value: 2 }, transit_details: undefined },
-            { instructions: 'Turn right onto Guy St.', start_location: new google.maps.LatLng(45.502, -73.5678), distance: { text: '300 m', value: 300 }, duration: { text: '4 mins', value: 4 }, transit_details: undefined },
+            {
+              instructions: 'Walk north on Main St.',
+              start_location: new google.maps.LatLng(45.5017, -73.5673),
+              distance: { text: '200 m', value: 200 },
+              duration: { text: '2 mins', value: 2 },
+              transit_details: undefined
+            },
+            {
+              instructions: 'Turn right onto Guy St.',
+              start_location: new google.maps.LatLng(45.502, -73.5678),
+              distance: { text: '300 m', value: 300 },
+              duration: { text: '4 mins', value: 4 },
+              transit_details: undefined
+            },
           ],
           eta: '6 mins',
         };
-      } else if (travelMode === google.maps.TravelMode.TRANSIT) {
+      } else if (mode === 'TRANSIT' || mode == "SHUTTLE") {
         response = {
           steps: [
-            { instructions: 'Walk to the nearest bus stop.', start_location: new google.maps.LatLng(45.5017, -73.5673), distance: { text: '150 m', value: 150 }, duration: { text: '2 mins', value: 2 }, transit_details: undefined },
-            { instructions: 'Take Bus #24 towards Downtown.', start_location: new google.maps.LatLng(45.502, -73.5678), distance: { text: '2.5 km', value: 2500 }, duration: { text: '10 mins', value: 10 }, transit_details: undefined },
+            {
+              instructions: 'Walk to the nearest bus stop.',
+              start_location: new google.maps.LatLng(45.5017, -73.5673),
+              distance: { text: '150 m', value: 150 },
+              duration: { text: '2 mins', value: 2 },
+              transit_details: undefined
+            },
+            {
+              instructions: 'Take Bus #24 towards Downtown.',
+              start_location: new google.maps.LatLng(45.502, -73.5678),
+              distance: { text: '2.5 km', value: 2500 },
+              duration: { text: '10 mins', value: 10 },
+              transit_details: {
+                line: { short_name: '24' }
+              } as google.maps.TransitDetails
+            },
           ],
           eta: '15 mins',
         };
-      } else if (travelMode === google.maps.TravelMode.DRIVING) {
+      } else if (mode === 'DRIVING') {
         response = {
           steps: [
-            { instructions: 'Drive north on Main St.', start_location: new google.maps.LatLng(45.5017, -73.5673), distance: { text: '1.2 km', value: 1200 }, duration: { text: '2 mins', value: 2 }, transit_details: undefined },
-            { instructions: 'Turn right onto Guy St.', start_location: new google.maps.LatLng(45.502, -73.5678), distance: { text: '3 km', value: 3000 }, duration: { text: '5 mins', value: 5 }, transit_details: undefined },
+            {
+              instructions: 'Drive north on Main St.',
+              start_location: new google.maps.LatLng(45.5017, -73.5673),
+              distance: { text: '1.2 km', value: 1200 },
+              duration: { text: '2 mins', value: 2 },
+              transit_details: undefined
+            },
+            {
+              instructions: 'Turn right onto Guy St.',
+              start_location: new google.maps.LatLng(45.502, -73.5678),
+              distance: { text: '3 km', value: 3000 },
+              duration: { text: '5 mins', value: 5 },
+              transit_details: undefined
+            },
           ],
           eta: '7 mins',
         };
