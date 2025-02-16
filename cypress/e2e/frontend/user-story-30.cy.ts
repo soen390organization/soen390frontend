@@ -1,4 +1,4 @@
-describe('Map Search - Select Start and Destination Buildings', () => {
+ describe('Map Search - Select Start and Destination Buildings', () => {
   beforeEach(() => {
     // Visit the homepage
     cy.visit('/');
@@ -16,7 +16,9 @@ describe('Map Search - Select Start and Destination Buildings', () => {
 
     // Enter "Hall" in the start location input and press Enter
     cy.get('input[placeholder="Choose starting point..."]')
-      .type('Hall{enter}');
+      .type('Hall')
+      .type('{enter}') // Simulate Enter key
+      .blur(); 
 
     // Wait for the first pin (start location) to be added
     cy.wait(2000);
