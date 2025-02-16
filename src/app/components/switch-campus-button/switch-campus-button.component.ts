@@ -25,7 +25,7 @@ export class SwitchCampusButtonComponent {
   switchCampus() {
     this.selectedCampus$.pipe(take(1)).subscribe(currentCampus => {
       let campus = currentCampus === 'sgw' ? 'loy' : 'sgw';
-      let location = new google.maps.LatLng(this.campusData[campus].coordinates);
+      let location = new google.maps.LatLng(this.campusData[campus].coordinates.lat, this.campusData[campus].coordinates.lng);
 
       this.store.dispatch(setSelectedCampus({ campus }));
       this.googleMapService.updateMapLocation(location);

@@ -58,13 +58,15 @@ export class PlacesService {
    */
   public async getPointsOfInterest(): Promise<LocationCard[]> {
     const campusKey = await firstValueFrom(this.store.select(selectSelectedCampus));
-    const places = await this.getPlaces(this.campusData[campusKey].coordinates, 250, 'restaurant');
-  
+    
+    const places = await this.getPlaces(this.campusData[campusKey].coordinates, 250, 'restaurant')
+      .catch(() => []); // Catch any error and return an empty array
+
     return places.map(place => ({
       name: place.name ?? 'No name available',
       coordinates: place.geometry?.location as google.maps.LatLng, 
       address: place.vicinity ?? 'No address available',
-      image: place.photos?.[0]?.getUrl() ?? ''
+      image: place.photos?.[0]?.getUrl() ?? 'default-image-url.jpg'
     }));
   }  
 
@@ -76,13 +78,7 @@ export class PlacesService {
    * @returns A promise resolving to an array of PlaceResult objects.
    */
   private getPlaces(location: google.maps.LatLng, radius: number, type: string): Promise<google.maps.places.PlaceResult[]> {
-    return new Promise((resolve, reject) => {
-      if (!this.placesService) {
-        console.error('PlacesService not initialized. Call setMap() first.');
-        reject('PlacesService not initialized.');
-        return;
-      }
-  
+    return new Promise((resolve, reject) => {  
       const request: google.maps.places.PlaceSearchRequest = {
         location,
         radius,
@@ -90,7 +86,7 @@ export class PlacesService {
       };
   
       this.placesService.nearbySearch(request, (results, status) => {
-        if (status === google.maps.places.PlacesServiceStatus.OK && results) {
+        if (status === "OK" && results) {
           const operationalResults = results.filter(place => 
             place.business_status === 'OPERATIONAL'
           );
