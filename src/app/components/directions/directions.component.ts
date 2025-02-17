@@ -17,6 +17,14 @@ export class DirectionsComponent implements OnInit {
   selectedMode: string = 'WALKING';
   isLoading: boolean = false;
 
+  // Used in a ngfor in the html to avoid duplication since the buttons are similar
+  transportModes = [
+    { mode: 'WALKING', icon: 'directions_walk' },
+    { mode: 'TRANSIT', icon: 'directions_bus' },
+    { mode: 'SHUTTLE', icon: 'directions_transit' },
+    { mode: 'DRIVING', icon: 'directions_car' }
+  ];
+
   constructor() {}
 
   ngOnInit(): void {

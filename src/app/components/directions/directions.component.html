@@ -4,61 +4,19 @@
 
 <!-- Transportation Mode Selector -->
 <div class="flex items-center space-x-2 mb-3">
-  <!-- Transportation Buttons Wrapper -->
   <div class="flex space-x-2 flex-grow">
     <button
+      *ngFor="let transport of transportModes"
       class="px-3 py-2 rounded-md"
-      [ngClass]="selectedMode === 'WALKING' ? 'bg-black' : 'bg-gray-200'"
-      (click)="setMode('WALKING')"
+      [ngClass]="selectedMode === transport.mode ? 'bg-black' : 'bg-gray-200'"
+      (click)="setMode(transport.mode)"
     >
       <span
         class="material-symbols-outlined"
-        [ngClass]="selectedMode === 'WALKING' ? 'text-white' : 'text-black'"
-        [style.color]="selectedMode === 'WALKING' ? 'white' : 'black'"
+        [ngClass]="selectedMode === transport.mode ? 'text-white' : 'text-black'"
+        [style.color]="selectedMode === transport.mode ? 'white' : 'black'"
       >
-        directions_walk
-      </span>
-    </button>
-
-    <button
-      class="px-3 py-2 rounded-md"
-      [ngClass]="selectedMode === 'TRANSIT' ? 'bg-black' : 'bg-gray-200'"
-      (click)="setMode('TRANSIT')"
-    >
-      <span
-        class="material-symbols-outlined"
-        [ngClass]="selectedMode === 'TRANSIT' ? 'text-white' : 'text-black'"
-        [style.color]="selectedMode === 'TRANSIT' ? 'white' : 'black'"
-      >
-        directions_bus
-      </span>
-    </button>
-
-    <button
-      class="px-3 py-2 rounded-md"
-      [ngClass]="selectedMode === 'SHUTTLE' ? 'bg-black' : 'bg-gray-200'"
-      (click)="setMode('SHUTTLE')"
-    >
-      <span
-        class="material-symbols-outlined"
-        [ngClass]="selectedMode === 'SHUTTLE' ? 'text-white' : 'text-black'"
-        [style.color]="selectedMode === 'SHUTTLE' ? 'white' : 'black'"
-      >
-        directions_transit
-      </span>
-    </button>
-
-    <button
-      class="px-3 py-2 rounded-md"
-      [ngClass]="selectedMode === 'DRIVING' ? 'bg-black' : 'bg-gray-200'"
-      (click)="setMode('DRIVING')"
-    >
-      <span
-        class="material-symbols-outlined"
-        [ngClass]="selectedMode === 'DRIVING' ? 'text-white' : 'text-black'"
-        [style.color]="selectedMode === 'DRIVING' ? 'white' : 'black'"
-      >
-        directions_car
+        {{ transport.icon }}
       </span>
     </button>
   </div>
