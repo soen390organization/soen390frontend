@@ -9,7 +9,7 @@
       *ngFor="let transport of transportModes"
       class="px-3 py-2 rounded-md"
       [ngClass]="selectedMode === transport.mode ? 'bg-black' : 'bg-gray-200'"
-      (click)="setMode(transport.mode)"
+      (click)="setMode(transport.mode, $event)"
     >
       <span
         class="material-symbols-outlined"

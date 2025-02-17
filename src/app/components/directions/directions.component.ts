@@ -51,7 +51,8 @@ export class DirectionsComponent implements OnInit {
   /**
    * Updates the travel mode and loads new hardcoded directions.
    */
-  setMode(mode: string) {
+  setMode(mode: string, event?: Event) {
+    if (event) event.stopPropagation();
     this.selectedMode = mode;
     this.loadDirections(mode);
   }
