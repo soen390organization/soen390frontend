@@ -1,30 +1,34 @@
 import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Store } from '@ngrx/store';
+import { selectSelectedCampus, setSelectedCampus } from 'src/app/store/app';
 import { GoogleMapService } from 'src/app/services/googeMap.service';
+import { PlacesService } from 'src/app/services/places.service';
+import { Observable, take } from 'rxjs';
 import data from 'src/assets/ConcordiaData.json';
 
 @Component({
   selector: 'app-switch-campus-button',
+  imports: [CommonModule],
   templateUrl: './switch-campus-button.component.html',
   styleUrls: ['./switch-campus-button.component.scss'],
 })
 export class SwitchCampusButtonComponent {
-  selectedCampus = 'SGW';
-  sgwLocation = { lat: data.campuses.sgw.mapOptions.center.lat, lng: data.campuses.sgw.mapOptions.center.lng };
-  loyLocation = { lat: data.campuses.loy.mapOptions.center.lat, lng: data.campuses.loy.mapOptions.center.lng };
+  selectedCampus$: Observable<string>;
+  // Consider Moving to places API or 1 service
+  campusData: any = data;
 
-
-  constructor(private googleMapService: GoogleMapService) { }
+  constructor(private store: Store, private googleMapService: GoogleMapService, private placesService: PlacesService) {
+    this.selectedCampus$ = this.store.select(selectSelectedCampus);
+  }
 
   switchCampus() {
-    let location;
-    if (this.selectedCampus === 'SGW') {
-      this.selectedCampus = "LOY"
-      location = new google.maps.LatLng(this.loyLocation.lat, this.loyLocation.lng);
-    } else {
-      this.selectedCampus = "SGW"
-      location = new google.maps.LatLng(this.sgwLocation.lat, this.sgwLocation.lng);
-    }
+    this.selectedCampus$.pipe(take(1)).subscribe(currentCampus => {
+      let campus = currentCampus === 'sgw' ? 'loy' : 'sgw';
+      let location = new google.maps.LatLng(this.campusData[campus].coordinates.lat, this.campusData[campus].coordinates.lng);
 
-    this.googleMapService.updateMapLocation(location);
+      this.store.dispatch(setSelectedCampus({ campus }));
+      this.googleMapService.updateMapLocation(location);
+    });
   }
 }

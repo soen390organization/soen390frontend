@@ -13,6 +13,7 @@ import {
   transition,
   trigger,
 } from '@angular/animations';
+import { DirectionsService } from 'src/app/services/directions/directions.service';
 
 
 @Component({
@@ -48,15 +49,31 @@ export class MapSearchComponent implements OnInit, OnDestroy{
 startMarker: google.maps.Marker | null = null;
   destinationMarker: google.maps.Marker | null = null;
   startLocationInput = '';
-  startLocation: { address: string; coordinates: google.maps.LatLng, marker: google.maps.Marker } | undefined
+  startLocation:
+    | {
+        address: string;
+        coordinates: google.maps.LatLng;
+        marker: google.maps.Marker;
+      }
+    | undefined;
   destinationLocationInput = '';
-  destinationLocation: { address: string; coordinates: google.maps.LatLng, marker: google.maps.Marker  } | undefined
+  destinationLocation:
+    | {
+        address: string;
+        coordinates: google.maps.LatLng;
+        marker: google.maps.Marker;
+      }
+    | undefined;
   isSearchVisible = false;
   places: any[]=[]; // Array to store the search suggestions
   query: string; // Query for the search bar
   isSearchingFromStart: boolean = false; // Flag to determine if the search is for the start or destination location
 
-  constructor(private googleMapService: GoogleMapService, private zone: NgZone) {}
+  constructor(
+    private googleMapService: GoogleMapService,
+    private zone: NgZone, 
+    private directionsService: DirectionsService
+  ) {}
 
   ngOnInit(): void {
     console.log('ngOnInit called');
@@ -72,28 +89,31 @@ startMarker: google.maps.Marker | null = null;
   
   onSetUsersLocationAsStart() {
     const currentLocationService = new CurrentLocationService();
-    currentLocationService.getCurrentLocation()
-      .then((position) => {
-        if (position == null)
-          throw new Error('Current location is null.');
+    currentLocationService.getCurrentLocation().then((position) => {
+      if (position == null) throw new Error('Current location is null.');
 
-        const geocoder = new google.maps.Geocoder();
+      const geocoder = new google.maps.Geocoder();
 
-        geocoder.geocode({ location: position }, (results, status) => {
-          if (results == null)
-            throw new Error("Current location's address cannot be read.");
+      geocoder.geocode({ location: position }, (results, status) => {
+        if (results == null)
+          throw new Error("Current location's address cannot be read.");
 
-          const result = results[0];
-          this.startLocation = {
-            address: result.formatted_address,
-            coordinates: result.geometry.location,
-            marker: this.startLocation?.marker ?? this.createMarker(result.geometry.location, 'https://upload.wikimedia.org/wikipedia/commons/8/8e/Icone_Verde.svg')
-          }
-          this.startLocation.marker.setPosition(result.geometry.location);
-          this.startLocationInput = 'Your Location';
-          this.updateMapView();
-        })
-      })
+        const result = results[0];
+        this.startLocation = {
+          address: result.formatted_address,
+          coordinates: result.geometry.location,
+          marker:
+            this.startLocation?.marker ??
+            this.googleMapService.createMarker(
+              result.geometry.location,
+              'https://upload.wikimedia.org/wikipedia/commons/8/8e/Icone_Verde.svg'
+            ),
+        };
+        this.startLocation.marker.setPosition(result.geometry.location);
+        this.startLocationInput = 'Your Location';
+        this.updateMapView();
+      });
+    });
   }
 
   //This method is called when the user types in the search bar, tracking every key stroke and updating the search results by calling getPlaces(). 
@@ -127,7 +147,7 @@ startMarker: google.maps.Marker | null = null;
       }
       this.startLocation.marker.setPosition(result.geometry.location);
       if (this.destinationLocation)
-        this.googleMapService.calculateRoute(this.startLocation.address, this.destinationLocation.address); 
+        this.directionsService.calculateRoute(this.startLocation.address, this.destinationLocation.address); 
     
     } else{
       const result = await this.findPlace(searchTerm);
@@ -138,10 +158,29 @@ startMarker: google.maps.Marker | null = null;
       }
       this.destinationLocation.marker.setPosition(result.geometry.location);
       if (this.startLocation)
-        this.googleMapService.calculateRoute(this.startLocation.address, this.destinationLocation.address);
+        this.directionsService.calculateRoute(this.startLocation.address, this.destinationLocation.address);
     }
       this.updateMapView();
   }   
+    // const result = await this.findPlace(searchTerm);
+
+    // this.startLocation = {
+    //   address: result.formatted_address,
+    //   coordinates: result.geometry.location,
+    //   marker:
+    //     this.startLocation?.marker ??
+    //     this.googleMapService.createMarker(
+    //       result.geometry.location,
+    //       'https://upload.wikimedia.org/wikipedia/commons/8/8e/Icone_Verde.svg'
+    //     ),
+    // };
+    // this.startLocation.marker.setPosition(result.geometry.location);
+
+    // if (this.destinationLocation)
+    //   this.directionsService.calculateRoute(
+    //     this.startLocation.address,
+    //     this.destinationLocation.address
+    //   );
 
   //This method clears the places array for the search suggestions.
   clearPlaces() {
@@ -198,6 +237,25 @@ startMarker: google.maps.Marker | null = null;
       console.log("Cannot get places. "+e)
     }
   }
+
+    // const result = await this.findPlace(searchTerm);
+    // this.destinationLocation = {
+    //   address: result.formatted_address,
+    //   coordinates: result.geometry.location,
+    //   marker:
+    //     this.destinationLocation?.marker ??
+    //     this.googleMapService.createMarker(
+    //       result.geometry.location,
+    //       'https://upload.wikimedia.org/wikipedia/commons/6/64/Icone_Vermelho.svg'
+    //     ),
+    // };
+    // this.destinationLocation.marker.setPosition(result.geometry.location);
+
+    // if (this.startLocation)
+    //   this.directionsService.calculateRoute(
+    //     this.startLocation.address,
+    //     this.destinationLocation.address
+    //   );
 
   //This method is used to get the latitude and longitude for a given address using the Google Geocoding API.
   geoCode(address: any) {

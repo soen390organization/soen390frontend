@@ -12,12 +12,20 @@ import { CurrentLocationService } from 'src/app/services/geolocation/current-loc
 
 // Mock Google Maps API
 class MockGoogleMapService {
-updateMapLocation = jasmine.createSpy('updateMapLocation');
-getMap = jasmine.createSpy('getMap').and.returnValue({
-  fitBounds: jasmine.createSpy('fitBounds'),
-  setCenter: jasmine.createSpy('setCenter'),
-  setZoom: jasmine.createSpy('setZoom'),
-});
+  updateMapLocation = jasmine.createSpy('updateMapLocation');
+  getMap = jasmine.createSpy('getMap').and.returnValue({
+    fitBounds: jasmine.createSpy('fitBounds'),
+    setCenter: jasmine.createSpy('setCenter'),
+    setZoom: jasmine.createSpy('setZoom'),
+  });
+  createMarker = jasmine.createSpy('createMarker').and.callFake(
+    (position: google.maps.LatLng, iconUrl: string) => ({
+      setPosition: jasmine.createSpy('setPosition'),
+      getPosition: jasmine.createSpy('getPosition').and.returnValue(position),
+      getIcon: jasmine.createSpy('getIcon').and.returnValue(iconUrl),
+      setMap: jasmine.createSpy('setMap'),
+    })
+  );
 }
 
 describe('MapSearchComponent', () => {

@@ -12,7 +12,7 @@ describe('Google Map Component & Toggle', () => {
     cy.get('.map-container', { timeout: 10000 }).should('be.visible');
 
     // Check the initial campus text
-    cy.get('app-switch-campus-button').should('contain', 'SGW');
+    cy.get('app-switch-campus-button').should('contain', 'sgw');
 
     cy.wait(5000); // Adjust the delay as needed
 
@@ -20,7 +20,7 @@ describe('Google Map Component & Toggle', () => {
     cy.get('app-switch-campus-button').click();
 
     // Check if the campus text has changed to LOY
-    cy.get('app-switch-campus-button').should('contain', 'LOY');
+    cy.get('app-switch-campus-button').should('contain', 'loy');
 
     // Wait for the map to update (optional, if needed)
     cy.wait(5000); // Adjust the delay as needed
@@ -29,6 +29,6 @@ describe('Google Map Component & Toggle', () => {
     cy.get('app-switch-campus-button').click();
 
     // Check if the campus text has changed back to SGW
-    cy.get('app-switch-campus-button').should('contain', 'SGW');
+    cy.get('app-switch-campus-button').should('contain', 'sgw');
   });
 });
