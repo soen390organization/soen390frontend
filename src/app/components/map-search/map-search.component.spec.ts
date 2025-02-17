@@ -8,7 +8,6 @@ import { provideAnimations } from '@angular/platform-browser/animations';
 import { CurrentLocationService } from 'src/app/services/geolocation/current-location.service';
 
 // Mock Google Maps API
-// ✅ Updated MockGoogleMapService with getMap()
 class MockGoogleMapService {
   updateMapLocation = jasmine.createSpy('updateMapLocation');
   getMap = jasmine.createSpy('getMap').and.returnValue({
@@ -16,6 +15,14 @@ class MockGoogleMapService {
     setCenter: jasmine.createSpy('setCenter'),
     setZoom: jasmine.createSpy('setZoom'),
   });
+  createMarker = jasmine.createSpy('createMarker').and.callFake(
+    (position: google.maps.LatLng, iconUrl: string) => ({
+      setPosition: jasmine.createSpy('setPosition'),
+      getPosition: jasmine.createSpy('getPosition').and.returnValue(position),
+      getIcon: jasmine.createSpy('getIcon').and.returnValue(iconUrl),
+      setMap: jasmine.createSpy('setMap'),
+    })
+  );
 }
 
 describe('MapSearchComponent', () => {
@@ -94,7 +101,7 @@ describe('MapSearchComponent', () => {
       },
     };
   });
-  
+
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -145,13 +152,13 @@ describe('MapSearchComponent', () => {
     expect(component.onSearchChangeStart).toHaveBeenCalledWith(event);
     // Ensure correct marker icon is passed
     expect(component.startLocation?.marker).toBeDefined()
-    
+
     const icon = component.startLocation?.marker.getIcon();
     const iconUrl = typeof icon === 'object' && icon !== null && 'url' in icon ? (icon as { url: string }).url : icon;
-  
+
     expect(iconUrl).toEqual('https://upload.wikimedia.org/wikipedia/commons/8/8e/Icone_Verde.svg');
-  
-    
+
+
   }));
 
   it('should call onSearchChangeDestination with correct icon for destination', fakeAsync(() => {
@@ -162,14 +169,12 @@ describe('MapSearchComponent', () => {
     tick();
     expect(component.onSearchChangeDestination).toHaveBeenCalledWith(event);
     expect(component.destinationLocation?.marker).toBeDefined();
-    // Ensure correct marker icon is passed
-    //expect(component.destinationLocation?.marker.getIcon()).toEqual('https://upload.wikimedia.org/wikipedia/commons/6/64/Icone_Vermelho.svg');
     const icon = component.destinationLocation?.marker.getIcon();
     const iconUrl = typeof icon === 'object' && icon !== null && 'url' in icon ? (icon as { url: string }).url : icon;
-  
+
     expect(iconUrl).toEqual('https://upload.wikimedia.org/wikipedia/commons/6/64/Icone_Vermelho.svg');
-  
- 
+
+
   }));
 
   it('should create start marker in onSetUsersLocationAsStart', fakeAsync(() => {
@@ -186,7 +191,7 @@ describe('MapSearchComponent', () => {
     const fakeEvent = { target: { value: 'New York' } };
     spyOn(component, 'findPlace').and.returnValue(Promise.resolve({ formatted_address: 'New York', geometry: { location: { lat: () => 10, lng: () => 20 } } }));
     component.onSearchChangeStart(fakeEvent);
-    
+
     tick();
     expect(googleMapService.getMap).toHaveBeenCalled();
     expect(component.startLocation?.marker).toBeDefined();
