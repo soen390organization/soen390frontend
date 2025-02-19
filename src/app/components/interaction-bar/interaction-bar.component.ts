@@ -1,7 +1,19 @@
-import { Component, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnInit, Renderer2, ViewChild } from '@angular/core';
+import { GestureController } from '@ionic/angular';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
+import { IonicModule } from '@ionic/angular';
+import { LocationCardsComponent } from '../location-cards/location-cards.component';
+import { Store } from '@ngrx/store';
+import { PlacesService } from 'src/app/services/places.service';
+import { selectSelectedCampus } from 'src/app/store/app';
+import { LocationCard } from 'src/app/interfaces/location-card.interface';
+import { filter, forkJoin, switchMap } from 'rxjs';
 
 @Component({
   selector: 'app-interaction-bar',
+  imports: [LocationCardsComponent],
   templateUrl: './interaction-bar.component.html',
   styleUrls: ['./interaction-bar.component.scss']
 })
@@ -14,6 +26,28 @@ export class InteractionBarComponent implements AfterViewInit {
   public threshold = 50; // Minimum swipe distance to trigger action
 
   isExpanded = false; // Track the footer's state
+  campusBuildings = { locations: [] as LocationCard[], loading: true }
+  pointsOfInterest = { locations: [] as LocationCard[], loading: true }
+
+  constructor(private store: Store, private placesService: PlacesService) {}
+
+  ngOnInit() {
+    this.placesService.isInitialized()
+      .pipe(
+        filter(ready => ready), // Only proceed when `ready` is true
+        switchMap(() => this.store.select(selectSelectedCampus)), // Wait for campus selection
+        switchMap(() =>
+          forkJoin({
+            campusBuildings: this.placesService.getCampusBuildings(),
+            pointsOfInterest: this.placesService.getPointsOfInterest(),
+          })
+        )
+      )
+      .subscribe(({ campusBuildings, pointsOfInterest }) => {
+        this.campusBuildings = { locations: campusBuildings, loading: false };
+        this.pointsOfInterest = { locations: pointsOfInterest, loading: false };
+      });
+  }
 
   ngAfterViewInit(): void {
     const footer = this.footerContainer.nativeElement;

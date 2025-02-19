@@ -57,27 +57,17 @@ export class PlacesService {
    * @returns A promise resolving to an array of LocationCard objects representing points of interest.
    */
   public async getPointsOfInterest(): Promise<LocationCard[]> {
-    try {
-      const campusKey = await firstValueFrom(this.store.select(selectSelectedCampus));
-      
-      // Ensure campus data exists before accessing coordinates
-      if (!this.campusData[campusKey]?.coordinates) {
-        return [];
-      }
-  
-      const places = await this.getPlaces(this.campusData[campusKey].coordinates, 250, 'restaurant')
-        .catch(() => []); // Catch any error and return an empty array
-  
-      return places.map(place => ({
-        name: place.name ?? 'No name available',
-        coordinates: place.geometry?.location as google.maps.LatLng, 
-        address: place.vicinity ?? 'No address available',
-        image: place.photos?.[0]?.getUrl() ?? 'default-image-url.jpg'
-      }));
-    } catch (error) {
-      console.error('Error fetching points of interest:', error);
-      return [];
-    }
+    const campusKey = await firstValueFrom(this.store.select(selectSelectedCampus));
+    
+    const places = await this.getPlaces(this.campusData[campusKey]?.coordinates, 250, 'restaurant')
+      .catch(() => []); // Catch any error and return an empty array
+
+    return places.map(place => ({
+      name: place.name ?? 'No name available',
+      coordinates: place.geometry?.location as google.maps.LatLng, 
+      address: place.vicinity ?? 'No address available',
+      image: place.photos?.[0]?.getUrl() ?? 'default-image-url.jpg'
+    }));
   }  
 
   /**
