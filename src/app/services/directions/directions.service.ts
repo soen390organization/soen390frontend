@@ -1,12 +1,22 @@
 import { Injectable } from '@angular/core';
 import { Step } from '../../interfaces/step.interface';
 
+interface Location {
+  title: string;
+  address: string;
+  coordinates: google.maps.LatLng;
+  image?: string;
+  marker?: google.maps.Marker;
+}
+
 @Injectable({
   providedIn: 'root',
 })
 export class DirectionsService {
   private directionsService!: google.maps.DirectionsService;
   private directionsRenderer!: google.maps.DirectionsRenderer;
+  private startPoint?: Location;
+  private destinationPoint?: Location;
 
   constructor() {}
 
@@ -26,6 +36,62 @@ export class DirectionsService {
   getDirectionsRenderer(): google.maps.DirectionsRenderer {
     return this.directionsRenderer;
   }
+
+  getStartPoint(): Location | null {
+    return this.startPoint;
+  }
+  
+  setStartPoint(location: Location): void {
+    const marker = this.startPoint?.marker ?? new google.maps.Marker({
+      position: location.coordinates,
+      map: this.directionsRenderer.getMap(),
+      icon: { 
+        url: 'https://upload.wikimedia.org/wikipedia/commons/8/8e/Icone_Verde.svg', 
+        scaledSize: new google.maps.Size(40, 40) 
+      }
+    });
+  
+    marker.setPosition(location.coordinates);
+
+    this.startPoint = { ...location, marker };
+    this.updateMapView();
+  }
+  
+  setDestinationPoint(location: Location): void {
+    const marker = this.destinationPoint?.marker ?? new google.maps.Marker({
+      position: location.coordinates,
+      map: this.directionsRenderer.getMap(),
+      icon: { 
+        url: 'https://upload.wikimedia.org/wikipedia/commons/8/8e/Icone_Verde.svg', 
+        scaledSize: new google.maps.Size(40, 40) 
+      }
+    });
+  
+    marker.setPosition(location.coordinates);
+
+    this.destinationPoint = { ...location, marker };
+    this.updateMapView();
+  }
+
+  private updateMapView() {
+    const map = this.directionsRenderer.getMap();
+  
+    const { startPoint, destinationPoint } = this;
+  
+    if (startPoint && destinationPoint) {
+      this.calculateRoute(this.startPoint.address, this.destinationPoint.address, google.maps.TravelMode.WALKING);
+      const bounds = new google.maps.LatLngBounds();
+      bounds.extend(startPoint.marker.getPosition()!);
+      bounds.extend(destinationPoint.marker.getPosition()!);
+      map.fitBounds(bounds);
+    } else {
+      const point = startPoint ?? destinationPoint;
+      if (point) {
+        map.setCenter(point.marker.getPosition()!);
+        map.setZoom(18);
+      }
+    }
+  }  
 
   /**
    *

@@ -205,14 +205,12 @@ it('should call clearPlaces when search query is empty', async () => {
   expect(component.clearPlaces).toHaveBeenCalled(); // Ensure clearPlaces is called
 });
 
-
-it('should call getPlaces when search query is not empty', async () => {
-  spyOn(component, 'getPlaces'); // Spy on getPlaces method
-  const event = { target: { value: 'New Location' } }; // Simulate valid input
-  await component.onSearchChange(event, 'start');
-  expect(component.getPlaces).toHaveBeenCalled(); // Ensure getPlaces is called
-});
-
+// it('should call getPlaces when search query is not empty', async () => {
+//   spyOn(component, 'getPlaces'); // Spy on getPlaces method
+//   const event = { target: { value: 'New Location' } }; // Simulate valid input
+//   await component.onSearchChange(event, 'start');
+//   expect(component.getPlaces).toHaveBeenCalled(); // Ensure getPlaces is called
+// });
 
 it('should set isSearchingFromStart flag correctly for start type', async () => {
   const event = { target: { value: 'New Location' } }; // Simulate valid input

@@ -35,6 +35,57 @@ export class PlacesService {
     return this.placesServiceReady.asObservable();
   }
 
+  public async getPlaceSuggestions(input: string): Promise<{ title: string; address: string; coordinates: google.maps.LatLng }[]> {
+    const campusKey = await firstValueFrom(this.store.select(selectSelectedCampus));
+    
+    if (!this.campusData[campusKey]?.coordinates) {
+      return [];
+    }
+  
+    return new Promise((resolve) => {
+      let autocompleteService = new google.maps.places.AutocompleteService();
+  
+      autocompleteService.getPlacePredictions(
+        {
+          input,
+          componentRestrictions: { country: "CA" },
+          locationBias: new google.maps.Circle({
+            center: new google.maps.LatLng(this.campusData[campusKey]?.coordinates),
+            radius: 500,
+          }),
+        },
+        async (predictions, status) => {
+          if (status !== "OK" || !predictions) {
+            return resolve([]);
+          }
+  
+          const placeDetailsPromises = predictions.map((prediction) =>
+            new Promise<{ title: string; address: string; coordinates: google.maps.LatLng }>((detailResolve) => {
+              this.placesService.getDetails(
+                { placeId: prediction.place_id, fields: ["geometry", "formatted_address", "address_components"] },
+                (place, detailsStatus) => {
+                  if (detailsStatus === "OK" && place?.geometry?.location) {
+                    detailResolve({
+                      title: prediction.structured_formatting.main_text,
+                      address: place.formatted_address,
+                      coordinates: new google.maps.LatLng({
+                        lat: place.geometry.location.lat(),
+                        lng: place.geometry.location.lng(),
+                      }),
+                    });
+                  }
+                }
+              );
+            })
+          );
+  
+          const results = await Promise.all(placeDetailsPromises);
+          resolve(results);
+        }
+      );
+    });
+  }  
+
   /**
    * Retrieves the buildings on the selected campus from the store.
    * @returns A promise resolving to an array of LocationCard objects representing campus buildings.
@@ -78,7 +129,7 @@ export class PlacesService {
       console.error('Error fetching points of interest:', error);
       return [];
     }
-  }  
+  }
 
   /**
    * Retrieves places from Google Places API based on location, radius, and type.

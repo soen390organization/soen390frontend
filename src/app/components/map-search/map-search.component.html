@@ -17,7 +17,7 @@
         <input
         [(ngModel)]="startLocationInput"
         (input)="onSearchChange($event, 'start')"  
-        (keyup.enter)="onSearchFromInput(startLocationInput, $event, 'start')" 
+        (keyup.enter)="directionsService.setStartPoint(places[0]); clearList()" 
         type="text" 
         placeholder="Choose starting point..." 
         debounce="1000"
@@ -25,8 +25,8 @@
       />
       
       <div *ngIf="isSearchingFromStart" class="absolute w-full mt-1 z-10">
-        <ion-list *ngIf="places?.length > 0">
-          <ion-item *ngFor="let place of places" (click)="selectPlace(place,'start')">
+        <ion-list *ngIf="places?.length > 0" class="rounded-b-xl">
+          <ion-item *ngFor="let place of places" (click)="directionsService.setStartPoint(place); clearList()">
             <ion-icon name="location-outline" slot="start"></ion-icon>
             <ion-label>
               {{ place?.title }}
@@ -53,14 +53,14 @@
       <input
         [(ngModel)]="destinationLocationInput"
         (input) = "onSearchChange($event,'destination')"
-        (keyup.enter)="onSearchFromInput(destinationLocationInput, $event,'destination')" 
+        (keyup.enter)="directionsService.setDestinationPoint(places[0]); clearList()" 
         type="text" 
         placeholder="Choose destination point..." 
         class="mt-2 w-full bg-white px-4 py-3 rounded-full border border-gray-300 focus:outline-none pr-10"
       />
       <div *ngIf="!isSearchingFromStart" class="absolute w-full mt-1 z-10">
         <ion-list *ngIf="places?.length > 0">
-          <ion-item *ngFor="let place of places" (click)="selectPlace(place, 'destination')">
+          <ion-item *ngFor="let place of places" (click)="directionsService.setDestinationPoint(place); clearList()">
             <ion-icon name="location-outline" slot="start"></ion-icon>
             <ion-label>
               {{ place?.title }}

@@ -8,7 +8,6 @@ import { DirectionsService } from './directions/directions.service';
 export class GoogleMapService {
   private map!: google.maps.Map;
 
-
   constructor(private directionsService: DirectionsService, private placesService: PlacesService) {}
 
   initialize(map: google.maps.Map) {
