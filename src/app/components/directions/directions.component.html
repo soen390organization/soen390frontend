@@ -1,13 +1,9 @@
-<div class="flex justify-between items-center mb-2">
-  <h2 class="text-2xl font-semibold">Directions</h2>
-</div>
-
 <!-- Transportation Mode Selector -->
 <div class="flex items-center space-x-2 mb-3">
   <div class="flex space-x-2 flex-grow">
     <button
       *ngFor="let transport of transportModes"
-      class="px-3 py-2 rounded-md"
+      class="px-6 py-1 rounded-md"
       [ngClass]="selectedMode === transport.mode ? 'bg-black' : 'bg-gray-200'"
       (click)="setMode(transport.mode, $event)"
     >
@@ -23,9 +19,9 @@
 
   <!-- End Button -->
   <button
-    class="bg-red-600 text-white px-3 py-2 rounded-md hover:bg-red-700 transition ml-auto w-[48px] h-[45px] flex items-center justify-center"
+    class="bg-red-600 text-white px-3 py-2 rounded-md hover:bg-red-700 transition ml-auto w-[80px] h-[45px] flex items-center justify-center"
     >
-    End
+    <b>End</b>
   </button>
 </div>
 
