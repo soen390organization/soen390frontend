@@ -3,7 +3,7 @@
   <div class="flex space-x-2 flex-grow">
     <button
       *ngFor="let transport of transportModes"
-      class="px-6 py-1 rounded-md"
+      class="px-3 py-1 rounded-md"
       [ngClass]="selectedMode === transport.mode ? 'bg-black' : 'bg-gray-200'"
       (click)="setMode(transport.mode, $event)"
     >
@@ -19,9 +19,9 @@
 
   <!-- End Button -->
   <button
-    class="bg-red-600 text-white px-3 py-2 rounded-md hover:bg-red-700 transition ml-auto w-[80px] h-[45px] flex items-center justify-center"
+    class="bg-red-600 text-white font-bold text-lg px-3 py-2 rounded-md hover:bg-red-700 transition ml-auto w-[80px] h-[45px] flex items-center justify-center"
     >
-    <b>End</b>
+    End
   </button>
 </div>
 
