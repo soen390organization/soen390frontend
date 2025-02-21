@@ -1,9 +1,10 @@
 <!-- Transportation Mode Selector -->
-<div class="flex items-center space-x-2 mb-3">
-  <div class="flex space-x-2 flex-grow">
-    <button
+<div class="relative flex items-center mb-3 w-full">
+  <div class="relative flex-grow overflow-hidden flex-shrink min-w-0">
+    <div class="flex space-x-2 overflow-x-auto scrollbar-hide">
+      <button
       *ngFor="let transport of transportModes"
-      class="px-3 py-1 rounded-md"
+      class="px-3 py-1 rounded-md w-[64px] h-[32px] flex-shrink-0"
       [ngClass]="selectedMode === transport.mode ? 'bg-black' : 'bg-gray-200'"
       (click)="setMode(transport.mode, $event)"
     >
@@ -16,13 +17,16 @@
       </span>
     </button>
   </div>
+</div>
+
 
   <!-- End Button -->
-  <button
-    class="bg-red-600 text-white font-bold text-lg px-3 py-2 rounded-md hover:bg-red-700 transition ml-auto w-[80px] h-[45px] flex items-center justify-center"
+    <button
+    class="mt-3 w-[76px] h-[48px] bg-red-600 text-white font-bold text-lg px-3 py-2 rounded-md hover:bg-red-700 transition flex-shrink-0 ml-2"
     >
     End
-  </button>
+    </button>
+
 </div>
 
  <!-- Loading State -->
