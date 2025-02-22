@@ -10,10 +10,11 @@ import { PlacesService } from 'src/app/services/places.service';
 import { selectSelectedCampus } from 'src/app/store/app';
 import { LocationCard } from 'src/app/interfaces/location-card.interface';
 import { filter, forkJoin, switchMap } from 'rxjs';
+import { DirectionsComponent } from '../directions/directions.component';
 
 @Component({
   selector: 'app-interaction-bar',
-  imports: [LocationCardsComponent],
+  imports: [LocationCardsComponent, DirectionsComponent],
   templateUrl: './interaction-bar.component.html',
   styleUrls: ['./interaction-bar.component.scss']
 })
