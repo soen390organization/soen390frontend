@@ -37,11 +37,16 @@
 
 <!-- Navigation Instruction -->
 <div *ngIf="!isLoading && steps.length > 0">
-  <div class="flex items-center">
-    <span class="material-symbols-outlined md-48">turn_left</span>
-    <span class="ml-3 text-xl font-semibold">{{ steps[0].instructions }}</span>
+  <div *ngFor="let step of steps" class="flex items-center mb-2">
+    <span class="material-symbols-outlined">turn_left</span>
+    <!-- <span class="ml-3 text-xl font-semibold text-black">{{ step.instructions }}</span> -->
+    <div
+    class="ml-3 text-xl font-semibold text-black text-left"
+    [innerHTML]="step.instructions"
+    ></div>
   </div>
 </div>
+
 
 <!-- No Directions Available -->
 <div *ngIf="!isLoading && steps.length === 0" class="text-gray-500 text-center mt-3">

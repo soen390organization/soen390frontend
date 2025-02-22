@@ -104,6 +104,7 @@ export class DirectionsService {
                 steps.push({
                   instructions: step.instructions, // "Turn right onto Main St."
                   start_location: step.start_location,
+                  end_location: step.end_location,
                   distance: step.distance,
                   duration: step.duration,
                   transit_details: step.transit_details,
