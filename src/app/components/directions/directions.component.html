@@ -40,7 +40,7 @@
   <!-- Show steps based on component's position -->
   <div *ngIf="!isLoading && steps.length > 0">
     <div *ngFor="let step of (showAllSteps ? steps : [steps[0]])" class="flex items-center mb-2">
-      <span class="material-symbols-outlined">turn_left</span>
+      <span class="material-symbols-outlined">{{ getDirectionIcon(step.instructions) }}</span>
       <div
         class="ml-3 text-xl font-semibold text-black text-left"
         [innerHTML]="step.instructions"
