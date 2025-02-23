@@ -35,20 +35,28 @@
   <span class="ml-2 text-lg text-gray-600">Loading directions...</span>
 </div>
 
-<!-- Navigation Instruction -->
-<div *ngIf="!isLoading && steps.length > 0">
-  <div *ngFor="let step of steps" class="flex items-center mb-2">
-    <span class="material-symbols-outlined">turn_left</span>
-    <!-- <span class="ml-3 text-xl font-semibold text-black">{{ step.instructions }}</span> -->
-    <div
-    class="ml-3 text-xl font-semibold text-black text-left"
-    [innerHTML]="step.instructions"
-    ></div>
+<!-- Bind ViewChild reference -->
+<div #directionsContainer>
+  <!-- Show steps based on component's position -->
+  <div *ngIf="!isLoading && steps.length > 0">
+    <div *ngFor="let step of (showAllSteps ? steps : [steps[0]])" class="flex items-center mb-2">
+      <span class="material-symbols-outlined">turn_left</span>
+      <div
+        class="ml-3 text-xl font-semibold text-black text-left"
+        [innerHTML]="step.instructions"
+      ></div>
+    </div>
+  </div>
+
+  <!-- Show arrival message when all steps are completed -->
+  <div *ngIf="!isLoading && hasArrived" class="text-center text-xl font-bold text-green-600">
+    You have arrived at your destination!
+  </div>
+
+  <!-- No Directions Available -->
+  <div *ngIf="!isLoading && steps.length === 0 && !hasArrived" class="text-gray-500 text-center mt-3">
+    No directions available.
   </div>
 </div>
 
 
-<!-- No Directions Available -->
-<div *ngIf="!isLoading && steps.length === 0" class="text-gray-500 text-center mt-3">
-  No directions available.
-</div>

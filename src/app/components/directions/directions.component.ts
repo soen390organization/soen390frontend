@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewInit, Component, OnInit, OnDestroy } from '@angular/core';
+import { AfterViewInit, Component, OnInit, OnDestroy, ViewChild, ElementRef, NgZone } from '@angular/core';
 import { Step } from 'src/app/interfaces/step.interface';
 import { CurrentLocationService } from 'src/app/services/geolocation/current-location.service';
 import { DirectionsService } from 'src/app/services/directions/directions.service';
@@ -14,12 +14,17 @@ import { DirectionsService } from 'src/app/services/directions/directions.servic
 
 })
 
-export class DirectionsComponent implements OnInit {
+export class DirectionsComponent implements OnInit, OnDestroy {
+  @ViewChild('directionsContainer') directionsContainer!: ElementRef;
+
   steps: Step[] = [];
   eta: string | null = null;
   selectedMode: string = 'WALKING';
   isLoading: boolean = false;
   currentWatchId: string | null = null;
+  hasArrived: boolean = false; // New boolean to track arrival
+  showAllSteps: boolean = true;
+
   private readonly stepCompletionThreshold = 30;
 
   startLocation: string = "McGill University, Montreal, QC";
@@ -35,12 +40,72 @@ export class DirectionsComponent implements OnInit {
 
   constructor(
     private directionsService: DirectionsService,
-    private currentLocationService: CurrentLocationService
+    private currentLocationService: CurrentLocationService,
+    private ngZone: NgZone // Ensures updates are inside Angular’s zone
+
   ) {}
 
+
+
   ngOnInit(): void {
-    this.setMode('WALKING'); // Automatically loads walking directions
-    this.startWatchingLocation();
+    this.waitForGoogleMaps().then(() => {
+      console.log("Google Maps is ready! Initializing directions...");
+      this.setMode('WALKING'); // Load directions only after Google Maps is ready
+      this.startWatchingLocation();
+    });
+  }
+
+  /**
+   * Waits for the Google Maps API to be fully loaded before proceeding.
+   */
+  waitForGoogleMaps(): Promise<void> {
+    return new Promise((resolve) => {
+      const checkGoogleMaps = () => {
+        if (typeof google !== 'undefined' && google.maps) {
+          resolve();
+        } else {
+          console.warn("Google Maps API not ready yet. Retrying...");
+          setTimeout(checkGoogleMaps, 200); // Retry every 200ms
+        }
+      };
+      checkGoogleMaps();
+    });
+  }
+
+
+  ngAfterViewInit(): void {
+    this.observeComponentPosition();
+  }
+
+  /**
+ * Continuously checks the component's Y position and updates `showAllSteps`.
+ */
+private observeComponentPosition(): void {
+  const updatePosition = () => {
+    this.updateShowAllSteps();
+    requestAnimationFrame(updatePosition); // Efficient continuous tracking
+  };
+
+  requestAnimationFrame(updatePosition);
+}
+
+/**
+ * Updates `showAllSteps` based on the component's Y position relative to the viewport.
+ */
+private updateShowAllSteps(): void {
+  if (!this.directionsContainer) return;
+
+  const componentRect = this.directionsContainer.nativeElement.getBoundingClientRect();
+  const screenHeight = window.innerHeight;
+  const triggerPoint = screenHeight / 2; // Adjust this threshold if needed
+
+  this.showAllSteps = componentRect.top < triggerPoint;
+
+}
+  ngOnDestroy(): void {
+    if (this.currentWatchId) {
+      this.currentLocationService.clearWatch(this.currentWatchId);
+    }
   }
 
   startWatchingLocation(): void {
@@ -57,16 +122,26 @@ export class DirectionsComponent implements OnInit {
   onPositionUpdate(position: { lat: number; lng: number }): void {
     if (this.steps.length === 0) return;
 
-    // Assuming each step has an end_location property with lat and lng.
     const currentStep = this.steps[0];
-    const stepLat = currentStep.end_location.lat();
-    const stepLng = currentStep.end_location.lng();
 
-    const distance = this.calculateDistance(position.lat, position.lng, stepLat, stepLng);
+    if (!currentStep.end_location) {
+      console.warn("Missing end location in step:", currentStep);
+      return;
+    }
 
-    // If the user is within the threshold, consider the step complete and remove it.
+    const stepLat = currentStep.end_location.lat;
+    const stepLng = currentStep.end_location.lng;
+    const distance = this.calculateDistance(position.lat, position.lng, stepLat(), stepLng());
+
+    console.log(`Current distance to next step: ${distance.toFixed(2)} meters`);
+
     if (distance < this.stepCompletionThreshold) {
+      console.log("Step completed. Moving to next step.");
       this.steps.shift();
+
+      if (this.steps.length === 0) {
+        this.hasArrived = true;
+      }
     }
   }
 
@@ -94,6 +169,7 @@ export class DirectionsComponent implements OnInit {
    */
   loadDirections(mode: string) {
     this.isLoading = true;
+    this.hasArrived = false; // Reset arrival status when loading new directions
     const travelMode = this.directionsService.getTravelMode(mode); // Convert string to enum
 
     this.directionsService
