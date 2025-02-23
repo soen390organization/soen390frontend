@@ -3,6 +3,9 @@ import { AfterViewInit, Component, OnInit, OnDestroy } from '@angular/core';
 import { Step } from 'src/app/interfaces/step.interface';
 import { CurrentLocationService } from 'src/app/services/geolocation/current-location.service';
 import { DirectionsService } from 'src/app/services/directions/directions.service';
+import { IconMapping } from 'src/app/interfaces/Icon-mapping';
+import rawIconMapping from 'src/assets/icon-mapping.json';
+const iconMapping = rawIconMapping as IconMapping;
 
 /// <reference types="google.maps" />
 
@@ -117,5 +120,30 @@ export class DirectionsComponent implements OnInit {
     this.selectedMode = mode;
     this.loadDirections(mode);
   }
+
+  getDirectionIcon(instructions: string): string {
+    // Remove HTML tags
+    const plainText = instructions.replace(/<[^>]*>/g, '');
+    const lowerText = plainText.toLowerCase();
+  
+    // Check directions mapping.
+    for (const key in iconMapping.directions_to_symbols) {
+      if (lowerText.includes(key)) {
+        return iconMapping.directions_to_symbols[key];
+      }
+    }
+  
+    // Check transit mapping.
+    for (const key in iconMapping.transit_to_symbols) {
+      if (lowerText.includes(key)) {
+        return iconMapping.transit_to_symbols[key];
+      }
+    }
+  
+    // Fallback icon.
+    return 'help_outline';
+  }
+   
+  
 }
 

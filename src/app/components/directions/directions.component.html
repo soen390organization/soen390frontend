@@ -38,7 +38,11 @@
 <!-- Navigation Instruction -->
 <div *ngIf="!isLoading && steps.length > 0">
   <div *ngFor="let step of steps" class="flex items-center mb-2">
-    <span class="material-symbols-outlined">turn_left</span>
+    <!-- Display the matched icon -->
+    <span class="material-symbols-outlined">
+      {{ getDirectionIcon(step.instructions) }}
+    </span>
+    <!-- <span class="material-symbols-outlined">turn_left</span> -->
     <!-- <span class="ml-3 text-xl font-semibold text-black">{{ step.instructions }}</span> -->
     <div
     class="ml-3 text-xl font-semibold text-black text-left"
