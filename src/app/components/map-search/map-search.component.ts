@@ -1,4 +1,4 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { GoogleMapComponent } from '../google-map/google-map.component';
 import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
@@ -36,7 +36,7 @@ import { PlacesService } from 'src/app/services/places.service';
     ]),
   ],
 })
-export class MapSearchComponent {
+export class MapSearchComponent implements OnInit {
   @ViewChild(GoogleMapComponent) googleMap!: GoogleMapComponent;
   startLocationInput = '';
   destinationLocationInput = '';
@@ -45,6 +45,13 @@ export class MapSearchComponent {
   isSearchingFromStart: boolean = false; // Flag to determine if the search is for the start or destination location
 
   constructor(public directionsService: DirectionsService, private placesService: PlacesService, private currentLocationService: CurrentLocationService) {}
+
+  ngOnInit(): void {
+    this.directionsService.getDestinationPoint().subscribe(destination => {
+      this.destinationLocationInput = destination.title;
+      this.isSearchVisible = true;
+    });    
+  }
 
   toggleSearch() {
     this.isSearchVisible = !this.isSearchVisible;
