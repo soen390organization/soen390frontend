@@ -199,27 +199,32 @@ private updateShowAllSteps(): void {
 
   getDirectionIcon(instructions: string): string {
     // Remove HTML tags
-    const plainText = instructions.replace(/<[^>]*>/g, '');
+    // Create a new DOM parser
+    const parser = new DOMParser();
+    // Parse the instructions as HTML
+    const doc = parser.parseFromString(instructions, 'text/html');
+    // Extract the text content, which removes all HTML tags
+    const plainText = doc.body.textContent || '';
     const lowerText = plainText.toLowerCase();
-  
+
     // Check directions mapping.
     for (const key in iconMapping.directions_to_symbols) {
       if (lowerText.includes(key)) {
         return iconMapping.directions_to_symbols[key];
       }
     }
-  
+
     // Check transit mapping.
     for (const key in iconMapping.transit_to_symbols) {
       if (lowerText.includes(key)) {
         return iconMapping.transit_to_symbols[key];
       }
     }
-  
+
     // Fallback icon.
     return 'help_outline';
   }
-   
-  
+
+
 }
 
