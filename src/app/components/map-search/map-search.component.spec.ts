@@ -8,7 +8,6 @@ import { provideAnimations } from '@angular/platform-browser/animations';
 import { CurrentLocationService } from 'src/app/services/geolocation/current-location.service';
 
 // Mock Google Maps API
-// ✅ Updated MockGoogleMapService with getMap()
 class MockGoogleMapService {
   updateMapLocation = jasmine.createSpy('updateMapLocation');
   getMap = jasmine.createSpy('getMap').and.returnValue({
@@ -16,6 +15,14 @@ class MockGoogleMapService {
     setCenter: jasmine.createSpy('setCenter'),
     setZoom: jasmine.createSpy('setZoom'),
   });
+  createMarker = jasmine.createSpy('createMarker').and.callFake(
+    (position: google.maps.LatLng, iconUrl: string) => ({
+      setPosition: jasmine.createSpy('setPosition'),
+      getPosition: jasmine.createSpy('getPosition').and.returnValue(position),
+      getIcon: jasmine.createSpy('getIcon').and.returnValue(iconUrl),
+      setMap: jasmine.createSpy('setMap'),
+    })
+  );
 }
 
 describe('MapSearchComponent', () => {
@@ -31,14 +38,22 @@ describe('MapSearchComponent', () => {
         },
         Marker: class {
           position: any;
+          icon: any;
           constructor(options: any) {
             this.position = options.position;
+            this.icon = options.icon || 'default-icon.svg';
           }
           getPosition() {
             return this.position;
           }
           setPosition(pos: any) {
             this.position = pos;
+          }
+          getIcon() {
+            return this.icon;
+          }
+          setIcon(icon: any) {
+            this.icon = icon;
           }
         },
         Geocoder: class {
@@ -86,11 +101,12 @@ describe('MapSearchComponent', () => {
       },
     };
   });
-  
+
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [IonicModule, CommonModule, FormsModule, MapSearchComponent], // FIX: MapSearchComponent moved to imports
+      imports: [IonicModule, CommonModule, FormsModule, MapSearchComponent], // FIX: Removed MapSearchComponent from imports
+      //declarations: [MapSearchComponent], // FIX: MapSearchComponent should be declared here
       providers: [
         { provide: GoogleMapService, useClass: MockGoogleMapService },
         provideAnimations(),
@@ -116,36 +132,50 @@ describe('MapSearchComponent', () => {
     expect(component.isSearchVisible).toBeFalse();
   });
 
-  it('should not search if input is empty', () => {
-    spyOn(component, 'onSearch');
+  it('should not search if input is empty', fakeAsync(() => {
+    component.findPlace = jasmine.createSpy('findPlace');
 
     const emptyEvent = { target: { value: '' } };
     component.onSearchChangeStart(emptyEvent);
-    expect(component.onSearch).not.toHaveBeenCalled();
-
     component.onSearchChangeDestination(emptyEvent);
-    expect(component.onSearch).not.toHaveBeenCalled();
-  });
 
-  it('should call onSearch with correct icon for start location', () => {
-    spyOn(component, 'onSearch');
+    tick();
+    expect(component.findPlace).not.toHaveBeenCalled();
+  }));
+
+  it('should call onSearchChangeStart with correct icon for start location', fakeAsync(() => {
     const event = { target: { value: 'New York' } };
+    spyOn(component, 'onSearchChangeStart').and.callThrough();
     component.onSearchChangeStart(event);
-    expect(component.onSearch).toHaveBeenCalledWith(
-      jasmine.any(Object),
-      'https://upload.wikimedia.org/wikipedia/commons/8/8e/Icone_Verde.svg'
-    );
-  });
 
-  it('should call onSearch with correct icon for destination', () => {
-    spyOn(component, 'onSearch');
+    tick();
+    expect(component.onSearchChangeStart).toHaveBeenCalledWith(event);
+    // Ensure correct marker icon is passed
+    expect(component.startLocation?.marker).toBeDefined()
+
+    const icon = component.startLocation?.marker.getIcon();
+    const iconUrl = typeof icon === 'object' && icon !== null && 'url' in icon ? (icon as { url: string }).url : icon;
+
+    expect(iconUrl).toEqual('https://upload.wikimedia.org/wikipedia/commons/8/8e/Icone_Verde.svg');
+
+
+  }));
+
+  it('should call onSearchChangeDestination with correct icon for destination', fakeAsync(() => {
     const event = { target: { value: 'Los Angeles' } };
+    spyOn(component, 'onSearchChangeDestination').and.callThrough();
     component.onSearchChangeDestination(event);
-    expect(component.onSearch).toHaveBeenCalledWith(
-      jasmine.any(Object),
-      'https://upload.wikimedia.org/wikipedia/commons/6/64/Icone_Vermelho.svg'
-    );
-  });
+
+    tick();
+    expect(component.onSearchChangeDestination).toHaveBeenCalledWith(event);
+    expect(component.destinationLocation?.marker).toBeDefined();
+    const icon = component.destinationLocation?.marker.getIcon();
+    const iconUrl = typeof icon === 'object' && icon !== null && 'url' in icon ? (icon as { url: string }).url : icon;
+
+    expect(iconUrl).toEqual('https://upload.wikimedia.org/wikipedia/commons/6/64/Icone_Vermelho.svg');
+
+
+  }));
 
   it('should create start marker in onSetUsersLocationAsStart', fakeAsync(() => {
     spyOn(CurrentLocationService.prototype, 'getCurrentLocation').and.returnValue(
@@ -153,23 +183,27 @@ describe('MapSearchComponent', () => {
     );
     component.onSetUsersLocationAsStart();
     tick();
-    expect(component.startMarker).toBeDefined();
-    expect(googleMapService.updateMapLocation).toHaveBeenCalled();
+    expect(component.startLocation?.marker).toBeDefined();
+    expect(googleMapService.getMap).toHaveBeenCalled();
   }));
 
-  it('should update marker in onSearch when valid search term is provided (start marker)', fakeAsync(() => {
+  it('should update marker in onSearchChangeStart when valid search term is provided', fakeAsync(() => {
     const fakeEvent = { target: { value: 'New York' } };
-    component.onSearch(fakeEvent, 'https://upload.wikimedia.org/wikipedia/commons/8/8e/Icone_Verde.svg');
+    spyOn(component, 'findPlace').and.returnValue(Promise.resolve({ formatted_address: 'New York', geometry: { location: { lat: () => 10, lng: () => 20 } } }));
+    component.onSearchChangeStart(fakeEvent);
+
     tick();
-    expect(googleMapService.updateMapLocation).toHaveBeenCalled();
-    expect(component.startMarker).toBeDefined();
+    expect(googleMapService.getMap).toHaveBeenCalled();
+    expect(component.startLocation?.marker).toBeDefined();
   }));
 
-  it('should update marker in onSearch when valid search term is provided (destination marker)', fakeAsync(() => {
+  it('should update marker in onSearchChangeDestination when valid search term is provided', fakeAsync(() => {
     const fakeEvent = { target: { value: 'Los Angeles' } };
-    component.onSearch(fakeEvent, 'https://upload.wikimedia.org/wikipedia/commons/6/64/Icone_Vermelho.svg');
+    spyOn(component, 'findPlace').and.returnValue(Promise.resolve({ formatted_address: 'Los Angeles', geometry: { location: { lat: () => 10, lng: () => 20 } } }));
+    component.onSearchChangeDestination(fakeEvent);
+
     tick();
-    expect(googleMapService.updateMapLocation).toHaveBeenCalled();
-    expect(component.destinationMarker).toBeDefined();
+    expect(googleMapService.getMap).toHaveBeenCalled();
+    expect(component.destinationLocation?.marker).toBeDefined();
   }));
 });
