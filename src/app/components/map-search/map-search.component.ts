@@ -44,26 +44,24 @@ export class MapSearchComponent {
   places: any[]=[]; // Array to store the search suggestions
   isSearchingFromStart: boolean = false; // Flag to determine if the search is for the start or destination location
 
-  constructor(public directionsService: DirectionsService, private placesService: PlacesService) {}
+  constructor(public directionsService: DirectionsService, private placesService: PlacesService, private currentLocationService: CurrentLocationService) {}
 
   toggleSearch() {
     this.isSearchVisible = !this.isSearchVisible;
   }
-  
-  onSetUsersLocationAsStart() {
-    const currentLocationService = new CurrentLocationService();
-    currentLocationService.getCurrentLocation().then((position) => {
-      console.log(position)
-      if (position == null) throw new Error('Current location is null.');
 
-      this.directionsService.setStartPoint({
-        title: 'Your Location',
-        address: String(position.lat) + ', ' + String(position.lng),
-        coordinates: new google.maps.LatLng(position)
-      });
-      console.log(this.directionsService.getStartPoint());
+  async onSetUsersLocationAsStart(): Promise<void> {
+    const position = await this.currentLocationService.getCurrentLocation();
+    if (position == null) {
+      throw new Error('Current location is null.');
+    }
+    this.directionsService.setStartPoint({
+      title: 'Your Location',
+      address: `${position.lat}, ${position.lng}`,
+      coordinates: new google.maps.LatLng(position)
     });
   }
+  
 
   async onSearchChange(event: any, type: 'start' | 'destination') {
     this.isSearchingFromStart = type === 'start'; // Set the flag to 'start' or 'destination'
