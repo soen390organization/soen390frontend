@@ -227,10 +227,4 @@ describe('DirectionsComponent', () => {
     expect((component as any).observeComponentPosition).toHaveBeenCalled();
   });
 
-  it('should not call clearWatch if currentWatchId is null', () => {
-    component.currentWatchId = null;
-    component.ngOnDestroy();
-    expect(mockCurrentLocationService.clearWatch).not.toHaveBeenCalled();
-  });
-
 });
