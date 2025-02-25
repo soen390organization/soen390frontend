@@ -107,6 +107,25 @@ export class DirectionsService {
   }  
 
   /**
+   * Converts a string (e.g., "WALKING") into a google.maps.TravelMode enum.
+   */
+  getTravelMode(mode: string): google.maps.TravelMode {
+    switch (mode.toUpperCase()) {
+      case 'WALKING':
+        return google.maps.TravelMode.WALKING;
+      case 'TRANSIT':
+        return google.maps.TravelMode.TRANSIT;
+      case 'DRIVING':
+        return google.maps.TravelMode.DRIVING;
+      case 'BICYCLING':
+        return google.maps.TravelMode.BICYCLING;
+      default:
+        console.warn(`Invalid travel mode: ${mode}, defaulting to WALKING`);
+        return google.maps.TravelMode.WALKING;
+    }
+  }
+
+  /**
    *
    * @param startAddress
    * @param destinationAddress
@@ -128,8 +147,8 @@ export class DirectionsService {
     eta: string
    */
   calculateRoute(
-    startAddress: string,
-    destinationAddress: string,
+    startAddress: string|google.maps.LatLng,
+    destinationAddress: string|google.maps.LatLng,
     travelMode: google.maps.TravelMode = google.maps.TravelMode.WALKING,
   ): Promise<{
     steps: Step[];
@@ -164,6 +183,7 @@ export class DirectionsService {
                 steps.push({
                   instructions: step.instructions, // "Turn right onto Main St."
                   start_location: step.start_location,
+                  end_location: step.end_location,
                   distance: step.distance,
                   duration: step.duration,
                   transit_details: step.transit_details,
