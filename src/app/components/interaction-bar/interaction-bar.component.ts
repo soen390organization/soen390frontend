@@ -7,6 +7,7 @@ import { IonicModule } from '@ionic/angular';
 import { LocationCardsComponent } from '../location-cards/location-cards.component';
 import { Store } from '@ngrx/store';
 import { PlacesService } from 'src/app/services/places.service';
+import { DirectionsService } from 'src/app/services/directions/directions.service';
 import { selectSelectedCampus } from 'src/app/store/app';
 import { LocationCard } from 'src/app/interfaces/location-card.interface';
 import { filter, forkJoin, switchMap } from 'rxjs';
@@ -25,12 +26,12 @@ export class InteractionBarComponent implements AfterViewInit {
   public currentY = 0;
   public isDragging = false;
   public threshold = 50; // Minimum swipe distance to trigger action
-
+  public showDirections = false;
   isExpanded = false; // Track the footer's state
   campusBuildings = { locations: [] as LocationCard[], loading: true }
   pointsOfInterest = { locations: [] as LocationCard[], loading: true }
 
-  constructor(private store: Store, private placesService: PlacesService) {}
+  constructor(private store: Store, private placesService: PlacesService, private directionsService: DirectionsService) {}
 
   ngOnInit() {
     this.placesService.isInitialized()
@@ -48,6 +49,10 @@ export class InteractionBarComponent implements AfterViewInit {
         this.campusBuildings = { locations: campusBuildings, loading: false };
         this.pointsOfInterest = { locations: pointsOfInterest, loading: false };
       });
+
+      this.directionsService.hasBothPoints$.subscribe((hasBoth) => {
+        this.showDirections = hasBoth;
+      });
   }
 
   ngAfterViewInit(): void {
@@ -59,9 +64,16 @@ export class InteractionBarComponent implements AfterViewInit {
     footer.addEventListener('touchend', () => this.onDragEnd());
 
     // **Mouse Events (Trackpad & Desktop)**
-    footer.addEventListener('mousedown', (event: MouseEvent) => this.onDragStart(event.clientY));
-    document.addEventListener('mousemove', (event: MouseEvent) => this.onDragMove(event.clientY));
-    document.addEventListener('mouseup', () => this.onDragEnd());
+    // footer.addEventListener('mousedown', (event: MouseEvent) => this.onDragStart(event.clientY));
+    // document.addEventListener('mousemove', (event: MouseEvent) => this.onDragMove(event.clientY));
+    // document.addEventListener('mouseup', () => this.onDragEnd());
+  }
+
+  onShowMore() {
+    this.isExpanded = !this.isExpanded;
+    const footer = this.footerContainer.nativeElement;
+    footer.style.transition = 'transform 0.3s ease-out';
+    footer.style.transform = this.isExpanded ? 'translateY(0)' : 'translateY(80%)';
   }
 
   /** Start dragging */

@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { BehaviorSubject, combineLatest, map, Observable } from 'rxjs';
 import { Step } from '../../interfaces/step.interface';
 
 interface Location {
@@ -15,8 +16,9 @@ interface Location {
 export class DirectionsService {
   private directionsService!: google.maps.DirectionsService;
   private directionsRenderer!: google.maps.DirectionsRenderer;
-  private startPoint?: Location;
-  private destinationPoint?: Location;
+  
+  private startPoint$ = new BehaviorSubject<Location | null>(null);
+  private destinationPoint$ = new BehaviorSubject<Location | null>(null);
 
   constructor() {}
 
@@ -37,12 +39,12 @@ export class DirectionsService {
     return this.directionsRenderer;
   }
 
-  getStartPoint(): Location | null {
-    return this.startPoint;
+  getStartPoint(): Observable<Location | null> {
+    return this.startPoint$.asObservable();
   }
-  
+
   setStartPoint(location: Location): void {
-    const marker = this.startPoint?.marker ?? new google.maps.Marker({
+    const marker = this.startPoint$.value?.marker ?? new google.maps.Marker({
       position: location.coordinates,
       map: this.directionsRenderer.getMap(),
       icon: { 
@@ -53,12 +55,16 @@ export class DirectionsService {
   
     marker.setPosition(location.coordinates);
 
-    this.startPoint = { ...location, marker };
+    this.startPoint$.next({ ...location, marker });
     this.updateMapView();
   }
-  
+
+  getDestinationPoint(): Observable<Location | null> {
+    return this.destinationPoint$.asObservable();
+  }
+
   setDestinationPoint(location: Location): void {
-    const marker = this.destinationPoint?.marker ?? new google.maps.Marker({
+    const marker = this.destinationPoint$.value?.marker ?? new google.maps.Marker({
       position: location.coordinates,
       map: this.directionsRenderer.getMap(),
       icon: { 
@@ -69,17 +75,24 @@ export class DirectionsService {
   
     marker.setPosition(location.coordinates);
 
-    this.destinationPoint = { ...location, marker };
+    this.destinationPoint$.next({ ...location, marker });
     this.updateMapView();
+  }
+
+  get hasBothPoints$(): Observable<boolean> {
+    return combineLatest([this.startPoint$, this.destinationPoint$]).pipe(
+      map(([start, destination]) => !!start && !!destination)
+    );
   }
 
   private updateMapView() {
     const map = this.directionsRenderer.getMap();
   
-    const { startPoint, destinationPoint } = this;
+    const startPoint = this.startPoint$.value;
+    const destinationPoint = this.destinationPoint$.value;
   
     if (startPoint && destinationPoint) {
-      this.calculateRoute(this.startPoint.address, this.destinationPoint.address, google.maps.TravelMode.WALKING);
+      this.calculateRoute(startPoint.address, destinationPoint.address, google.maps.TravelMode.WALKING);
       const bounds = new google.maps.LatLngBounds();
       bounds.extend(startPoint.marker.getPosition()!);
       bounds.extend(destinationPoint.marker.getPosition()!);
