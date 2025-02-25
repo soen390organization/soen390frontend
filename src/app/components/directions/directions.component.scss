@@ -1,0 +1,22 @@
+.material-symbols-outlined {
+  font-size: 24px;
+  color: #333;
+}
+
+
+button:focus {
+  outline: none;
+}
+
+.md-48 {
+  font-size: 40px !important;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+

@@ -18,7 +18,7 @@ import { InteractionBarComponent } from "../components/interaction-bar/interacti
     FormsModule,
     IonicModule,
     HomePageRoutingModule,
-    InteractionBarComponent
+    InteractionBarComponent,
 ],
   declarations: [HomePage],
   exports: [GoogleMapComponent]
