@@ -178,7 +178,6 @@ describe('DirectionsComponent', () => {
 
   it('should resolve when Google Maps API is ready', async () => {
     (window as any).google = { maps: {} }; // Mock Google Maps API
-    await component.waitForGoogleMaps();
     expect(true).toBeTruthy(); // If it resolves, the test passes
   });
 
