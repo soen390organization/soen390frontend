@@ -52,6 +52,7 @@ export class InteractionBarComponent implements AfterViewInit {
 
       this.directionsService.hasBothPoints$.subscribe((hasBoth) => {
         this.showDirections = hasBoth;
+        this.isExpanded = false;
       });
   }
 
