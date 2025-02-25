@@ -69,6 +69,7 @@ describe('Directions Service', () => {
                         {
                           instructions: 'Head north',
                           start_location: { lat: () => 45, lng: () => -73 }, // Mocking LatLng functions
+                          end_location: { lat: () => 46, lng: () => -74 }, // Mocking LatLng functions
                           distance: { text: '1 km', value: 1000 },
                           duration: { text: '10 mins', value: 600 },
                           transit_details: null,
@@ -90,6 +91,7 @@ describe('Directions Service', () => {
               Joi.object({
                 instructions: Joi.string().required(),
                 start_location: Joi.any().required(),
+                end_location: Joi.any().required(),
                 distance: Joi.object({
                   text: Joi.string().required(),
                   value: Joi.number().required(),
