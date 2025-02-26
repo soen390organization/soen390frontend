@@ -37,55 +37,60 @@ export class PlacesService {
 
   public async getPlaceSuggestions(input: string): Promise<{ title: string; address: string; coordinates: google.maps.LatLng }[]> {
     const campusKey = await firstValueFrom(this.store.select(selectSelectedCampus));
-    
-    if (!this.campusData[campusKey]?.coordinates) {
+    const campusCoordinates = this.campusData[campusKey]?.coordinates;
+    if (!campusCoordinates) {
       return [];
     }
-  
-    return new Promise((resolve) => {
-      let autocompleteService = new google.maps.places.AutocompleteService();
-  
+
+    const autocompleteService = new google.maps.places.AutocompleteService();
+    const predictions = await new Promise<google.maps.places.AutocompletePrediction[]>((resolve) => {
       autocompleteService.getPlacePredictions(
         {
           input,
           componentRestrictions: { country: "CA" },
           locationBias: new google.maps.Circle({
-            center: new google.maps.LatLng(this.campusData[campusKey]?.coordinates),
+            center: new google.maps.LatLng(campusCoordinates),
             radius: 500,
           }),
         },
-        async (predictions, status) => {
+        (predictions, status) => {
           if (status !== "OK" || !predictions) {
-            return resolve([]);
+            resolve([]);
+          } else {
+            resolve(predictions);
           }
-  
-          const placeDetailsPromises = predictions.map((prediction) =>
-            new Promise<{ title: string; address: string; coordinates: google.maps.LatLng }>((detailResolve) => {
-              this.placesService.getDetails(
-                { placeId: prediction.place_id, fields: ["geometry", "formatted_address", "address_components"] },
-                (place, detailsStatus) => {
-                  if (detailsStatus === "OK" && place?.geometry?.location) {
-                    detailResolve({
-                      title: prediction.structured_formatting.main_text,
-                      address: place.formatted_address,
-                      coordinates: new google.maps.LatLng({
-                        lat: place.geometry.location.lat(),
-                        lng: place.geometry.location.lng(),
-                      }),
-                    });
-                  }
-                }
-              );
-            })
-          );
-  
-          const results = await Promise.all(placeDetailsPromises);
-          resolve(results);
         }
       );
     });
-  }  
 
+    const detailsPromises = predictions.map((prediction) => this.getPlaceDetail(prediction));
+    const details = await Promise.all(detailsPromises);
+    // Filter out any null values (failed details)
+    return details.filter((detail): detail is { title: string; address: string; coordinates: google.maps.LatLng } => detail !== null);
+  }
+
+  private getPlaceDetail(prediction: google.maps.places.AutocompletePrediction): Promise<{ title: string; address: string; coordinates: google.maps.LatLng } | null> {
+    return new Promise((resolve) => {
+      this.placesService.getDetails(
+        { placeId: prediction.place_id, fields: ["geometry", "formatted_address", "address_components"] },
+        (place, status) => {
+          if (status === "OK" && place?.geometry?.location) {
+            resolve({
+              title: prediction.structured_formatting.main_text,
+              address: place.formatted_address,
+              coordinates: new google.maps.LatLng({
+                lat: place.geometry.location.lat(),
+                lng: place.geometry.location.lng(),
+              }),
+            });
+          } else {
+            resolve(null);
+          }
+        }
+      );
+    });
+  }
+ 
   /**
    * Retrieves the buildings on the selected campus from the store.
    * @returns A promise resolving to an array of LocationCard objects representing campus buildings.
