@@ -1,3 +1,4 @@
+import { of } from 'rxjs';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DirectionsComponent } from './directions.component';
 import { Step } from 'src/app/interfaces/step.interface';
@@ -9,7 +10,12 @@ import { DirectionsService } from 'src/app/services/directions/directions.servic
 // Mock services
 const mockDirectionsService = {
   calculateRoute: jasmine.createSpy('calculateRoute').and.returnValue(Promise.resolve({ steps: [], eta: null })),
-  getTravelMode: jasmine.createSpy('getTravelMode').and.returnValue('WALKING')
+  getTravelMode: jasmine.createSpy('getTravelMode').and.returnValue('WALKING'),
+  hasBothPoints$: of(false),
+  getDestinationPoint: jasmine.createSpy('getDestinationPoint').and.returnValue(of({ address: 'destination address', title: 'Destination', coordinates: {} })),
+  getStartPoint: jasmine.createSpy('getStartPoint').and.returnValue(of({ address: 'start address', title: 'Start', coordinates: {} })),
+  setStartPoint: jasmine.createSpy('setStartPoint'),
+  setDestinationPoint: jasmine.createSpy('setDestinationPoint')
 };
 
 const mockCurrentLocationService = {
@@ -23,7 +29,7 @@ describe('DirectionsComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [DirectionsComponent, CommonModule], // Import standalone component here
+      imports: [DirectionsComponent, CommonModule], 
       providers: [
         { provide: DirectionsService, useValue: mockDirectionsService },
         { provide: CurrentLocationService, useValue: mockCurrentLocationService }

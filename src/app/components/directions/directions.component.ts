@@ -165,16 +165,15 @@ private updateShowAllSteps(): void {
     const start = await firstValueFrom(this.directionsService.getStartPoint());
     const destination = await firstValueFrom(this.directionsService.getDestinationPoint());
     
-    this.directionsService.calculateRoute(start.address, destination.address, travelMode) // Pass 3 arguments correctly
-      .then(({ steps, eta }) => {
-        this.steps = steps;
-        this.eta = eta;
-        this.isLoading = false;
-      })
-      .catch((error) => {
-        console.error('Failed to fetch directions:', error);
-        this.isLoading = false;
-      });
+    try {
+      const { steps, eta } = await this.directionsService.calculateRoute(start.address, destination.address, travelMode);
+      this.steps = steps;
+      this.eta = eta;
+    } catch (error) {
+      console.error('Failed to fetch directions:', error);
+    } finally {
+      this.isLoading = false;
+    }
   }
 
   /**

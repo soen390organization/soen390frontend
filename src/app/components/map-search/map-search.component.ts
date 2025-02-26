@@ -48,8 +48,10 @@ export class MapSearchComponent implements OnInit {
 
   ngOnInit(): void {
     this.directionsService.getDestinationPoint().subscribe(destination => {
-      this.destinationLocationInput = destination.title;
-      this.isSearchVisible = true;
+      if (destination) {
+        this.destinationLocationInput = destination.title;
+        this.isSearchVisible = true;
+      }
     });    
   }
 

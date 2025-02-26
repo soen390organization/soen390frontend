@@ -1,3 +1,4 @@
+import { of } from 'rxjs';
 import { ComponentFixture, TestBed, fakeAsync, tick} from '@angular/core/testing';
 import { MapSearchComponent } from './map-search.component';
 import { IonicModule } from '@ionic/angular';
@@ -25,6 +26,10 @@ describe('MapSearchComponent', () => {
       'getStartPoint',
       'getDestinationPoint',
     ]);
+    // Ensure getDestinationPoint() returns an observable
+    directionsServiceSpy.getDestinationPoint.and.returnValue(
+      of({ title: 'Default Destination', address: '', coordinates: null })
+    );
     placesServiceSpy = jasmine.createSpyObj('PlacesService', [
       'getPlaceSuggestions',
     ]);
@@ -38,7 +43,7 @@ describe('MapSearchComponent', () => {
         CommonModule,
         FormsModule,
         BrowserAnimationsModule, // Needed if testing animations
-        MapSearchComponent
+        MapSearchComponent,
       ],
       providers: [
         { provide: DirectionsService, useValue: directionsServiceSpy },
@@ -51,6 +56,7 @@ describe('MapSearchComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(MapSearchComponent);
     component = fixture.componentInstance;
+    directionsServiceSpy.getDestinationPoint.and.returnValue(of(null)); // to solve setting auto-true value
     fixture.detectChanges();
   });
 
