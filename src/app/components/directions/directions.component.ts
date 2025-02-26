@@ -1,10 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewInit, Component, OnInit, OnDestroy, ViewChild, ElementRef, NgZone } from '@angular/core';
+import { AfterViewInit, Component, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
 import { Step } from 'src/app/interfaces/step.interface';
 import { CurrentLocationService } from 'src/app/services/geolocation/current-location.service';
 import { DirectionsService } from 'src/app/services/directions/directions.service';
 import { IconMapping } from 'src/app/interfaces/Icon-mapping';
 import rawIconMapping from 'src/assets/icon-mapping.json';
+import { firstValueFrom, take } from 'rxjs';
 const iconMapping = rawIconMapping as IconMapping;
 
 /// <reference types="google.maps" />
@@ -43,35 +44,22 @@ export class DirectionsComponent implements OnInit, OnDestroy {
 
   constructor(
     private directionsService: DirectionsService,
-    private currentLocationService: CurrentLocationService,
-    private ngZone: NgZone // Ensures updates are inside Angular’s zone
-
+    private currentLocationService: CurrentLocationService
   ) {}
 
 
 
   ngOnInit(): void {
-    this.waitForGoogleMaps().then(() => {
-      console.log("Google Maps is ready! Initializing directions...");
-      this.setMode('WALKING'); // Load directions only after Google Maps is ready
-      this.startWatchingLocation();
-    });
-  }
-
-  /**
-   * Waits for the Google Maps API to be fully loaded before proceeding.
-   */
-  waitForGoogleMaps(): Promise<void> {
-    return new Promise((resolve) => {
-      const checkGoogleMaps = () => {
-        if (typeof google !== 'undefined' && google.maps) {
-          resolve();
-        } else {
-          console.warn("Google Maps API not ready yet. Retrying...");
-          setTimeout(checkGoogleMaps, 200); // Retry every 200ms
-        }
-      };
-      checkGoogleMaps();
+    // this.waitForGoogleMaps().then(() => {
+    //   console.log("Google Maps is ready! Initializing directions...");
+    //   this.setMode('WALKING'); // Load directions only after Google Maps is ready
+    //   this.startWatchingLocation();
+    // });
+    this.directionsService.hasBothPoints$.subscribe((hasBoth) => {
+      console.log(hasBoth)
+      if (hasBoth) {
+        this.loadDirections; 
+      }
     });
   }
 
@@ -170,22 +158,22 @@ private updateShowAllSteps(): void {
   /**
    * Fetches directions using the DirectionsService with hardcoded Montreal locations.
    */
-  loadDirections(mode: string) {
+  async loadDirections(mode: string) {
     this.isLoading = true;
     this.hasArrived = false; // Reset arrival status when loading new directions
     const travelMode = this.directionsService.getTravelMode(mode); // Convert string to enum
-
-    this.directionsService
-      .calculateRoute(this.startLocation, this.destinationLocation, travelMode) // Pass 3 arguments correctly
-      .then(({ steps, eta }) => {
-        this.steps = steps;
-        this.eta = eta;
-        this.isLoading = false;
-      })
-      .catch((error) => {
-        console.error('Failed to fetch directions:', error);
-        this.isLoading = false;
-      });
+    const start = await firstValueFrom(this.directionsService.getStartPoint());
+    const destination = await firstValueFrom(this.directionsService.getDestinationPoint());
+    
+    try {
+      const { steps, eta } = await this.directionsService.calculateRoute(start.address, destination.address, travelMode);
+      this.steps = steps;
+      this.eta = eta;
+    } catch (error) {
+      console.error('Failed to fetch directions:', error);
+    } finally {
+      this.isLoading = false;
+    }
   }
 
   /**

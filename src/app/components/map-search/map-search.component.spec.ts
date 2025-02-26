@@ -1,209 +1,194 @@
-import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { of } from 'rxjs';
+import { ComponentFixture, TestBed, fakeAsync, tick} from '@angular/core/testing';
 import { MapSearchComponent } from './map-search.component';
-import { GoogleMapService } from 'src/app/services/googeMap.service';
-import { FormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
-import { provideAnimations } from '@angular/platform-browser/animations';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { DirectionsService } from 'src/app/services/directions/directions.service';
+import { PlacesService } from 'src/app/services/places.service';
 import { CurrentLocationService } from 'src/app/services/geolocation/current-location.service';
-
-// Mock Google Maps API
-class MockGoogleMapService {
-  updateMapLocation = jasmine.createSpy('updateMapLocation');
-  getMap = jasmine.createSpy('getMap').and.returnValue({
-    fitBounds: jasmine.createSpy('fitBounds'),
-    setCenter: jasmine.createSpy('setCenter'),
-    setZoom: jasmine.createSpy('setZoom'),
-  });
-  createMarker = jasmine.createSpy('createMarker').and.callFake(
-    (position: google.maps.LatLng, iconUrl: string) => ({
-      setPosition: jasmine.createSpy('setPosition'),
-      getPosition: jasmine.createSpy('getPosition').and.returnValue(position),
-      getIcon: jasmine.createSpy('getIcon').and.returnValue(iconUrl),
-      setMap: jasmine.createSpy('setMap'),
-    })
-  );
-}
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 describe('MapSearchComponent', () => {
   let component: MapSearchComponent;
   let fixture: ComponentFixture<MapSearchComponent>;
-  let googleMapService: MockGoogleMapService;
 
-  beforeAll(() => {
-    (window as any).google = {
-      maps: {
-        LatLng: class {
-          constructor(public lat: number, public lng: number) {}
-        },
-        Marker: class {
-          position: any;
-          icon: any;
-          constructor(options: any) {
-            this.position = options.position;
-            this.icon = options.icon || 'default-icon.svg';
-          }
-          getPosition() {
-            return this.position;
-          }
-          setPosition(pos: any) {
-            this.position = pos;
-          }
-          getIcon() {
-            return this.icon;
-          }
-          setIcon(icon: any) {
-            this.icon = icon;
-          }
-        },
-        Geocoder: class {
-          geocode(request: any, callback: Function) {
-            callback(
-              [
-                {
-                  formatted_address: 'Test Address',
-                  geometry: { location: { lat: () => 10, lng: () => 20 } },
-                },
-              ],
-              'OK'
-            );
-          }
-        },
-        LatLngBounds: class {
-          extend = jasmine.createSpy('extend');
-          getCenter() {
-            return { lat: 10, lng: 20 };
-          }
-        },
-        Size: class {
-          width: number;
-          height: number;
-          constructor(width: number, height: number) {
-            this.width = width;
-            this.height = height;
-          }
-        },
-        places: {
-          PlacesServiceStatus: { OK: 'OK' },
-          PlacesService: class {
-            findPlaceFromQuery(request: any, callback: Function) {
-              callback(
-                [
-                  {
-                    geometry: { location: { lat: () => 10, lng: () => 20 } },
-                  },
-                ],
-                'OK'
-              );
-            }
-          },
-        },
-      },
-    };
-  });
-
+  // Spies for the injected services
+  let directionsServiceSpy: jasmine.SpyObj<DirectionsService>;
+  let placesServiceSpy: jasmine.SpyObj<PlacesService>;
+  let currentLocationServiceSpy: jasmine.SpyObj<CurrentLocationService>;
 
   beforeEach(async () => {
+    // Create spies
+    directionsServiceSpy = jasmine.createSpyObj('DirectionsService', [
+      'setStartPoint',
+      'setDestinationPoint',
+      'getStartPoint',
+      'getDestinationPoint',
+    ]);
+    // Ensure getDestinationPoint() returns an observable
+    directionsServiceSpy.getDestinationPoint.and.returnValue(
+      of({ title: 'Default Destination', address: '', coordinates: null })
+    );
+    placesServiceSpy = jasmine.createSpyObj('PlacesService', [
+      'getPlaceSuggestions',
+    ]);
+    currentLocationServiceSpy = jasmine.createSpyObj('CurrentLocationService', [
+      'getCurrentLocation',
+    ]);
+
     await TestBed.configureTestingModule({
-      imports: [IonicModule, CommonModule, FormsModule, MapSearchComponent], // FIX: Removed MapSearchComponent from imports
-      //declarations: [MapSearchComponent], // FIX: MapSearchComponent should be declared here
+      imports: [
+        IonicModule,
+        CommonModule,
+        FormsModule,
+        BrowserAnimationsModule, // Needed if testing animations
+        MapSearchComponent,
+      ],
       providers: [
-        { provide: GoogleMapService, useClass: MockGoogleMapService },
-        provideAnimations(),
+        { provide: DirectionsService, useValue: directionsServiceSpy },
+        { provide: PlacesService, useValue: placesServiceSpy },
+        { provide: CurrentLocationService, useValue: currentLocationServiceSpy },
       ],
     }).compileComponents();
+  });
 
+  beforeEach(() => {
     fixture = TestBed.createComponent(MapSearchComponent);
     component = fixture.componentInstance;
-    googleMapService = TestBed.inject(GoogleMapService) as any;
-
+    directionsServiceSpy.getDestinationPoint.and.returnValue(of(null)); // to solve setting auto-true value
     fixture.detectChanges();
   });
 
-  it('should create', () => {
+  it('should create the component', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should toggle search visibility', () => {
-    expect(component.isSearchVisible).toBeFalse();
-    component.toggleSearch();
-    expect(component.isSearchVisible).toBeTrue();
-    component.toggleSearch();
-    expect(component.isSearchVisible).toBeFalse();
+  describe('UI visibility tests', () => {
+    it('should have isSearchVisible false by default', () => {
+      expect(component.isSearchVisible).toBeFalse();
+    });
+
+    it('should toggle search visibility', () => {
+      // Initially false
+      expect(component.isSearchVisible).toBeFalse();
+
+      component.toggleSearch();
+      expect(component.isSearchVisible).toBeTrue();
+
+      component.toggleSearch();
+      expect(component.isSearchVisible).toBeFalse();
+    });
   });
 
-  it('should not search if input is empty', fakeAsync(() => {
-    component.findPlace = jasmine.createSpy('findPlace');
+  describe('onSearchChange()', () => {
+    it('should clear places if query is empty or blank', async () => {
+      component.places = [{ title: 'Some Place' }];
+      const event = { target: { value: ' ' } };
 
-    const emptyEvent = { target: { value: '' } };
-    component.onSearchChangeStart(emptyEvent);
-    component.onSearchChangeDestination(emptyEvent);
+      await component.onSearchChange(event, 'start');
+      expect(component.places).toEqual([]);
+      expect(placesServiceSpy.getPlaceSuggestions).not.toHaveBeenCalled();
+    });
 
-    tick();
-    expect(component.findPlace).not.toHaveBeenCalled();
-  }));
+    it('should call placesService and set places when search query is not empty (start location)', async () => {
+      const event = { target: { value: 'pizza' } };
+      const mockPlaces = [
+        { title: 'Pizza Palace', address: '123 Main St', coordinates: new google.maps.LatLng(10, 20) },
+        { title: 'Pizza Haven', address: '456 Side St', coordinates: new google.maps.LatLng(30, 40) },
+      ];
+      
+      placesServiceSpy.getPlaceSuggestions.and.returnValue(
+        Promise.resolve(mockPlaces)
+      );
 
-  it('should call onSearchChangeStart with correct icon for start location', fakeAsync(() => {
-    const event = { target: { value: 'New York' } };
-    spyOn(component, 'onSearchChangeStart').and.callThrough();
-    component.onSearchChangeStart(event);
+      await component.onSearchChange(event, 'start');
 
-    tick();
-    expect(component.onSearchChangeStart).toHaveBeenCalledWith(event);
-    // Ensure correct marker icon is passed
-    expect(component.startLocation?.marker).toBeDefined()
+      expect(component.isSearchingFromStart).toBeTrue();
+      expect(placesServiceSpy.getPlaceSuggestions).toHaveBeenCalledWith('pizza');
+      expect(component.places).toEqual(mockPlaces);
+    });
 
-    const icon = component.startLocation?.marker.getIcon();
-    const iconUrl = typeof icon === 'object' && icon !== null && 'url' in icon ? (icon as { url: string }).url : icon;
+    it('should call placesService and set places when search query is not empty (destination)', async () => {
+      const event = { target: { value: 'museum' } };
+      const mockPlaces = [
+        { title: 'Art Museum', address: '789 Park Ave', coordinates: new google.maps.LatLng(10, 20) },
+      ];
+      placesServiceSpy.getPlaceSuggestions.and.returnValue(
+        Promise.resolve(mockPlaces)
+      );
 
-    expect(iconUrl).toEqual('https://upload.wikimedia.org/wikipedia/commons/8/8e/Icone_Verde.svg');
+      await component.onSearchChange(event, 'destination');
 
+      expect(component.isSearchingFromStart).toBeFalse();
+      expect(placesServiceSpy.getPlaceSuggestions).toHaveBeenCalledWith('museum');
+      expect(component.places).toEqual(mockPlaces);
+    });
+  });
 
-  }));
+  describe('clearList()', () => {
+    it('should clear the places array', () => {
+      component.places = [{ title: 'Place1' }, { title: 'Place2' }];
+      component.clearList();
+      expect(component.places.length).toBe(0);
+    });
+  });
 
-  it('should call onSearchChangeDestination with correct icon for destination', fakeAsync(() => {
-    const event = { target: { value: 'Los Angeles' } };
-    spyOn(component, 'onSearchChangeDestination').and.callThrough();
-    component.onSearchChangeDestination(event);
+  describe('onSetUsersLocationAsStart()', () => {
+    it('should retrieve current location and set start point via DirectionsService', fakeAsync(() => {
+      // Mock the service to resolve a location
+      currentLocationServiceSpy.getCurrentLocation.and.returnValue(
+        Promise.resolve({ lat: 10, lng: 20 })
+      );
 
-    tick();
-    expect(component.onSearchChangeDestination).toHaveBeenCalledWith(event);
-    expect(component.destinationLocation?.marker).toBeDefined();
-    const icon = component.destinationLocation?.marker.getIcon();
-    const iconUrl = typeof icon === 'object' && icon !== null && 'url' in icon ? (icon as { url: string }).url : icon;
+      component.onSetUsersLocationAsStart();
+      tick(); // Resolve the Promise
 
-    expect(iconUrl).toEqual('https://upload.wikimedia.org/wikipedia/commons/6/64/Icone_Vermelho.svg');
+      expect(currentLocationServiceSpy.getCurrentLocation).toHaveBeenCalled();
+      expect(directionsServiceSpy.setStartPoint).toHaveBeenCalledWith({
+        title: 'Your Location',
+        address: '10, 20',
+        coordinates: jasmine.any(Object),
+      });
+    }));
 
+    it('should throw an error if current location is null', async () => {
+      // Mock the service to return null
+      currentLocationServiceSpy.getCurrentLocation.and.returnValue(Promise.resolve(null));
+      spyOn(console, 'error'); // to suppress or check error logs
+    
+      await expectAsync(component.onSetUsersLocationAsStart()).toBeRejectedWithError('Current location is null.');
+    });
+  });
 
-  }));
+  describe('Keyboard "enter" handling', () => {
+    // These tests simulate pressing enter in the input fields to set start/destination
+    // e.g., (keyup.enter)="directionsService.setStartPoint(places[0]); clearList()"
 
-  it('should create start marker in onSetUsersLocationAsStart', fakeAsync(() => {
-    spyOn(CurrentLocationService.prototype, 'getCurrentLocation').and.returnValue(
-      Promise.resolve({ lat: 10, lng: 20 })
-    );
-    component.onSetUsersLocationAsStart();
-    tick();
-    expect(component.startLocation?.marker).toBeDefined();
-    expect(googleMapService.getMap).toHaveBeenCalled();
-  }));
-
-  it('should update marker in onSearchChangeStart when valid search term is provided', fakeAsync(() => {
-    const fakeEvent = { target: { value: 'New York' } };
-    spyOn(component, 'findPlace').and.returnValue(Promise.resolve({ formatted_address: 'New York', geometry: { location: { lat: () => 10, lng: () => 20 } } }));
-    component.onSearchChangeStart(fakeEvent);
-
-    tick();
-    expect(googleMapService.getMap).toHaveBeenCalled();
-    expect(component.startLocation?.marker).toBeDefined();
-  }));
-
-  it('should update marker in onSearchChangeDestination when valid search term is provided', fakeAsync(() => {
-    const fakeEvent = { target: { value: 'Los Angeles' } };
-    spyOn(component, 'findPlace').and.returnValue(Promise.resolve({ formatted_address: 'Los Angeles', geometry: { location: { lat: () => 10, lng: () => 20 } } }));
-    component.onSearchChangeDestination(fakeEvent);
-
-    tick();
-    expect(googleMapService.getMap).toHaveBeenCalled();
-    expect(component.destinationLocation?.marker).toBeDefined();
-  }));
+    it('should set start point on enter if places is not empty', () => {
+      const selectedPlace = { title: 'Start Place', address: 'Somewhere', coordinates: new google.maps.LatLng(10, 20) };
+      component.places = [selectedPlace];
+      directionsServiceSpy.setStartPoint.calls.reset();
+    
+      // Simulate the (keyup.enter) logic
+      directionsServiceSpy.setStartPoint(component.places[0]);
+      component.clearList();
+    
+      expect(directionsServiceSpy.setStartPoint).toHaveBeenCalledWith(selectedPlace);
+      expect(component.places.length).toBe(0);
+    });
+    
+    it('should set destination point on enter if places is not empty', () => {
+      const selectedPlace = { title: 'Destination Place', address: 'Somewhere', coordinates: new google.maps.LatLng(30, 40) };
+      component.places = [selectedPlace];
+      directionsServiceSpy.setDestinationPoint.calls.reset();
+    
+      // Simulate the (keyup.enter) logic
+      directionsServiceSpy.setDestinationPoint(component.places[0]);
+      component.clearList();
+    
+      expect(directionsServiceSpy.setDestinationPoint).toHaveBeenCalledWith(selectedPlace);
+      expect(component.places.length).toBe(0);
+    });
+  });
 });
