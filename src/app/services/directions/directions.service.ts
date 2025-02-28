@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, combineLatest, map, Observable } from 'rxjs';
 import { Step } from '../../interfaces/step.interface';
+import data  from '../../../assets/ConcordiaData.json';
 
 interface Location {
   title: string;
@@ -15,8 +16,8 @@ interface Location {
 })
 export class DirectionsService {
   private directionsService!: google.maps.DirectionsService;
-  private directionsRenderer!: google.maps.DirectionsRenderer;
-  
+  private renderers!: google.maps.DirectionsRenderer[];
+  private placesService!: google.maps.places.PlacesService;
   private startPoint$ = new BehaviorSubject<Location | null>(null);
   private destinationPoint$ = new BehaviorSubject<Location | null>(null);
 
@@ -25,18 +26,26 @@ export class DirectionsService {
   public initialize(map: google.maps.Map): void {
     if (!this.directionsService)
       this.directionsService = new google.maps.DirectionsService();
-    if (!this.directionsRenderer) {
-      this.directionsRenderer = new google.maps.DirectionsRenderer();
-      this.directionsRenderer.setMap(map);
+    if (!this.renderers) {
+      this.renderers = [];
+      const renderer1 = new google.maps.DirectionsRenderer();
+      const renderer2 = new google.maps.DirectionsRenderer();
+      const renderer3 = new google.maps.DirectionsRenderer();
+      renderer1.setMap(map);
+      renderer2.setMap(map);
+      renderer3.setMap(map);
+      this.renderers.push(renderer1, renderer2, renderer3);
     }
+    if(!this.placesService)
+      this.placesService = new google.maps.places.PlacesService(map);
   }
 
   getDirectionsService(): google.maps.DirectionsService {
     return this.directionsService;
   }
 
-  getDirectionsRenderer(): google.maps.DirectionsRenderer {
-    return this.directionsRenderer;
+  getDirectionsRenderer(): google.maps.DirectionsRenderer[] {
+    return this.renderers;
   }
 
   getStartPoint(): Observable<Location | null> {
@@ -46,7 +55,7 @@ export class DirectionsService {
   setStartPoint(location: Location): void {
     const marker = this.startPoint$.value?.marker ?? new google.maps.Marker({
       position: location.coordinates,
-      map: this.directionsRenderer.getMap(),
+      map: this.renderers[0].getMap(),
       icon: { 
         url: 'https://upload.wikimedia.org/wikipedia/commons/8/8e/Icone_Verde.svg', 
         scaledSize: new google.maps.Size(40, 40) 
@@ -66,7 +75,7 @@ export class DirectionsService {
   setDestinationPoint(location: Location): void {
     const marker = this.destinationPoint$.value?.marker ?? new google.maps.Marker({
       position: location.coordinates,
-      map: this.directionsRenderer.getMap(),
+      map: this.renderers[0].getMap(),
       icon: { 
         url: 'https://upload.wikimedia.org/wikipedia/commons/8/8e/Icone_Verde.svg', 
         scaledSize: new google.maps.Size(40, 40) 
@@ -86,13 +95,13 @@ export class DirectionsService {
   }
 
   private updateMapView() {
-    const map = this.directionsRenderer.getMap();
+    const map = this.renderers[0].getMap();
   
     const startPoint = this.startPoint$.value;
     const destinationPoint = this.destinationPoint$.value;
   
     if (startPoint && destinationPoint) {
-      this.calculateRoute(startPoint.address, destinationPoint.address, google.maps.TravelMode.WALKING);
+      this.generateRoute(startPoint.address, destinationPoint.address, google.maps.TravelMode.WALKING);
       const bounds = new google.maps.LatLngBounds();
       bounds.extend(startPoint.marker.getPosition()!);
       bounds.extend(destinationPoint.marker.getPosition()!);
@@ -110,7 +119,9 @@ export class DirectionsService {
    * Converts a string (e.g., "WALKING") into a google.maps.TravelMode enum.
    */
   getTravelMode(mode: string): google.maps.TravelMode {
+
     switch (mode.toUpperCase()) {
+    
       case 'WALKING':
         return google.maps.TravelMode.WALKING;
       case 'TRANSIT':
@@ -150,6 +161,7 @@ export class DirectionsService {
     startAddress: string|google.maps.LatLng,
     destinationAddress: string|google.maps.LatLng,
     travelMode: google.maps.TravelMode = google.maps.TravelMode.WALKING,
+    renderer: google.maps.DirectionsRenderer = this.renderers[0]
   ): Promise<{
     steps: Step[];
     eta: string | null;
@@ -157,7 +169,7 @@ export class DirectionsService {
     return new Promise((resolve, reject) => {
       // this.directionsRenderer.setMap(this.map);
 
-      this.setRouteColor(travelMode);
+      this.setRouteColor(travelMode, renderer);
 
       const request: google.maps.DirectionsRequest = {
         origin: startAddress,
@@ -167,7 +179,7 @@ export class DirectionsService {
 
       this.directionsService.route(request, (response, status) => {
         if (status === google.maps.DirectionsStatus.OK && response) {
-          this.directionsRenderer.setDirections(response);
+          renderer.setDirections(response);
 
           const steps: Step[] = [];
           let eta: string | null = null;
@@ -199,8 +211,89 @@ export class DirectionsService {
       });
     });
   }
+  async calculateShuttleBusRoute(startAddress: string | google.maps.LatLng, destinationAddress: string | google.maps.LatLng) {
 
-  setRouteColor(travelMode: google.maps.TravelMode) {
+    const startCoords = await this.findCoords(startAddress);
+    const destinationCoords = await this.findCoords(destinationAddress);
+    if (!startCoords || !destinationCoords) {
+      throw new Error('Start place not found');
+    }
+
+    const startDistanceToSGW = Math.sqrt(
+      Math.pow(startCoords.lat() - data.sgw.coordinates.lat, 2) +
+        Math.pow(startCoords.lng() - data.sgw.coordinates.lng, 2)
+    );
+    const startDistanceToLOY = Math.sqrt(
+      Math.pow(startCoords.lat() - data.loy.coordinates.lat, 2) +
+        Math.pow(startCoords.lng() - data.loy.coordinates.lng, 2)
+    );
+    const destinationDistanceToSGW = Math.sqrt(
+      Math.pow(destinationCoords.lat() - data.sgw.coordinates.lat, 2) +
+        Math.pow(destinationCoords.lng() - data.sgw.coordinates.lng, 2)
+    );
+    const destinationDistanceToLOY = Math.sqrt(
+      Math.pow(destinationCoords.lat() - data.loy.coordinates.lat, 2) +
+        Math.pow(destinationCoords.lng() - data.loy.coordinates.lng, 2)
+    );
+
+    const startCampus = startDistanceToSGW < startDistanceToLOY ? 'sgw' : 'loy';
+    const destinationCampus =
+      destinationDistanceToSGW < destinationDistanceToLOY ? 'sgw' : 'loy';
+    const shuttleSteps = [];
+
+    const sameCampus = startCampus === destinationCampus;
+
+    if (sameCampus) {
+      const steps = await this.calculateRoute(
+      
+        startAddress,
+        destinationAddress,
+        google.maps.TravelMode.WALKING
+      );
+      shuttleSteps.push(steps.steps);
+    } else {
+      const initialWalk = await this.calculateRoute(
+        startAddress,
+        String(data[startCampus].shuttleBus.terminal),
+        google.maps.TravelMode.WALKING,
+        this.renderers[0]
+      );
+      const shuttleBus = await this.calculateRoute(
+        String(data[startCampus].shuttleBus.terminal),
+        String(data[destinationCampus].shuttleBus.terminal),
+        google.maps.TravelMode.TRANSIT,
+        this.renderers[1]
+      );
+      const finalWalk = await this.calculateRoute(
+        String(data[destinationCampus].shuttleBus.terminal),
+        destinationAddress,
+        google.maps.TravelMode.WALKING,
+        this.renderers[2]
+
+      );
+
+      shuttleSteps.push(initialWalk.steps);
+      shuttleSteps.push(shuttleBus.steps);
+      shuttleSteps.push(finalWalk.steps);
+    }
+
+    return { steps: shuttleSteps, eta: "TBD" };
+  }
+
+  generateRoute(startAddress: string|google.maps.LatLng,
+    destinationAddress: string|google.maps.LatLng,
+    travelMode: string | google.maps.TravelMode = google.maps.TravelMode.WALKING,
+    ){
+      this.clearMapDirections();
+      if (travelMode === "SHUTTLE") {
+        return this.calculateShuttleBusRoute(startAddress, destinationAddress);
+      } else {
+        const travelType= this.getTravelMode(travelMode);
+        return this.calculateRoute(startAddress, destinationAddress, this.getTravelMode(travelMode));
+      }
+    }
+
+  setRouteColor(travelMode: google.maps.TravelMode, renderer: google.maps.DirectionsRenderer): google.maps.PolylineOptions {
     const polylineOptions: google.maps.PolylineOptions = {};
 
     switch (travelMode) {
@@ -225,7 +318,33 @@ export class DirectionsService {
           },
         ];
     }
-    this.directionsRenderer.setOptions({ polylineOptions });
+    renderer.setOptions({ polylineOptions });
     return polylineOptions;
+  }
+
+  private findCoords(query: string | google.maps.LatLng): Promise<google.maps.LatLng | null> {
+    if (query instanceof google.maps.LatLng) {
+      return Promise.resolve(query);
+    }
+    return new Promise((resolve, reject) => {
+      this.placesService.findPlaceFromQuery(
+        { query, fields: ['geometry', 'formatted_address'] },
+        (results: any, status: any) => {
+          if (
+            status === google.maps.places.PlacesServiceStatus.OK &&
+            results.length > 0
+          ) {
+            resolve(results[0].geometry.location);
+          } else {
+            reject(null);
+          }
+        }
+      );
+    });
+  }
+  public clearMapDirections() {
+    this.renderers.forEach((renderer) => {
+      renderer.setMap(null);
+    });
   }
 }

@@ -3,7 +3,16 @@
     "name": "Sir George William",
     "abreviation": "SGW",
     "coordinates": { "lat": 45.49508674774648, "lng": -73.57795691041848 },
-    "buildings": [
+    "shuttleBus": {
+      "terminal": {
+        "lat": 45.49713286141489,
+        "lng": -73.57851866143918
+      }
+    },
+      
+      "schedule": [],
+      "buildings": [
+
       {
         "name": "Engineering and Visual Arts",
         "abreviation": "EV",
@@ -296,6 +305,13 @@
     "name": "Loyola",
     "abreviation": "LOY",
     "coordinates": { "lat": 45.45812810976341, "lng": -73.6393513063634 },
+    "shuttleBus": {
+      "terminal": {
+        "lat": 45.49713286141489,
+        "lng": -73.57851866143918
+      },
+      "schedule": []
+    },
     "buildings": [
       {
         "name": "Central Building",
@@ -459,4 +475,5 @@
       }
     ]
   }
-}
+  
+  }

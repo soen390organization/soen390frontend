@@ -161,12 +161,11 @@ private updateShowAllSteps(): void {
   async loadDirections(mode: string) {
     this.isLoading = true;
     this.hasArrived = false; // Reset arrival status when loading new directions
-    const travelMode = this.directionsService.getTravelMode(mode); // Convert string to enum
     const start = await firstValueFrom(this.directionsService.getStartPoint());
     const destination = await firstValueFrom(this.directionsService.getDestinationPoint());
     
     try {
-      const { steps, eta } = await this.directionsService.calculateRoute(start.address, destination.address, travelMode);
+      const { steps, eta } = await this.directionsService.generateRoute(start.address, destination.address, mode );
       this.steps = steps;
       this.eta = eta;
     } catch (error) {

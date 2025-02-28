@@ -108,7 +108,7 @@ describe('Directions Service', () => {
         });
 
         spyOn(service, 'calculateRoute').and.callThrough();
-        const response = await service.calculateRoute(origin, destination);
+        const response = await service.generateRoute(origin, destination);
         expect(schema.validate(response).error).toBeUndefined();
       });
     });
