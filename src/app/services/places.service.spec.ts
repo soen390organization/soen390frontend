@@ -7,7 +7,7 @@ describe('PlacesService', () => {
   let service: PlacesService;
   let storeMock: any;
   let mapMock: google.maps.Map;
-  let placesServiceMock: any
+  let placesServiceMock: any;
 
   beforeEach(() => {
     // Mock the Store
@@ -190,7 +190,6 @@ describe('PlacesService', () => {
     
       // Call getPointsOfInterest and verify that the result is an empty array when failure occurs
       const places = await service.getPointsOfInterest();
-      console.log('VALUES: ', places)
       expect(places).toEqual([]);
     });
 
