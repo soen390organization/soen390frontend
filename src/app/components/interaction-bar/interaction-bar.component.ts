@@ -21,6 +21,7 @@ import { DirectionsComponent } from '../directions/directions.component';
 })
 export class InteractionBarComponent implements AfterViewInit {
   @ViewChild('footerContainer', { static: false }) footerContainer!: ElementRef;
+  @ViewChild('handleBar', { static: false }) handleBar!: ElementRef;
 
   public startY = 0;
   public currentY = 0;
@@ -58,11 +59,12 @@ export class InteractionBarComponent implements AfterViewInit {
 
   ngAfterViewInit(): void {
     const footer = this.footerContainer.nativeElement;
+    const handle = this.handleBar.nativeElement;
 
     // **Touch Events (Mobile)**
-    footer.addEventListener('touchstart', (event: TouchEvent) => this.onDragStart(event.touches[0].clientY));
-    footer.addEventListener('touchmove', (event: TouchEvent) => this.onDragMove(event.touches[0].clientY, event));
-    footer.addEventListener('touchend', () => this.onDragEnd());
+    handle.addEventListener('touchstart', (event: TouchEvent) => this.onDragStart(event.touches[0].clientY));
+    handle.addEventListener('touchmove', (event: TouchEvent) => this.onDragMove(event.touches[0].clientY, event));
+    handle.addEventListener('touchend', () => this.onDragEnd());
 
     // **Mouse Events (Trackpad & Desktop)**
     // footer.addEventListener('mousedown', (event: MouseEvent) => this.onDragStart(event.clientY));
