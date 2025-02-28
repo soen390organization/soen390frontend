@@ -11,6 +11,7 @@ getTestBed().initTestEnvironment(
   platformBrowserDynamicTesting()
 );
 
+// Global Google Maps Stub definition:
 interface LatLngLiteral {
   lat: number;
   lng: number;
@@ -76,6 +77,37 @@ class PlacesService {
   }
 }
 
+class DirectionsService {
+  constructor(public map: any) {}
+  route(
+    request: google.maps.DirectionsRequest,
+    callback: (result: google.maps.DirectionsResult, status: google.maps.DirectionsStatus) => void
+  ): void {
+    callback(null, 'NOT_FOUND' as any);
+  }
+}
+
+class DirectionsRenderer {
+  setMap(map: google.maps.Map): void {}
+  setOptions(options: any): void {}
+  setDirections(directions: google.maps.DirectionsResult): void {}
+}
+
+const TravelMode = {
+  DRIVING: 'DRIVING',
+  TRANSIT: 'TRANSIT',
+  WALKING: 'WALKING',
+};
+
+const DirectionsStatus = {
+  OK: 'OK',
+  NOT_FOUND: 'NOT_FOUND',
+};
+
+const SymbolPath = {
+  CIRCLE: 'CIRCLE',
+};
+
 const containsLocation = (point: LatLngLiteral, polygon: Polygon): boolean => {
   const lats = polygon.paths.map((p) => p.lat);
   const lngs = polygon.paths.map((p) => p.lng);
@@ -100,5 +132,16 @@ const containsLocation = (point: LatLngLiteral, polygon: Polygon): boolean => {
       AutocompleteService,
       PlacesService,
     },
+    DirectionsService,
+    DirectionsRenderer,
+    TravelMode,
+    DirectionsStatus,
+    SymbolPath,
   },
 };
+
+// Save and Global Restoration after each test
+const originalGoogle = (window as any).google;
+afterEach(() => {
+  (window as any).google = originalGoogle;
+});
