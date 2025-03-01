@@ -58,6 +58,19 @@
         placeholder="Choose destination point..." 
         class="mt-2 w-full bg-white px-4 py-3 rounded-full border border-gray-300 focus:outline-none pr-10"
       />
+
+        <!-- ETA and Start Button aligned as per prototype -->
+      <div class="mt-2 flex items-center justify-between">
+        <div class="text-[#912338] font-bold text-lg">
+          3 min (180m)
+        </div>
+        <button
+          
+          class="bg-[#912338] text-white py-3 px-8 rounded-full text-lg font-semibold"
+        >
+          Start
+        </button>
+
       <div *ngIf="!isSearchingFromStart" class="absolute w-full mt-1 z-10">
         <ion-list *ngIf="places?.length > 0">
           <ion-item *ngFor="let place of places" (click)="directionsService.setDestinationPoint(place); clearList()">
