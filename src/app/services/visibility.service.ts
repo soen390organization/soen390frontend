@@ -11,15 +11,14 @@ export class VisibilityService {
 
   constructor() {}
 
-  // Show Component 1 and hide Component 2
-  showDirectionsComponent(): void {
-    console.log("Before", this.showDirections$.getValue())
-    this.showDirections$.next(true);  // Show Component 1
-    console.log("After", this.showDirections$.getValue())
+  // Toggle visibility of Directions component
+  toggleDirectionsComponent(): void {
+    this.showDirections$.next(!this.showDirections$.getValue());  // Toggle Component 1
   }
 
-  hidePOIsComponent(): void {
-    this.showPOIs$.next(false); // Hide Component 2
+  // Toggle visibility of points of interest and buildings component
+  togglePOIsComponent(): void {
+    this.showPOIs$.next(!this.showPOIs$.getValue());  // Toggle Component 2
   }
 
   // Observables for other components to subscribe

@@ -6,6 +6,7 @@ import { DirectionsService } from 'src/app/services/directions/directions.servic
 import { IconMapping } from 'src/app/interfaces/Icon-mapping';
 import rawIconMapping from 'src/assets/icon-mapping.json';
 import { firstValueFrom, take } from 'rxjs';
+import { VisibilityService } from 'src/app/services/visibility.service';
 const iconMapping = rawIconMapping as IconMapping;
 
 /// <reference types="google.maps" />
@@ -44,7 +45,8 @@ export class DirectionsComponent implements OnInit, OnDestroy {
 
   constructor(
     private directionsService: DirectionsService,
-    private currentLocationService: CurrentLocationService
+    private currentLocationService: CurrentLocationService,
+    private visibilityService: VisibilityService
   ) {}
 
 
@@ -58,7 +60,7 @@ export class DirectionsComponent implements OnInit, OnDestroy {
     this.directionsService.hasBothPoints$.subscribe((hasBoth) => {
       console.log(hasBoth)
       if (hasBoth) {
-        this.loadDirections; 
+        this.loadDirections;
       }
     });
   }
@@ -164,7 +166,7 @@ private updateShowAllSteps(): void {
     const travelMode = this.directionsService.getTravelMode(mode); // Convert string to enum
     const start = await firstValueFrom(this.directionsService.getStartPoint());
     const destination = await firstValueFrom(this.directionsService.getDestinationPoint());
-    
+
     try {
       const { steps, eta } = await this.directionsService.calculateRoute(start.address, destination.address, travelMode);
       this.steps = steps;
@@ -211,6 +213,11 @@ private updateShowAllSteps(): void {
 
     // Fallback icon.
     return 'help_outline';
+  }
+
+  onEndClick(): void {
+    this.visibilityService.toggleDirectionsComponent();
+    this.visibilityService.togglePOIsComponent();
   }
 
 
