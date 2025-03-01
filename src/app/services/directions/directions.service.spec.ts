@@ -1,11 +1,12 @@
-import { DirectionsService } from './directions.service';
+import { RouteService } from './directions.service';
 import { TestBed } from '@angular/core/testing';
 import Joi from 'joi';
 
 describe('Directions Service', () => {
-  let service: DirectionsService;
+  let service: RouteService;
   let origin = 'Hall Building Concordia';
   let destination = 'John Molson School of Business';
+  let mockRenderer: any;
 
   beforeAll(() => {
     class MockDirectionsService {
@@ -18,8 +19,31 @@ describe('Directions Service', () => {
       setDirections = jasmine.createSpy('setDirections');
     }
 
+    class MockPlacesService {
+      findPlaceFromQuery = jasmine.createSpy('findPlaceFromQuery');
+    }
+
+    // Mock LatLng to avoid "not a constructor" errors
+    class MockLatLng {
+      constructor(private _lat: number, private _lng: number) {}
+      lat() {
+        return this._lat;
+      }
+      lng() {
+        return this._lng;
+      }
+    }
+
     globalThis.google = {
       maps: {
+        Map: class {},
+        LatLng: MockLatLng,
+        places: {
+          PlacesService: MockPlacesService,
+          PlacesServiceStatus: {
+            OK: 'OK',
+          },
+        },
         DirectionsService: MockDirectionsService,
         DirectionsRenderer: MockDirectionsRenderer,
         TravelMode: {
@@ -28,9 +52,8 @@ describe('Directions Service', () => {
           WALKING: 'WALKING',
         },
         DirectionsStatus: {
-          OK: 'OK', // <-- Define this to fix the issue
+          OK: 'OK',
         },
-
         SymbolPath: { CIRCLE: 'CIRCLE' },
       },
     } as any;
@@ -38,10 +61,14 @@ describe('Directions Service', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [DirectionsService],
+      providers: [RouteService],
     });
-    service = TestBed.inject(DirectionsService);
+    service = TestBed.inject(RouteService);
+
+    // Initialize service with a dummy map
     service.initialize({} as google.maps.Map);
+
+    mockRenderer = new google.maps.DirectionsRenderer();
   });
 
   it('should be created', () => {
@@ -56,8 +83,8 @@ describe('Directions Service', () => {
             request: google.maps.DirectionsRequest,
             callback: (
               result: google.maps.DirectionsResult,
-              status: google.maps.DirectionsStatus,
-            ) => void,
+              status: google.maps.DirectionsStatus
+            ) => void
           ) => {
             const mockResponse = {
               routes: [
@@ -68,8 +95,8 @@ describe('Directions Service', () => {
                       steps: [
                         {
                           instructions: 'Head north',
-                          start_location: { lat: () => 45, lng: () => -73 }, // Mocking LatLng functions
-                          end_location: { lat: () => 46, lng: () => -74 }, // Mocking LatLng functions
+                          start_location: new google.maps.LatLng(45, -73),
+                          end_location: new google.maps.LatLng(46, -74),
                           distance: { text: '1 km', value: 1000 },
                           duration: { text: '10 mins', value: 600 },
                           transit_details: null,
@@ -82,7 +109,7 @@ describe('Directions Service', () => {
             } as unknown as google.maps.DirectionsResult;
 
             callback(mockResponse, google.maps.DirectionsStatus.OK);
-          },
+          }
         );
 
         const schema = Joi.object({
@@ -101,7 +128,7 @@ describe('Directions Service', () => {
                   value: Joi.number().required(),
                 }).optional(),
                 transit_details: Joi.any().optional(),
-              }),
+              })
             )
             .required(),
           eta: Joi.string().allow(null).required(),
@@ -116,25 +143,30 @@ describe('Directions Service', () => {
 
   describe('setRouteColor() function', () => {
     describe('given the travel mode is DRIVING', () => {
-      it('should return the color red', async () => {
+      it('should return the color red', () => {
         const polylineOptions = service.setRouteColor(
           google.maps.TravelMode.DRIVING,
+          mockRenderer
         );
         expect(polylineOptions).toEqual({ strokeColor: 'red' });
       });
     });
+
     describe('given the travel mode is TRANSIT', () => {
-      it('should return the color green', async () => {
+      it('should return the color green', () => {
         const polylineOptions = service.setRouteColor(
           google.maps.TravelMode.TRANSIT,
+          mockRenderer
         );
         expect(polylineOptions).toEqual({ strokeColor: 'green' });
       });
     });
+
     describe('given the travel mode is WALKING', () => {
-      it('should return a specific json', async () => {
+      it('should return a specific json', () => {
         const polylineOptions = service.setRouteColor(
           google.maps.TravelMode.WALKING,
+          mockRenderer
         );
         expect(polylineOptions).toEqual({
           strokeColor: '#0096FF',

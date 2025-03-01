@@ -9,14 +9,14 @@ export class GoogleMapService {
   private map!: google.maps.Map;
 
   constructor(
-    private routeService: RouteService,
+    private directionsService: RouteService,
     private placesService: PlacesService
   ) {}
 
   initialize(map: google.maps.Map) {
     this.map = map;
     this.placesService.initialize(this.map);
-    this.routeService.initialize(map);
+    this.directionsService.initialize(map);
   }
 
   getMap(): google.maps.Map {

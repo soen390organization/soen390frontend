@@ -9,10 +9,9 @@
         "lng": -73.57851866143918
       }
     },
-      
-      "schedule": [],
-      "buildings": [
 
+    "schedule": [],
+    "buildings": [
       {
         "name": "Engineering and Visual Arts",
         "abreviation": "EV",
@@ -307,8 +306,8 @@
     "coordinates": { "lat": 45.45812810976341, "lng": -73.6393513063634 },
     "shuttleBus": {
       "terminal": {
-        "lat": 45.49713286141489,
-        "lng": -73.57851866143918
+        "lat": 45.45789692831165,
+        "lng": -73.63891431897557
       },
       "schedule": []
     },
@@ -475,5 +474,4 @@
       }
     ]
   }
-  
-  }
+}

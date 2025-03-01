@@ -1,4 +1,11 @@
-import { AfterViewInit, Component, ElementRef, OnInit, Renderer2, ViewChild } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  OnInit,
+  Renderer2,
+  ViewChild,
+} from '@angular/core';
 import { GestureController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -7,7 +14,7 @@ import { IonicModule } from '@ionic/angular';
 import { LocationCardsComponent } from '../location-cards/location-cards.component';
 import { Store } from '@ngrx/store';
 import { PlacesService } from 'src/app/services/places.service';
-import { DirectionsService } from 'src/app/services/directions/directions.service';
+import { RouteService } from 'src/app/services/directions/directions.service';
 import { selectSelectedCampus } from 'src/app/store/app';
 import { LocationCard } from 'src/app/interfaces/location-card.interface';
 import { filter, forkJoin, switchMap } from 'rxjs';
@@ -17,7 +24,7 @@ import { DirectionsComponent } from '../directions/directions.component';
   selector: 'app-interaction-bar',
   imports: [LocationCardsComponent, DirectionsComponent],
   templateUrl: './interaction-bar.component.html',
-  styleUrls: ['./interaction-bar.component.scss']
+  styleUrls: ['./interaction-bar.component.scss'],
 })
 export class InteractionBarComponent implements AfterViewInit {
   @ViewChild('footerContainer', { static: false }) footerContainer!: ElementRef;
@@ -28,15 +35,20 @@ export class InteractionBarComponent implements AfterViewInit {
   public threshold = 50; // Minimum swipe distance to trigger action
   public showDirections = false;
   isExpanded = false; // Track the footer's state
-  campusBuildings = { locations: [] as LocationCard[], loading: true }
-  pointsOfInterest = { locations: [] as LocationCard[], loading: true }
+  campusBuildings = { locations: [] as LocationCard[], loading: true };
+  pointsOfInterest = { locations: [] as LocationCard[], loading: true };
 
-  constructor(private store: Store, private placesService: PlacesService, private directionsService: DirectionsService) {}
+  constructor(
+    private store: Store,
+    private placesService: PlacesService,
+    private directionsService: RouteService
+  ) {}
 
   ngOnInit() {
-    this.placesService.isInitialized()
+    this.placesService
+      .isInitialized()
       .pipe(
-        filter(ready => ready), // Only proceed when `ready` is true
+        filter((ready) => ready), // Only proceed when `ready` is true
         switchMap(() => this.store.select(selectSelectedCampus)), // Wait for campus selection
         switchMap(() =>
           forkJoin({
@@ -50,18 +62,22 @@ export class InteractionBarComponent implements AfterViewInit {
         this.pointsOfInterest = { locations: pointsOfInterest, loading: false };
       });
 
-      this.directionsService.hasBothPoints$.subscribe((hasBoth) => {
-        this.showDirections = hasBoth;
-        this.isExpanded = false;
-      });
+    this.directionsService.hasBothPoints$.subscribe((hasBoth) => {
+      this.showDirections = hasBoth;
+      this.isExpanded = false;
+    });
   }
 
   ngAfterViewInit(): void {
     const footer = this.footerContainer.nativeElement;
 
     // **Touch Events (Mobile)**
-    footer.addEventListener('touchstart', (event: TouchEvent) => this.onDragStart(event.touches[0].clientY));
-    footer.addEventListener('touchmove', (event: TouchEvent) => this.onDragMove(event.touches[0].clientY, event));
+    footer.addEventListener('touchstart', (event: TouchEvent) =>
+      this.onDragStart(event.touches[0].clientY)
+    );
+    footer.addEventListener('touchmove', (event: TouchEvent) =>
+      this.onDragMove(event.touches[0].clientY, event)
+    );
     footer.addEventListener('touchend', () => this.onDragEnd());
 
     // **Mouse Events (Trackpad & Desktop)**
@@ -74,7 +90,9 @@ export class InteractionBarComponent implements AfterViewInit {
     this.isExpanded = !this.isExpanded;
     const footer = this.footerContainer.nativeElement;
     footer.style.transition = 'transform 0.3s ease-out';
-    footer.style.transform = this.isExpanded ? 'translateY(0)' : 'translateY(80%)';
+    footer.style.transform = this.isExpanded
+      ? 'translateY(0)'
+      : 'translateY(80%)';
   }
 
   /** Start dragging */
@@ -96,7 +114,10 @@ export class InteractionBarComponent implements AfterViewInit {
     // Adjust footer position dynamically
     const footer = this.footerContainer.nativeElement;
     const translateY = this.isExpanded ? -diff : 80 - diff;
-    footer.style.transform = `translateY(${Math.min(Math.max(translateY, 0), 80)}%)`;
+    footer.style.transform = `translateY(${Math.min(
+      Math.max(translateY, 0),
+      80
+    )}%)`;
   }
 
   /** End dragging & determine if expansion should happen */
@@ -113,6 +134,8 @@ export class InteractionBarComponent implements AfterViewInit {
     // Reset position with smooth transition
     const footer = this.footerContainer.nativeElement;
     footer.style.transition = 'transform 0.3s ease-out';
-    footer.style.transform = this.isExpanded ? 'translateY(0)' : 'translateY(80%)';
+    footer.style.transform = this.isExpanded
+      ? 'translateY(0)'
+      : 'translateY(80%)';
   }
 }

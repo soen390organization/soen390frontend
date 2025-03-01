@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, combineLatest, map, Observable } from 'rxjs';
 import { Step } from '../../interfaces/step.interface';
-import data  from '../../../assets/ConcordiaData.json';
+import data from '../../../assets/ConcordiaData.json';
 
 interface Location {
   title: string;
@@ -14,7 +14,7 @@ interface Location {
 @Injectable({
   providedIn: 'root',
 })
-export class DirectionsService {
+export class RouteService {
   private directionsService!: google.maps.DirectionsService;
   private renderers!: google.maps.DirectionsRenderer[];
   private placesService!: google.maps.places.PlacesService;
@@ -36,7 +36,7 @@ export class DirectionsService {
       renderer3.setMap(map);
       this.renderers.push(renderer1, renderer2, renderer3);
     }
-    if(!this.placesService)
+    if (!this.placesService)
       this.placesService = new google.maps.places.PlacesService(map);
   }
 
@@ -53,15 +53,17 @@ export class DirectionsService {
   }
 
   setStartPoint(location: Location): void {
-    const marker = this.startPoint$.value?.marker ?? new google.maps.Marker({
-      position: location.coordinates,
-      map: this.renderers[0].getMap(),
-      icon: { 
-        url: 'https://upload.wikimedia.org/wikipedia/commons/8/8e/Icone_Verde.svg', 
-        scaledSize: new google.maps.Size(40, 40) 
-      }
-    });
-  
+    const marker =
+      this.startPoint$.value?.marker ??
+      new google.maps.Marker({
+        position: location.coordinates,
+        map: this.renderers[0].getMap(),
+        icon: {
+          url: 'https://upload.wikimedia.org/wikipedia/commons/8/8e/Icone_Verde.svg',
+          scaledSize: new google.maps.Size(40, 40),
+        },
+      });
+
     marker.setPosition(location.coordinates);
 
     this.startPoint$.next({ ...location, marker });
@@ -73,15 +75,17 @@ export class DirectionsService {
   }
 
   setDestinationPoint(location: Location): void {
-    const marker = this.destinationPoint$.value?.marker ?? new google.maps.Marker({
-      position: location.coordinates,
-      map: this.renderers[0].getMap(),
-      icon: { 
-        url: 'https://upload.wikimedia.org/wikipedia/commons/8/8e/Icone_Verde.svg', 
-        scaledSize: new google.maps.Size(40, 40) 
-      }
-    });
-  
+    const marker =
+      this.destinationPoint$.value?.marker ??
+      new google.maps.Marker({
+        position: location.coordinates,
+        map: this.renderers[0].getMap(),
+        icon: {
+          url: 'https://upload.wikimedia.org/wikipedia/commons/8/8e/Icone_Verde.svg',
+          scaledSize: new google.maps.Size(40, 40),
+        },
+      });
+
     marker.setPosition(location.coordinates);
 
     this.destinationPoint$.next({ ...location, marker });
@@ -96,12 +100,16 @@ export class DirectionsService {
 
   private updateMapView() {
     const map = this.renderers[0].getMap();
-  
+
     const startPoint = this.startPoint$.value;
     const destinationPoint = this.destinationPoint$.value;
-  
+
     if (startPoint && destinationPoint) {
-      this.generateRoute(startPoint.address, destinationPoint.address, google.maps.TravelMode.WALKING);
+      this.generateRoute(
+        startPoint.address,
+        destinationPoint.address,
+        google.maps.TravelMode.WALKING
+      );
       const bounds = new google.maps.LatLngBounds();
       bounds.extend(startPoint.marker.getPosition()!);
       bounds.extend(destinationPoint.marker.getPosition()!);
@@ -113,15 +121,13 @@ export class DirectionsService {
         map.setZoom(18);
       }
     }
-  }  
+  }
 
   /**
    * Converts a string (e.g., "WALKING") into a google.maps.TravelMode enum.
    */
   getTravelMode(mode: string): google.maps.TravelMode {
-
     switch (mode.toUpperCase()) {
-    
       case 'WALKING':
         return google.maps.TravelMode.WALKING;
       case 'TRANSIT':
@@ -158,25 +164,28 @@ export class DirectionsService {
     eta: string
    */
   calculateRoute(
-    startAddress: string|google.maps.LatLng,
-    destinationAddress: string|google.maps.LatLng,
+    startAddress: string | google.maps.LatLng,
+    destinationAddress: string | google.maps.LatLng,
     travelMode: google.maps.TravelMode = google.maps.TravelMode.WALKING,
     renderer: google.maps.DirectionsRenderer = this.renderers[0]
   ): Promise<{
     steps: Step[];
     eta: string | null;
   }> {
+    console.log(
+      `starting at: ${startAddress}, ending at: ${destinationAddress}`
+    );
     return new Promise((resolve, reject) => {
       // this.directionsRenderer.setMap(this.map);
 
       this.setRouteColor(travelMode, renderer);
+      console.log('route colors set');
 
       const request: google.maps.DirectionsRequest = {
         origin: startAddress,
         destination: destinationAddress,
         travelMode: travelMode,
       };
-
       this.directionsService.route(request, (response, status) => {
         if (status === google.maps.DirectionsStatus.OK && response) {
           renderer.setDirections(response);
@@ -203,6 +212,7 @@ export class DirectionsService {
               });
             }
           }
+          console.log('route steps: ', steps);
 
           resolve({ steps, eta });
         } else {
@@ -211,10 +221,18 @@ export class DirectionsService {
       });
     });
   }
-  async calculateShuttleBusRoute(startAddress: string | google.maps.LatLng, destinationAddress: string | google.maps.LatLng) {
 
+  async calculateShuttleBusRoute(
+    startAddress: string | google.maps.LatLng,
+    destinationAddress: string | google.maps.LatLng
+  ) {
+    console.log('calculating shuttle bus route');
     const startCoords = await this.findCoords(startAddress);
     const destinationCoords = await this.findCoords(destinationAddress);
+
+    const loyTerminalCoords = `${data.loy.shuttleBus.terminal.lat}, ${data.loy.shuttleBus.terminal.lng}`;
+    const sgwTerminalCoords = `${data.sgw.shuttleBus.terminal.lat}, ${data.sgw.shuttleBus.terminal.lng}`;
+
     if (!startCoords || !destinationCoords) {
       throw new Error('Start place not found');
     }
@@ -240,12 +258,13 @@ export class DirectionsService {
     const destinationCampus =
       destinationDistanceToSGW < destinationDistanceToLOY ? 'sgw' : 'loy';
     const shuttleSteps = [];
+    console.log(startCampus);
+    console.log(destinationCampus);
 
     const sameCampus = startCampus === destinationCampus;
 
     if (sameCampus) {
       const steps = await this.calculateRoute(
-      
         startAddress,
         destinationAddress,
         google.maps.TravelMode.WALKING
@@ -254,56 +273,72 @@ export class DirectionsService {
     } else {
       const initialWalk = await this.calculateRoute(
         startAddress,
-        String(data[startCampus].shuttleBus.terminal),
+        startCampus === 'sgw' ? sgwTerminalCoords : loyTerminalCoords,
         google.maps.TravelMode.WALKING,
         this.renderers[0]
       );
+      // fails here
+      console.log('calculating shuttle bus');
       const shuttleBus = await this.calculateRoute(
-        String(data[startCampus].shuttleBus.terminal),
-        String(data[destinationCampus].shuttleBus.terminal),
-        google.maps.TravelMode.TRANSIT,
+        startCampus === 'sgw' ? sgwTerminalCoords : loyTerminalCoords,
+        destinationCampus === 'sgw' ? sgwTerminalCoords : loyTerminalCoords,
+        google.maps.TravelMode.DRIVING,
         this.renderers[1]
       );
+      console.log('calculating final walk');
       const finalWalk = await this.calculateRoute(
-        String(data[destinationCampus].shuttleBus.terminal),
+        destinationCampus === 'sgw' ? sgwTerminalCoords : loyTerminalCoords,
         destinationAddress,
         google.maps.TravelMode.WALKING,
         this.renderers[2]
-
       );
 
-      shuttleSteps.push(initialWalk.steps);
-      shuttleSteps.push(shuttleBus.steps);
-      shuttleSteps.push(finalWalk.steps);
+      shuttleSteps.push(...initialWalk.steps);
+      shuttleSteps.push(...shuttleBus.steps);
+      shuttleSteps.push(...finalWalk.steps);
     }
+    console.log('shuttle bus steps: ', shuttleSteps);
 
-    return { steps: shuttleSteps, eta: "TBD" };
+    return { steps: shuttleSteps, eta: 'TBD' };
   }
 
-  generateRoute(startAddress: string|google.maps.LatLng,
-    destinationAddress: string|google.maps.LatLng,
-    travelMode: string | google.maps.TravelMode = google.maps.TravelMode.WALKING,
-    ){
-      this.clearMapDirections();
-      if (travelMode === "SHUTTLE") {
-        return this.calculateShuttleBusRoute(startAddress, destinationAddress);
-      } else {
-        const travelType= this.getTravelMode(travelMode);
-        return this.calculateRoute(startAddress, destinationAddress, this.getTravelMode(travelMode));
-      }
+  generateRoute(
+    startAddress: string | google.maps.LatLng,
+    destinationAddress: string | google.maps.LatLng,
+    travelMode: string | google.maps.TravelMode = google.maps.TravelMode.WALKING
+  ) {
+    console.log('generating routes');
+    this.clearMapDirections();
+    if (travelMode === 'SHUTTLE') {
+      console.log('shuttle bus...');
+      return this.calculateShuttleBusRoute(startAddress, destinationAddress);
+    } else {
+      return this.calculateRoute(
+        startAddress,
+        destinationAddress,
+        this.getTravelMode(travelMode)
+      );
     }
+  }
 
-  setRouteColor(travelMode: google.maps.TravelMode, renderer: google.maps.DirectionsRenderer): google.maps.PolylineOptions {
+  setRouteColor(
+    travelMode: google.maps.TravelMode,
+    renderer: google.maps.DirectionsRenderer
+  ): google.maps.PolylineOptions {
+    console.log('setting route colors');
     const polylineOptions: google.maps.PolylineOptions = {};
 
     switch (travelMode) {
       case google.maps.TravelMode.DRIVING:
+        console.log('rendering driving');
         polylineOptions['strokeColor'] = 'red';
         break;
       case google.maps.TravelMode.TRANSIT:
+        console.log('rendering driving');
         polylineOptions['strokeColor'] = 'green';
         break;
       case google.maps.TravelMode.WALKING:
+        console.log('rendering walking');
         polylineOptions['strokeColor'] = '#0096FF';
         polylineOptions['strokeOpacity'] = 0;
         polylineOptions['icons'] = [
@@ -322,7 +357,10 @@ export class DirectionsService {
     return polylineOptions;
   }
 
-  private findCoords(query: string | google.maps.LatLng): Promise<google.maps.LatLng | null> {
+  private findCoords(
+    query: string | google.maps.LatLng
+  ): Promise<google.maps.LatLng | null> {
+    console.log('finding coords');
     if (query instanceof google.maps.LatLng) {
       return Promise.resolve(query);
     }
@@ -334,6 +372,7 @@ export class DirectionsService {
             status === google.maps.places.PlacesServiceStatus.OK &&
             results.length > 0
           ) {
+            console.log(results[0].geometry.location);
             resolve(results[0].geometry.location);
           } else {
             reject(null);
@@ -344,7 +383,7 @@ export class DirectionsService {
   }
   public clearMapDirections() {
     this.renderers.forEach((renderer) => {
-      renderer.setMap(null);
+      renderer.setDirections(null);
     });
   }
 }
