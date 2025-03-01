@@ -16,14 +16,14 @@
       <div class="relative w-full mt-1">
         <input
         [(ngModel)]="startLocationInput"
-        (input)="onSearchChange($event, 'start')"  
-        (keyup.enter)="directionsService.setStartPoint(places[0]); clearList()" 
-        type="text" 
-        placeholder="Choose starting point..." 
+        (input)="onSearchChange($event, 'start')"
+        (keyup.enter)="directionsService.setStartPoint(places[0]); clearList()"
+        type="text"
+        placeholder="Choose starting point..."
         debounce="1000"
         class="w-full bg-white px-4 py-3 rounded-full border border-gray-300 focus:outline-none pr-10"
       />
-      
+
       <div *ngIf="isSearchingFromStart" class="absolute w-full mt-1 z-10">
         <ion-list *ngIf="places?.length > 0" class="rounded-b-xl">
           <ion-item *ngFor="let place of places" (click)="directionsService.setStartPoint(place); clearList()">
@@ -39,8 +39,8 @@
           </ion-item>
         </ion-list>
       </div>
-      
-        <div 
+
+        <div
           (click)="onSetUsersLocationAsStart()"
           class="absolute right-1.5 top-1/2 transform -translate-y-1/2 cursor-pointer bg-[#912338] p-2 rounded-full flex items-center justify-center"
         >
@@ -48,14 +48,14 @@
             my_location
           </span>
         </div>
-      </div>      
-  
+      </div>
+
       <input
         [(ngModel)]="destinationLocationInput"
         (input) = "onSearchChange($event,'destination')"
-        (keyup.enter)="directionsService.setDestinationPoint(places[0]); clearList()" 
-        type="text" 
-        placeholder="Choose destination point..." 
+        (keyup.enter)="directionsService.setDestinationPoint(places[0]); clearList()"
+        type="text"
+        placeholder="Choose destination point..."
         class="mt-2 w-full bg-white px-4 py-3 rounded-full border border-gray-300 focus:outline-none pr-10"
       />
 
@@ -66,6 +66,7 @@
         </div>
         <button
           class="bg-[#912338] text-white py-3 px-8 rounded-full text-lg font-semibold"
+          (click)="directionsService.showDirections()"
         >
           Start
         </button>

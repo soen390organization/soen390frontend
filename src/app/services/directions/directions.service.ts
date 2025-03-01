@@ -16,7 +16,7 @@ interface Location {
 export class DirectionsService {
   private directionsService!: google.maps.DirectionsService;
   private directionsRenderer!: google.maps.DirectionsRenderer;
-  
+
   private startPoint$ = new BehaviorSubject<Location | null>(null);
   private destinationPoint$ = new BehaviorSubject<Location | null>(null);
 
@@ -47,16 +47,16 @@ export class DirectionsService {
     const marker = this.startPoint$.value?.marker ?? new google.maps.Marker({
       position: location.coordinates,
       map: this.directionsRenderer.getMap(),
-      icon: { 
-        url: 'https://upload.wikimedia.org/wikipedia/commons/8/8e/Icone_Verde.svg', 
-        scaledSize: new google.maps.Size(40, 40) 
+      icon: {
+        url: 'https://upload.wikimedia.org/wikipedia/commons/8/8e/Icone_Verde.svg',
+        scaledSize: new google.maps.Size(40, 40)
       }
     });
-  
+
     marker.setPosition(location.coordinates);
 
     this.startPoint$.next({ ...location, marker });
-    this.updateMapView();
+    this.updateMapView("start");
   }
 
   getDestinationPoint(): Observable<Location | null> {
@@ -67,16 +67,16 @@ export class DirectionsService {
     const marker = this.destinationPoint$.value?.marker ?? new google.maps.Marker({
       position: location.coordinates,
       map: this.directionsRenderer.getMap(),
-      icon: { 
-        url: 'https://upload.wikimedia.org/wikipedia/commons/8/8e/Icone_Verde.svg', 
-        scaledSize: new google.maps.Size(40, 40) 
+      icon: {
+        url: 'https://upload.wikimedia.org/wikipedia/commons/8/8e/Icone_Verde.svg',
+        scaledSize: new google.maps.Size(40, 40)
       }
     });
-  
+
     marker.setPosition(location.coordinates);
 
     this.destinationPoint$.next({ ...location, marker });
-    this.updateMapView();
+    this.updateMapView("destination");
   }
 
   get hasBothPoints$(): Observable<boolean> {
@@ -85,26 +85,31 @@ export class DirectionsService {
     );
   }
 
-  private updateMapView() {
+  // Function to handle the button click, which will enable the start functionality
+  showDirections(): void {
+    this.updateMapView("both");
+  }
+
+  private updateMapView(toUpdate: string) {
     const map = this.directionsRenderer.getMap();
-  
+
     const startPoint = this.startPoint$.value;
     const destinationPoint = this.destinationPoint$.value;
-  
-    if (startPoint && destinationPoint) {
+
+    if (toUpdate=="both") {
       this.calculateRoute(startPoint.address, destinationPoint.address, google.maps.TravelMode.WALKING);
       const bounds = new google.maps.LatLngBounds();
       bounds.extend(startPoint.marker.getPosition()!);
       bounds.extend(destinationPoint.marker.getPosition()!);
       map.fitBounds(bounds);
     } else {
-      const point = startPoint ?? destinationPoint;
+      const point = toUpdate == "start" ? startPoint : destinationPoint;
       if (point) {
         map.setCenter(point.marker.getPosition()!);
         map.setZoom(18);
       }
     }
-  }  
+  }
 
   /**
    * Converts a string (e.g., "WALKING") into a google.maps.TravelMode enum.
