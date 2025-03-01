@@ -92,5 +92,6 @@ export class MapSearchComponent implements OnInit {
     this.visibilityService.toggleDirectionsComponent();
     this.visibilityService.togglePOIsComponent();
     this.directionsService.showDirections()
+    this.toggleSearch();
   }
 }
