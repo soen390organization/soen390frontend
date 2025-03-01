@@ -7,6 +7,7 @@ import { CurrentLocationService } from 'src/app/services/geolocation/current-loc
 import { animate, state, style, transition, trigger } from '@angular/animations';
 import { DirectionsService } from 'src/app/services/directions/directions.service';
 import { PlacesService } from 'src/app/services/places.service';
+import { VisibilityService } from 'src/app/services/visibility.service';
 
 @Component({
   selector: 'app-map-search',
@@ -44,7 +45,7 @@ export class MapSearchComponent implements OnInit {
   places: any[]=[]; // Array to store the search suggestions
   isSearchingFromStart: boolean = false; // Flag to determine if the search is for the start or destination location
 
-  constructor(public directionsService: DirectionsService, private placesService: PlacesService, private currentLocationService: CurrentLocationService) {}
+  constructor(public directionsService: DirectionsService, private placesService: PlacesService, private currentLocationService: CurrentLocationService, private visibilityService: VisibilityService) {}
 
   ngOnInit(): void {
     this.directionsService.getDestinationPoint().subscribe(destination => {
@@ -52,7 +53,7 @@ export class MapSearchComponent implements OnInit {
         this.destinationLocationInput = destination.title;
         this.isSearchVisible = true;
       }
-    });    
+    });
   }
 
   toggleSearch() {
@@ -70,11 +71,11 @@ export class MapSearchComponent implements OnInit {
       coordinates: new google.maps.LatLng(position)
     });
   }
-  
+
 
   async onSearchChange(event: any, type: 'start' | 'destination') {
     this.isSearchingFromStart = type === 'start'; // Set the flag to 'start' or 'destination'
-    const query = event.target.value.trim(); 
+    const query = event.target.value.trim();
     if (!query) {
       this.places = [];
       return;
@@ -85,5 +86,11 @@ export class MapSearchComponent implements OnInit {
 
   clearList() {
     this.places = [];
+  }
+
+  onStartClick(): void {
+    this.visibilityService.showDirectionsComponent();
+    this.visibilityService.hidePOIsComponent();
+    this.directionsService.showDirections()
   }
 }
