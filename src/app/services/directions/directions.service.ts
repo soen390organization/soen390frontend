@@ -176,7 +176,6 @@ export class RouteService {
       `starting at: ${startAddress}, ending at: ${destinationAddress}`
     );
     return new Promise((resolve, reject) => {
-      // this.directionsRenderer.setMap(this.map);
 
       this.setRouteColor(travelMode, renderer);
       console.log('route colors set');
@@ -226,12 +225,14 @@ export class RouteService {
     startAddress: string | google.maps.LatLng,
     destinationAddress: string | google.maps.LatLng
   ) {
-    console.log('calculating shuttle bus route');
     const startCoords = await this.findCoords(startAddress);
     const destinationCoords = await this.findCoords(destinationAddress);
 
-    const loyTerminalCoords = `${data.loy.shuttleBus.terminal.lat}, ${data.loy.shuttleBus.terminal.lng}`;
-    const sgwTerminalCoords = `${data.sgw.shuttleBus.terminal.lat}, ${data.sgw.shuttleBus.terminal.lng}`;
+    const terminalCodes = {
+      'sgw': `${data.sgw.shuttleBus.terminal.lat}, ${data.sgw.shuttleBus.terminal.lng}`,
+      'loy': `${data.loy.shuttleBus.terminal.lat}, ${data.loy.shuttleBus.terminal.lng}`
+    }
+
 
     if (!startCoords || !destinationCoords) {
       throw new Error('Start place not found');
@@ -258,8 +259,6 @@ export class RouteService {
     const destinationCampus =
       destinationDistanceToSGW < destinationDistanceToLOY ? 'sgw' : 'loy';
     const shuttleSteps = [];
-    console.log(startCampus);
-    console.log(destinationCampus);
 
     const sameCampus = startCampus === destinationCampus;
 
@@ -273,21 +272,19 @@ export class RouteService {
     } else {
       const initialWalk = await this.calculateRoute(
         startAddress,
-        startCampus === 'sgw' ? sgwTerminalCoords : loyTerminalCoords,
+        terminalCodes[startCampus],
         google.maps.TravelMode.WALKING,
         this.renderers[0]
       );
       // fails here
-      console.log('calculating shuttle bus');
       const shuttleBus = await this.calculateRoute(
-        startCampus === 'sgw' ? sgwTerminalCoords : loyTerminalCoords,
-        destinationCampus === 'sgw' ? sgwTerminalCoords : loyTerminalCoords,
+        terminalCodes[startCampus],
+        terminalCodes[destinationCampus],
         google.maps.TravelMode.DRIVING,
         this.renderers[1]
       );
-      console.log('calculating final walk');
       const finalWalk = await this.calculateRoute(
-        destinationCampus === 'sgw' ? sgwTerminalCoords : loyTerminalCoords,
+        terminalCodes[destinationCampus],
         destinationAddress,
         google.maps.TravelMode.WALKING,
         this.renderers[2]
@@ -297,7 +294,6 @@ export class RouteService {
       shuttleSteps.push(...shuttleBus.steps);
       shuttleSteps.push(...finalWalk.steps);
     }
-    console.log('shuttle bus steps: ', shuttleSteps);
 
     return { steps: shuttleSteps, eta: 'TBD' };
   }
@@ -307,10 +303,8 @@ export class RouteService {
     destinationAddress: string | google.maps.LatLng,
     travelMode: string | google.maps.TravelMode = google.maps.TravelMode.WALKING
   ) {
-    console.log('generating routes');
     this.clearMapDirections();
     if (travelMode === 'SHUTTLE') {
-      console.log('shuttle bus...');
       return this.calculateShuttleBusRoute(startAddress, destinationAddress);
     } else {
       return this.calculateRoute(
@@ -325,20 +319,16 @@ export class RouteService {
     travelMode: google.maps.TravelMode,
     renderer: google.maps.DirectionsRenderer
   ): google.maps.PolylineOptions {
-    console.log('setting route colors');
     const polylineOptions: google.maps.PolylineOptions = {};
 
     switch (travelMode) {
       case google.maps.TravelMode.DRIVING:
-        console.log('rendering driving');
         polylineOptions['strokeColor'] = 'red';
         break;
       case google.maps.TravelMode.TRANSIT:
-        console.log('rendering driving');
         polylineOptions['strokeColor'] = 'green';
         break;
       case google.maps.TravelMode.WALKING:
-        console.log('rendering walking');
         polylineOptions['strokeColor'] = '#0096FF';
         polylineOptions['strokeOpacity'] = 0;
         polylineOptions['icons'] = [
@@ -360,7 +350,6 @@ export class RouteService {
   private findCoords(
     query: string | google.maps.LatLng
   ): Promise<google.maps.LatLng | null> {
-    console.log('finding coords');
     if (query instanceof google.maps.LatLng) {
       return Promise.resolve(query);
     }
