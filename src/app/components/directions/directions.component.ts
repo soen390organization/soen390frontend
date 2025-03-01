@@ -60,7 +60,8 @@ export class DirectionsComponent implements OnInit, OnDestroy {
     this.directionsService.hasBothPoints$.subscribe((hasBoth) => {
       console.log(hasBoth)
       if (hasBoth) {
-        this.loadDirections;
+        this.loadDirections("WALKING");
+        this.startWatchingLocation();
       }
     });
   }

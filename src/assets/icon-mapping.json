@@ -6,6 +6,7 @@
     "left": "turn_left",
     "go straight": "straight",
     "straight": "straight",
+    "continue": "straight",
     "make a u-turn": "u_turn_left",
     "u-turn": "u_turn_left",
     "merge": "merge",
