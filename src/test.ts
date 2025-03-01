@@ -25,8 +25,8 @@ class Polygon {
 }
 
 class LatLng {
-  private _lat: number;
-  private _lng: number;
+  private readonly _lat: number;
+  private readonly _lng: number;
   constructor({ lat, lng }: LatLngLiteral) {
     this._lat = lat;
     this._lng = lng;
