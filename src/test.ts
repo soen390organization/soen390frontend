@@ -48,8 +48,12 @@ class Circle {
 
 class Map {
   constructor(public element: HTMLElement, public options: any) {}
-  setCenter(latLng: any) {}
-  setZoom(zoom: number) {}
+  setCenter(latLng: any): void {
+    // intentionally left blank
+  }
+  setZoom(zoom: number): void {
+    // intentionally left blank
+  }
 }
 
 class AutocompleteService {
@@ -88,9 +92,15 @@ class DirectionsService {
 }
 
 class DirectionsRenderer {
-  setMap(map: google.maps.Map): void {}
-  setOptions(options: any): void {}
-  setDirections(directions: google.maps.DirectionsResult): void {}
+  setMap(map: google.maps.Map): void {
+    // intentionally left blank
+  }
+  setOptions(options: any): void {
+    // intentionally left blank
+  }
+  setDirections(directions: google.maps.DirectionsResult): void {
+    // intentionally left blank
+  }
 }
 
 const TravelMode = {
