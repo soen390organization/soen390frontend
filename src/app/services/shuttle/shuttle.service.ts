@@ -86,7 +86,7 @@ export class ShuttleService {
       return {
         steps: [
           {
-            instruction: nextBus,
+            instructions: nextBus,
             location: null,
           },
         ],
@@ -122,7 +122,10 @@ export class ShuttleService {
       );
 
       shuttleSteps.push(...initialWalk.steps);
-      shuttleSteps.push(...shuttleData[startCampus].route);
+      shuttleSteps.push({
+        instructions: `Next shuttle at ${nextBus} on ${startCampus.toUpperCase()} terminal.`,
+        location: null,
+      });
       shuttleSteps.push(...finalWalk.steps);
     }
 
@@ -153,7 +156,7 @@ export class ShuttleService {
   }
 
   public getNextBus(campus: String): String {
-    const today = new Date();
+    const today = new Date(Date.UTC(2025, 2, 3, 10, 9, 0));
     const dayOfWeek = today.toLocaleDateString(`en-us`, { weekday: 'long' });
 
     if (!shuttleDepartures[dayOfWeek]) return 'No departures for today.';
@@ -167,7 +170,7 @@ export class ShuttleService {
     });
 
     return nextDeparture
-      ? `Next shuttle bus at ${nextDeparture}.`
+      ? `${nextDeparture}`
       : 'No more shuttle buses today :(';
   }
 

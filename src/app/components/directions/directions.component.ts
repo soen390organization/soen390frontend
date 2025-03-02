@@ -184,6 +184,7 @@ export class DirectionsComponent implements OnInit, OnDestroy {
         mode
       );
       this.steps = steps;
+      console.log(this.steps);
       this.eta = eta;
     } catch (error) {
       console.error('Failed to fetch directions:', error);
