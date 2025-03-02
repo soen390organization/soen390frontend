@@ -8,33 +8,18 @@ describe('Directions Service', () => {
   let destination = 'John Molson School of Business';
   let mockRenderer: any;
 
-  beforeAll(() => {
-    class MockDirectionsService {
-      route = jasmine.createSpy('route');
-    }
+  class MockDirectionsService {
+    route = jasmine.createSpy('route');
+  }
 
-    class MockDirectionsRenderer {
-      setMap = jasmine.createSpy('setMap');
-      setOptions = jasmine.createSpy('setOptions');
-      setDirections = jasmine.createSpy('setDirections');
-    }
+  class MockDirectionsRenderer {
+    setMap = jasmine.createSpy('setMap');
+    setOptions = jasmine.createSpy('setOptions');
+    setDirections = jasmine.createSpy('setDirections');
+  }
 
-    class MockPlacesService {
-      findPlaceFromQuery = jasmine.createSpy('findPlaceFromQuery');
-    }
-
-    // Mock LatLng to avoid "not a constructor" errors
-    class MockLatLng {
-      constructor(private _lat: number, private _lng: number) {}
-      lat() {
-        return this._lat;
-      }
-      lng() {
-        return this._lng;
-      }
-    }
-
-    globalThis.google = {
+  beforeEach(() => {
+    (window as any).google = {
       maps: {
         Map: class {},
         LatLng: MockLatLng,
@@ -57,9 +42,7 @@ describe('Directions Service', () => {
         SymbolPath: { CIRCLE: 'CIRCLE' },
       },
     } as any;
-  });
 
-  beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [RouteService],
     });

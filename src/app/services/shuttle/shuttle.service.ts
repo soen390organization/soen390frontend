@@ -8,14 +8,15 @@ import { Injectable, Injector } from '@angular/core';
 export class ShuttleService {
   private placesService!: google.maps.places.PlacesService;
   private renderers!: google.maps.DirectionsRenderer[];
-  private routeService!: RouteService; // Remove constructor injection
+  private routeService!: RouteService;
   private initialized = false;
 
-  constructor(private injector: Injector) {} // Inject Injector instead
+  // use injector to inject routeservice dynamically
+  constructor(private injector: Injector) {}
 
   public initialize(map: google.maps.Map): void {
     if (!this.initialized) {
-      this.routeService = this.injector.get(RouteService); // Retrieve RouteService dynamically
+      this.routeService = this.injector.get(RouteService);
       this.initialized = true;
     }
 
