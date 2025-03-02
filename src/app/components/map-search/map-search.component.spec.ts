@@ -134,6 +134,30 @@ describe('MapSearchComponent', () => {
     });
   });
 
+  describe('Clear button functionalities', () => {
+    it('should clear the start input when clearStartInput() is called', () => {
+      component.startLocationInput = 'Some text';
+      component.places = [{ title: 'Place1' }];
+      spyOn(component, 'clearList');
+      
+      component.clearStartInput();
+      
+      expect(component.startLocationInput).toBe('');
+      expect(component.clearList).toHaveBeenCalled();
+    });
+
+    it('should clear the destination input when clearDestinationInput() is called', () => {
+      component.destinationLocationInput = 'Some text';
+      component.places = [{ title: 'Place2' }];
+      spyOn(component, 'clearList');
+      
+      component.clearDestinationInput();
+      
+      expect(component.destinationLocationInput).toBe('');
+      expect(component.clearList).toHaveBeenCalled();
+    });
+  });
+
   describe('onSetUsersLocationAsStart()', () => {
     it('should retrieve current location and set start point via DirectionsService', fakeAsync(() => {
       // Mock the service to resolve a location
