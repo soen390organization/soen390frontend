@@ -49,7 +49,7 @@ export class ShuttleService {
     const { startCoords, destinationCoords, startCampus, destinationCampus } =
       await this.fetchCoordinates(startAddress, destinationAddress);
 
-    const date = new Date();
+    const date = new Date('2025-03-04T14:00:00');
     const nextBus = this.getNextBus(startCampus, date);
 
     if (this.isNoBusAvailable(nextBus)) {
@@ -67,7 +67,7 @@ export class ShuttleService {
           nextBus
         );
 
-    return { steps, eta: 'TBD' };
+    return { steps: steps.steps, eta: steps.eta };
   }
 
   /**
@@ -80,6 +80,8 @@ export class ShuttleService {
     const startCoords = await this.findCoords(startAddress);
     const destinationCoords = await this.findCoords(destinationAddress);
 
+    const shuttleSteps = [];
+    var eta = '';
     const startCampus = this.getNearestCampus(startCoords);
     const destinationCampus = this.getNearestCampus(destinationCoords);
 
@@ -123,7 +125,7 @@ export class ShuttleService {
       destinationAddress,
       google.maps.TravelMode.WALKING
     );
-    return result.steps;
+    return { steps: result.steps, eta: result.eta };
   }
 
   /**
@@ -147,7 +149,7 @@ export class ShuttleService {
     );
     shuttleSteps.push(...initialWalk.steps);
 
-    await this.routeService.calculateRoute(
+    const shuttleBus = await this.routeService.calculateRoute(
       terminalCodes[startCampus],
       terminalCodes[destinationCampus],
       google.maps.TravelMode.DRIVING,
@@ -166,7 +168,12 @@ export class ShuttleService {
     );
     shuttleSteps.push(...finalWalk.steps);
 
-    return shuttleSteps;
+    const initialWalkEta = Number(initialWalk.eta.replace(/\D/g, ''));
+    const shuttleBusEta = Number(shuttleBus.eta.replace(/\D/g, ''));
+    const finalWalkEta = Number(finalWalk.eta.replace(/\D/g, ''));
+    const eta = `${initialWalkEta + shuttleBusEta + finalWalkEta} minutes`;
+
+    return { steps: shuttleSteps, eta: eta };
   }
 
   /**
