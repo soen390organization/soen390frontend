@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, combineLatest, map, Observable } from 'rxjs';
 import { Step } from '../../interfaces/step.interface';
+import { start } from 'repl';
 
 interface Location {
   title: string;
@@ -126,6 +127,7 @@ export class DirectionsService {
       bounds.extend(destinationPoint.marker.getPosition()!);
       map.fitBounds(bounds);
     } else {
+      this.directionsRenderer.set('directions', null);
       const point = toUpdate == "start" ? startPoint : destinationPoint;
       if (point) {
         map.setCenter(point.marker.getPosition()!);
@@ -256,6 +258,23 @@ export class DirectionsService {
     this.directionsRenderer.setOptions({ polylineOptions });
     return polylineOptions;
   }
+
+  clearStartPoint(): void {
+    if (this.startPoint$.value?.marker) {
+      this.startPoint$.value.marker.setMap(null);
+    }
+    this.startPoint$.next(null);
+    this.updateMapView('start');
+  }
+  
+  clearDestinationPoint(): void {
+    if (this.destinationPoint$.value?.marker) {
+      this.destinationPoint$.value.marker.setMap(null);
+    }
+    this.destinationPoint$.next(null);
+    this.updateMapView('destination');
+  }
+  
 
   public async calculateShortestRoute(
     start: string | google.maps.LatLng,
