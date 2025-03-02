@@ -30,8 +30,11 @@ describe('MapSearchComponent', () => {
       'setDestinationPoint',
       'getStartPoint',
       'getDestinationPoint',
+      'clearStartPoint',
+      'clearDestinationPoint'
     ]);
     // Ensure getDestinationPoint() returns an observable
+    directionsServiceSpy.getStartPoint.and.returnValue(of(null));
     directionsServiceSpy.getDestinationPoint.and.returnValue(
       of({ title: 'Default Destination', address: '', coordinates: null })
     );
@@ -155,6 +158,32 @@ describe('MapSearchComponent', () => {
       component.places = [{ title: 'Place1' }, { title: 'Place2' }];
       component.clearList();
       expect(component.places.length).toBe(0);
+    });
+  });
+
+  describe('Clear button functionalities', () => {
+    it('should clear the start input when clearStartInput() is called', () => {
+      component.startLocationInput = 'Some text';
+      component.places = [{ title: 'Place1' }];
+      spyOn(component, 'clearList');
+      
+      component.clearStartInput();
+      
+      expect(component.startLocationInput).toBe('');
+      expect(component.clearList).toHaveBeenCalled();
+      expect(directionsServiceSpy.clearStartPoint).toHaveBeenCalled();
+    });
+
+    it('should clear the destination input when clearDestinationInput() is called', () => {
+      component.destinationLocationInput = 'Some text';
+      component.places = [{ title: 'Place2' }];
+      spyOn(component, 'clearList');
+      
+      component.clearDestinationInput();
+      
+      expect(component.destinationLocationInput).toBe('');
+      expect(component.clearList).toHaveBeenCalled();
+      expect(directionsServiceSpy.clearDestinationPoint).toHaveBeenCalled();
     });
   });
 
