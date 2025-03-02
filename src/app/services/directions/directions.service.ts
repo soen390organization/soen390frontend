@@ -20,7 +20,7 @@ export class RouteService {
   private startPoint$ = new BehaviorSubject<Location | null>(null);
   private destinationPoint$ = new BehaviorSubject<Location | null>(null);
 
-  constructor(private shuttleService: ShuttleService) {}
+  constructor(private readonly shuttleService: ShuttleService) {}
 
   public initialize(map: google.maps.Map): void {
     if (!this.directionsService)
@@ -230,7 +230,7 @@ export class RouteService {
   }
 
   setRouteColor(
-    travelMode: google.maps.TravelMode | String,
+    travelMode: google.maps.TravelMode | string,
     renderer: google.maps.DirectionsRenderer
   ): google.maps.PolylineOptions {
     const polylineOptions: google.maps.PolylineOptions = {};

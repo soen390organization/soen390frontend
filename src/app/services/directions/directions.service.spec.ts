@@ -1,12 +1,23 @@
 import { RouteService } from './directions.service';
 import { TestBed } from '@angular/core/testing';
 import Joi from 'joi';
+import { BehaviorSubject } from 'rxjs';
+import { ShuttleService } from '../shuttle/shuttle.service';
 
 describe('Directions Service', () => {
   let service: RouteService;
+  let shuttleService: ShuttleService;
   let origin = 'Hall Building Concordia';
   let destination = 'John Molson School of Business';
   let mockRenderer: any;
+
+  interface Location {
+    title: string;
+    address: string;
+    coordinates: google.maps.LatLng;
+    image?: string;
+    marker?: google.maps.Marker;
+  }
 
   class MockLatLng {
     lat: number;
@@ -25,6 +36,12 @@ describe('Directions Service', () => {
     nearbySearch(req: any, callback: (results: any[], status: string) => void) {
       callback([], 'ZERO_RESULTS');
     }
+    findPlaceFromQuery(
+      req: any,
+      callback: (results: any[], status: string) => void
+    ) {
+      callback([], 'ZERO_RESULTS');
+    }
   }
 
   class MockDirectionsService {
@@ -36,6 +53,7 @@ describe('Directions Service', () => {
     setOptions = jasmine.createSpy('setOptions');
     setDirections = jasmine.createSpy('setDirections');
     set = jasmine.createSpy('set');
+    getMap = jasmine.createSpy('getMap');
   }
 
   beforeEach(() => {
@@ -64,9 +82,10 @@ describe('Directions Service', () => {
     } as any;
 
     TestBed.configureTestingModule({
-      providers: [RouteService],
+      providers: [RouteService, ShuttleService],
     });
     service = TestBed.inject(RouteService);
+    shuttleService = TestBed.inject(ShuttleService);
 
     // Initialize service with a dummy map
     service.initialize({} as google.maps.Map);
@@ -145,6 +164,13 @@ describe('Directions Service', () => {
   });
 
   describe('setRouteColor() function', () => {
+    describe('given the travel mode is SHUTTLE', () => {
+      it('should return the color red', () => {
+        const polylineOptions = service.setRouteColor('SHUTTLE', mockRenderer);
+        expect(polylineOptions).toEqual({ strokeColor: 'purple' });
+      });
+    });
+
     describe('given the travel mode is DRIVING', () => {
       it('should return the color red', () => {
         const polylineOptions = service.setRouteColor(
@@ -187,6 +213,75 @@ describe('Directions Service', () => {
           ],
         });
       });
+    });
+  });
+
+  describe('getDirectionsService()', () => {
+    it('should return the directionsService instance', () => {
+      expect(service.getDirectionsService()).toBeDefined();
+    });
+  });
+
+  describe('getStartPoint()', () => {
+    it('should return the correct start point as an observable', (done) => {
+      const mockLocation: Location = {
+        title: 'Start',
+        address: '123 Street',
+        coordinates: new google.maps.LatLng(45.5017, -73.5673),
+      };
+
+      (service as any).startPoint$ = new BehaviorSubject<Location | null>(
+        mockLocation
+      );
+
+      service.getStartPoint().subscribe((location) => {
+        expect(location).toEqual(mockLocation);
+        done();
+      });
+    });
+  });
+
+  describe('getDestinationPoint()', () => {
+    it('should return the correct destination point as an observable', (done) => {
+      const mockLocation: Location = {
+        title: 'Destination',
+        address: '456 Avenue',
+        coordinates: new google.maps.LatLng(45.505, -73.561),
+      };
+
+      (service as any).destinationPoint$ = new BehaviorSubject<Location | null>(
+        mockLocation
+      );
+
+      service.getDestinationPoint().subscribe((location) => {
+        expect(location).toEqual(mockLocation);
+        done();
+      });
+    });
+  });
+
+  describe('generateRoute()', () => {
+    beforeEach(() => {
+      spyOn(shuttleService, 'clearMapDirections').and.callThrough();
+      spyOn(shuttleService, 'calculateShuttleBusRoute').and.returnValue(
+        Promise.resolve({ steps: [], eta: '10 mins' }) // Ensuring successful response
+      );
+    });
+
+    it('should call calculateShuttleBusRoute when travel mode is SHUTTLE', async () => {
+      const expectedResponse = { steps: [], eta: '10 mins' };
+
+      const result = await service.generateRoute(
+        origin,
+        destination,
+        'SHUTTLE'
+      );
+
+      expect(shuttleService.calculateShuttleBusRoute).toHaveBeenCalledWith(
+        origin,
+        destination
+      );
+      expect(result).toEqual(expectedResponse);
     });
   });
 });
