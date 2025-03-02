@@ -2,17 +2,17 @@ import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { getVenue, showVenue } from '@mappedin/mappedin-js';
 
 const options = {
- /*  venue: '67b39ca55b54d7000b151bdb',
+  venue: '67b39ca55b54d7000b151bdb',
   clientId: 'mik_eGVRJrNs6bz7fm8en549e0799',
-  clientSecret: 'mis_BOEW2MPSJxdmI3neWVtzJoCliyic7MhuEBGTCmx2fk88c6a1071', */
+  clientSecret: 'mis_BOEW2MPSJxdmI3neWVtzJoCliyic7MhuEBGTCmx2fk88c6a1071',
 
 /*   mapId: '67b39ca55b54d7000b151bdb', // John Molson Building MB
   key: 'mik_eGVRJrNs6bz7fm8en549e0799',
   secret:  'mis_BOEW2MPSJxdmI3neWVtzJoCliyic7MhuEBGTCmx2fk88c6a1071', */
 
-  venue: 'mappedin-demo-mall',
+  /* venue: 'mappedin-demo-mall',
   clientId: '5eab30aa91b055001a68e996',
-  clientSecret: 'RJyRXKcryCMy4erZqqCbuB1NbR66QTGNXVE0x3Pg6oCIlUR1',
+  clientSecret: 'RJyRXKcryCMy4erZqqCbuB1NbR66QTGNXVE0x3Pg6oCIlUR1', */
 };
 
 @Component({
