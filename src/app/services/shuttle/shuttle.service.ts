@@ -1,8 +1,7 @@
 import data from '../../../assets/ConcordiaData.json';
-import shuttleData from '../../../assets/ShuttleBusData.json';
 import { RouteService } from '../directions/directions.service';
 import { Injectable, Injector } from '@angular/core';
-import shuttleDepartures from '../../../assets/ShuttleDepartures.json';
+import shuttleData from '../../../assets/ShuttleData.json';
 
 @Injectable({
   providedIn: 'root',
@@ -41,43 +40,22 @@ export class ShuttleService {
     startAddress: string | google.maps.LatLng,
     destinationAddress: string | google.maps.LatLng
   ) {
+    const terminalCodes = {
+      sgw: `${shuttleData.terminals.sgw.terminal.lat}, ${shuttleData.terminals.sgw.terminal.lng}`,
+      loy: `${shuttleData.terminals.loy.terminal.lat}, ${shuttleData.terminals.loy.terminal.lng}`,
+    };
+
     const startCoords = await this.findCoords(startAddress);
     const destinationCoords = await this.findCoords(destinationAddress);
 
-    const terminalCodes = {
-      sgw: `${shuttleData.sgw.terminal.lat}, ${shuttleData.sgw.terminal.lng}`,
-      loy: `${shuttleData.loy.terminal.lat}, ${shuttleData.loy.terminal.lng}`,
-    };
-
-    if (!startCoords || !destinationCoords) {
-      throw new Error('Start place not found');
-    }
-
-    const startDistanceToSGW = Math.sqrt(
-      Math.pow(startCoords.lat() - data.sgw.coordinates.lat, 2) +
-        Math.pow(startCoords.lng() - data.sgw.coordinates.lng, 2)
-    );
-    const startDistanceToLOY = Math.sqrt(
-      Math.pow(startCoords.lat() - data.loy.coordinates.lat, 2) +
-        Math.pow(startCoords.lng() - data.loy.coordinates.lng, 2)
-    );
-    const destinationDistanceToSGW = Math.sqrt(
-      Math.pow(destinationCoords.lat() - data.sgw.coordinates.lat, 2) +
-        Math.pow(destinationCoords.lng() - data.sgw.coordinates.lng, 2)
-    );
-    const destinationDistanceToLOY = Math.sqrt(
-      Math.pow(destinationCoords.lat() - data.loy.coordinates.lat, 2) +
-        Math.pow(destinationCoords.lng() - data.loy.coordinates.lng, 2)
-    );
-
-    const startCampus = startDistanceToSGW < startDistanceToLOY ? 'sgw' : 'loy';
-    const destinationCampus =
-      destinationDistanceToSGW < destinationDistanceToLOY ? 'sgw' : 'loy';
     const shuttleSteps = [];
+    const startCampus = this.getNearestCampus(startCoords);
+    const destinationCampus = this.getNearestCampus(destinationCoords);
 
     const sameCampus = startCampus === destinationCampus;
 
-    const nextBus = this.getNextBus(startCampus);
+    const date = new Date(2025, 2, 3, 10, 9, 0);
+    const nextBus = this.getNextBus(startCampus, date);
 
     if (
       nextBus === 'No more shuttle buses today :(' ||
@@ -132,6 +110,21 @@ export class ShuttleService {
     return { steps: shuttleSteps, eta: 'TBD' };
   }
 
+  getNearestCampus(coords: google.maps.LatLng) {
+    const distanceToSGW = Math.sqrt(
+      Math.pow(coords.lat() - data.sgw.coordinates.lat, 2) +
+        Math.pow(coords.lng() - data.sgw.coordinates.lng, 2)
+    );
+    const distanceToLOY = Math.sqrt(
+      Math.pow(coords.lat() - data.loy.coordinates.lat, 2) +
+        Math.pow(coords.lng() - data.loy.coordinates.lng, 2)
+    );
+
+    const nearestCampus = distanceToSGW < distanceToLOY ? 'sgw' : 'loy';
+
+    return nearestCampus;
+  }
+
   private findCoords(
     query: string | google.maps.LatLng
   ): Promise<google.maps.LatLng | null> {
@@ -155,15 +148,14 @@ export class ShuttleService {
     });
   }
 
-  public getNextBus(campus: String): String {
-    const today = new Date(Date.UTC(2025, 2, 3, 10, 9, 0));
-    const dayOfWeek = today.toLocaleDateString(`en-us`, { weekday: 'long' });
+  public getNextBus(campus: String, date: Date): String {
+    const dayOfWeek = date.toLocaleDateString(`en-us`, { weekday: 'long' });
 
-    if (!shuttleDepartures[dayOfWeek]) return 'No departures for today.';
+    if (!shuttleData.schedule[dayOfWeek]) return 'No departures for today.';
 
-    const currentTime = today.getHours() * 60 + today.getMinutes();
+    const currentTime = date.getHours() * 60 + date.getMinutes();
 
-    const departures = shuttleDepartures[dayOfWeek][campus];
+    const departures = shuttleData.schedule[dayOfWeek][campus];
     const nextDeparture = departures.find((time: String) => {
       const [hours, minutes] = time.split(':').map(Number);
       return hours * 60 + minutes > currentTime;
