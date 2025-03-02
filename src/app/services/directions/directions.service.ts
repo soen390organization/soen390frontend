@@ -20,6 +20,21 @@ export class DirectionsService {
   private startPoint$ = new BehaviorSubject<Location | null>(null);
   private destinationPoint$ = new BehaviorSubject<Location | null>(null);
 
+  private allRoutesData: {
+      mode: google.maps.TravelMode;
+      eta: string | null;
+      distance: number;
+      duration: number;
+  }[] = [];
+
+  private shortestRoute: {
+    mode: google.maps.TravelMode;
+    eta: string | null;
+    distance: number;
+    duration: number;
+  } | null = null;
+
+
   constructor() {}
 
   public initialize(map: google.maps.Map): void {
@@ -232,5 +247,55 @@ export class DirectionsService {
     }
     this.directionsRenderer.setOptions({ polylineOptions });
     return polylineOptions;
+  }
+
+  public async calculateShortestRoute(
+    start: string | google.maps.LatLng,
+    destination: string | google.maps.LatLng
+  ): Promise<void> {
+    // The 4 travel modes we want to compare:
+    const modes = [
+      google.maps.TravelMode.DRIVING,
+      google.maps.TravelMode.WALKING,
+      google.maps.TravelMode.BICYCLING,
+      google.maps.TravelMode.TRANSIT
+    ];
+  
+    // Calculate routes for each mode in parallel.
+    const routePromises = modes.map(mode => {
+      return this.calculateRoute(start, destination, mode).then(({ steps, eta }) => {
+        // Summation of all step distances (in meters) and durations (in seconds).
+        let totalDistance = 0;
+        let totalDuration = 0;
+        if (steps?.length) {
+          totalDistance = steps.reduce((acc, step) => acc + (step.distance?.value ?? 0), 0);
+          totalDuration = steps.reduce((acc, step) => acc + (step.duration?.value ?? 0), 0);
+        }
+  
+        return {
+          mode,
+          eta,
+          distance: totalDistance,
+          duration: totalDuration,
+        };
+      });
+    });
+  
+    // Wait for all modes to finish calculating.
+    const results = await Promise.all(routePromises);
+  
+    // Pick the route with the smallest duration (fastest).
+    let fastest = results[0];
+    for (let i = 1; i < results.length; i++) {
+      if (results[i].duration < fastest.duration) {
+        fastest = results[i];
+      }
+    }
+  
+    // Store them for later reference, if you want to switch modes.
+    this.allRoutesData = results;
+    this.shortestRoute = fastest;
+    
+    await this.calculateRoute(start, destination, fastest.mode);
   }
 }

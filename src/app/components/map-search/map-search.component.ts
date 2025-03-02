@@ -44,6 +44,7 @@ export class MapSearchComponent implements OnInit {
   isSearchVisible = false;
   places: any[]=[]; // Array to store the search suggestions
   isSearchingFromStart: boolean = false; // Flag to determine if the search is for the start or destination location
+  currentRouteData: { eta: string | null; distance: number } | null = null;
 
   constructor(public directionsService: DirectionsService, private placesService: PlacesService, private currentLocationService: CurrentLocationService, private visibilityService: VisibilityService) {}
 
