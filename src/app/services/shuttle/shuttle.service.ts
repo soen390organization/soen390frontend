@@ -2,6 +2,7 @@ import data from '../../../assets/ConcordiaData.json';
 import shuttleData from '../../../assets/ShuttleBusData.json';
 import { RouteService } from '../directions/directions.service';
 import { Injectable, Injector } from '@angular/core';
+import shuttleDepartures from '../../../assets/ShuttleDepartures.json';
 
 @Injectable({
   providedIn: 'root',
@@ -74,6 +75,23 @@ export class ShuttleService {
 
     const sameCampus = startCampus === destinationCampus;
 
+    const nextBus = this.getNextBus(startCampus);
+
+    if (
+      nextBus === 'No more shuttle buses today :(' ||
+      'No departures for today.'
+    ) {
+      return {
+        steps: [
+          {
+            instruction: nextBus,
+            location: null,
+          },
+        ],
+        eta: 'N/A',
+      };
+    }
+
     if (sameCampus) {
       const steps = await this.routeService.calculateRoute(
         startAddress,
@@ -124,7 +142,6 @@ export class ShuttleService {
             status === google.maps.places.PlacesServiceStatus.OK &&
             results.length > 0
           ) {
-            console.log(results[0].geometry.location);
             resolve(results[0].geometry.location);
           } else {
             reject(null);
@@ -134,8 +151,26 @@ export class ShuttleService {
     });
   }
 
+  public getNextBus(campus: String): String {
+    const today = new Date();
+    const dayOfWeek = today.toLocaleDateString(`en-us`, { weekday: 'long' });
+
+    if (!shuttleDepartures[dayOfWeek]) return 'No departures for today.';
+
+    const currentTime = today.getHours() * 60 + today.getMinutes();
+
+    const departures = shuttleDepartures[dayOfWeek][campus];
+    const nextDeparture = departures.find((time: String) => {
+      const [hours, minutes] = time.split(':').map(Number);
+      return hours * 60 + minutes > currentTime;
+    });
+
+    return nextDeparture
+      ? `Next shuttle bus at ${nextDeparture}.`
+      : 'No more shuttle buses today :(';
+  }
+
   public clearMapDirections() {
-    console.log(this.renderers);
     this.renderers.forEach((renderer) => {
       renderer.set('directions', null);
     });

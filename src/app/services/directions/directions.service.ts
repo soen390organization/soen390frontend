@@ -20,18 +20,16 @@ export class RouteService {
   private startPoint$ = new BehaviorSubject<Location | null>(null);
   private destinationPoint$ = new BehaviorSubject<Location | null>(null);
 
-  constructor(
-  private shuttleService: ShuttleService
-  ) {}
+  constructor(private shuttleService: ShuttleService) {}
 
   public initialize(map: google.maps.Map): void {
-    this.shuttleService.initialize(map)
     if (!this.directionsService)
       this.directionsService = new google.maps.DirectionsService();
     if (!this.directionsRenderer) {
       this.directionsRenderer = new google.maps.DirectionsRenderer();
       this.directionsRenderer.setMap(map);
     }
+    this.shuttleService.initialize(map);
   }
 
   getDirectionsService(): google.maps.DirectionsService {
@@ -157,7 +155,7 @@ export class RouteService {
     }[];
     eta: string
    */
-  calculateRoute(
+  async calculateRoute(
     startAddress: string | google.maps.LatLng,
     destinationAddress: string | google.maps.LatLng,
     travelMode: google.maps.TravelMode = google.maps.TravelMode.WALKING,
@@ -167,9 +165,7 @@ export class RouteService {
     eta: string | null;
   }> {
     return new Promise((resolve, reject) => {
-
       this.setRouteColor(travelMode, renderer);
-      console.log('route colors set');
 
       const request: google.maps.DirectionsRequest = {
         origin: startAddress,
@@ -202,7 +198,6 @@ export class RouteService {
               });
             }
           }
-          console.log('route steps: ', steps);
 
           resolve({ steps, eta });
         } else {
@@ -212,16 +207,19 @@ export class RouteService {
     });
   }
 
-  generateRoute(
+  async generateRoute(
     startAddress: string | google.maps.LatLng,
     destinationAddress: string | google.maps.LatLng,
     travelMode: string | google.maps.TravelMode = google.maps.TravelMode.WALKING
   ) {
     this.shuttleService.clearMapDirections();
     if (travelMode === 'SHUTTLE') {
-      return this.shuttleService.calculateShuttleBusRoute(startAddress, destinationAddress);
+      return this.shuttleService.calculateShuttleBusRoute(
+        startAddress,
+        destinationAddress
+      );
     } else {
-      return this.calculateRoute(
+      return await this.calculateRoute(
         startAddress,
         destinationAddress,
         this.getTravelMode(travelMode)

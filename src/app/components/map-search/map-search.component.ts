@@ -89,7 +89,6 @@ export class MapSearchComponent implements OnInit {
       return;
     }
     this.places = await this.placesService.getPlaceSuggestions(query);
-    console.log(this.places);
   }
 
   clearList() {
