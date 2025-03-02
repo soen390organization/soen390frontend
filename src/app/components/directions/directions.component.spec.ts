@@ -7,22 +7,24 @@ import { CommonModule } from '@angular/common';
 import { CurrentLocationService } from 'src/app/services/geolocation/current-location.service';
 import { RouteService } from 'src/app/services/directions/directions.service';
 
-// Mock services
 const mockDirectionsService = {
+  generateRoute: jasmine
+    .createSpy('generateRoute')
+    .and.callFake((start, destination, mode) =>
+      mockDirectionsService.calculateRoute(start, destination, mode)
+    ),
   calculateRoute: jasmine
     .createSpy('calculateRoute')
     .and.returnValue(Promise.resolve({ steps: [], eta: null })),
   getTravelMode: jasmine.createSpy('getTravelMode').and.returnValue('WALKING'),
   hasBothPoints$: of(false),
-  getDestinationPoint: jasmine
-    .createSpy('getDestinationPoint')
-    .and.returnValue(
-      of({
-        address: 'destination address',
-        title: 'Destination',
-        coordinates: {},
-      })
-    ),
+  getDestinationPoint: jasmine.createSpy('getDestinationPoint').and.returnValue(
+    of({
+      address: 'destination address',
+      title: 'Destination',
+      coordinates: {},
+    })
+  ),
   getStartPoint: jasmine
     .createSpy('getStartPoint')
     .and.returnValue(

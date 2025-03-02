@@ -8,6 +8,25 @@ describe('Directions Service', () => {
   let destination = 'John Molson School of Business';
   let mockRenderer: any;
 
+  class MockLatLng {
+    lat: number;
+    lng: number;
+    constructor(latLng: { lat: number; lng: number }) {
+      this.lat = latLng.lat;
+      this.lng = latLng.lng;
+    }
+  }
+
+  class MockPlacesService {
+    constructor(public map: any) {}
+    getDetails(req: any, callback: (place: any, status: string) => void) {
+      callback(null, 'NOT_FOUND');
+    }
+    nearbySearch(req: any, callback: (results: any[], status: string) => void) {
+      callback([], 'ZERO_RESULTS');
+    }
+  }
+
   class MockDirectionsService {
     route = jasmine.createSpy('route');
   }
@@ -16,6 +35,7 @@ describe('Directions Service', () => {
     setMap = jasmine.createSpy('setMap');
     setOptions = jasmine.createSpy('setOptions');
     setDirections = jasmine.createSpy('setDirections');
+    set = jasmine.createSpy('set');
   }
 
   beforeEach(() => {
