@@ -18,7 +18,7 @@ import { PlacesService } from 'src/app/services/places.service';
       state(
         'in',
         style({
-          width: '360px',
+          width: '100%',
           opacity: 1,
           transform: 'translateX(0)',
         })
