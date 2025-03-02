@@ -31,3 +31,28 @@
     padding: 8px 12px;
   }
 }
+
+.fullwidth {
+  display: flex;
+  position: absolute;
+  width: 100%;
+  justify-content: center;
+}
+
+.fullwidth app-switch-campus-button {
+  justify-content: center;
+}
+
+.fullwidth app-map-search {
+  position: absolute;
+  right: 0px;
+  top: 0px;
+}
+
+//For mobile display only.
+@media (any-pointer: coarse) {
+ .moved-down {
+   margin-top: 140px;
+   margin-left: 75%;
+ }
+}

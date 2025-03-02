@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, Output } from '@angular/core';
 import { GoogleMapComponent } from '../google-map/google-map.component';
 import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
@@ -7,6 +7,7 @@ import { CurrentLocationService } from 'src/app/services/geolocation/current-loc
 import { animate, state, style, transition, trigger } from '@angular/animations';
 import { DirectionsService } from 'src/app/services/directions/directions.service';
 import { PlacesService } from 'src/app/services/places.service';
+import { HomePage } from 'src/app/home/home.page';
 
 @Component({
   selector: 'app-map-search',
@@ -36,6 +37,7 @@ import { PlacesService } from 'src/app/services/places.service';
     ]),
   ],
 })
+
 export class MapSearchComponent implements OnInit {
   @ViewChild(GoogleMapComponent) googleMap!: GoogleMapComponent;
   startLocationInput = '';
@@ -57,6 +59,11 @@ export class MapSearchComponent implements OnInit {
 
   toggleSearch() {
     this.isSearchVisible = !this.isSearchVisible;
+    if (this.isSearchVisible) {
+      HomePage.prototype.showSearch();
+    } else {
+      HomePage.prototype.hideSearch();
+    }
   }
 
   async onSetUsersLocationAsStart(): Promise<void> {
