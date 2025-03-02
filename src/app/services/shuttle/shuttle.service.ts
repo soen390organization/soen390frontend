@@ -1,5 +1,6 @@
 import data from '../../../assets/ConcordiaData.json';
-import { RouteService } from "../directions/directions.service";
+import shuttleData from '../../../assets/ShuttleBusData.json';
+import { RouteService } from '../directions/directions.service';
 import { Injectable, Injector } from '@angular/core';
 
 @Injectable({
@@ -33,7 +34,6 @@ export class ShuttleService {
       this.placesService = new google.maps.places.PlacesService(map);
   }
 
-
   async calculateShuttleBusRoute(
     startAddress: string | google.maps.LatLng,
     destinationAddress: string | google.maps.LatLng
@@ -42,10 +42,9 @@ export class ShuttleService {
     const destinationCoords = await this.findCoords(destinationAddress);
 
     const terminalCodes = {
-      'sgw': `${data.sgw.shuttleBus.terminal.lat}, ${data.sgw.shuttleBus.terminal.lng}`,
-      'loy': `${data.loy.shuttleBus.terminal.lat}, ${data.loy.shuttleBus.terminal.lng}`
-    }
-
+      sgw: `${shuttleData.sgw.terminal.lat}, ${shuttleData.sgw.terminal.lng}`,
+      loy: `${shuttleData.loy.terminal.lat}, ${shuttleData.loy.terminal.lng}`,
+    };
 
     if (!startCoords || !destinationCoords) {
       throw new Error('Start place not found');
@@ -136,10 +135,9 @@ export class ShuttleService {
   }
 
   public clearMapDirections() {
-    console.log(this.renderers)
+    console.log(this.renderers);
     this.renderers.forEach((renderer) => {
       renderer.set('directions', null);
     });
   }
-
 }

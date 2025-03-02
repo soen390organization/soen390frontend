@@ -1,0 +1,398 @@
+{
+  "sgw": {
+    "terminal": {
+      "lat": 45.49713286141489,
+      "lng": -73.57851866143918
+    },
+    "sgwToLoyRoute": [
+      {
+        "instructions": "Head <b>southwest</b> on <b>Blvd. De Maisonneuve Ouest</b> toward <b>Rue Mackay</b>",
+        "start_location": {
+          "lat": 45.4970838,
+          "lng": -73.5784043
+        },
+        "end_location": {
+          "lat": 45.4957283,
+          "lng": -73.57932439999999
+        },
+        "distance": {
+          "text": "0.2 km",
+          "value": 170
+        },
+        "duration": {
+          "text": "1 min",
+          "value": 47
+        }
+      },
+      {
+        "instructions": "Turn <b>left</b> onto <b>Rue Guy</b>",
+        "start_location": {
+          "lat": 45.4957283,
+          "lng": -73.57932439999999
+        },
+        "end_location": {
+          "lat": 45.49385789999999,
+          "lng": -73.57508709999999
+        },
+        "distance": {
+          "text": "0.4 km",
+          "value": 390
+        },
+        "duration": {
+          "text": "2 mins",
+          "value": 112
+        }
+      },
+      {
+        "instructions": "Turn <b>right</b> onto <b>Boul. René-Lévesque O S</b>",
+        "start_location": {
+          "lat": 45.49385789999999,
+          "lng": -73.57508709999999
+        },
+        "end_location": {
+          "lat": 45.49023709999999,
+          "lng": -73.5786961
+        },
+        "distance": {
+          "text": "0.5 km",
+          "value": 492
+        },
+        "duration": {
+          "text": "2 mins",
+          "value": 90
+        }
+      },
+      {
+        "instructions": "Turn <b>left</b> onto the <b>Autoroute 720 W</b> ramp to <b>Aéroport Mirabel</b>/<wbr/><b>Aéroport Pierre-Elliot-Trudeau</b>",
+        "start_location": {
+          "lat": 45.49023709999999,
+          "lng": -73.5786961
+        },
+        "end_location": {
+          "lat": 45.4851188,
+          "lng": -73.5834294
+        },
+        "distance": {
+          "text": "0.8 km",
+          "value": 769
+        },
+        "duration": {
+          "text": "1 min",
+          "value": 64
+        }
+      },
+      {
+        "instructions": "Merge onto <b>QC-136</b>",
+        "start_location": {
+          "lat": 45.4851188,
+          "lng": -73.5834294
+        },
+        "end_location": {
+          "lat": 45.4793838,
+          "lng": -73.5926334
+        },
+        "distance": {
+          "text": "1.0 km",
+          "value": 960
+        },
+        "duration": {
+          "text": "1 min",
+          "value": 42
+        }
+      },
+      {
+        "instructions": "Take exit <b>1-S</b> for <b>Autoroute 15 Sud</b> toward <b>Autoroute 20 Estate</b>/<wbr/><b>Boul. Décarie</b>/<wbr/><b>Rue St-Rémi</b>/<wbr/><b>Pont Champlain</b>",
+        "start_location": {
+          "lat": 45.4793838,
+          "lng": -73.5926334
+        },
+        "end_location": {
+          "lat": 45.4755628,
+          "lng": -73.595872
+        },
+        "distance": {
+          "text": "0.5 km",
+          "value": 505
+        },
+        "duration": {
+          "text": "1 min",
+          "value": 25
+        }
+      },
+      {
+        "instructions": "Take exit <b>2</b> toward <b>Decarie Blvd</b>",
+        "start_location": {
+          "lat": 45.4755628,
+          "lng": -73.595872
+        },
+        "end_location": {
+          "lat": 45.4724879,
+          "lng": -73.59949879999999
+        },
+        "distance": {
+          "text": "0.4 km",
+          "value": 450
+        },
+        "duration": {
+          "text": "1 min",
+          "value": 28
+        }
+      },
+      {
+        "instructions": "Merge onto <b>Rue Saint-Jacques</b>",
+        "start_location": {
+          "lat": 45.4724879,
+          "lng": -73.59949879999999
+        },
+        "end_location": {
+          "lat": 45.4615995,
+          "lng": -73.6240918
+        },
+        "distance": {
+          "text": "2.3 km",
+          "value": 2333
+        },
+        "duration": {
+          "text": "5 mins",
+          "value": 298
+        }
+      },
+      {
+        "instructions": "Turn <b>right</b> onto <b>Boul Cavendish</b>/<wbr/><b>QC-138 E</b>",
+        "start_location": {
+          "lat": 45.4615995,
+          "lng": -73.6240918
+        },
+        "end_location": {
+          "lat": 45.4637446,
+          "lng": -73.6289014
+        },
+        "distance": {
+          "text": "0.4 km",
+          "value": 445
+        },
+        "duration": {
+          "text": "2 mins",
+          "value": 104
+        }
+      },
+      {
+        "instructions": "Turn <b>left</b> onto <b>Rue Sherbrooke O</b><div style=\"font-size:0.9em\">Destination will be on the right</div>",
+        "start_location": {
+          "lat": 45.4637446,
+          "lng": -73.6289014
+        },
+        "end_location": {
+          "lat": 45.4578464,
+          "lng": -73.63882579999999
+        },
+        "distance": {
+          "text": "1.0 km",
+          "value": 1020
+        },
+        "duration": {
+          "text": "2 mins",
+          "value": 145
+        }
+      }
+    ]
+  },
+  "loy": {
+    "terminal": {
+      "lat": 45.45789692831165,
+      "lng": -73.63891431897557
+    },
+    "loyToSgwRoute": [
+      {
+        "instructions": "Head <b>southwest</b> on <b>Blvd. De Maisonneuve Ouest</b> toward <b>Rue Mackay</b>",
+        "start_location": {
+          "lat": 45.4970838,
+          "lng": -73.5784043
+        },
+        "end_location": {
+          "lat": 45.4957283,
+          "lng": -73.57932439999999
+        },
+        "distance": {
+          "text": "0.2 km",
+          "value": 170
+        },
+        "duration": {
+          "text": "1 min",
+          "value": 47
+        }
+      },
+      {
+        "instructions": "Turn <b>left</b> onto <b>Rue Guy</b>",
+        "start_location": {
+          "lat": 45.4957283,
+          "lng": -73.57932439999999
+        },
+        "end_location": {
+          "lat": 45.49385789999999,
+          "lng": -73.57508709999999
+        },
+        "distance": {
+          "text": "0.4 km",
+          "value": 390
+        },
+        "duration": {
+          "text": "2 mins",
+          "value": 112
+        }
+      },
+      {
+        "instructions": "Turn <b>right</b> onto <b>Boul. René-Lévesque O S</b>",
+        "start_location": {
+          "lat": 45.49385789999999,
+          "lng": -73.57508709999999
+        },
+        "end_location": {
+          "lat": 45.49023709999999,
+          "lng": -73.5786961
+        },
+        "distance": {
+          "text": "0.5 km",
+          "value": 492
+        },
+        "duration": {
+          "text": "2 mins",
+          "value": 90
+        }
+      },
+      {
+        "instructions": "Turn <b>left</b> onto the <b>Autoroute 720 W</b> ramp to <b>Aéroport Mirabel</b>/<wbr/><b>Aéroport Pierre-Elliot-Trudeau</b>",
+        "start_location": {
+          "lat": 45.49023709999999,
+          "lng": -73.5786961
+        },
+        "end_location": {
+          "lat": 45.4851188,
+          "lng": -73.5834294
+        },
+        "distance": {
+          "text": "0.8 km",
+          "value": 769
+        },
+        "duration": {
+          "text": "1 min",
+          "value": 64
+        }
+      },
+      {
+        "instructions": "Merge onto <b>QC-136</b>",
+        "start_location": {
+          "lat": 45.4851188,
+          "lng": -73.5834294
+        },
+        "end_location": {
+          "lat": 45.4793838,
+          "lng": -73.5926334
+        },
+        "distance": {
+          "text": "1.0 km",
+          "value": 960
+        },
+        "duration": {
+          "text": "1 min",
+          "value": 42
+        }
+      },
+      {
+        "instructions": "Take exit <b>1-S</b> for <b>Autoroute 15 Sud</b> toward <b>Autoroute 20 Estate</b>/<wbr/><b>Boul. Décarie</b>/<wbr/><b>Rue St-Rémi</b>/<wbr/><b>Pont Champlain</b>",
+        "start_location": {
+          "lat": 45.4793838,
+          "lng": -73.5926334
+        },
+        "end_location": {
+          "lat": 45.4755628,
+          "lng": -73.595872
+        },
+        "distance": {
+          "text": "0.5 km",
+          "value": 505
+        },
+        "duration": {
+          "text": "1 min",
+          "value": 25
+        }
+      },
+      {
+        "instructions": "Take exit <b>2</b> toward <b>Decarie Blvd</b>",
+        "start_location": {
+          "lat": 45.4755628,
+          "lng": -73.595872
+        },
+        "end_location": {
+          "lat": 45.4724879,
+          "lng": -73.59949879999999
+        },
+        "distance": {
+          "text": "0.4 km",
+          "value": 450
+        },
+        "duration": {
+          "text": "1 min",
+          "value": 28
+        }
+      },
+      {
+        "instructions": "Merge onto <b>Rue Saint-Jacques</b>",
+        "start_location": {
+          "lat": 45.4724879,
+          "lng": -73.59949879999999
+        },
+        "end_location": {
+          "lat": 45.4615995,
+          "lng": -73.6240918
+        },
+        "distance": {
+          "text": "2.3 km",
+          "value": 2333
+        },
+        "duration": {
+          "text": "5 mins",
+          "value": 298
+        }
+      },
+      {
+        "instructions": "Turn <b>right</b> onto <b>Boul Cavendish</b>/<wbr/><b>QC-138 E</b>",
+        "start_location": {
+          "lat": 45.4615995,
+          "lng": -73.6240918
+        },
+        "end_location": {
+          "lat": 45.4637446,
+          "lng": -73.6289014
+        },
+        "distance": {
+          "text": "0.4 km",
+          "value": 445
+        },
+        "duration": {
+          "text": "2 mins",
+          "value": 104
+        }
+      },
+      {
+        "instructions": "Turn <b>left</b> onto <b>Rue Sherbrooke O</b><div style=\"font-size:0.9em\">Destination will be on the right</div>",
+        "start_location": {
+          "lat": 45.4637446,
+          "lng": -73.6289014
+        },
+        "end_location": {
+          "lat": 45.4578464,
+          "lng": -73.63882579999999
+        },
+        "distance": {
+          "text": "1.0 km",
+          "value": 1020
+        },
+        "duration": {
+          "text": "2 mins",
+          "value": 145
+        }
+      }
+    ]
+  }
+}
