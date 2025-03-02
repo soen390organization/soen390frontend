@@ -12,7 +12,7 @@ describe('LocationCardsComponent', () => {
     mockDirectionsService = jasmine.createSpyObj('DirectionsService', ['setDestinationPoint']);
 
     TestBed.configureTestingModule({
-      declarations: [LocationCardsComponent],
+      imports: [LocationCardsComponent],
       providers: [{ provide: DirectionsService, useValue: mockDirectionsService }],
     }).compileComponents();
 
