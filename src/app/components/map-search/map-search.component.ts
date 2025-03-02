@@ -52,8 +52,8 @@ export class MapSearchComponent implements OnInit {
 
   constructor(
     public directionsService: RouteService,
-    private placesService: PlacesService,
-    private currentLocationService: CurrentLocationService
+    private readonly placesService: PlacesService,
+    private readonly currentLocationService: CurrentLocationService
   ) {}
 
   ngOnInit(): void {

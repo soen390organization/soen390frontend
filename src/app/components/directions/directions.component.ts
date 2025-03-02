@@ -1,6 +1,5 @@
 import { CommonModule } from '@angular/common';
 import {
-  AfterViewInit,
   Component,
   OnInit,
   OnDestroy,
@@ -48,7 +47,7 @@ export class DirectionsComponent implements OnInit, OnDestroy {
   ];
 
   constructor(
-    private directionsService: RouteService,
+    private readonly directionsService: RouteService,
     private currentLocationService: CurrentLocationService
   ) {}
 

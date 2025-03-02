@@ -1,16 +1,4 @@
-import {
-  AfterViewInit,
-  Component,
-  ElementRef,
-  OnInit,
-  Renderer2,
-  ViewChild,
-} from '@angular/core';
-import { GestureController } from '@ionic/angular';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
-import { IonicModule } from '@ionic/angular';
+import { AfterViewInit, Component, ElementRef, ViewChild } from '@angular/core';
 import { LocationCardsComponent } from '../location-cards/location-cards.component';
 import { Store } from '@ngrx/store';
 import { PlacesService } from 'src/app/services/places.service';
@@ -39,9 +27,9 @@ export class InteractionBarComponent implements AfterViewInit {
   pointsOfInterest = { locations: [] as LocationCard[], loading: true };
 
   constructor(
-    private store: Store,
-    private placesService: PlacesService,
-    private directionsService: RouteService
+    private readonly store: Store,
+    private readonly placesService: PlacesService,
+    private readonly directionsService: RouteService
   ) {}
 
   ngOnInit() {

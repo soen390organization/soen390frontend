@@ -13,7 +13,7 @@ export class LocationCardsComponent {
   @Input() locations: LocationCard[] = [];
   @Input() loading: boolean = false;
 
-  constructor(private directionsService: RouteService) {}
+  constructor(private readonly directionsService: RouteService) {}
 
   setDestination(location: any) {
     console.log(location);

@@ -142,7 +142,7 @@ describe('ShuttleService', () => {
       );
       await expectAsync(
         (service as any).findCoords('Invalid place')
-      ).toBeRejectedWith(null);
+      ).toBeRejectedWith(new Error('Error finding coords'));
     });
   });
 

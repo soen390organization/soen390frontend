@@ -9,8 +9,8 @@ export class GoogleMapService {
   private map!: google.maps.Map;
 
   constructor(
-    private routeService: RouteService,
-    private placesService: PlacesService
+    private readonly routeService: RouteService,
+    private readonly placesService: PlacesService
   ) {}
 
   initialize(map: google.maps.Map) {

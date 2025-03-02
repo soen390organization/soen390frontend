@@ -13,7 +13,7 @@ export class ShuttleService {
   private routeService!: RouteService;
   private initialized = false;
 
-  constructor(private injector: Injector) {}
+  constructor(private readonly injector: Injector) {}
 
   public initialize(map: google.maps.Map): void {
     if (!this.initialized) {
@@ -46,8 +46,10 @@ export class ShuttleService {
     startAddress: string | google.maps.LatLng,
     destinationAddress: string | google.maps.LatLng
   ) {
-    const { startCoords, destinationCoords, startCampus, destinationCampus } =
-      await this.fetchCoordinates(startAddress, destinationAddress);
+    const { startCampus, destinationCampus } = await this.fetchCoordinates(
+      startAddress,
+      destinationAddress
+    );
 
     const date = new Date();
     const nextBus = this.getNextBus(startCampus, date);
@@ -80,8 +82,6 @@ export class ShuttleService {
     const startCoords = await this.findCoords(startAddress);
     const destinationCoords = await this.findCoords(destinationAddress);
 
-    const shuttleSteps = [];
-    var eta = '';
     const startCampus = this.getNearestCampus(startCoords);
     const destinationCampus = this.getNearestCampus(destinationCoords);
 
@@ -221,7 +221,7 @@ export class ShuttleService {
           ) {
             resolve(results[0].geometry.location);
           } else {
-            reject(null);
+            reject(new Error('Error finding coords'));
           }
         }
       );
@@ -242,7 +242,7 @@ export class ShuttleService {
       return hours * 60 + minutes > currentTime;
     });
 
-    return nextDeparture ? nextDeparture : 'No more shuttle buses today :(';
+    return nextDeparture || 'No more shuttle buses today :(';
   }
 
   /**
