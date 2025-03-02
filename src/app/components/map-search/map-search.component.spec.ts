@@ -25,6 +25,8 @@ describe('MapSearchComponent', () => {
       'setDestinationPoint',
       'getStartPoint',
       'getDestinationPoint',
+      'clearStartPoint',
+      'clearDestinationPoint'
     ]);
     // Ensure getDestinationPoint() returns an observable
     directionsServiceSpy.getStartPoint.and.returnValue(of(null));
@@ -145,6 +147,7 @@ describe('MapSearchComponent', () => {
       
       expect(component.startLocationInput).toBe('');
       expect(component.clearList).toHaveBeenCalled();
+      expect(directionsServiceSpy.clearStartPoint).toHaveBeenCalled();
     });
 
     it('should clear the destination input when clearDestinationInput() is called', () => {
@@ -156,6 +159,7 @@ describe('MapSearchComponent', () => {
       
       expect(component.destinationLocationInput).toBe('');
       expect(component.clearList).toHaveBeenCalled();
+      expect(directionsServiceSpy.clearDestinationPoint).toHaveBeenCalled();
     });
   });
 

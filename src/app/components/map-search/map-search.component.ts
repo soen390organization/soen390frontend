@@ -95,10 +95,12 @@ export class MapSearchComponent implements OnInit {
   clearStartInput() {
     this.startLocationInput = '';
     this.clearList();
+    this.directionsService.clearStartPoint();
   }
   
   clearDestinationInput() {
     this.destinationLocationInput = '';
     this.clearList();
+    this.directionsService.clearDestinationPoint();
   }
 }
