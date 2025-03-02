@@ -47,6 +47,11 @@ export class MapSearchComponent implements OnInit {
   constructor(public directionsService: DirectionsService, private placesService: PlacesService, private currentLocationService: CurrentLocationService) {}
 
   ngOnInit(): void {
+    this.directionsService.getStartPoint().subscribe(start => {
+      if (start) {
+        this.startLocationInput = start.title;
+      }
+    });    
     this.directionsService.getDestinationPoint().subscribe(destination => {
       if (destination) {
         this.destinationLocationInput = destination.title;

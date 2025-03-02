@@ -27,6 +27,7 @@ describe('MapSearchComponent', () => {
       'getDestinationPoint',
     ]);
     // Ensure getDestinationPoint() returns an observable
+    directionsServiceSpy.getStartPoint.and.returnValue(of(null));
     directionsServiceSpy.getDestinationPoint.and.returnValue(
       of({ title: 'Default Destination', address: '', coordinates: null })
     );
