@@ -20,18 +20,16 @@ export class RouteService {
   private startPoint$ = new BehaviorSubject<Location | null>(null);
   private destinationPoint$ = new BehaviorSubject<Location | null>(null);
 
-  constructor(
-  private shuttleService: ShuttleService
-  ) {}
+  constructor(private shuttleService: ShuttleService) {}
 
   public initialize(map: google.maps.Map): void {
-    this.shuttleService.initialize(map)
     if (!this.directionsService)
       this.directionsService = new google.maps.DirectionsService();
     if (!this.directionsRenderer) {
       this.directionsRenderer = new google.maps.DirectionsRenderer();
       this.directionsRenderer.setMap(map);
     }
+    this.shuttleService.initialize(map);
   }
 
   getDirectionsService(): google.maps.DirectionsService {
@@ -167,7 +165,6 @@ export class RouteService {
     eta: string | null;
   }> {
     return new Promise((resolve, reject) => {
-
       this.setRouteColor(travelMode, renderer);
       console.log('route colors set');
 
@@ -178,6 +175,7 @@ export class RouteService {
       };
       this.directionsService.route(request, (response, status) => {
         if (status === google.maps.DirectionsStatus.OK && response) {
+          console.log(response);
           renderer.setDirections(response);
 
           const steps: Step[] = [];
@@ -202,8 +200,6 @@ export class RouteService {
               });
             }
           }
-          console.log('route steps: ', steps);
-
           resolve({ steps, eta });
         } else {
           reject(status);
@@ -219,7 +215,10 @@ export class RouteService {
   ) {
     this.shuttleService.clearMapDirections();
     if (travelMode === 'SHUTTLE') {
-      return this.shuttleService.calculateShuttleBusRoute(startAddress, destinationAddress);
+      return this.shuttleService.calculateShuttleBusRoute(
+        startAddress,
+        destinationAddress
+      );
     } else {
       return this.calculateRoute(
         startAddress,
