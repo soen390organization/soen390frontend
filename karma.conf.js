@@ -34,7 +34,11 @@ module.exports = function (config) {
       ],
       includeAllSources: true,
     },
-
+    coverageIstanbulReporter: {
+      reports: ["html", "lcovonly", "text-summary"],
+      fixWebpackSourcePaths: true,
+      skipFiles: ["**/test.ts"],
+    },
     reporters: ["coverage", "progress", "kjhtml"],
     port: 9876,
     colors: true,

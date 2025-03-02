@@ -7,18 +7,18 @@ describe('Directions Service', () => {
   let origin = 'Hall Building Concordia';
   let destination = 'John Molson School of Business';
 
-  beforeAll(() => {
-    class MockDirectionsService {
-      route = jasmine.createSpy('route');
-    }
+  class MockDirectionsService {
+    route = jasmine.createSpy('route');
+  }
 
-    class MockDirectionsRenderer {
-      setMap = jasmine.createSpy('setMap');
-      setOptions = jasmine.createSpy('setOptions');
-      setDirections = jasmine.createSpy('setDirections');
-    }
+  class MockDirectionsRenderer {
+    setMap = jasmine.createSpy('setMap');
+    setOptions = jasmine.createSpy('setOptions');
+    setDirections = jasmine.createSpy('setDirections');
+  }
 
-    globalThis.google = {
+  beforeEach(() => {
+    (window as any).google = {
       maps: {
         DirectionsService: MockDirectionsService,
         DirectionsRenderer: MockDirectionsRenderer,
@@ -28,15 +28,12 @@ describe('Directions Service', () => {
           WALKING: 'WALKING',
         },
         DirectionsStatus: {
-          OK: 'OK', // <-- Define this to fix the issue
+          OK: 'OK',
         },
-
         SymbolPath: { CIRCLE: 'CIRCLE' },
       },
     } as any;
-  });
 
-  beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [DirectionsService],
     });

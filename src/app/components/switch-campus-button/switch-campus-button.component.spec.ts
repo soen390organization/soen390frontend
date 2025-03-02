@@ -16,10 +16,13 @@ describe('SwitchCampusButtonComponent', () => {
   let googleMapService: MockGoogleMapService;
   let store: jasmine.SpyObj<Store>;
 
-  beforeAll(() => {
-    // Mock Google Maps API globally
+  beforeEach(() => {
+    // Override only what is necessary for this test.
     (window as any).google = {
+      ...((window as any).google || {}),
       maps: {
+        ...((window as any).google?.maps || {}),
+        // Provide a simple LatLng constructor that matches what the component expects.
         LatLng: class {
           constructor(public lat: number, public lng: number) {}
         },
