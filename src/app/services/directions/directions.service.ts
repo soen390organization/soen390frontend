@@ -58,6 +58,10 @@ export class DirectionsService {
     return this.startPoint$.asObservable();
   }
 
+  getDestinationPoint(): Observable<Location | null> {
+    return this.destinationPoint$.asObservable();
+  }
+
   setStartPoint(location: Location): void {
     const marker = this.startPoint$.value?.marker ?? new google.maps.Marker({
       position: location.coordinates,
@@ -74,8 +78,12 @@ export class DirectionsService {
     this.updateMapView("start");
   }
 
-  getDestinationPoint(): Observable<Location | null> {
-    return this.destinationPoint$.asObservable();
+  getShortestRoute(): { eta: string | null; distance: number } | null {
+    if (!this.shortestRoute) return null;
+    return {
+      eta: this.shortestRoute.eta,
+      distance: this.shortestRoute.distance,
+    };
   }
 
   setDestinationPoint(location: Location): void {
