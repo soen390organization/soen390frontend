@@ -52,12 +52,10 @@
         <ul class="rounded-xl border border-gray-300 bg-white">
           <li
             *ngFor="let place of places"
-            role="button"
             (click)="directionsService.setStartPoint(place); clearList()"
             (keydown.enter)="directionsService.setStartPoint(place); clearList()"
             (keypress.enter)="directionsService.setStartPoint(place); clearList()"
             (keyup.enter)="directionsService.setStartPoint(place); clearList()"
-            tabindex="0"
             class="flex items-center hover:bg-gray-100 p-3 cursor-pointer"
           >
             <span class="material-symbols-outlined mr-3 p-2 border border-gray-300 rounded-full">
@@ -102,12 +100,10 @@
         <ul class="rounded-xl border border-gray-300 bg-white">
           <li
             *ngFor="let place of places"
-            role="button"
             (click)="directionsService.setDestinationPoint(place); clearList()"
             (keydown.enter)="directionsService.setDestinationPoint(place); clearList()"
             (keypress.enter)="directionsService.setDestinationPoint(place); clearList()"
             (keyup.enter)="directionsService.setDestinationPoint(place); clearList()"
-            tabindex="0"
             class="flex items-center hover:bg-gray-100 p-3 cursor-pointer"
           >
             <span class="material-symbols-outlined mr-3 p-2 border border-gray-300 rounded-full">
