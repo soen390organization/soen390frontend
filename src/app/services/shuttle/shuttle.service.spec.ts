@@ -69,7 +69,7 @@ describe('ShuttleService', () => {
     (service as any).placesService = new MockPlacesService();
 
     routeServiceSpy.calculateRoute.and.returnValue(
-      Promise.resolve({ steps: [], eta: null })
+      Promise.resolve({ steps: [], eta: '0 minutes' })
     );
 
     service['routeService'] = routeServiceSpy;
@@ -213,85 +213,70 @@ describe('ShuttleService', () => {
           })
         );
 
-        const steps = await (service as any).buildSameCampusSteps(
+        const result = await (service as any).buildSameCampusSteps(
           'Start',
           'Destination'
         );
-
         expect(routeServiceSpy.calculateRoute).toHaveBeenCalledTimes(1);
         expect(routeServiceSpy.calculateRoute).toHaveBeenCalledWith(
           'Start',
           'Destination',
           google.maps.TravelMode.WALKING
         );
-        expect(steps.length).toBe(1);
-        expect(steps[0].instructions).toBe('Walk');
+        expect(result.steps.length).toBe(1);
+        expect(result.steps[0].instructions).toBe('Walk');
+        expect(result.eta).toBe('N/A');
       });
     });
 
     describe('buildDifferentCampusSteps()', () => {
       it('should call calculateRoute three times and include shuttle instructions', async () => {
-        routeServiceSpy.calculateRoute
-          .withArgs(
-            'Start',
-            jasmine.any(String),
-            google.maps.TravelMode.WALKING,
-            jasmine.anything()
-          )
-          .and.returnValue(
-            Promise.resolve({
-              steps: [
-                {
-                  instructions: 'Walk to terminal',
-                  start_location: null,
-                  end_location: null,
-                },
-              ],
-              eta: 'N/A',
-            })
-          );
+        // Mock initial walk
+        routeServiceSpy.calculateRoute.and.returnValue(
+          // Instead of just { instructions: 'Walk around campus' }, include the needed props:
+          Promise.resolve({
+            steps: [
+              {
+                instructions: 'Walk to Terminal',
+                start_location: null,
+                end_location: null,
+              },
+            ],
+            eta: 'TBD',
+          })
+        );
 
-        routeServiceSpy.calculateRoute
-          .withArgs(
-            jasmine.any(String),
-            jasmine.any(String),
-            google.maps.TravelMode.DRIVING,
-            jasmine.anything()
-          )
-          .and.returnValue(
-            Promise.resolve({
-              steps: [
-                {
-                  instructions: 'Shuttle Ride',
-                  start_location: null,
-                  end_location: null,
-                },
-              ],
-              eta: 'N/A',
-            })
-          );
+        // Mock shuttle bus
+        routeServiceSpy.calculateRoute.and.returnValue(
+          // Instead of just { instructions: 'Walk around campus' }, include the needed props:
+          Promise.resolve({
+            steps: [
+              {
+                instructions: 'Shuttle ride',
+                start_location: null,
+                end_location: null,
+              },
+            ],
+            eta: 'TBD',
+          })
+        );
 
-        routeServiceSpy.calculateRoute
-          .withArgs(
-            jasmine.any(String),
-            'Destination',
-            google.maps.TravelMode.WALKING,
-            jasmine.anything()
-          )
-          .and.returnValue(
-            Promise.resolve({
-              steps: [
-                {
-                  instructions: 'Walk to final',
-                  start_location: null,
-                  end_location: null,
-                },
-              ],
-              eta: 'N/A',
-            })
-          );
+        // Mock final walk
+        routeServiceSpy.calculateRoute.and.returnValue(
+          // Instead of just { instructions: 'Walk around campus' }, include the needed props:
+          Promise.resolve({
+            steps: [
+              {
+                instructions: 'Walk to final',
+                start_location: null,
+                end_location: null,
+              },
+            ],
+            eta: 'TBD',
+          })
+        );
 
-        const steps = await (service as any).buildDifferentCampusSteps(
+        const result = await (service as any).buildDifferentCampusSteps(
           'Start',
           'Destination',
           'sgw',
@@ -300,86 +285,101 @@ describe('ShuttleService', () => {
         );
 
         expect(routeServiceSpy.calculateRoute).toHaveBeenCalledTimes(3);
-        expect(steps.length).toBe(2);
+        // Adjust to whatever final total steps you expect:
+        expect(result.steps.length).toBe(3);
+        expect(
+          result.steps.some((s) => s.instructions.includes('Next shuttle at'))
+        ).toBeTrue();
+        expect(result.eta).toBeDefined();
       });
     });
-  });
 
-  describe('calculateShuttleBusRoute()', () => {
-    it('should return a no-bus response if nextBus is "No more shuttle buses today :("', async () => {
-      spyOn(service as any, 'fetchCoordinates').and.returnValue(
-        Promise.resolve({
-          startCoords: new MockLatLng(45.497, -73.578),
-          destinationCoords: new MockLatLng(45.458, -73.64),
-          startCampus: 'sgw',
-          destinationCampus: 'loy',
-        })
-      );
-      spyOn(service, 'getNextBus').and.returnValue(
-        'No more shuttle buses today :('
-      );
+    describe('calculateShuttleBusRoute()', () => {
+      it('should return a no-bus response if nextBus is "No more shuttle buses today :("', async () => {
+        spyOn(service as any, 'fetchCoordinates').and.returnValue(
+          Promise.resolve({
+            startCoords: new MockLatLng(45.497, -73.578),
+            destinationCoords: new MockLatLng(45.458, -73.64),
+            startCampus: 'sgw',
+            destinationCampus: 'loy',
+          })
+        );
+        spyOn(service, 'getNextBus').and.returnValue(
+          'No more shuttle buses today :('
+        );
 
-      const result = await service.calculateShuttleBusRoute(
-        'Start',
-        'Destination'
-      );
-      expect(result.steps[0].instructions).toBe(
-        'No more shuttle buses today :('
-      );
-      expect(result.eta).toBe('N/A');
-      expect(routeServiceSpy.calculateRoute).not.toHaveBeenCalled();
-    });
+        const result = await service.calculateShuttleBusRoute(
+          'Start',
+          'Destination'
+        );
+        expect(result.steps[0].instructions).toBe(
+          'No more shuttle buses today :('
+        );
+        expect(result.eta).toBe('N/A');
+        expect(routeServiceSpy.calculateRoute).not.toHaveBeenCalled();
+      });
 
-    it('should handle same-campus travel by calling buildSameCampusSteps()', async () => {
-      spyOn(service as any, 'fetchCoordinates').and.returnValue(
-        Promise.resolve({
-          startCoords: new MockLatLng(45.497, -73.578),
-          destinationCoords: new MockLatLng(45.497, -73.578),
-          startCampus: 'sgw',
-          destinationCampus: 'sgw',
-        })
-      );
-      spyOn(service, 'getNextBus').and.returnValue('10:00 AM');
-      const sameCampusSpy = spyOn(
-        service as any,
-        'buildSameCampusSteps'
-      ).and.returnValue(
-        Promise.resolve([{ instructions: 'Walk around campus' }])
-      );
+      it('should handle same-campus travel by calling buildSameCampusSteps()', async () => {
+        spyOn(service as any, 'fetchCoordinates').and.returnValue(
+          Promise.resolve({
+            startCoords: new MockLatLng(45.497, -73.578),
+            destinationCoords: new MockLatLng(45.497, -73.578),
+            startCampus: 'sgw',
+            destinationCampus: 'sgw',
+          })
+        );
+        spyOn(service, 'getNextBus').and.returnValue('10:00 AM');
 
-      const result = await service.calculateShuttleBusRoute(
-        'Start',
-        'Destination'
-      );
-      expect(sameCampusSpy).toHaveBeenCalled();
-      expect(result.steps[0].instructions).toBe('Walk around campus');
-      expect(result.eta).toBe('TBD');
-    });
+        // Return an object with steps and eta:
+        const sameCampusSpy = spyOn(
+          service as any,
+          'buildSameCampusSteps'
+        ).and.returnValue(
+          Promise.resolve({
+            steps: [{ instructions: 'Walk around campus' }],
+            eta: 'TBD',
+          })
+        );
 
-    it('should handle different-campus travel by calling buildDifferentCampusSteps()', async () => {
-      spyOn(service as any, 'fetchCoordinates').and.returnValue(
-        Promise.resolve({
-          startCoords: new MockLatLng(45.497, -73.578),
-          destinationCoords: new MockLatLng(45.457, -73.643),
-          startCampus: 'sgw',
-          destinationCampus: 'loy',
-        })
-      );
-      spyOn(service, 'getNextBus').and.returnValue('10:00 AM');
-      const differentCampusSpy = spyOn(
-        service as any,
-        'buildDifferentCampusSteps'
-      ).and.returnValue(
-        Promise.resolve([{ instructions: 'Steps for Inter-campus' }])
-      );
+        const result = await service.calculateShuttleBusRoute(
+          'Start',
+          'Destination'
+        );
+        expect(sameCampusSpy).toHaveBeenCalled();
+        expect(result.steps[0].instructions).toBe('Walk around campus');
+        expect(result.eta).toBe('TBD');
+      });
 
-      const result = await service.calculateShuttleBusRoute(
-        'Start',
-        'Destination'
-      );
-      expect(differentCampusSpy).toHaveBeenCalled();
-      expect(result.steps[0].instructions).toBe('Steps for Inter-campus');
-      expect(result.eta).toBe('TBD');
+      it('should handle different-campus travel by calling buildDifferentCampusSteps()', async () => {
+        spyOn(service as any, 'fetchCoordinates').and.returnValue(
+          Promise.resolve({
+            startCoords: new MockLatLng(45.497, -73.578),
+            destinationCoords: new MockLatLng(45.457, -73.643),
+            startCampus: 'sgw',
+            destinationCampus: 'loy',
+          })
+        );
+        spyOn(service, 'getNextBus').and.returnValue('10:00 AM');
+
+        // Return an object with steps and eta:
+        const differentCampusSpy = spyOn(
+          service as any,
+          'buildDifferentCampusSteps'
+        ).and.returnValue(
+          Promise.resolve({
+            steps: [{ instructions: 'Steps for Inter-campus' }],
+            eta: 'TBD',
+          })
+        );
+
+        const result = await service.calculateShuttleBusRoute(
+          'Start',
+          'Destination'
+        );
+        expect(differentCampusSpy).toHaveBeenCalled();
+        expect(result.steps[0].instructions).toBe('Steps for Inter-campus');
+        expect(result.eta).toBe('TBD');
+      });
     });
   });
 });

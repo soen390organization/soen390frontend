@@ -49,7 +49,7 @@ export class ShuttleService {
     const { startCoords, destinationCoords, startCampus, destinationCampus } =
       await this.fetchCoordinates(startAddress, destinationAddress);
 
-    const date = new Date('2025-03-04T14:00:00');
+    const date = new Date();
     const nextBus = this.getNextBus(startCampus, date);
 
     if (this.isNoBusAvailable(nextBus)) {
