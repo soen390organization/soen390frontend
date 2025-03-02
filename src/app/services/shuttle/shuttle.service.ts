@@ -9,6 +9,7 @@ import shuttleDepartures from '../../../assets/ShuttleDepartures.json';
 })
 export class ShuttleService {
   private placesService!: google.maps.places.PlacesService;
+  private directionsService!: google.maps.DirectionsService;
   private renderers!: google.maps.DirectionsRenderer[];
   private routeService!: RouteService;
   private initialized = false;
@@ -21,7 +22,6 @@ export class ShuttleService {
       this.routeService = this.injector.get(RouteService);
       this.initialized = true;
     }
-
     if (!this.renderers) {
       this.renderers = [];
       const renderer1 = this.routeService.getDirectionsRenderer();
@@ -33,6 +33,8 @@ export class ShuttleService {
     }
     if (!this.placesService)
       this.placesService = new google.maps.places.PlacesService(map);
+    if (!this.directionsService)
+      this.directionsService = new google.maps.DirectionsService();
   }
 
   async calculateShuttleBusRoute(
@@ -106,13 +108,17 @@ export class ShuttleService {
         google.maps.TravelMode.WALKING,
         this.renderers[0]
       );
-      // fails here
+      //======================================
+      console.log('SHUTTLE BUS ================================');
       const shuttleBus = await this.routeService.calculateRoute(
         terminalCodes[startCampus],
         terminalCodes[destinationCampus],
         google.maps.TravelMode.DRIVING,
         this.renderers[1]
       );
+
+      console.log('SHUTTLE BUS ================================');
+      //======================================
       const finalWalk = await this.routeService.calculateRoute(
         terminalCodes[destinationCampus],
         destinationAddress,

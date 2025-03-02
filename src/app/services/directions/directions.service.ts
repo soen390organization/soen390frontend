@@ -30,6 +30,7 @@ export class RouteService {
       this.directionsRenderer.setMap(map);
     }
     this.shuttleService.initialize(map);
+    this.shuttleService.initialize(map);
   }
 
   getDirectionsService(): google.maps.DirectionsService {
@@ -174,6 +175,7 @@ export class RouteService {
       };
       this.directionsService.route(request, (response, status) => {
         if (status === google.maps.DirectionsStatus.OK && response) {
+          console.log(response);
           renderer.setDirections(response);
 
           const steps: Step[] = [];
