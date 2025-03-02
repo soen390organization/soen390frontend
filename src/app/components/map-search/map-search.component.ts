@@ -86,4 +86,14 @@ export class MapSearchComponent implements OnInit {
   clearList() {
     this.places = [];
   }
+
+  clearStartInput() {
+    this.startLocationInput = '';
+    this.clearList();
+  }
+  
+  clearDestinationInput() {
+    this.destinationLocationInput = '';
+    this.clearList();
+  }
 }
