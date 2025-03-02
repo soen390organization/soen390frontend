@@ -230,12 +230,15 @@ export class RouteService {
   }
 
   setRouteColor(
-    travelMode: google.maps.TravelMode,
+    travelMode: google.maps.TravelMode | String,
     renderer: google.maps.DirectionsRenderer
   ): google.maps.PolylineOptions {
     const polylineOptions: google.maps.PolylineOptions = {};
 
     switch (travelMode) {
+      case 'SHUTTLE':
+        polylineOptions['strokeColor'] = 'purple';
+        break;
       case google.maps.TravelMode.DRIVING:
         polylineOptions['strokeColor'] = 'red';
         break;

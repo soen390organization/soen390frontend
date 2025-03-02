@@ -108,17 +108,12 @@ export class ShuttleService {
         google.maps.TravelMode.WALKING,
         this.renderers[0]
       );
-      //======================================
-      console.log('SHUTTLE BUS ================================');
-      const shuttleBus = await this.routeService.calculateRoute(
+      await this.routeService.calculateRoute(
         terminalCodes[startCampus],
         terminalCodes[destinationCampus],
         google.maps.TravelMode.DRIVING,
         this.renderers[1]
       );
-
-      console.log('SHUTTLE BUS ================================');
-      //======================================
       const finalWalk = await this.routeService.calculateRoute(
         terminalCodes[destinationCampus],
         destinationAddress,
@@ -127,7 +122,7 @@ export class ShuttleService {
       );
 
       shuttleSteps.push(...initialWalk.steps);
-      shuttleSteps.push(...shuttleBus.steps);
+      shuttleSteps.push(...shuttleData[startCampus].route);
       shuttleSteps.push(...finalWalk.steps);
     }
 
