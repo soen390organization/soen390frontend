@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, combineLatest, map, Observable } from 'rxjs';
 import { Step } from '../../interfaces/step.interface';
-import data from '../../../assets/ConcordiaData.json';
+import { ShuttleService } from '../shuttle/shuttle.service';
 
 interface Location {
   title: string;
@@ -16,36 +16,30 @@ interface Location {
 })
 export class RouteService {
   private directionsService!: google.maps.DirectionsService;
-  private renderers!: google.maps.DirectionsRenderer[];
-  private placesService!: google.maps.places.PlacesService;
+  private directionsRenderer!: google.maps.DirectionsRenderer;
   private startPoint$ = new BehaviorSubject<Location | null>(null);
   private destinationPoint$ = new BehaviorSubject<Location | null>(null);
 
-  constructor() {}
+  constructor(
+  private shuttleService: ShuttleService
+  ) {}
 
   public initialize(map: google.maps.Map): void {
+    this.shuttleService.initialize(map)
     if (!this.directionsService)
       this.directionsService = new google.maps.DirectionsService();
-    if (!this.renderers) {
-      this.renderers = [];
-      const renderer1 = new google.maps.DirectionsRenderer();
-      const renderer2 = new google.maps.DirectionsRenderer();
-      const renderer3 = new google.maps.DirectionsRenderer();
-      renderer1.setMap(map);
-      renderer2.setMap(map);
-      renderer3.setMap(map);
-      this.renderers.push(renderer1, renderer2, renderer3);
+    if (!this.directionsRenderer) {
+      this.directionsRenderer = new google.maps.DirectionsRenderer();
+      this.directionsRenderer.setMap(map);
     }
-    if (!this.placesService)
-      this.placesService = new google.maps.places.PlacesService(map);
   }
 
   getDirectionsService(): google.maps.DirectionsService {
     return this.directionsService;
   }
 
-  getDirectionsRenderer(): google.maps.DirectionsRenderer[] {
-    return this.renderers;
+  getDirectionsRenderer(): google.maps.DirectionsRenderer {
+    return this.directionsRenderer;
   }
 
   getStartPoint(): Observable<Location | null> {
@@ -57,7 +51,7 @@ export class RouteService {
       this.startPoint$.value?.marker ??
       new google.maps.Marker({
         position: location.coordinates,
-        map: this.renderers[0].getMap(),
+        map: this.directionsRenderer.getMap(),
         icon: {
           url: 'https://upload.wikimedia.org/wikipedia/commons/8/8e/Icone_Verde.svg',
           scaledSize: new google.maps.Size(40, 40),
@@ -79,7 +73,7 @@ export class RouteService {
       this.destinationPoint$.value?.marker ??
       new google.maps.Marker({
         position: location.coordinates,
-        map: this.renderers[0].getMap(),
+        map: this.directionsRenderer.getMap(),
         icon: {
           url: 'https://upload.wikimedia.org/wikipedia/commons/8/8e/Icone_Verde.svg',
           scaledSize: new google.maps.Size(40, 40),
@@ -99,7 +93,7 @@ export class RouteService {
   }
 
   private updateMapView() {
-    const map = this.renderers[0].getMap();
+    const map = this.directionsRenderer.getMap();
 
     const startPoint = this.startPoint$.value;
     const destinationPoint = this.destinationPoint$.value;
@@ -167,14 +161,11 @@ export class RouteService {
     startAddress: string | google.maps.LatLng,
     destinationAddress: string | google.maps.LatLng,
     travelMode: google.maps.TravelMode = google.maps.TravelMode.WALKING,
-    renderer: google.maps.DirectionsRenderer = this.renderers[0]
+    renderer: google.maps.DirectionsRenderer = this.directionsRenderer
   ): Promise<{
     steps: Step[];
     eta: string | null;
   }> {
-    console.log(
-      `starting at: ${startAddress}, ending at: ${destinationAddress}`
-    );
     return new Promise((resolve, reject) => {
 
       this.setRouteColor(travelMode, renderer);
@@ -221,91 +212,14 @@ export class RouteService {
     });
   }
 
-  async calculateShuttleBusRoute(
-    startAddress: string | google.maps.LatLng,
-    destinationAddress: string | google.maps.LatLng
-  ) {
-    const startCoords = await this.findCoords(startAddress);
-    const destinationCoords = await this.findCoords(destinationAddress);
-
-    const terminalCodes = {
-      'sgw': `${data.sgw.shuttleBus.terminal.lat}, ${data.sgw.shuttleBus.terminal.lng}`,
-      'loy': `${data.loy.shuttleBus.terminal.lat}, ${data.loy.shuttleBus.terminal.lng}`
-    }
-
-
-    if (!startCoords || !destinationCoords) {
-      throw new Error('Start place not found');
-    }
-
-    const startDistanceToSGW = Math.sqrt(
-      Math.pow(startCoords.lat() - data.sgw.coordinates.lat, 2) +
-        Math.pow(startCoords.lng() - data.sgw.coordinates.lng, 2)
-    );
-    const startDistanceToLOY = Math.sqrt(
-      Math.pow(startCoords.lat() - data.loy.coordinates.lat, 2) +
-        Math.pow(startCoords.lng() - data.loy.coordinates.lng, 2)
-    );
-    const destinationDistanceToSGW = Math.sqrt(
-      Math.pow(destinationCoords.lat() - data.sgw.coordinates.lat, 2) +
-        Math.pow(destinationCoords.lng() - data.sgw.coordinates.lng, 2)
-    );
-    const destinationDistanceToLOY = Math.sqrt(
-      Math.pow(destinationCoords.lat() - data.loy.coordinates.lat, 2) +
-        Math.pow(destinationCoords.lng() - data.loy.coordinates.lng, 2)
-    );
-
-    const startCampus = startDistanceToSGW < startDistanceToLOY ? 'sgw' : 'loy';
-    const destinationCampus =
-      destinationDistanceToSGW < destinationDistanceToLOY ? 'sgw' : 'loy';
-    const shuttleSteps = [];
-
-    const sameCampus = startCampus === destinationCampus;
-
-    if (sameCampus) {
-      const steps = await this.calculateRoute(
-        startAddress,
-        destinationAddress,
-        google.maps.TravelMode.WALKING
-      );
-      shuttleSteps.push(steps.steps);
-    } else {
-      const initialWalk = await this.calculateRoute(
-        startAddress,
-        terminalCodes[startCampus],
-        google.maps.TravelMode.WALKING,
-        this.renderers[0]
-      );
-      // fails here
-      const shuttleBus = await this.calculateRoute(
-        terminalCodes[startCampus],
-        terminalCodes[destinationCampus],
-        google.maps.TravelMode.DRIVING,
-        this.renderers[1]
-      );
-      const finalWalk = await this.calculateRoute(
-        terminalCodes[destinationCampus],
-        destinationAddress,
-        google.maps.TravelMode.WALKING,
-        this.renderers[2]
-      );
-
-      shuttleSteps.push(...initialWalk.steps);
-      shuttleSteps.push(...shuttleBus.steps);
-      shuttleSteps.push(...finalWalk.steps);
-    }
-
-    return { steps: shuttleSteps, eta: 'TBD' };
-  }
-
   generateRoute(
     startAddress: string | google.maps.LatLng,
     destinationAddress: string | google.maps.LatLng,
     travelMode: string | google.maps.TravelMode = google.maps.TravelMode.WALKING
   ) {
-    this.clearMapDirections();
+    this.shuttleService.clearMapDirections();
     if (travelMode === 'SHUTTLE') {
-      return this.calculateShuttleBusRoute(startAddress, destinationAddress);
+      return this.shuttleService.calculateShuttleBusRoute(startAddress, destinationAddress);
     } else {
       return this.calculateRoute(
         startAddress,
@@ -345,34 +259,5 @@ export class RouteService {
     }
     renderer.setOptions({ polylineOptions });
     return polylineOptions;
-  }
-
-  private findCoords(
-    query: string | google.maps.LatLng
-  ): Promise<google.maps.LatLng | null> {
-    if (query instanceof google.maps.LatLng) {
-      return Promise.resolve(query);
-    }
-    return new Promise((resolve, reject) => {
-      this.placesService.findPlaceFromQuery(
-        { query, fields: ['geometry', 'formatted_address'] },
-        (results: any, status: any) => {
-          if (
-            status === google.maps.places.PlacesServiceStatus.OK &&
-            results.length > 0
-          ) {
-            console.log(results[0].geometry.location);
-            resolve(results[0].geometry.location);
-          } else {
-            reject(null);
-          }
-        }
-      );
-    });
-  }
-  public clearMapDirections() {
-    this.renderers.forEach((renderer) => {
-      renderer.setDirections(null);
-    });
   }
 }
