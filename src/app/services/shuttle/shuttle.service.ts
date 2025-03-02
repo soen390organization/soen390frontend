@@ -81,7 +81,7 @@ export class ShuttleService {
 
     if (
       nextBus === 'No more shuttle buses today :(' ||
-      'No departures for today.'
+      nextBus === 'No departures for today.'
     ) {
       return {
         steps: [
