@@ -54,7 +54,7 @@ export class ShuttleService {
 
     const sameCampus = startCampus === destinationCampus;
 
-    const date = new Date(2025, 2, 3, 10, 9, 0);
+    const date = new Date();
     const nextBus = this.getNextBus(startCampus, date);
 
     if (
