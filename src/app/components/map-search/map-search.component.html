@@ -52,6 +52,7 @@
         <ul class="rounded-xl border border-gray-300 bg-white">
           <li
             *ngFor="let place of places"
+            role="button"
             (click)="directionsService.setStartPoint(place); clearList()"
             (keydown.enter)="directionsService.setStartPoint(place); clearList()"
             (keypress.enter)="directionsService.setStartPoint(place); clearList()"
@@ -101,6 +102,7 @@
         <ul class="rounded-xl border border-gray-300 bg-white">
           <li
             *ngFor="let place of places"
+            role="button"
             (click)="directionsService.setDestinationPoint(place); clearList()"
             (keydown.enter)="directionsService.setDestinationPoint(place); clearList()"
             (keypress.enter)="directionsService.setDestinationPoint(place); clearList()"
