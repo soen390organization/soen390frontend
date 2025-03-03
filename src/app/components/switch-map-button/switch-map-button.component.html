@@ -1,5 +1,5 @@
 <button 
-  class="fixed right-4 bottom-[200px] flex items-center justify-center rounded-full p-3 shadow z-[10000]"
+  class="fixed right-4 bottom-[200px] flex items-center justify-center rounded-full p-3 shadow"
   (click)="onClick()"
   [ngClass]="(mappedinService.isMappedin$ | async) ? 'bg-black' : 'bg-white'"
 >
