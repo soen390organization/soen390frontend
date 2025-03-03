@@ -290,34 +290,6 @@ describe('DirectionsService - Start/Destination Points and Observables', () => {
     });
   });
 
-  // it('should set start point and update marker', () => {
-  //   const location: Location = {
-  //     title: 'Start',
-  //     address: 'Start Address',
-  //     coordinates: {} as google.maps.LatLng,
-  //   };
-
-  //   service.setStartPoint(location);
-
-  //   expect((service as any).startPoint$.value?.title).toBe('Start');
-  //   expect(mockMarker.setPosition).toHaveBeenCalledWith(location.coordinates);
-  //   expect((service as any).updateMapView).toHaveBeenCalledWith('start');
-  // });
-
-  // it('should set destination point and update marker', () => {
-  //   const location: Location = {
-  //     title: 'Destination',
-  //     address: 'Destination Address',
-  //     coordinates: {} as google.maps.LatLng,
-  //   };
-
-  //   service.setDestinationPoint(location);
-
-  //   expect((service as any).destinationPoint$.value?.title).toBe('Destination');
-  //   expect(mockMarker.setPosition).toHaveBeenCalledWith(location.coordinates);
-  //   expect((service as any).updateMapView).toHaveBeenCalledWith('destination');
-  // });
-
   it('should return null when getting shortest route if none exist', () => {
     expect(service.getShortestRoute()).toBeNull();
   });
