@@ -1,0 +1,11 @@
+<button 
+  class="fixed right-4 bottom-[200px] flex items-center justify-center rounded-full p-3 shadow z-[10000]"
+  (click)="onClick()"
+  [ngClass]="(mappedinService.isMappedin$ | async) ? 'bg-black' : 'bg-white'"
+>
+  <!-- Inline the SVG with dynamic fill binding -->
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" class="h-6 w-6"
+       [attr.fill]="(mappedinService.isMappedin$ | async) ? '#fff' : '#000'">
+    <path d="M3.99992 25.3333V7.59994C3.99984 7.32624 4.08399 7.05915 4.24094 6.83492C4.3979 6.6107 4.62006 6.44021 4.87725 6.34661L17.7719 1.65861C17.8726 1.62195 17.9807 1.61012 18.087 1.62412C18.1933 1.63812 18.2946 1.67754 18.3824 1.73904C18.4702 1.80053 18.5419 1.88229 18.5913 1.97738C18.6408 2.07247 18.6666 2.17809 18.6666 2.28528V8.88927L27.0879 11.6959C27.3535 11.7844 27.5846 11.9542 27.7482 12.1813C27.9119 12.4084 28 12.6813 27.9999 12.9613V25.3333H30.6666V27.9999H1.33325V25.3333H3.99992ZM6.66659 25.3333H15.9999V5.13994L6.66659 8.53461V25.3333ZM25.3333 25.3333V13.9226L18.6666 11.6999V25.3333H25.3333Z"/>
+  </svg>
+</button>

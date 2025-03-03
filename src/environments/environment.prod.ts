@@ -13,4 +13,9 @@ export type EnvironmentType = {
     messagingSenderId: string;
     appId: string;
   };
+  mappedin: {
+    mapId: string;
+    key: string;
+    secret: string;
+  };
 };
