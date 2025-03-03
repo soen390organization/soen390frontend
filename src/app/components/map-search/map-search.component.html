@@ -14,6 +14,7 @@
     [@slideInOut]="isSearchVisible ? 'in' : 'out'"
     [ngStyle]="{ 'height': isSearchVisible ? 'auto' : '0', 'overflow': isSearchVisible ? 'visible' : 'hidden' }">
     <div class="pl-4 w-full">
+      <div class="relative">
         <input
         [(ngModel)]="startLocationInput"
         (input)="onSearchChange($event, 'start')"  
@@ -23,6 +24,15 @@
         debounce="1000"
         class="w-full bg-white px-4 py-3 rounded-full border border-gray-300 focus:outline-none "
        />
+       <div 
+       (click)="onSetUsersLocationAsStart()"
+       class="absolute right-1.5 top-1/2 transform -translate-y-1/2 cursor-pointer bg-[#912338] p-2 rounded-full flex items-center justify-center"
+      >
+       <span class="material-symbols-outlined text-white">
+         my_location
+       </span>
+     </div>
+      </div>
       
         <div *ngIf="isSearchingFromStart" class="absolute w-full mt-1 z-10">
           <ion-list *ngIf="places?.length > 0" class="rounded-b-xl">
@@ -37,18 +47,8 @@
               </p>
             </ion-label>
           </ion-item>
-        </ion-list>
-      
-      
-        <div 
-          (click)="onSetUsersLocationAsStart()"
-          class="absolute right-1.5 top-1/2 transform -translate-y-1/2 cursor-pointer bg-[#912338] p-2 rounded-full flex items-center justify-center"
-         >
-          <span class="material-symbols-outlined text-white">
-            my_location
-          </span>
-        </div>
-      </div>      
+          </ion-list>
+        </div>      
   
       <input
         [(ngModel)]="destinationLocationInput"
