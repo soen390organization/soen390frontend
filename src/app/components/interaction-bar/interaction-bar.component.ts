@@ -58,7 +58,6 @@ export class InteractionBarComponent implements AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    const footer = this.footerContainer.nativeElement;
     const handle = this.handleBar.nativeElement;
 
     // **Touch Events (Mobile)**
