@@ -169,7 +169,7 @@ private updateShowAllSteps(): void {
     const destination = await firstValueFrom(this.directionsService.getDestinationPoint());
 
     try {
-      const { steps, eta } = await this.directionsService.calculateRoute(start.address, destination.address, travelMode);
+      const { steps, eta } = await this.directionsService.calculateRoute(start.address, destination.address, travelMode, true);
       this.steps = steps;
       this.eta = eta;
     } catch (error) {
