@@ -15,9 +15,19 @@ describe('Directions Service', () => {
     setMap = jasmine.createSpy('setMap');
     setOptions = jasmine.createSpy('setOptions');
     setDirections = jasmine.createSpy('setDirections');
+    set = jasmine.createSpy('set');
+    getMap = jasmine.createSpy('getMap');
   }
 
+  let mockMap: any;
+
   beforeEach(() => {
+    mockMap = {
+      setCenter: jasmine.createSpy('setCenter'),
+      setZoom: jasmine.createSpy('setZoom'),
+      fitBounds: jasmine.createSpy('fitBounds'),
+    };
+    
     (window as any).google = {
       maps: {
         DirectionsService: MockDirectionsService,
@@ -39,6 +49,7 @@ describe('Directions Service', () => {
     });
     service = TestBed.inject(DirectionsService);
     service.initialize({} as google.maps.Map);
+    (service as any).directionsRenderer.getMap.and.returnValue(mockMap);
   });
 
   it('should be created', () => {
@@ -149,6 +160,49 @@ describe('Directions Service', () => {
           ],
         });
       });
+    });
+  });
+
+  describe('Clear methods', () => {
+    let mockMarker: any;
+    
+    beforeEach(() => {
+      mockMarker = { 
+        setMap: jasmine.createSpy('setMap'),
+        getPosition: jasmine.createSpy('getPosition').and.returnValue({ lat: () => 45, lng: () => -73 }),
+      };
+    });
+
+    it('clearStartPoint should remove marker and clear the route', () => {
+      (service as any).startPoint$.next({ title: 'Test Start', address: 'Test Address', coordinates: {} as google.maps.LatLng, marker: mockMarker });
+      (service as any).destinationPoint$.next({ title: 'Test Dest', address: 'Test Address 2', coordinates: {} as google.maps.LatLng, marker: { 
+        setMap: jasmine.createSpy('setMap'),
+        getPosition: () => ({ lat: () => 0, lng: () => 0 })
+      } });
+      
+      service.clearStartPoint();
+
+      expect(mockMarker.setMap).toHaveBeenCalledWith(null);
+      expect((service as any).startPoint$.value).toBeNull();
+      expect((service as any).directionsRenderer.set).toHaveBeenCalledWith('directions', null);
+    });
+
+    it('clearDestinationPoint should remove marker and clear the route', () => {
+      const destMarker = { 
+        setMap: jasmine.createSpy('setMap'),
+        getPosition: jasmine.createSpy('getPosition').and.returnValue({ lat: () => 40, lng: () => -80 }),
+      };
+      (service as any).destinationPoint$.next({ title: 'Test Dest', address: 'Test Address', coordinates: {} as google.maps.LatLng, marker: destMarker });
+      (service as any).startPoint$.next({ title: 'Test Start', address: 'Test Address 2', coordinates: {} as google.maps.LatLng, marker: { 
+        setMap: jasmine.createSpy('setMap'),
+        getPosition: () => ({ lat: () => 0, lng: () => 0 })
+      } });
+      
+      service.clearDestinationPoint();
+
+      expect(destMarker.setMap).toHaveBeenCalledWith(null);
+      expect((service as any).destinationPoint$.value).toBeNull();
+      expect((service as any).directionsRenderer.set).toHaveBeenCalledWith('directions', null);
     });
   });
 });
