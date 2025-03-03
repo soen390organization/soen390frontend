@@ -1,5 +1,5 @@
 import { of } from 'rxjs';
-import { ComponentFixture, TestBed, fakeAsync, tick} from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, tick, flushMicrotasks} from '@angular/core/testing';
 import { MapSearchComponent } from './map-search.component';
 import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
@@ -220,4 +220,84 @@ describe('MapSearchComponent', () => {
       expect(component.places.length).toBe(0);
     });
   });
+
+describe('ngOnInit and calculateShortestRoute', () => {
+  let componentWithRoute: MapSearchComponent;
+  let fixtureWithRoute: ComponentFixture<MapSearchComponent>;
+
+  // Define a dummy google.maps.LatLng object for testing purposes.
+  const dummyLatLng = {
+    equals: (other: any) => true,
+    lat: () => 10,
+    lng: () => 20,
+    toJSON: () => ({ lat: 10, lng: 20 }),
+    toUrlValue: () => '10,20'
+  } as google.maps.LatLng;
+
+  beforeEach(() => {
+    // Set up the spies to return valid start and destination points.
+    directionsServiceSpy.getStartPoint.and.returnValue(
+      of({ title: 'Start Place', address: 'start address', coordinates: dummyLatLng })
+    );
+    directionsServiceSpy.getDestinationPoint.and.returnValue(
+      of({ title: 'Destination Place', address: 'destination address', coordinates: dummyLatLng })
+    );
+    // Set the spy for calculateShortestRoute to return a resolved promise.
+    directionsServiceSpy.calculateShortestRoute = jasmine.createSpy('calculateShortestRoute').and.returnValue(Promise.resolve());
+    directionsServiceSpy.getShortestRoute = jasmine.createSpy('getShortestRoute').and.returnValue({ eta: '10 mins', distance: 5 });
+
+    fixtureWithRoute = TestBed.createComponent(MapSearchComponent);
+    componentWithRoute = fixtureWithRoute.componentInstance;
+    fixtureWithRoute.detectChanges();
+  });
+
+  it('should set start and destination inputs and call calculateShortestRoute on ngOnInit', async () => {
+    fixtureWithRoute.detectChanges();
+    await fixtureWithRoute.whenStable();
+    
+    expect(componentWithRoute.startLocationInput).toBe('Start Place');
+    expect(componentWithRoute.destinationLocationInput).toBe('Destination Place');
+    expect(componentWithRoute.isSearchVisible).toBeTrue();
+    expect(directionsServiceSpy.calculateShortestRoute).toHaveBeenCalledWith('start address', 'destination address');
+    expect(componentWithRoute.currentRouteData).toEqual({ eta: '10 mins', distance: 5 });
+  });
+  
+  
+
+  it('should handle error in calculateShortestRoute gracefully', fakeAsync(() => {
+    const error = new Error('Route calculation failed');
+    // Simulate a rejected promise in calculateShortestRoute.
+    directionsServiceSpy.calculateShortestRoute.and.returnValue(Promise.reject(error));
+    // Create a new instance for this error case.
+    const errorFixture = TestBed.createComponent(MapSearchComponent);
+    const errorComponent = errorFixture.componentInstance;
+    spyOn(console, 'error');
+    errorFixture.detectChanges();
+    tick();
+    flushMicrotasks();
+    expect(console.error).toHaveBeenCalledWith('Error calculating route:', error);
+    // currentRouteData should remain null if route calculation fails.
+    expect(errorComponent.currentRouteData).toBeNull();
+  }));
+
+  it('should not call calculateShortestRoute if one of the points is null', fakeAsync(() => {
+    // Reset the spy calls so previous calls don't affect this test.
+    directionsServiceSpy.calculateShortestRoute.calls.reset();
+    // Simulate scenario where the start point is null.
+    directionsServiceSpy.getStartPoint.and.returnValue(of(null));
+    directionsServiceSpy.getDestinationPoint.and.returnValue(
+      of({ title: 'Destination Only', address: 'destination only address', coordinates: dummyLatLng })
+    );
+    // Create a new component instance for this scenario.
+    const incompleteFixture = TestBed.createComponent(MapSearchComponent);
+    const incompleteComponent = incompleteFixture.componentInstance;
+    incompleteFixture.detectChanges();
+    tick();
+    flushMicrotasks();
+    expect(directionsServiceSpy.calculateShortestRoute).not.toHaveBeenCalled();
+    // Even though the combineLatest branch doesn't run, the destination observable subscription should set its value.
+    expect(incompleteComponent.destinationLocationInput).toBe('Destination Only');
+  }));
+});
+
 });
