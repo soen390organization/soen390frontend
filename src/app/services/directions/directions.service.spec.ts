@@ -366,7 +366,8 @@ describe('DirectionsService - calculateShortestRoute()', () => {
       (
         start: string | google.maps.LatLng,
         destination: string | google.maps.LatLng,
-        mode: google.maps.TravelMode
+        mode: google.maps.TravelMode,
+        render: boolean
       ): Promise<{ steps: Step[]; eta: string }> => {
         let duration = 0;
 
@@ -423,6 +424,6 @@ describe('DirectionsService - calculateShortestRoute()', () => {
     });
 
     // Ensure calculateRoute was called with the fastest mode
-    expect(mockCalculateRoute).toHaveBeenCalledWith(start, destination, google.maps.TravelMode.DRIVING);
+    expect(mockCalculateRoute).toHaveBeenCalledWith(start, destination, google.maps.TravelMode.DRIVING, false);
   });
 });
