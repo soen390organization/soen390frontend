@@ -130,11 +130,13 @@ export class MapSearchComponent implements OnInit {
     this.startLocationInput = '';
     this.clearList();
     this.directionsService.clearStartPoint();
+    this.currentRouteData = null;
   }
 
   clearDestinationInput() {
     this.destinationLocationInput = '';
     this.clearList();
     this.directionsService.clearDestinationPoint();
+    this.currentRouteData = null;
   }
 }
