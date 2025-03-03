@@ -75,7 +75,7 @@ export class DirectionsService {
     marker.setPosition(location.coordinates);
 
     this.startPoint$.next({ ...location, marker });
-    this.updateMapView("start");
+    this.updateMapView();
   }
 
   getShortestRoute(): { eta: string | null; distance: number } | null {
@@ -99,7 +99,7 @@ export class DirectionsService {
     marker.setPosition(location.coordinates);
 
     this.destinationPoint$.next({ ...location, marker });
-    this.updateMapView("destination");
+    this.updateMapView();
   }
 
   get hasBothPoints$(): Observable<boolean> {
@@ -110,16 +110,16 @@ export class DirectionsService {
 
   // Function to handle the button click, which will enable the start functionality
   showDirections(): void {
-    this.updateMapView("both");
+    this.updateMapView();
   }
 
-  private updateMapView(toUpdate: string) {
+  private updateMapView() {
     const map = this.directionsRenderer.getMap();
 
     const startPoint = this.startPoint$.value;
     const destinationPoint = this.destinationPoint$.value;
 
-    if (toUpdate=="both") {
+    if (startPoint && destinationPoint) {
       this.calculateRoute(startPoint.address, destinationPoint.address, google.maps.TravelMode.WALKING, true);
       const bounds = new google.maps.LatLngBounds();
       bounds.extend(startPoint.marker.getPosition()!);
@@ -127,7 +127,7 @@ export class DirectionsService {
       map.fitBounds(bounds);
     } else {
       this.directionsRenderer.set('directions', null);
-      const point = toUpdate == "start" ? startPoint : destinationPoint;
+      const point = startPoint ?? destinationPoint;
       if (point) {
         map.setCenter(point.marker.getPosition()!);
         map.setZoom(18);
@@ -303,7 +303,7 @@ export class DirectionsService {
       this.startPoint$.value.marker.setMap(null);
     }
     this.startPoint$.next(null);
-    this.updateMapView("start");
+    this.updateMapView();
   }
 
   clearDestinationPoint(): void {
@@ -311,7 +311,7 @@ export class DirectionsService {
       this.destinationPoint$.value.marker.setMap(null);
     }
     this.destinationPoint$.next(null);
-    this.updateMapView("destination");
+    this.updateMapView();
   }
 
 }

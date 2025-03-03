@@ -318,7 +318,7 @@ describe('DirectionsService - Start/Destination Points and Observables', () => {
 
   it('should call updateMapView when showDirections() is triggered', () => {
     service.showDirections();
-    expect((service as any).updateMapView).toHaveBeenCalledWith('both');
+    expect((service as any).updateMapView).toHaveBeenCalled();
   });
 });
 
