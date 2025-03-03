@@ -98,6 +98,7 @@ export class DirectionsService {
       bounds.extend(destinationPoint.marker.getPosition()!);
       map.fitBounds(bounds);
     } else {
+      this.directionsRenderer.set('directions', null);
       const point = startPoint ?? destinationPoint;
       if (point) {
         map.setCenter(point.marker.getPosition()!);
@@ -228,4 +229,21 @@ export class DirectionsService {
     this.directionsRenderer.setOptions({ polylineOptions });
     return polylineOptions;
   }
+
+  clearStartPoint(): void {
+    if (this.startPoint$.value?.marker) {
+      this.startPoint$.value.marker.setMap(null);
+    }
+    this.startPoint$.next(null);
+    this.updateMapView();
+  }
+  
+  clearDestinationPoint(): void {
+    if (this.destinationPoint$.value?.marker) {
+      this.destinationPoint$.value.marker.setMap(null);
+    }
+    this.destinationPoint$.next(null);
+    this.updateMapView();
+  }
+  
 }
