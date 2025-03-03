@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, combineLatest, map, Observable } from 'rxjs';
 import { Step } from '../../interfaces/step.interface';
+import { ShuttleService } from '../shuttle/shuttle.service';
 
 interface Location {
   title: string;
@@ -13,14 +14,13 @@ interface Location {
 @Injectable({
   providedIn: 'root',
 })
-export class DirectionsService {
+export class RouteService {
   private directionsService!: google.maps.DirectionsService;
   private directionsRenderer!: google.maps.DirectionsRenderer;
-  
   private startPoint$ = new BehaviorSubject<Location | null>(null);
   private destinationPoint$ = new BehaviorSubject<Location | null>(null);
 
-  constructor() {}
+  constructor(private readonly shuttleService: ShuttleService) {}
 
   public initialize(map: google.maps.Map): void {
     if (!this.directionsService)
@@ -29,6 +29,8 @@ export class DirectionsService {
       this.directionsRenderer = new google.maps.DirectionsRenderer();
       this.directionsRenderer.setMap(map);
     }
+    this.shuttleService.initialize(map);
+    this.shuttleService.initialize(map);
   }
 
   getDirectionsService(): google.maps.DirectionsService {
@@ -44,15 +46,17 @@ export class DirectionsService {
   }
 
   setStartPoint(location: Location): void {
-    const marker = this.startPoint$.value?.marker ?? new google.maps.Marker({
-      position: location.coordinates,
-      map: this.directionsRenderer.getMap(),
-      icon: { 
-        url: 'https://upload.wikimedia.org/wikipedia/commons/8/8e/Icone_Verde.svg', 
-        scaledSize: new google.maps.Size(40, 40) 
-      }
-    });
-  
+    const marker =
+      this.startPoint$.value?.marker ??
+      new google.maps.Marker({
+        position: location.coordinates,
+        map: this.directionsRenderer.getMap(),
+        icon: {
+          url: 'https://upload.wikimedia.org/wikipedia/commons/8/8e/Icone_Verde.svg',
+          scaledSize: new google.maps.Size(40, 40),
+        },
+      });
+
     marker.setPosition(location.coordinates);
 
     this.startPoint$.next({ ...location, marker });
@@ -64,15 +68,17 @@ export class DirectionsService {
   }
 
   setDestinationPoint(location: Location): void {
-    const marker = this.destinationPoint$.value?.marker ?? new google.maps.Marker({
-      position: location.coordinates,
-      map: this.directionsRenderer.getMap(),
-      icon: { 
-        url: 'https://upload.wikimedia.org/wikipedia/commons/8/8e/Icone_Verde.svg', 
-        scaledSize: new google.maps.Size(40, 40) 
-      }
-    });
-  
+    const marker =
+      this.destinationPoint$.value?.marker ??
+      new google.maps.Marker({
+        position: location.coordinates,
+        map: this.directionsRenderer.getMap(),
+        icon: {
+          url: 'https://upload.wikimedia.org/wikipedia/commons/8/8e/Icone_Verde.svg',
+          scaledSize: new google.maps.Size(40, 40),
+        },
+      });
+
     marker.setPosition(location.coordinates);
 
     this.destinationPoint$.next({ ...location, marker });
@@ -87,12 +93,16 @@ export class DirectionsService {
 
   private updateMapView() {
     const map = this.directionsRenderer.getMap();
-  
+
     const startPoint = this.startPoint$.value;
     const destinationPoint = this.destinationPoint$.value;
-  
+
     if (startPoint && destinationPoint) {
-      this.calculateRoute(startPoint.address, destinationPoint.address, google.maps.TravelMode.WALKING);
+      this.generateRoute(
+        startPoint.address,
+        destinationPoint.address,
+        google.maps.TravelMode.WALKING
+      );
       const bounds = new google.maps.LatLngBounds();
       bounds.extend(startPoint.marker.getPosition()!);
       bounds.extend(destinationPoint.marker.getPosition()!);
@@ -105,7 +115,7 @@ export class DirectionsService {
         map.setZoom(18);
       }
     }
-  }  
+  }
 
   /**
    * Converts a string (e.g., "WALKING") into a google.maps.TravelMode enum.
@@ -147,28 +157,27 @@ export class DirectionsService {
     }[];
     eta: string
    */
-  calculateRoute(
-    startAddress: string|google.maps.LatLng,
-    destinationAddress: string|google.maps.LatLng,
+  async calculateRoute(
+    startAddress: string | google.maps.LatLng,
+    destinationAddress: string | google.maps.LatLng,
     travelMode: google.maps.TravelMode = google.maps.TravelMode.WALKING,
+    renderer: google.maps.DirectionsRenderer = this.directionsRenderer
   ): Promise<{
     steps: Step[];
     eta: string | null;
   }> {
     return new Promise((resolve, reject) => {
-      // this.directionsRenderer.setMap(this.map);
-
-      this.setRouteColor(travelMode);
+      this.setRouteColor(travelMode, renderer);
 
       const request: google.maps.DirectionsRequest = {
         origin: startAddress,
         destination: destinationAddress,
         travelMode: travelMode,
       };
-
       this.directionsService.route(request, (response, status) => {
         if (status === google.maps.DirectionsStatus.OK && response) {
-          this.directionsRenderer.setDirections(response);
+          console.log(response);
+          renderer.setDirections(response);
 
           const steps: Step[] = [];
           let eta: string | null = null;
@@ -201,10 +210,36 @@ export class DirectionsService {
     });
   }
 
-  setRouteColor(travelMode: google.maps.TravelMode) {
+  async generateRoute(
+    startAddress: string | google.maps.LatLng,
+    destinationAddress: string | google.maps.LatLng,
+    travelMode: string | google.maps.TravelMode = google.maps.TravelMode.WALKING
+  ) {
+    this.shuttleService.clearMapDirections();
+    if (travelMode === 'SHUTTLE') {
+      return this.shuttleService.calculateShuttleBusRoute(
+        startAddress,
+        destinationAddress
+      );
+    } else {
+      return await this.calculateRoute(
+        startAddress,
+        destinationAddress,
+        this.getTravelMode(travelMode)
+      );
+    }
+  }
+
+  setRouteColor(
+    travelMode: google.maps.TravelMode | string,
+    renderer: google.maps.DirectionsRenderer
+  ): google.maps.PolylineOptions {
     const polylineOptions: google.maps.PolylineOptions = {};
 
     switch (travelMode) {
+      case 'SHUTTLE':
+        polylineOptions['strokeColor'] = 'purple';
+        break;
       case google.maps.TravelMode.DRIVING:
         polylineOptions['strokeColor'] = 'red';
         break;
@@ -226,7 +261,7 @@ export class DirectionsService {
           },
         ];
     }
-    this.directionsRenderer.setOptions({ polylineOptions });
+    renderer.setOptions({ polylineOptions });
     return polylineOptions;
   }
 

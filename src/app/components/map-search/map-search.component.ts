@@ -4,8 +4,14 @@ import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CurrentLocationService } from 'src/app/services/geolocation/current-location.service';
-import { animate, state, style, transition, trigger } from '@angular/animations';
-import { DirectionsService } from 'src/app/services/directions/directions.service';
+import {
+  animate,
+  state,
+  style,
+  transition,
+  trigger,
+} from '@angular/animations';
+import { RouteService } from 'src/app/services/directions/directions.service';
 import { PlacesService } from 'src/app/services/places.service';
 
 @Component({
@@ -41,23 +47,27 @@ export class MapSearchComponent implements OnInit {
   startLocationInput = '';
   destinationLocationInput = '';
   isSearchVisible = false;
-  places: any[]=[]; // Array to store the search suggestions
+  places: any[] = []; // Array to store the search suggestions
   isSearchingFromStart: boolean = false; // Flag to determine if the search is for the start or destination location
 
-  constructor(public directionsService: DirectionsService, private placesService: PlacesService, private currentLocationService: CurrentLocationService) {}
+  constructor(
+    public directionsService: RouteService,
+    private readonly placesService: PlacesService,
+    private readonly currentLocationService: CurrentLocationService
+  ) {}
 
   ngOnInit(): void {
-    this.directionsService.getStartPoint().subscribe(start => {
+    this.directionsService.getStartPoint().subscribe((start) => {
       if (start) {
         this.startLocationInput = start.title;
       }
-    });    
-    this.directionsService.getDestinationPoint().subscribe(destination => {
+    });
+    this.directionsService.getDestinationPoint().subscribe((destination) => {
       if (destination) {
         this.destinationLocationInput = destination.title;
         this.isSearchVisible = true;
       }
-    });    
+    });
   }
 
   toggleSearch() {
@@ -72,20 +82,18 @@ export class MapSearchComponent implements OnInit {
     this.directionsService.setStartPoint({
       title: 'Your Location',
       address: `${position.lat}, ${position.lng}`,
-      coordinates: new google.maps.LatLng(position)
+      coordinates: new google.maps.LatLng(position),
     });
   }
-  
 
   async onSearchChange(event: any, type: 'start' | 'destination') {
     this.isSearchingFromStart = type === 'start'; // Set the flag to 'start' or 'destination'
-    const query = event.target.value.trim(); 
+    const query = event.target.value.trim();
     if (!query) {
       this.places = [];
       return;
     }
     this.places = await this.placesService.getPlaceSuggestions(query);
-    console.log(this.places);
   }
 
   clearList() {
@@ -97,7 +105,7 @@ export class MapSearchComponent implements OnInit {
     this.clearList();
     this.directionsService.clearStartPoint();
   }
-  
+
   clearDestinationInput() {
     this.destinationLocationInput = '';
     this.clearList();
