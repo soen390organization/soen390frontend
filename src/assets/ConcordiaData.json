@@ -3,13 +3,21 @@
     "name": "Sir George William",
     "abreviation": "SGW",
     "coordinates": { "lat": 45.49508674774648, "lng": -73.57795691041848 },
+    "shuttleBus": {
+      "terminal": {
+        "lat": 45.49713286141489,
+        "lng": -73.57851866143918
+      }
+    },
+
+    "schedule": [],
     "buildings": [
       {
         "name": "Engineering and Visual Arts",
         "abreviation": "EV",
         "address": "1515 Saint-Catherine St W #1428, Montreal, Quebec H3G 1S6",
         "coordinates": { "lat": 45.49541909930391, "lng": -73.57769260301784 },
-        "image": "https://lh3.googleusercontent.com/p/AF1QipPdcC9aj620AW078WET7MWOA9X8J6ZrRBX9gDdM=s1360-w1360-h1020",
+        "image": "assets/images/ev-building.jpg",
         "entrances": [],
         "boundaries": [
           {
@@ -67,7 +75,7 @@
         "abreviation": "ER",
         "address": "2155 Guy St, Montreal, Quebec H3H 2L9",
         "coordinates": { "lat": 45.49619913491374, "lng": -73.58013324104284 },
-        "image": "",
+        "image": "assets/images/er-building.jpg",
         "entrances": [],
         "boundaries": [
           {
@@ -93,7 +101,7 @@
         "abreviation": "LB",
         "address": "1400 Blvd. De Maisonneuve Ouest, Montreal, Quebec H3G 2V8",
         "coordinates": { "lat": 45.496856674256634, "lng": -73.57802308456793 },
-        "image": "",
+        "image": "assets/images/webster-building.jpg",
         "entrances": [],
         "boundaries": [
           {
@@ -223,7 +231,7 @@
         "abreviation": "H",
         "address": "1455 Blvd. De Maisonneuve Ouest, Montreal, Quebec H3G 1M8",
         "coordinates": { "lat": 45.49732887794189, "lng": -73.5790258502087 },
-        "image": "",
+        "image": "assets/images/hall-building.jpg",
         "entrances": [],
         "boundaries": [
           {
@@ -249,7 +257,7 @@
         "abreviation": "JMSB",
         "address": "1450 Guy St, Montreal, Quebec H3H 0A1",
         "coordinates": { "lat": 45.49549521890683, "lng": -73.57917148051556 },
-        "image": "https://lh5.googleusercontent.com/p/AF1QipPTVnfU7Qp7P8q3Jx3MMEmU37vy9tWHQDVUc1xa=w408-h544-k-no",
+        "image": "assets/images/jmsb-building.jpg",
         "entrances": [],
         "boundaries": [
           {
@@ -296,13 +304,20 @@
     "name": "Loyola",
     "abreviation": "LOY",
     "coordinates": { "lat": 45.45812810976341, "lng": -73.6393513063634 },
+    "shuttleBus": {
+      "terminal": {
+        "lat": 45.45789692831165,
+        "lng": -73.63891431897557
+      },
+      "schedule": []
+    },
     "buildings": [
       {
         "name": "Central Building",
         "abreviation": "CC",
         "address": "7141 Sherbrooke St W, Montreal, Quebec H4B 1R6",
         "coordinates": { "lat": 45.45849007178699, "lng": -73.64064018870205 },
-        "image": "",
+        "image": "assets/images/cc-building.jpg",
         "entrances": [],
         "boundaries": [
           {
@@ -384,7 +399,7 @@
         "abreviation": "SP",
         "address": "3475 Rue West Broadway, Montréal, QC H4B 2A7",
         "coordinates": { "lat": 45.45784653344979, "lng": -73.64157117911424 },
-        "image": "",
+        "image": "assets/images/sp-building.jpg",
         "entrances": [],
         "boundaries": [
           {
@@ -454,6 +469,108 @@
           {
             "lat": 45.45767453764288,
             "lng": -73.6419273037453
+          }
+        ]
+      },
+      {
+        "name": "Vanier Library",
+        "abreviation": "VL",
+        "address": "7141 Sherbrooke St. W. Montreal, Quebec, Canada H4B 1R6",
+        "coordinates": { "lat": 45.45905565, "lng": -73.63840962048661 },
+        "image": "assets/images/vl-building.jpg",
+        "entrances": [],
+        "boundaries": [
+          {
+
+            "lat": 45.45931212657071,
+            "lng": -73.63866458231996
+          },
+          {
+            "lat": 45.45912971946173,
+            "lng": -73.63819312060384
+          },
+          {
+            "lat": 45.459214395113506,
+            "lng": -73.63812745217822
+          },
+          {
+            "lat": 45.459099585699136,
+            "lng": -73.63785011918803
+          },
+          {
+            "lat": 45.45890169779716,
+            "lng": -73.63800122898932
+          },
+          {
+            "lat": 45.45891260838451,
+            "lng": -73.6380249684685
+          },
+          {
+            "lat": 45.45888344735091,
+            "lng": -73.63804977890064
+          },
+          {
+            "lat": 45.45889943888733,
+            "lng": -73.6380993997649
+          },
+          {
+            "lat": 45.45886980750742,
+            "lng": -73.63812756295813
+          },
+          {
+            "lat": 45.45888156599337,
+            "lng": -73.6381738310613
+          },
+          {
+            "lat": 45.4588524049437,
+            "lng": -73.63820199425453
+          },
+          {
+            "lat": 45.458866044791385,
+            "lng": -73.63823686296996
+          },
+          {
+            "lat": 45.458792069631016,
+            "lng":  -73.63829868501783
+          },
+          {
+            "lat": 45.45901064810901,
+            "lng": -73.63889166238613
+          }
+        ]
+      },
+      {
+        "name": "Vanier Extension",
+        "abreviation": "VE",
+        "address": "7141 Sherbrooke St. W. Montreal, Quebec, Canada H4B 1R6",
+        "coordinates": { "lat": 45.45905565, "lng": -73.63840962048661 },
+        "image": "assets/images/ve-building.jpg",
+        "entrances": [],
+        "boundaries": [
+          {
+
+            "lat": 45.45900124134198,
+            "lng": -73.63890105011723
+          },
+          {
+            "lat": 45.458777959425205,
+            "lng": -73.63830606109225
+          },
+          {
+            "lat": 45.45870309376594,
+            "lng": -73.63836232915817
+          },
+          {
+            "lat": 45.45871814467203,
+            "lng": -73.63839988008247
+          },
+          {
+            "lat": 45.45863121307513,
+            "lng": -73.63847101693833
+          },
+          {
+            "lat": 45.4588503917777,
+            "lng": -73.63903293969851
           }
         ]
       }
