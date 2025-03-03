@@ -14,7 +14,7 @@ interface Location {
 @Injectable({
   providedIn: 'root',
 })
-export class RouteService {
+export class DirectionsService {
   private directionsService!: google.maps.DirectionsService;
   private directionsRenderer!: google.maps.DirectionsRenderer;
   private startPoint$ = new BehaviorSubject<Location | null>(null);
@@ -272,7 +272,7 @@ export class RouteService {
     this.startPoint$.next(null);
     this.updateMapView();
   }
-  
+
   clearDestinationPoint(): void {
     if (this.destinationPoint$.value?.marker) {
       this.destinationPoint$.value.marker.setMap(null);
@@ -280,5 +280,5 @@ export class RouteService {
     this.destinationPoint$.next(null);
     this.updateMapView();
   }
-  
+
 }
