@@ -1,7 +1,7 @@
 import { Component, EventEmitter } from '@angular/core';
 
-var isSearchVisible_Global = false;
-var searchStateChange = new EventEmitter<boolean>();
+let isSearchVisible_Global = false;
+let searchStateChange = new EventEmitter<boolean>();
 
 @Component({
   selector: 'app-home',
