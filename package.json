@@ -25,7 +25,7 @@
     "@capacitor/core": "^7.0.1",
     "@capacitor/geolocation": "^7.0.0",
     "@ionic/angular": "^8.0.0",
-    "@mappedin/mappedin-js": "^5.49.0",
+    "@mappedin/mappedin-js": "^6.0.1-beta.31",
     "@ngrx/effects": "^19.0.0",
     "@ngrx/entity": "^19.0.0",
     "@ngrx/store": "^19.0.0",

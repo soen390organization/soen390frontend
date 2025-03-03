@@ -33,8 +33,7 @@
             ],
             "styles": [
               "src/global.scss", 
-              "src/theme/variables.scss",
-              "node_modules/@mappedin/mappedin-js/lib/mappedin.css"
+              "src/theme/variables.scss"
             ],
             "scripts": []
           },

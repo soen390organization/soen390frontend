@@ -1,18 +1,10 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import { getVenue, showVenue } from '@mappedin/mappedin-js';
+import { getMapData, show3dMap } from '@mappedin/mappedin-js';
 
 const options = {
-  venue: '67b39ca55b54d7000b151bdb',
-  clientId: 'mik_eGVRJrNs6bz7fm8en549e0799',
-  clientSecret: 'mis_BOEW2MPSJxdmI3neWVtzJoCliyic7MhuEBGTCmx2fk88c6a1071',
-
-/*   mapId: '67b39ca55b54d7000b151bdb', // John Molson Building MB
+  mapId: '67b39ca55b54d7000b151bdb', // John Molson Building MB
   key: 'mik_eGVRJrNs6bz7fm8en549e0799',
-  secret:  'mis_BOEW2MPSJxdmI3neWVtzJoCliyic7MhuEBGTCmx2fk88c6a1071', */
-
-  /* venue: 'mappedin-demo-mall',
-  clientId: '5eab30aa91b055001a68e996',
-  clientSecret: 'RJyRXKcryCMy4erZqqCbuB1NbR66QTGNXVE0x3Pg6oCIlUR1', */
+  secret: 'mis_BOEW2MPSJxdmI3neWVtzJoCliyic7MhuEBGTCmx2fk88c6a1071',
 };
 
 @Component({
@@ -22,18 +14,38 @@ const options = {
   standalone: false
 })
 export class AppComponent implements OnInit {
-  @ViewChild('app', { static: false }) mapEl!: ElementRef<HTMLElement>;
+  // Flag to toggle between the map and the rest of your app
+  showMap = true;
+
+  @ViewChild('mapContainer', { static: false }) mapContainer!: ElementRef<HTMLElement>;
 
   async ngOnInit(): Promise<void> {
+    if (this.showMap) {
+      await this.initMap();
+    }
+  }
+
+  async initMap(): Promise<void> {
     try {
-      const venue = await getVenue(options);
-      if (this.mapEl && this.mapEl.nativeElement) {
-        await showVenue(this.mapEl.nativeElement, venue);
+      const mapData = await getMapData(options);
+      if (this.mapContainer && this.mapContainer.nativeElement) {
+        await show3dMap(this.mapContainer.nativeElement, mapData);
       } else {
-        console.error('Map element not found.');
+        console.error('Map container element not found.');
       }
     } catch (error) {
       console.error('Error initializing the map:', error);
+    }
+  }
+
+  toggleView(): void {
+    // Toggle the view flag
+    this.showMap = !this.showMap;
+    // If switching to the map view, wait for the view to update and then initialize the map
+    if (this.showMap) {
+      setTimeout(() => {
+        this.initMap();
+      }, 0);
     }
   }
 }
