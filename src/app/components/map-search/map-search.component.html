@@ -1,9 +1,9 @@
-<div class=" absolute top-[15px] left-1/2 transform -translate-x-1/2 z-[999]"
+<div class="absolute top-[24px] left-1/2 transform -translate-x-1/2 z-[999] flex space-x-4"
 [ngStyle]="{'width': isSearchVisible ? '95%' : 'auto' }">
 <div
   class="rounded-3xl w-full flex text-black bg-white shadow-lg p-2 pb-3 relative"
   [ngStyle]="{ 'height': isSearchVisible ? 'auto' : '48px' }"
->
+    >
   <div
     (click)="toggleSearch()"
     [ngStyle]="{ 'margin-top': isSearchVisible ? '10px' : '0' }"
@@ -29,35 +29,7 @@
         type="text"
         placeholder="Choose starting point..."
         debounce="1000"
-        class="w-full bg-white px-4 py-3 rounded-full border border-gray-300 focus:outline-none "
-       />
-       <div 
-       (click)="onSetUsersLocationAsStart()"
-       class="absolute right-1.5 top-1/2 transform -translate-y-1/2 cursor-pointer bg-[#912338] p-2 rounded-full flex items-center justify-center"
-      >
-       <span class="material-symbols-outlined text-white">
-         my_location
-       </span>
-     </div>
-      </div>
-      
-        <div *ngIf="isSearchingFromStart" class="absolute w-full mt-1 z-10">
-          <ion-list *ngIf="places?.length > 0" class="rounded-b-xl">
-            <ion-item *ngFor="let place of places" (click)="directionsService.setStartPoint(place); clearList()">
-              <ion-icon name="location-outline" slot="start"></ion-icon>
-              <ion-label>
-              {{ place?.title }}
-              <p>
-                <ion-text>
-                  {{ place?.address }}
-                </ion-text>
-              </p>
-            </ion-label>
-          </ion-item>
-          </ion-list>
-        </div>      
-  
-        class="w-full bg-white px-4 py-3 pr-10 rounded-full border border-gray-300 focus:outline-none"
+        class="w-full min-w-[250px] bg-white px-4 py-3 pr-10 rounded-full border border-gray-300 focus:outline-none"
       />
       <div class="absolute inset-y-0 right-2 flex items-center">
         <ng-container
@@ -108,16 +80,11 @@
     <div class="relative">
       <input
         [(ngModel)]="destinationLocationInput"
-        (input) = "onSearchChange($event,'destination')"
-        (keyup.enter)="directionsService.setDestinationPoint(places[0]); clearList()" 
-        type="text" 
-        placeholder="Choose destination point..." 
-        class="mt-2 w-full bg-white px-4 py-3 rounded-full border border-gray-300 focus:outline-none "
         (input)="onSearchChange($event, 'destination')"
         (keyup.enter)="directionsService.setDestinationPoint(places[0]); clearList()"
         type="text"
         placeholder="Choose destination point..."
-        class="w-full bg-white px-4 py-3 pr-10 rounded-full border border-gray-300 focus:outline-none"
+        class="w-full min-w-[250px] bg-white px-4 py-3 pr-10 rounded-full border border-gray-300 focus:outline-none"
       />
       <div class="absolute inset-y-0 right-2 flex items-center">
         <ng-container
@@ -158,4 +125,5 @@
       </div>
     </div>
   </div>
+</div>
 </div>
