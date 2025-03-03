@@ -300,4 +300,39 @@ describe('ngOnInit and calculateShortestRoute', () => {
   }));
 });
 
+describe('onStartClick()', () => {
+  it('should toggle components, show directions, and toggle search', () => {
+    // Access private members using type assertions
+    const visibilityService = (component as any).visibilityService;
+    const directionsService = (component as any).directionsService;
+    
+    spyOn(visibilityService, 'toggleDirectionsComponent');
+    spyOn(visibilityService, 'togglePOIsComponent');
+
+    // Patch the directionsService with a dummy showDirections if it's not defined.
+    if (!directionsService.showDirections) {
+      directionsService.showDirections = () => {};
+    }
+    spyOn(directionsService, 'showDirections');
+
+    spyOn(component, 'toggleSearch').and.callThrough();
+
+    // Set initial flag value
+    component.isSearchVisible = false;
+
+    // Call the method under test
+    component.onStartClick();
+
+    // Verify that the methods were called
+    expect(visibilityService.toggleDirectionsComponent).toHaveBeenCalled();
+    expect(visibilityService.togglePOIsComponent).toHaveBeenCalled();
+    expect(directionsService.showDirections).toHaveBeenCalled();
+    expect(component.toggleSearch).toHaveBeenCalled();
+
+    // Verify that toggleSearch toggled the flag as expected
+    expect(component.isSearchVisible).toBeTrue();
+  });
+});
+
+
 });
