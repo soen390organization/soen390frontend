@@ -5,7 +5,7 @@ import { Step } from 'src/app/interfaces/step.interface';
 import { ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CurrentLocationService } from 'src/app/services/geolocation/current-location.service';
-import { RouteService } from 'src/app/services/directions/directions.service';
+import { DirectionsService } from 'src/app/services/directions/directions.service';
 
 const mockDirectionsService = {
   generateRoute: jasmine
@@ -49,7 +49,7 @@ describe('DirectionsComponent', () => {
     await TestBed.configureTestingModule({
       imports: [DirectionsComponent, CommonModule],
       providers: [
-        { provide: RouteService, useValue: mockDirectionsService },
+        { provide: DirectionsService, useValue: mockDirectionsService },
         {
           provide: CurrentLocationService,
           useValue: mockCurrentLocationService,

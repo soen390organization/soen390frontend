@@ -64,7 +64,7 @@ describe('ShuttleService', () => {
     service = TestBed.inject(ShuttleService);
     routeServiceSpy = TestBed.inject(
       DirectionsService
-    ) as jasmine.SpyObj<RouteService>;
+    ) as jasmine.SpyObj<DirectionsService>;
 
     (service as any).placesService = new MockPlacesService();
 

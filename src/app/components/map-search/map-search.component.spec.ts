@@ -54,7 +54,7 @@ describe('MapSearchComponent', () => {
         MapSearchComponent,
       ],
       providers: [
-        { provide: RouteService, useValue: directionsServiceSpy },
+        { provide: DirectionsService, useValue: directionsServiceSpy },
         { provide: PlacesService, useValue: placesServiceSpy },
         {
           provide: CurrentLocationService,
