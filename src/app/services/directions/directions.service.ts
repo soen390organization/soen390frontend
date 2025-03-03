@@ -120,7 +120,7 @@ export class DirectionsService {
     const destinationPoint = this.destinationPoint$.value;
 
     if (toUpdate=="both") {
-      this.calculateRoute(startPoint.address, destinationPoint.address, google.maps.TravelMode.WALKING);
+      this.calculateRoute(startPoint.address, destinationPoint.address, google.maps.TravelMode.WALKING, true);
       const bounds = new google.maps.LatLngBounds();
       bounds.extend(startPoint.marker.getPosition()!);
       bounds.extend(destinationPoint.marker.getPosition()!);
@@ -179,6 +179,7 @@ export class DirectionsService {
     startAddress: string|google.maps.LatLng,
     destinationAddress: string|google.maps.LatLng,
     travelMode: google.maps.TravelMode = google.maps.TravelMode.WALKING,
+    render: boolean = true
   ): Promise<{
     steps: Step[];
     eta: string | null;
@@ -196,8 +197,10 @@ export class DirectionsService {
 
       this.directionsService.route(request, (response, status) => {
         if (status === google.maps.DirectionsStatus.OK && response) {
-          this.directionsRenderer.setDirections(response);
+          if (render) {
+            this.directionsRenderer.setDirections(response);
 
+          }
           const steps: Step[] = [];
           let eta: string | null = null;
 
@@ -272,7 +275,7 @@ export class DirectionsService {
 
     // Calculate routes for each mode in parallel.
     const routePromises = modes.map(mode => {
-      return this.calculateRoute(start, destination, mode).then(({ steps, eta }) => {
+      return this.calculateRoute(start, destination, mode, false).then(({ steps, eta }) => {
         // Summation of all step distances (in meters) and durations (in seconds).
         let totalDistance = 0;
         let totalDuration = 0;
@@ -305,7 +308,7 @@ export class DirectionsService {
     this.allRoutesData = results;
     this.shortestRoute = fastest;
 
-    await this.calculateRoute(start, destination, fastest.mode);
+    await this.calculateRoute(start, destination, fastest.mode, false);
   }
 
   clearStartPoint(): void {
