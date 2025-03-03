@@ -138,8 +138,8 @@
       </div>
       <button
         class="bg-[#912338] text-white py-3 px-8 rounded-full text-lg font-semibold"
-        [ngClass]="{ 'opacity-50 cursor-not-allowed': !startLocationInput || !destinationLocationInput }"
-        [disabled]="!startLocationInput || !destinationLocationInput"
+        [ngClass]="{ 'opacity-50 cursor-not-allowed': (!startLocationInput || !destinationLocationInput)||!(enableStart$ | async) }"
+        [disabled]="(!startLocationInput || !destinationLocationInput)||!(enableStart$ | async)"
         (click)="onStartClick()"
       >
         Start

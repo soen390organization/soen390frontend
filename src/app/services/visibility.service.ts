@@ -8,6 +8,7 @@ import { BehaviorSubject } from 'rxjs';
 export class VisibilityService {
   private showDirections$ = new BehaviorSubject<boolean>(false);
   private showPOIs$ = new BehaviorSubject<boolean>(true);
+  private enableStart$ = new BehaviorSubject<boolean>(true)
 
   constructor() {}
 
@@ -21,6 +22,11 @@ export class VisibilityService {
     this.showPOIs$.next(!this.showPOIs$.getValue());  // Toggle Component 2
   }
 
+  toggleStartButton(): void {
+    this.enableStart$.next(!this.enableStart$.getValue());
+    console.log("Switched enable start")
+  }
+
   // Observables for other components to subscribe
   get showDirections() {
     return this.showDirections$.asObservable();
@@ -28,5 +34,9 @@ export class VisibilityService {
 
   get showPOIs() {
     return this.showPOIs$.asObservable();
+  }
+
+  get enableStart(){
+    return this.enableStart$.asObservable();
   }
 }

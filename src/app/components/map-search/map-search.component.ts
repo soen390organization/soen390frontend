@@ -8,7 +8,7 @@ import { animate, state, style, transition, trigger } from '@angular/animations'
 import { DirectionsService } from 'src/app/services/directions/directions.service';
 import { PlacesService } from 'src/app/services/places.service';
 import { VisibilityService } from 'src/app/services/visibility.service';
-import { combineLatest } from 'rxjs';
+import { combineLatest, Observable } from 'rxjs';
 import { filter } from 'rxjs/operators';
 
 @Component({
@@ -47,10 +47,12 @@ export class MapSearchComponent implements OnInit {
   places: any[]=[]; // Array to store the search suggestions
   isSearchingFromStart: boolean = false; // Flag to determine if the search is for the start or destination location
   currentRouteData: { eta: string | null; distance: number } | null = null;
+  enableStart$!: Observable<boolean>;
 
   constructor(public directionsService: DirectionsService, private placesService: PlacesService, private currentLocationService: CurrentLocationService, private visibilityService: VisibilityService) {}
 
   ngOnInit(): void {
+    this.enableStart$ = this.visibilityService.enableStart;
     this.directionsService.getStartPoint().subscribe(start => {
       if (start) {
         this.startLocationInput = start.title;
@@ -118,8 +120,10 @@ export class MapSearchComponent implements OnInit {
   onStartClick(): void {
     this.visibilityService.toggleDirectionsComponent();
     this.visibilityService.togglePOIsComponent();
-    this.directionsService.showDirections()
+    this.directionsService.showDirections();
+    this.visibilityService.toggleStartButton();
     this.toggleSearch();
+
   }
 
   clearStartInput() {

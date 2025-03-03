@@ -219,6 +219,7 @@ private updateShowAllSteps(): void {
   onEndClick(): void {
     this.visibilityService.toggleDirectionsComponent();
     this.visibilityService.togglePOIsComponent();
+    this.visibilityService.toggleStartButton();
   }
 
 
