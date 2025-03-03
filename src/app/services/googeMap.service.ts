@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { PlacesService } from './places.service';
-import { RouteService } from './directions/directions.service';
+import { DirectionsService } from './directions/directions.service';
 
 @Injectable({
   providedIn: 'root',
@@ -9,7 +9,7 @@ export class GoogleMapService {
   private map!: google.maps.Map;
 
   constructor(
-    private readonly routeService: RouteService,
+    private readonly routeService: DirectionsService,
     private readonly placesService: PlacesService
   ) {}
 

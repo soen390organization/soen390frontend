@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
 import { LocationCard } from 'src/app/interfaces/location-card.interface';
-import { RouteService } from 'src/app/services/directions/directions.service';
+import { DirectionsService } from 'src/app/services/directions/directions.service';
 
 @Component({
   selector: 'app-location-cards',
@@ -13,7 +13,7 @@ export class LocationCardsComponent {
   @Input() locations: LocationCard[] = [];
   @Input() loading: boolean = false;
 
-  constructor(private readonly directionsService: RouteService) {}
+  constructor(private readonly directionsService: DirectionsService) {}
 
   onImageError(event: Event) {
     const imgElement = event.target as HTMLImageElement;

@@ -1,5 +1,5 @@
 import data from '../../../assets/ConcordiaData.json';
-import { RouteService } from '../directions/directions.service';
+import { DirectionsService } from '../directions/directions.service';
 import { Injectable, Injector } from '@angular/core';
 import shuttleData from '../../../assets/ShuttleData.json';
 
@@ -10,14 +10,14 @@ export class ShuttleService {
   private placesService!: google.maps.places.PlacesService;
   private directionsService!: google.maps.DirectionsService;
   private renderers!: google.maps.DirectionsRenderer[];
-  private routeService!: RouteService;
+  private routeService!: DirectionsService;
   private initialized = false;
 
   constructor(private readonly injector: Injector) {}
 
   public initialize(map: google.maps.Map): void {
     if (!this.initialized) {
-      this.routeService = this.injector.get(RouteService);
+      this.routeService = this.injector.get(DirectionsService);
       this.initialized = true;
     }
     if (!this.renderers) {

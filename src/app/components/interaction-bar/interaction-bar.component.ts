@@ -2,7 +2,7 @@ import { AfterViewInit, Component, ElementRef, ViewChild } from '@angular/core';
 import { LocationCardsComponent } from '../location-cards/location-cards.component';
 import { Store } from '@ngrx/store';
 import { PlacesService } from 'src/app/services/places.service';
-import { RouteService } from 'src/app/services/directions/directions.service';
+import { DirectionsService } from 'src/app/services/directions/directions.service';
 import { selectSelectedCampus } from 'src/app/store/app';
 import { LocationCard } from 'src/app/interfaces/location-card.interface';
 import { filter, forkJoin, switchMap } from 'rxjs';
@@ -30,7 +30,7 @@ export class InteractionBarComponent implements AfterViewInit {
   constructor(
     private readonly store: Store,
     private readonly placesService: PlacesService,
-    private readonly directionsService: RouteService
+    private readonly directionsService: DirectionsService
   ) {}
 
   ngOnInit() {

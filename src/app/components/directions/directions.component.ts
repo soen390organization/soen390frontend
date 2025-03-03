@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 import { Step } from 'src/app/interfaces/step.interface';
 import { CurrentLocationService } from 'src/app/services/geolocation/current-location.service';
-import { RouteService } from 'src/app/services/directions/directions.service';
+import { DirectionsService } from 'src/app/services/directions/directions.service';
 import { IconMapping } from 'src/app/interfaces/Icon-mapping';
 import rawIconMapping from 'src/assets/icon-mapping.json';
 import { firstValueFrom, take } from 'rxjs';
@@ -47,7 +47,7 @@ export class DirectionsComponent implements OnInit, OnDestroy {
   ];
 
   constructor(
-    private readonly directionsService: RouteService,
+    private readonly directionsService: DirectionsService,
     private currentLocationService: CurrentLocationService
   ) {}
 

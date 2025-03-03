@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { ShuttleService } from './shuttle.service';
-import { RouteService } from '../directions/directions.service';
+import { DirectionsService } from '../directions/directions.service';
 import { Injector } from '@angular/core';
 
 describe('ShuttleService', () => {
@@ -32,7 +32,7 @@ describe('ShuttleService', () => {
   }
 
   let service: ShuttleService;
-  let routeServiceSpy: jasmine.SpyObj<RouteService>;
+  let routeServiceSpy: jasmine.SpyObj<DirectionsService>;
 
   beforeEach(() => {
     (window as any).google = {
@@ -46,7 +46,7 @@ describe('ShuttleService', () => {
       },
     } as any;
 
-    const routeSpy = jasmine.createSpyObj('RouteService', [
+    const routeSpy = jasmine.createSpyObj('DirectionsService', [
       'calculateRoute',
       'getDirectionsRenderer',
     ]);
@@ -56,14 +56,14 @@ describe('ShuttleService', () => {
     TestBed.configureTestingModule({
       providers: [
         ShuttleService,
-        { provide: RouteService, useValue: routeSpy },
+        { provide: DirectionsService, useValue: routeSpy },
         Injector,
       ],
     });
 
     service = TestBed.inject(ShuttleService);
     routeServiceSpy = TestBed.inject(
-      RouteService
+      DirectionsService
     ) as jasmine.SpyObj<RouteService>;
 
     (service as any).placesService = new MockPlacesService();

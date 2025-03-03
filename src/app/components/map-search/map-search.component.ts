@@ -11,7 +11,7 @@ import {
   transition,
   trigger,
 } from '@angular/animations';
-import { RouteService } from 'src/app/services/directions/directions.service';
+import { DirectionsService } from 'src/app/services/directions/directions.service';
 import { PlacesService } from 'src/app/services/places.service';
 
 @Component({
@@ -51,7 +51,7 @@ export class MapSearchComponent implements OnInit {
   isSearchingFromStart: boolean = false; // Flag to determine if the search is for the start or destination location
 
   constructor(
-    public directionsService: RouteService,
+    public directionsService: DirectionsService,
     private readonly placesService: PlacesService,
     private readonly currentLocationService: CurrentLocationService
   ) {}

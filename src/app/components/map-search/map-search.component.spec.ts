@@ -9,7 +9,7 @@ import { MapSearchComponent } from './map-search.component';
 import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouteService } from 'src/app/services/directions/directions.service';
+import { DirectionsService } from 'src/app/services/directions/directions.service';
 import { PlacesService } from 'src/app/services/places.service';
 import { CurrentLocationService } from 'src/app/services/geolocation/current-location.service';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -19,7 +19,7 @@ describe('MapSearchComponent', () => {
   let fixture: ComponentFixture<MapSearchComponent>;
 
   // Spies for the injected services
-  let directionsServiceSpy: jasmine.SpyObj<RouteService>;
+  let directionsServiceSpy: jasmine.SpyObj<DirectionsService>;
   let placesServiceSpy: jasmine.SpyObj<PlacesService>;
   let currentLocationServiceSpy: jasmine.SpyObj<CurrentLocationService>;
 
@@ -166,9 +166,9 @@ describe('MapSearchComponent', () => {
       component.startLocationInput = 'Some text';
       component.places = [{ title: 'Place1' }];
       spyOn(component, 'clearList');
-      
+
       component.clearStartInput();
-      
+
       expect(component.startLocationInput).toBe('');
       expect(component.clearList).toHaveBeenCalled();
       expect(directionsServiceSpy.clearStartPoint).toHaveBeenCalled();
@@ -178,9 +178,9 @@ describe('MapSearchComponent', () => {
       component.destinationLocationInput = 'Some text';
       component.places = [{ title: 'Place2' }];
       spyOn(component, 'clearList');
-      
+
       component.clearDestinationInput();
-      
+
       expect(component.destinationLocationInput).toBe('');
       expect(component.clearList).toHaveBeenCalled();
       expect(directionsServiceSpy.clearDestinationPoint).toHaveBeenCalled();

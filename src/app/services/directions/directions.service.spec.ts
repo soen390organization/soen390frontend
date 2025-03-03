@@ -1,11 +1,11 @@
-import { RouteService } from './directions.service';
+import { DirectionsService } from './directions.service';
 import { TestBed } from '@angular/core/testing';
 import Joi from 'joi';
 import { BehaviorSubject } from 'rxjs';
 import { ShuttleService } from '../shuttle/shuttle.service';
 
 describe('Directions Service', () => {
-  let service: RouteService;
+  let service: DirectionsService;
   let shuttleService: ShuttleService;
   let origin = 'Hall Building Concordia';
   let destination = 'John Molson School of Business';
@@ -90,9 +90,9 @@ describe('Directions Service', () => {
     } as any;
 
     TestBed.configureTestingModule({
-      providers: [RouteService, ShuttleService],
+      providers: [DirectionsService, ShuttleService],
     });
-    service = TestBed.inject(RouteService);
+    service = TestBed.inject(DirectionsService);
     shuttleService = TestBed.inject(ShuttleService);
 
     // Initialize service with a dummy map
