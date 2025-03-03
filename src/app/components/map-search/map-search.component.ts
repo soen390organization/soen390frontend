@@ -51,6 +51,11 @@ export class MapSearchComponent implements OnInit {
   constructor(public directionsService: DirectionsService, private placesService: PlacesService, private currentLocationService: CurrentLocationService, private visibilityService: VisibilityService) {}
 
   ngOnInit(): void {
+    this.directionsService.getStartPoint().subscribe(start => {
+      if (start) {
+        this.startLocationInput = start.title;
+      }
+    });
     this.directionsService.getDestinationPoint().subscribe(destination => {
       if (destination) {
         this.destinationLocationInput = destination.title;
@@ -115,5 +120,17 @@ export class MapSearchComponent implements OnInit {
     this.visibilityService.togglePOIsComponent();
     this.directionsService.showDirections()
     this.toggleSearch();
+  }
+
+  clearStartInput() {
+    this.startLocationInput = '';
+    this.clearList();
+    this.directionsService.clearStartPoint();
+  }
+
+  clearDestinationInput() {
+    this.destinationLocationInput = '';
+    this.clearList();
+    this.directionsService.clearDestinationPoint();
   }
 }

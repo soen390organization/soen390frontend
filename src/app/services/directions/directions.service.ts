@@ -126,6 +126,7 @@ export class DirectionsService {
       bounds.extend(destinationPoint.marker.getPosition()!);
       map.fitBounds(bounds);
     } else {
+      this.directionsRenderer.set('directions', null);
       const point = toUpdate == "start" ? startPoint : destinationPoint;
       if (point) {
         map.setCenter(point.marker.getPosition()!);
@@ -268,7 +269,7 @@ export class DirectionsService {
       google.maps.TravelMode.BICYCLING,
       google.maps.TravelMode.TRANSIT
     ];
-  
+
     // Calculate routes for each mode in parallel.
     const routePromises = modes.map(mode => {
       return this.calculateRoute(start, destination, mode).then(({ steps, eta }) => {
@@ -279,7 +280,7 @@ export class DirectionsService {
           totalDistance = steps.reduce((acc, step) => acc + (step.distance?.value ?? 0), 0);
           totalDuration = steps.reduce((acc, step) => acc + (step.duration?.value ?? 0), 0);
         }
-  
+
         return {
           mode,
           eta,
@@ -288,10 +289,10 @@ export class DirectionsService {
         };
       });
     });
-  
+
     // Wait for all modes to finish calculating.
     const results = await Promise.all(routePromises);
-  
+
     // Pick the route with the smallest duration (fastest).
     let fastest = results[0];
     for (let i = 1; i < results.length; i++) {
@@ -299,11 +300,28 @@ export class DirectionsService {
         fastest = results[i];
       }
     }
-  
+
     // Store them for later reference, if you want to switch modes.
     this.allRoutesData = results;
     this.shortestRoute = fastest;
-    
+
     await this.calculateRoute(start, destination, fastest.mode);
   }
+
+  clearStartPoint(): void {
+    if (this.startPoint$.value?.marker) {
+      this.startPoint$.value.marker.setMap(null);
+    }
+    this.startPoint$.next(null);
+    this.updateMapView("start");
+  }
+
+  clearDestinationPoint(): void {
+    if (this.destinationPoint$.value?.marker) {
+      this.destinationPoint$.value.marker.setMap(null);
+    }
+    this.destinationPoint$.next(null);
+    this.updateMapView("destination");
+  }
+
 }

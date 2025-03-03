@@ -1,9 +1,15 @@
 <div
-  class="rounded-3xl w-full flex text-black bg-white shadow-lg p-2 pb-3"
+  class="rounded-3xl w-full flex text-black bg-white shadow-lg p-2 pb-3 relative"
   [ngStyle]="{ 'height': isSearchVisible ? 'auto' : '48px' }"
 >
-  <div (click)="toggleSearch()" class="h-[32px] w-[32px] pt-1 rounded-full cursor-pointer">
-    <span class="material-symbols-outlined pl-1">
+  <div
+    (click)="toggleSearch()"
+    [ngStyle]="{ 'margin-top': isSearchVisible ? '10px' : '0' }"
+  >
+    <span
+      class="material-symbols-outlined rounded-full p-1 cursor-pointer"
+      [ngStyle]="{'padding-right': isSearchVisible ? '10px' : '4px'}"
+    >
       {{ isSearchVisible ? 'arrow_back' : 'search' }}
     </span>
   </div>
@@ -11,87 +17,134 @@
   <div
     [@slideInOut]="isSearchVisible ? 'in' : 'out'"
     [ngStyle]="{ 'height': isSearchVisible ? 'auto' : '0', 'overflow': isSearchVisible ? 'visible' : 'hidden' }"
+    class="w-full space-y-2"
   >
-    <div class="pl-4">
-      <div class="relative w-full mt-1">
-        <input
+    <div class="relative">
+      <input
         [(ngModel)]="startLocationInput"
         (input)="onSearchChange($event, 'start')"
         (keyup.enter)="directionsService.setStartPoint(places[0]); clearList()"
         type="text"
         placeholder="Choose starting point..."
+        (input)="onSearchChange($event, 'start')"
+        (keyup.enter)="directionsService.setStartPoint(places[0]); clearList()"
+        type="text"
+        placeholder="Choose starting point..."
         debounce="1000"
-        class="w-full bg-white px-4 py-3 rounded-full border border-gray-300 focus:outline-none pr-10"
+        class="w-full bg-white px-4 py-3 pr-10 rounded-full border border-gray-300 focus:outline-none"
       />
-
-      <div *ngIf="isSearchingFromStart" class="absolute w-full mt-1 z-10">
-        <ion-list *ngIf="places?.length > 0" class="rounded-b-xl">
-          <ion-item *ngFor="let place of places" (click)="directionsService.setStartPoint(place); clearList()">
-            <ion-icon name="location-outline" slot="start"></ion-icon>
-            <ion-label>
-              {{ place?.title }}
-              <p>
-                <ion-text>
-                  {{ place?.address }}
-                </ion-text>
-              </p>
-            </ion-label>
-          </ion-item>
-        </ion-list>
-      </div>
-
-        <div
-          (click)="onSetUsersLocationAsStart()"
-          class="absolute right-1.5 top-1/2 transform -translate-y-1/2 cursor-pointer bg-[#912338] p-2 rounded-full flex items-center justify-center"
+      <div class="absolute inset-y-0 right-2 flex items-center">
+        <ng-container
+          *ngIf="startLocationInput && startLocationInput.trim().length > 0; else showLocationBtn"
         >
-          <span class="material-symbols-outlined text-white">
-            my_location
-          </span>
-        </div>
+          <button (click)="clearStartInput()">
+            <span class="material-symbols-outlined text-gray-400 p-2">cancel</span>
+          </button>
+        </ng-container>
+        <ng-template #showLocationBtn>
+          <button (click)="onSetUsersLocationAsStart()">
+            <span class="material-symbols-outlined leading-none bg-[#912338] rounded-full text-white p-2">
+              my_location
+            </span>
+          </button>
+        </ng-template>
       </div>
+      <div
+        *ngIf="isSearchingFromStart && places?.length > 0"
+        class="absolute left-0 w-full top-full mt-2 z-20"
+      >
+        <ul class="rounded-xl border border-gray-300 bg-white">
+          <li
+            *ngFor="let place of places"
+            (click)="directionsService.setStartPoint(place); clearList()"
+            (keydown.enter)="directionsService.setStartPoint(place); clearList()"
+            (keypress.enter)="directionsService.setStartPoint(place); clearList()"
+            (keyup.enter)="directionsService.setStartPoint(place); clearList()"
+            class="flex items-center hover:bg-gray-100 p-3 cursor-pointer"
+          >
+            <span class="material-symbols-outlined mr-3 p-2 border border-gray-300 rounded-full">
+              location_on
+            </span>
+            <div class="flex flex-col min-w-0">
+              <div>{{ place?.title }}</div>
+              <div class="text-sm text-gray-500 truncate">
+                {{ place?.address }}
+              </div>
+            </div>
+            <span class="material-symbols-outlined ml-auto p-2 text-[#912338]">
+              arrow_insert
+            </span>
+          </li>
+        </ul>
+      </div>
+    </div>
 
+    <div class="relative">
       <input
         [(ngModel)]="destinationLocationInput"
-        (input) = "onSearchChange($event,'destination')"
+        (input)="onSearchChange($event, 'destination')"
         (keyup.enter)="directionsService.setDestinationPoint(places[0]); clearList()"
         type="text"
         placeholder="Choose destination point..."
-        class="mt-2 w-full bg-white px-4 py-3 rounded-full border border-gray-300 focus:outline-none pr-10"
+        class="w-full bg-white px-4 py-3 pr-10 rounded-full border border-gray-300 focus:outline-none"
       />
 
-      <!-- ETA and Start Button -->
-      <div class="mt-2 flex items-center justify-between">
-        <div class="text-lg font-bold text-[#912338]">
-          {{ currentRouteData?.eta || '' }} 
-          <span class="text-gray-500 font-bold">
-            {{ currentRouteData?.distance != null ? '('+currentRouteData.distance + ' m' +')': '' }}
-          </span>          
-        </div>
-        <button
-          class="bg-[#912338] text-white py-3 px-8 rounded-full text-lg font-semibold"
-          [ngClass]="{ 'opacity-50 cursor-not-allowed': !startLocationInput || !destinationLocationInput }"
-          [disabled]="!startLocationInput || !destinationLocationInput"
-          (click)="onStartClick()"
+      <div class="absolute inset-y-0 right-2 flex items-center">
+        <ng-container
+          *ngIf="destinationLocationInput && destinationLocationInput.trim().length > 0"
         >
-          Start
-        </button>
+          <button (click)="clearDestinationInput()">
+            <span class="material-symbols-outlined text-gray-400 p-2">cancel</span>
+          </button>
+        </ng-container>
       </div>
-
-      <div *ngIf="!isSearchingFromStart" class="absolute w-full mt-1 z-10">
-        <ion-list *ngIf="places?.length > 0">
-          <ion-item *ngFor="let place of places" (click)="directionsService.setDestinationPoint(place); clearList()">
-            <ion-icon name="location-outline" slot="start"></ion-icon>
-            <ion-label>
-              {{ place?.title }}
-              <p>
-                <ion-text>
-                  {{ place?.address }}
-                </ion-text>
-              </p>
-            </ion-label>
-          </ion-item>
-        </ion-list>
+      <div
+        *ngIf="!isSearchingFromStart && places?.length > 0"
+        class="absolute left-0 w-full top-full mt-2"
+      >
+        <ul class="rounded-xl border border-gray-300 bg-white">
+          <li
+            *ngFor="let place of places"
+            (click)="directionsService.setDestinationPoint(place); clearList()"
+            (keydown.enter)="directionsService.setDestinationPoint(place); clearList()"
+            (keypress.enter)="directionsService.setDestinationPoint(place); clearList()"
+            (keyup.enter)="directionsService.setDestinationPoint(place); clearList()"
+            class="flex items-center hover:bg-gray-100 p-3 cursor-pointer"
+          >
+            <span class="material-symbols-outlined mr-3 p-2 border border-gray-300 rounded-full">
+              location_on
+            </span>
+            <div class="flex flex-col min-w-0">
+              <div>{{ place?.title }}</div>
+              <div class="text-sm text-gray-500 truncate">
+                {{ place?.address }}
+              </div>
+            </div>
+            <span class="material-symbols-outlined ml-auto p-2 text-[#912338]">
+              arrow_insert
+            </span>
+          </li>
+        </ul>
       </div>
     </div>
+
+    <!-- ETA and Start Button -->
+    <div class="mt-2 flex items-center justify-between">
+      <div class="text-lg font-bold text-[#912338]">
+        {{ currentRouteData?.eta || '' }}
+        <span class="text-gray-500 font-bold">
+          {{ currentRouteData?.distance != null ? '('+currentRouteData.distance + ' m' +')': '' }}
+        </span>
+      </div>
+      <button
+        class="bg-[#912338] text-white py-3 px-8 rounded-full text-lg font-semibold"
+        [ngClass]="{ 'opacity-50 cursor-not-allowed': !startLocationInput || !destinationLocationInput }"
+        [disabled]="!startLocationInput || !destinationLocationInput"
+        (click)="onStartClick()"
+      >
+        Start
+      </button>
+    </div>
+
   </div>
 </div>
