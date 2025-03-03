@@ -53,6 +53,8 @@
     "car rental": "directions_car",
     "taxi": "local_taxi",
     "ride share": "hail",
-    "parking": "local_parking"
+    "parking": "local_parking",
+    "no more": "bus_alert",
+    "no departures": "bus_alert"
   }
 }
