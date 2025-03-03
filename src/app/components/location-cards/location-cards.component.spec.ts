@@ -2,41 +2,55 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { LocationCardsComponent } from './location-cards.component';
 import { DirectionsService } from 'src/app/services/directions/directions.service';
 import { LocationCard } from 'src/app/interfaces/location-card.interface';
+import { By } from '@angular/platform-browser';
 
 describe('LocationCardsComponent', () => {
   let component: LocationCardsComponent;
   let fixture: ComponentFixture<LocationCardsComponent>;
-  let mockDirectionsService: jasmine.SpyObj<DirectionsService>;
+  let directionsServiceSpy: jasmine.SpyObj<DirectionsService>;
 
-  beforeEach(() => {
-    mockDirectionsService = jasmine.createSpyObj('DirectionsService', ['setDestinationPoint']);
+  beforeEach(async () => {
+    const spy = jasmine.createSpyObj('DirectionsService', ['setDestinationPoint']);
 
-    TestBed.configureTestingModule({
+    await TestBed.configureTestingModule({
       imports: [LocationCardsComponent],
-      providers: [{ provide: DirectionsService, useValue: mockDirectionsService }],
+      providers: [{ provide: DirectionsService, useValue: spy }]
     }).compileComponents();
 
     fixture = TestBed.createComponent(LocationCardsComponent);
     component = fixture.componentInstance;
+    directionsServiceSpy = TestBed.inject(DirectionsService) as jasmine.SpyObj<DirectionsService>;
   });
 
-  it('should log the location and call setDestinationPoint', () => {
-    const location: LocationCard = {
-      name: 'Engineering and Visual Arts',
-      coordinates: new google.maps.LatLng(45.49541909930391,-73.57769260301784 ),
-      address: "1515 Saint-Catherine St W #1428, Montreal, Quebec H3G 1S6",
-      image: "https://lh3.googleusercontent.com/p/AF1QipPdcC9aj620AW078WET7MWOA9X8J6ZrRBX9gDdM=s1360-w1360-h1020"
+  it('should create', () => {
+    expect(component).toBeTruthy();
+  });
+
+  it('should set a default image when onImageError is triggered', () => {
+    const imgElement = document.createElement('img');
+    imgElement.src = 'invalid-image-url.jpg'; // Simulating a broken image
+
+    // Call the method with the event containing the faulty image
+    component.onImageError({ target: imgElement } as unknown as Event);
+
+    // Expect the image to be replaced with the placeholder URL
+    expect(imgElement.src).toBe('https://cdn.discordapp.com/attachments/1152015876300754956/1346007857719546017/image.png?ex=67c69f00&is=67c54d80&hm=536b59895f6facbe007133b8c1ab73d1b28060fe55d196a4e4077df61263fa66');
+  });
+
+  it('should set the destination when setDestination is called', () => {
+    const mockLocation: LocationCard = {
+      name: 'Test Location',
+      address: '123 Test St',
+      image: 'test-image.jpg',
+      coordinates: new google.maps.LatLng(12.345, 67.890)
     };
 
-    spyOn(console, 'log');
+    component.setDestination(mockLocation);
 
-    component.setDestination(location);
-
-    expect(console.log).toHaveBeenCalledWith(location);
-    expect(mockDirectionsService.setDestinationPoint).toHaveBeenCalledWith({
-      title: 'Engineering and Visual Arts',
-      coordinates: jasmine.any(google.maps.LatLng),
-      address: "1515 Saint-Catherine St W #1428, Montreal, Quebec H3G 1S6"
+    expect(directionsServiceSpy.setDestinationPoint).toHaveBeenCalledWith({
+      title: mockLocation.name,
+      coordinates: mockLocation.coordinates,
+      address: mockLocation.address
     });
   });
 });
