@@ -231,5 +231,31 @@ describe('DirectionsComponent', () => {
     component.ngAfterViewInit();
     expect((component as any).observeComponentPosition).toHaveBeenCalled();
   });
+  
+  it('should not update showAllSteps if directionsContainer is not defined', () => {
+    // Remove the directionsContainer so that updateShowAllSteps returns immediately.
+    component.directionsContainer = undefined as any;
+    // Set a known value for showAllSteps.
+    component.showAllSteps = false;
+    
+    // Call the private method via type assertion.
+    (component as any).updateShowAllSteps();
+    
+    // Expect showAllSteps to remain unchanged.
+    expect(component.showAllSteps).toBeFalse();
+  });
+  
+  it('should toggle directions and POIs when onEndClick is called', () => {
+    // Access private visibilityService using a type assertion.
+    const visibilityService = (component as any).visibilityService;
+    spyOn(visibilityService, 'toggleDirectionsComponent');
+    spyOn(visibilityService, 'togglePOIsComponent');
+  
+    component.onEndClick();
+  
+    expect(visibilityService.toggleDirectionsComponent).toHaveBeenCalled();
+    expect(visibilityService.togglePOIsComponent).toHaveBeenCalled();
+  });
+  
 
 });
