@@ -18,7 +18,7 @@
         (click)="setDestination(location)"
         class="w-[224px] h-[186px] bg-white overflow-hidden shrink-0 hover:cursor-pointer "
       >
-        <img [src]="location.image" class="bg-gray-200 w-[224px] h-[130px] object-cover rounded-2xl" (error)="onImageError($event)" />
+        <img [src]="location.image" class="bg-gray-200 w-[224px] h-[130px] object-cover rounded-2xl" (error)="onImageError($event)" alt="location-image"/>
         <div class="mt-2">
           <h3 class="text-left text-lg font-bold text-gray-800"> {{ location.name | slice:0:22 }}{{ location.name.length
             > 22 ? '...' : '' }}</h3>
