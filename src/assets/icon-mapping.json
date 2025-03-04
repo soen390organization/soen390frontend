@@ -56,7 +56,9 @@
     "taxi": "local_taxi",
     "ride share": "hail",
     "parking": "local_parking",
-    "light rail": "light_rail"
+    "light rail": "light_rail",
+    "no more": "bus_alert",
+    "no departures": "bus_alert"
   }
 }
 

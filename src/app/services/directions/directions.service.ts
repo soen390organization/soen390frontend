@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, combineLatest, map, Observable } from 'rxjs';
 import { Step } from '../../interfaces/step.interface';
+import { ShuttleService } from '../shuttle/shuttle.service';
 import { Location } from 'src/app/interfaces/location.interface';
 
 @Injectable({
@@ -28,7 +29,7 @@ export class DirectionsService {
   } | null = null;
 
 
-  constructor() {}
+  constructor(private readonly shuttleService: ShuttleService) {}
 
   public initialize(map: google.maps.Map): void {
     if (!this.directionsService)
@@ -37,6 +38,8 @@ export class DirectionsService {
       this.directionsRenderer = new google.maps.DirectionsRenderer();
       this.directionsRenderer.setMap(map);
     }
+    this.shuttleService.initialize(map);
+    this.shuttleService.initialize(map);
   }
 
   getDirectionsService(): google.maps.DirectionsService {
@@ -166,30 +169,29 @@ export class DirectionsService {
     }[];
     eta: string
    */
-  calculateRoute(
-    startAddress: string|google.maps.LatLng,
-    destinationAddress: string|google.maps.LatLng,
+  async calculateRoute(
+    startAddress: string | google.maps.LatLng,
+    destinationAddress: string | google.maps.LatLng,
     travelMode: google.maps.TravelMode = google.maps.TravelMode.WALKING,
-    render: boolean = true
+    render: boolean = true,
+    renderer: google.maps.DirectionsRenderer = this.directionsRenderer
   ): Promise<{
     steps: Step[];
     eta: string | null;
   }> {
     return new Promise((resolve, reject) => {
-      // this.directionsRenderer.setMap(this.map);
-
-      this.setRouteColor(travelMode);
+      this.setRouteColor(travelMode, renderer);
 
       const request: google.maps.DirectionsRequest = {
         origin: startAddress,
         destination: destinationAddress,
         travelMode: travelMode,
       };
-
       this.directionsService.route(request, (response, status) => {
         if (status === google.maps.DirectionsStatus.OK && response) {
           if (render) {
-            this.directionsRenderer.setDirections(response);
+            console.log(response);
+          renderer.setDirections(response);
 
           }
           const steps: Step[] = [];
@@ -223,10 +225,36 @@ export class DirectionsService {
     });
   }
 
-  setRouteColor(travelMode: google.maps.TravelMode) {
+  async generateRoute(
+    startAddress: string | google.maps.LatLng,
+    destinationAddress: string | google.maps.LatLng,
+    travelMode: string | google.maps.TravelMode = google.maps.TravelMode.WALKING
+  ) {
+    this.shuttleService.clearMapDirections();
+    if (travelMode === 'SHUTTLE') {
+      return this.shuttleService.calculateShuttleBusRoute(
+        startAddress,
+        destinationAddress
+      );
+    } else {
+      return await this.calculateRoute(
+        startAddress,
+        destinationAddress,
+        this.getTravelMode(travelMode)
+      );
+    }
+  }
+
+  setRouteColor(
+    travelMode: google.maps.TravelMode | string,
+    renderer: google.maps.DirectionsRenderer
+  ): google.maps.PolylineOptions {
     const polylineOptions: google.maps.PolylineOptions = {};
 
     switch (travelMode) {
+      case 'SHUTTLE':
+        polylineOptions['strokeColor'] = 'purple';
+        break;
       case google.maps.TravelMode.DRIVING:
         polylineOptions['strokeColor'] = 'red';
         break;
@@ -248,7 +276,7 @@ export class DirectionsService {
           },
         ];
     }
-    this.directionsRenderer.setOptions({ polylineOptions });
+    renderer.setOptions({ polylineOptions });
     return polylineOptions;
   }
 

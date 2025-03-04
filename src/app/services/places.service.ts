@@ -12,7 +12,7 @@ export class PlacesService {
   private placesService!: google.maps.places.PlacesService;
   private placesServiceReady = new BehaviorSubject<boolean>(false);
   private campusData: any = data;
-  
+
   constructor(private store: Store<AppState>) {}
 
   /**
@@ -90,7 +90,7 @@ export class PlacesService {
       );
     });
   }
- 
+
   /**
    * Retrieves the buildings on the selected campus from the store.
    * @returns A promise resolving to an array of LocationCard objects representing campus buildings.
@@ -105,7 +105,7 @@ export class PlacesService {
       image: building.image
     }));
   }
-  
+
   /**
    * Retrieves nearby points of interest (e.g., restaurants) around the selected campus.
    * Defaults to the current campus location but can be enhanced to prioritize the user's location.
@@ -114,17 +114,19 @@ export class PlacesService {
    */
   public async getPointsOfInterest(): Promise<Location[]> {
     const campusKey = await firstValueFrom(this.store.select(selectSelectedCampus));
-    
+
     const places = await this.getPlaces(this.campusData[campusKey]?.coordinates, 250, 'restaurant')
       .catch(() => []); // Catch any error and return an empty array
 
+    console.log(places);
     return places.map(place => ({
       name: place.name ?? 'No name available',
-      coordinates: place.geometry?.location as google.maps.LatLng, 
+      coordinates: place.geometry?.location as google.maps.LatLng,
       address: place.vicinity ?? 'No address available',
-      image: place.photos?.[0]?.getUrl() ?? 'default-image-url.jpg'
+      image: place.photos[0]?.getUrl()
     }));
-  }  
+
+  }
 
   /**
    * Retrieves places from Google Places API based on location, radius, and type.
@@ -134,19 +136,19 @@ export class PlacesService {
    * @returns A promise resolving to an array of PlaceResult objects.
    */
   private getPlaces(location: google.maps.LatLng, radius: number, type: string): Promise<google.maps.places.PlaceResult[]> {
-    return new Promise((resolve, reject) => {  
+    return new Promise((resolve, reject) => {
       const request: google.maps.places.PlaceSearchRequest = {
         location,
         radius,
         type
       };
-  
+
       this.placesService.nearbySearch(request, (results, status) => {
         if (status === "OK" && results) {
-          const operationalResults = results.filter(place => 
+          const operationalResults = results.filter(place =>
             place.business_status === 'OPERATIONAL'
           );
-  
+
           resolve(operationalResults);
         } else {
           console.error('Failed to get places:', status);
@@ -154,5 +156,5 @@ export class PlacesService {
         }
       });
     });
-  }  
+  }
 }

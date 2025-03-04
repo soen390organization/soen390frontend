@@ -51,7 +51,10 @@ describe('MapSearchComponent', () => {
       providers: [
         { provide: DirectionsService, useValue: directionsServiceSpy },
         { provide: PlacesService, useValue: placesServiceSpy },
-        { provide: CurrentLocationService, useValue: currentLocationServiceSpy },
+        {
+          provide: CurrentLocationService,
+          useValue: currentLocationServiceSpy,
+        },
       ],
     }).compileComponents();
   });
@@ -97,10 +100,18 @@ describe('MapSearchComponent', () => {
     it('should call placesService and set places when search query is not empty (start location)', async () => {
       const event = { target: { value: 'pizza' } };
       const mockPlaces = [
-        { title: 'Pizza Palace', address: '123 Main St', coordinates: new google.maps.LatLng(10, 20) },
-        { title: 'Pizza Haven', address: '456 Side St', coordinates: new google.maps.LatLng(30, 40) },
+        {
+          title: 'Pizza Palace',
+          address: '123 Main St',
+          coordinates: new google.maps.LatLng(10, 20),
+        },
+        {
+          title: 'Pizza Haven',
+          address: '456 Side St',
+          coordinates: new google.maps.LatLng(30, 40),
+        },
       ];
-      
+
       placesServiceSpy.getPlaceSuggestions.and.returnValue(
         Promise.resolve(mockPlaces)
       );
@@ -108,14 +119,20 @@ describe('MapSearchComponent', () => {
       await component.onSearchChange(event, 'start');
 
       expect(component.isSearchingFromStart).toBeTrue();
-      expect(placesServiceSpy.getPlaceSuggestions).toHaveBeenCalledWith('pizza');
+      expect(placesServiceSpy.getPlaceSuggestions).toHaveBeenCalledWith(
+        'pizza'
+      );
       expect(component.places).toEqual(mockPlaces);
     });
 
     it('should call placesService and set places when search query is not empty (destination)', async () => {
       const event = { target: { value: 'museum' } };
       const mockPlaces = [
-        { title: 'Art Museum', address: '789 Park Ave', coordinates: new google.maps.LatLng(10, 20) },
+        {
+          title: 'Art Museum',
+          address: '789 Park Ave',
+          coordinates: new google.maps.LatLng(10, 20),
+        },
       ];
       placesServiceSpy.getPlaceSuggestions.and.returnValue(
         Promise.resolve(mockPlaces)
@@ -124,7 +141,9 @@ describe('MapSearchComponent', () => {
       await component.onSearchChange(event, 'destination');
 
       expect(component.isSearchingFromStart).toBeFalse();
-      expect(placesServiceSpy.getPlaceSuggestions).toHaveBeenCalledWith('museum');
+      expect(placesServiceSpy.getPlaceSuggestions).toHaveBeenCalledWith(
+        'museum'
+      );
       expect(component.places).toEqual(mockPlaces);
     });
   });
@@ -142,9 +161,9 @@ describe('MapSearchComponent', () => {
       component.startLocationInput = 'Some text';
       component.places = [{ title: 'Place1' }];
       spyOn(component, 'clearList');
-      
+
       component.clearStartInput();
-      
+
       expect(component.startLocationInput).toBe('');
       expect(component.clearList).toHaveBeenCalled();
       expect(directionsServiceSpy.clearStartPoint).toHaveBeenCalled();
@@ -154,9 +173,9 @@ describe('MapSearchComponent', () => {
       component.destinationLocationInput = 'Some text';
       component.places = [{ title: 'Place2' }];
       spyOn(component, 'clearList');
-      
+
       component.clearDestinationInput();
-      
+
       expect(component.destinationLocationInput).toBe('');
       expect(component.clearList).toHaveBeenCalled();
       expect(directionsServiceSpy.clearDestinationPoint).toHaveBeenCalled();
@@ -183,10 +202,14 @@ describe('MapSearchComponent', () => {
 
     it('should throw an error if current location is null', async () => {
       // Mock the service to return null
-      currentLocationServiceSpy.getCurrentLocation.and.returnValue(Promise.resolve(null));
+      currentLocationServiceSpy.getCurrentLocation.and.returnValue(
+        Promise.resolve(null)
+      );
       spyOn(console, 'error'); // to suppress or check error logs
-    
-      await expectAsync(component.onSetUsersLocationAsStart()).toBeRejectedWithError('Current location is null.');
+
+      await expectAsync(
+        component.onSetUsersLocationAsStart()
+      ).toBeRejectedWithError('Current location is null.');
     });
   });
 
@@ -195,28 +218,40 @@ describe('MapSearchComponent', () => {
     // e.g., (keyup.enter)="directionsService.setStartPoint(places[0]); clearList()"
 
     it('should set start point on enter if places is not empty', () => {
-      const selectedPlace = { title: 'Start Place', address: 'Somewhere', coordinates: new google.maps.LatLng(10, 20) };
+      const selectedPlace = {
+        title: 'Start Place',
+        address: 'Somewhere',
+        coordinates: new google.maps.LatLng(10, 20),
+      };
       component.places = [selectedPlace];
       directionsServiceSpy.setStartPoint.calls.reset();
-    
+
       // Simulate the (keyup.enter) logic
       directionsServiceSpy.setStartPoint(component.places[0]);
       component.clearList();
-    
-      expect(directionsServiceSpy.setStartPoint).toHaveBeenCalledWith(selectedPlace);
+
+      expect(directionsServiceSpy.setStartPoint).toHaveBeenCalledWith(
+        selectedPlace
+      );
       expect(component.places.length).toBe(0);
     });
-    
+
     it('should set destination point on enter if places is not empty', () => {
-      const selectedPlace = { title: 'Destination Place', address: 'Somewhere', coordinates: new google.maps.LatLng(30, 40) };
+      const selectedPlace = {
+        title: 'Destination Place',
+        address: 'Somewhere',
+        coordinates: new google.maps.LatLng(30, 40),
+      };
       component.places = [selectedPlace];
       directionsServiceSpy.setDestinationPoint.calls.reset();
-    
+
       // Simulate the (keyup.enter) logic
       directionsServiceSpy.setDestinationPoint(component.places[0]);
       component.clearList();
-    
-      expect(directionsServiceSpy.setDestinationPoint).toHaveBeenCalledWith(selectedPlace);
+
+      expect(directionsServiceSpy.setDestinationPoint).toHaveBeenCalledWith(
+        selectedPlace
+      );
       expect(component.places.length).toBe(0);
     });
   });

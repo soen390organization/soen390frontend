@@ -4,7 +4,13 @@ import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CurrentLocationService } from 'src/app/services/geolocation/current-location.service';
-import { animate, state, style, transition, trigger } from '@angular/animations';
+import {
+  animate,
+  state,
+  style,
+  transition,
+  trigger,
+} from '@angular/animations';
 import { DirectionsService } from 'src/app/services/directions/directions.service';
 import { PlacesService } from 'src/app/services/places.service';
 import { VisibilityService } from 'src/app/services/visibility.service';
@@ -44,12 +50,16 @@ export class MapSearchComponent implements OnInit {
   startLocationInput = '';
   destinationLocationInput = '';
   isSearchVisible = false;
-  places: any[]=[]; // Array to store the search suggestions
+  places: any[] = []; // Array to store the search suggestions
   isSearchingFromStart: boolean = false; // Flag to determine if the search is for the start or destination location
   currentRouteData: { eta: string | null; distance: number } | null = null;
   enableStart$!: Observable<boolean>;
 
-  constructor(public directionsService: DirectionsService, private placesService: PlacesService, private currentLocationService: CurrentLocationService, private visibilityService: VisibilityService) {}
+  constructor(
+    public directionsService: DirectionsService,
+    private readonly placesService: PlacesService,
+    private readonly currentLocationService: CurrentLocationService
+  , private visibilityService: VisibilityService) {}
 
   ngOnInit(): void {
     this.enableStart$ = this.visibilityService.enableStart;
@@ -97,7 +107,7 @@ export class MapSearchComponent implements OnInit {
     this.directionsService.setStartPoint({
       title: 'Your Location',
       address: `${position.lat}, ${position.lng}`,
-      coordinates: new google.maps.LatLng(position)
+      coordinates: new google.maps.LatLng(position),
     });
   }
 
@@ -110,7 +120,6 @@ export class MapSearchComponent implements OnInit {
       return;
     }
     this.places = await this.placesService.getPlaceSuggestions(query);
-    console.log(this.places);
   }
 
   clearList() {
@@ -132,6 +141,7 @@ export class MapSearchComponent implements OnInit {
     this.directionsService.clearStartPoint();
     this.currentRouteData = null;
   }
+
 
   clearDestinationInput() {
     this.destinationLocationInput = '';
