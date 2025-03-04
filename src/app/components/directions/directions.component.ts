@@ -12,6 +12,7 @@ import { DirectionsService } from 'src/app/services/directions/directions.servic
 import { IconMapping } from 'src/app/interfaces/Icon-mapping';
 import rawIconMapping from 'src/assets/icon-mapping.json';
 import { firstValueFrom, take } from 'rxjs';
+import { VisibilityService } from 'src/app/services/visibility.service';
 const iconMapping = rawIconMapping as IconMapping;
 
 /// <reference types="google.maps" />
@@ -48,7 +49,8 @@ export class DirectionsComponent implements OnInit, OnDestroy {
 
   constructor(
     private readonly directionsService: DirectionsService,
-    private currentLocationService: CurrentLocationService
+    private currentLocationService: CurrentLocationService,
+    private visibilityService: VisibilityService
   ) {}
 
   ngOnInit(): void {
@@ -59,7 +61,8 @@ export class DirectionsComponent implements OnInit, OnDestroy {
     // });
     this.directionsService.hasBothPoints$.subscribe((hasBoth) => {
       if (hasBoth) {
-        this.loadDirections;
+        this.loadDirections("WALKING");
+        this.startWatchingLocation();
       }
     });
   }
@@ -177,11 +180,7 @@ export class DirectionsComponent implements OnInit, OnDestroy {
     );
 
     try {
-      const { steps, eta } = await this.directionsService.generateRoute(
-        start.address,
-        destination.address,
-        mode
-      );
+      const { steps, eta } = await this.directionsService.generateRoute(start.address, destination.address, this.selectedMode);
       this.steps = steps;
       console.log(this.steps);
       this.eta = eta;
@@ -229,4 +228,12 @@ export class DirectionsComponent implements OnInit, OnDestroy {
     // Fallback icon.
     return 'help_outline';
   }
+
+  onEndClick(): void {
+    this.visibilityService.toggleDirectionsComponent();
+    this.visibilityService.togglePOIsComponent();
+    this.visibilityService.toggleStartButton();
+  }
+
+
 }

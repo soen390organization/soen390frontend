@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input } from '@angular/core';
-import { LocationCard } from 'src/app/interfaces/location-card.interface';
+import { Component, Input} from '@angular/core';
+import { Location } from 'src/app/interfaces/location.interface';
 import { DirectionsService } from 'src/app/services/directions/directions.service';
 
 @Component({
@@ -9,8 +9,8 @@ import { DirectionsService } from 'src/app/services/directions/directions.servic
   templateUrl: './location-cards.component.html',
   styleUrls: ['./location-cards.component.scss'],
 })
-export class LocationCardsComponent {
-  @Input() locations: LocationCard[] = [];
+export class LocationCardsComponent{
+  @Input() locations: Location[] = [];
   @Input() loading: boolean = false;
 
   constructor(private readonly directionsService: DirectionsService) {}

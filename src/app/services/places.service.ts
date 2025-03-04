@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { LocationCard } from '../interfaces/location-card.interface';
+import { Location } from '../interfaces/location.interface';
 import data from 'src/assets/ConcordiaData.json';
 import { selectSelectedCampus, AppState } from '../store/app';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
@@ -95,10 +95,10 @@ export class PlacesService {
    * Retrieves the buildings on the selected campus from the store.
    * @returns A promise resolving to an array of LocationCard objects representing campus buildings.
    */
-  public async getCampusBuildings(): Promise<LocationCard[]> {
+  public async getCampusBuildings(): Promise<Location[]> {
     const campusKey = await firstValueFrom(this.store.select(selectSelectedCampus));
 
-    return this.campusData[campusKey].buildings.map((building: LocationCard) => ({
+    return this.campusData[campusKey].buildings.map((building: Location) => ({
       name: building.name,
       coordinates: new google.maps.LatLng(building.coordinates),
       address: building.address,
@@ -112,7 +112,7 @@ export class PlacesService {
    * @TODO - Modify to prioritize the user's location if they are on campus.
    * @returns A promise resolving to an array of LocationCard objects representing points of interest.
    */
-  public async getPointsOfInterest(): Promise<LocationCard[]> {
+  public async getPointsOfInterest(): Promise<Location[]> {
     const campusKey = await firstValueFrom(this.store.select(selectSelectedCampus));
 
     const places = await this.getPlaces(this.campusData[campusKey]?.coordinates, 250, 'restaurant')

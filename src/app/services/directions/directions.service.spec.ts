@@ -1,8 +1,47 @@
 import { DirectionsService } from './directions.service';
+import { Location } from 'src/app/interfaces/location.interface';
 import { TestBed } from '@angular/core/testing';
+import { Step } from 'src/app/interfaces/step.interface';
 import Joi from 'joi';
 import { BehaviorSubject } from 'rxjs';
 import { ShuttleService } from '../shuttle/shuttle.service';
+
+class MockPlacesService {
+  constructor(public map: any) {}
+  getDetails(req: any, callback: (place: any, status: string) => void) {
+    callback(null, 'NOT_FOUND');
+  }
+  nearbySearch(req: any, callback: (results: any[], status: string) => void) {
+    callback([], 'ZERO_RESULTS');
+  }
+  findPlaceFromQuery(
+    req: any,
+    callback: (results: any[], status: string) => void
+  ) {
+    callback([], 'ZERO_RESULTS');
+  }
+}
+
+class MockLatLng {
+  lat: number;
+  lng: number;
+  constructor(latLng: { lat: number; lng: number }) {
+    this.lat = latLng.lat;
+    this.lng = latLng.lng;
+  }
+}
+
+class MockDirectionsService {
+  route = jasmine.createSpy('route');
+}
+
+class MockDirectionsRenderer {
+  setMap = jasmine.createSpy('setMap');
+  setOptions = jasmine.createSpy('setOptions');
+  setDirections = jasmine.createSpy('setDirections');
+  set = jasmine.createSpy('set');
+  getMap = jasmine.createSpy('getMap');
+}
 
 describe('Directions Service', () => {
   let service: DirectionsService;
@@ -19,52 +58,8 @@ describe('Directions Service', () => {
     marker?: google.maps.Marker;
   }
 
-  class MockLatLng {
-    lat: number;
-    lng: number;
-    constructor(latLng: { lat: number; lng: number }) {
-      this.lat = latLng.lat;
-      this.lng = latLng.lng;
-    }
-  }
-
-  class MockPlacesService {
-    constructor(public map: any) {}
-    getDetails(req: any, callback: (place: any, status: string) => void) {
-      callback(null, 'NOT_FOUND');
-    }
-    nearbySearch(req: any, callback: (results: any[], status: string) => void) {
-      callback([], 'ZERO_RESULTS');
-    }
-    findPlaceFromQuery(
-      req: any,
-      callback: (results: any[], status: string) => void
-    ) {
-      callback([], 'ZERO_RESULTS');
-    }
-  }
-
-  class MockDirectionsService {
-    route = jasmine.createSpy('route');
-  }
-
-  class MockDirectionsRenderer {
-    setMap = jasmine.createSpy('setMap');
-    setOptions = jasmine.createSpy('setOptions');
-    setDirections = jasmine.createSpy('setDirections');
-    set = jasmine.createSpy('set');
-    getMap = jasmine.createSpy('getMap');
-  }
-
-  let mockMap: any;
-
   beforeEach(() => {
-    mockMap = {
-      setCenter: jasmine.createSpy('setCenter'),
-      setZoom: jasmine.createSpy('setZoom'),
-      fitBounds: jasmine.createSpy('fitBounds'),
-    };
-
+    // Global google mock for this suite (including places)
     (window as any).google = {
       maps: {
         Map: class {},
@@ -99,7 +94,11 @@ describe('Directions Service', () => {
     service.initialize({} as google.maps.Map);
 
     mockRenderer = new google.maps.DirectionsRenderer();
-    (service as any).directionsRenderer.getMap.and.returnValue(mockMap);
+    (service as any).directionsRenderer.getMap.and.returnValue({
+      setCenter: jasmine.createSpy('setCenter'),
+      setZoom: jasmine.createSpy('setZoom'),
+      fitBounds: jasmine.createSpy('fitBounds'),
+    });
   });
 
   it('should be created', () => {
@@ -174,7 +173,7 @@ describe('Directions Service', () => {
 
   describe('setRouteColor() function', () => {
     describe('given the travel mode is SHUTTLE', () => {
-      it('should return the color red', () => {
+      it('should return the color purple', () => {
         const polylineOptions = service.setRouteColor('SHUTTLE', mockRenderer);
         expect(polylineOptions).toEqual({ strokeColor: 'purple' });
       });
@@ -365,5 +364,233 @@ describe('Directions Service', () => {
         null
       );
     });
+  });
+});
+
+describe('DirectionsService - Start/Destination Points and Observables', () => {
+  let service: DirectionsService;
+  let mockMarker: any;
+  let mockMap: any;
+
+  class MockDirectionsService {
+    route = jasmine.createSpy('route');
+  }
+
+  class MockDirectionsRenderer {
+    setMap = jasmine.createSpy('setMap');
+    setOptions = jasmine.createSpy('setOptions');
+    setDirections = jasmine.createSpy('setDirections');
+    set = jasmine.createSpy('set');
+    getMap = jasmine.createSpy('getMap');
+  }
+
+  // Include the MockPlacesService here (or rely on the global one declared above)
+  // class MockPlacesService { ... } // Already declared above.
+
+  beforeEach(() => {
+    mockMarker = {
+      setPosition: jasmine.createSpy('setPosition'),
+      setMap: jasmine.createSpy('setMap'),
+      getPosition: jasmine
+        .createSpy('getPosition')
+        .and.returnValue({ lat: () => 45, lng: () => -73 }),
+    };
+
+    mockMap = {
+      setCenter: jasmine.createSpy('setCenter'),
+      setZoom: jasmine.createSpy('setZoom'),
+      fitBounds: jasmine.createSpy('fitBounds'),
+    };
+
+    // Updated global google mock including places property.
+    (window as any).google = {
+      maps: {
+        DirectionsService: MockDirectionsService,
+        DirectionsRenderer: MockDirectionsRenderer,
+        LatLngBounds: jasmine.createSpy('LatLngBounds').and.returnValue({
+          extend: jasmine.createSpy('extend'),
+        }),
+        Marker: jasmine.createSpy('Marker').and.returnValue(mockMarker),
+        TravelMode: {
+          WALKING: 'WALKING',
+          DRIVING: 'DRIVING',
+          TRANSIT: 'TRANSIT',
+        },
+        DirectionsStatus: {
+          OK: 'OK',
+        },
+        SymbolPath: { CIRCLE: 'CIRCLE' },
+        places: {
+          PlacesService: MockPlacesService,
+          PlacesServiceStatus: { OK: 'OK' },
+        },
+      },
+    };
+
+    TestBed.configureTestingModule({
+      providers: [DirectionsService],
+    });
+
+    service = TestBed.inject(DirectionsService);
+    service.initialize(mockMap);
+
+    // Mock getMap to return mockMap
+    (service as any).directionsRenderer.getMap.and.returnValue(mockMap);
+    spyOn(service as any, 'updateMapView').and.callFake(() => {}); // Avoid side effects
+  });
+
+  it('should be created', () => {
+    expect(service).toBeTruthy();
+  });
+
+  it('should get startPoint$ observable', (done) => {
+    service.getStartPoint().subscribe((startPoint) => {
+      expect(startPoint).toBeNull();
+      done();
+    });
+  });
+
+  it('should get destinationPoint$ observable', (done) => {
+    service.getDestinationPoint().subscribe((destinationPoint) => {
+      expect(destinationPoint).toBeNull();
+      done();
+    });
+  });
+
+  it('should return null when getting shortest route if none exist', () => {
+    expect(service.getShortestRoute()).toBeNull();
+  });
+
+  it('should return shortest route if it exists', () => {
+    (service as any).shortestRoute = { eta: '10 mins', distance: 5000 };
+    expect(service.getShortestRoute()).toEqual({ eta: '10 mins', distance: 5000 });
+  });
+
+  it('should emit hasBothPoints$ as false when points are missing', (done) => {
+    service.hasBothPoints$.subscribe((hasBoth) => {
+      expect(hasBoth).toBeFalse();
+      done();
+    });
+  });
+
+  it('should emit hasBothPoints$ as true when both points are set', (done) => {
+    (service as any).startPoint$.next({
+      title: 'Start',
+      address: 'Start Address',
+      coordinates: {} as google.maps.LatLng,
+    });
+    (service as any).destinationPoint$.next({
+      title: 'Destination',
+      address: 'Destination Address',
+      coordinates: {} as google.maps.LatLng,
+    });
+
+    service.hasBothPoints$.subscribe((hasBoth) => {
+      expect(hasBoth).toBeTrue();
+      done();
+    });
+  });
+
+  it('should call updateMapView when showDirections() is triggered', () => {
+    service.showDirections();
+    expect((service as any).updateMapView).toHaveBeenCalled();
+  });
+});
+
+describe('DirectionsService - calculateShortestRoute()', () => {
+  let service: DirectionsService;
+  let mockCalculateRoute: jasmine.Spy;
+
+  beforeEach(() => {
+    // Updated global google mock including places property.
+    (window as any).google = {
+      maps: {
+        DirectionsService: function() {},
+        DirectionsRenderer: function() {},
+        LatLngBounds: jasmine.createSpy('LatLngBounds').and.returnValue({
+          extend: jasmine.createSpy('extend'),
+        }),
+        Marker: jasmine.createSpy('Marker'),
+        TravelMode: {
+          WALKING: 'WALKING',
+          DRIVING: 'DRIVING',
+          TRANSIT: 'TRANSIT',
+        },
+        DirectionsStatus: {
+          OK: 'OK',
+        },
+        SymbolPath: { CIRCLE: 'CIRCLE' },
+        places: {
+          PlacesService: MockPlacesService,
+          PlacesServiceStatus: { OK: 'OK' },
+        },
+      },
+    };
+
+    TestBed.configureTestingModule({
+      providers: [DirectionsService],
+    });
+
+    service = TestBed.inject(DirectionsService);
+
+    // Correct mock for calculateRoute function: Three parallel calls plus one extra render call.
+    mockCalculateRoute = spyOn(service, 'calculateRoute').and.callFake(
+      (
+        start: string | google.maps.LatLng,
+        destination: string | google.maps.LatLng,
+        mode: google.maps.TravelMode,
+        render: boolean
+      ): Promise<{ steps: Step[]; eta: string }> => {
+        let duration = 0;
+        switch (mode) {
+          case google.maps.TravelMode.DRIVING:
+            duration = 500; // 500 seconds
+            break;
+          case google.maps.TravelMode.WALKING:
+            duration = 700; // 700 seconds
+            break;
+          case google.maps.TravelMode.TRANSIT:
+            duration = 900; // 900 seconds
+            break;
+        }
+        return Promise.resolve({
+          steps: [
+            {
+              instructions: `Move ${mode}`,
+              start_location: {} as google.maps.LatLng,
+              end_location: {} as google.maps.LatLng,
+              distance: { text: '1 km', value: 1000 },
+              duration: { text: `${duration / 60} mins`, value: duration },
+              transit_details: null,
+            },
+          ],
+          eta: `${Math.round(duration / 60)} mins`,
+        });
+      }
+    );
+  });
+
+  it('should calculate the shortest route correctly', async () => {
+    const start = 'Start Location';
+    const destination = 'Destination Location';
+
+    await service.calculateShortestRoute(start, destination);
+
+    // Expect calculateRoute to be called 4 times (three modes plus one extra to render the fastest route)
+    expect(mockCalculateRoute).toHaveBeenCalledTimes(4);
+
+    // Verify that all routes were stored (3 routes)
+    expect((service as any).allRoutesData.length).toBe(3);
+
+    // The shortest duration should be for DRIVING (500 seconds)
+    expect((service as any).shortestRoute).toEqual({
+      mode: google.maps.TravelMode.DRIVING,
+      eta: '8 mins', // 500 seconds ≈ 8 mins
+      distance: 1000,
+      duration: 500,
+    });
+
+    // Ensure calculateRoute was called with the fastest mode
+    expect(mockCalculateRoute).toHaveBeenCalledWith(start, destination, google.maps.TravelMode.DRIVING, false);
   });
 });

@@ -4,13 +4,15 @@ import { Store } from '@ngrx/store';
 import { PlacesService } from 'src/app/services/places.service';
 import { DirectionsService } from 'src/app/services/directions/directions.service';
 import { selectSelectedCampus } from 'src/app/store/app';
-import { LocationCard } from 'src/app/interfaces/location-card.interface';
-import { filter, forkJoin, switchMap } from 'rxjs';
+import { Location } from 'src/app/interfaces/location.interface';
+import { filter, forkJoin, Observable, switchMap } from 'rxjs';
 import { DirectionsComponent } from '../directions/directions.component';
+import { VisibilityService } from 'src/app/services/visibility.service';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-interaction-bar',
-  imports: [LocationCardsComponent, DirectionsComponent],
+  imports: [LocationCardsComponent, DirectionsComponent, CommonModule],
   templateUrl: './interaction-bar.component.html',
   styleUrls: ['./interaction-bar.component.scss'],
 })
@@ -22,16 +24,17 @@ export class InteractionBarComponent implements AfterViewInit {
   public currentY = 0;
   public isDragging = false;
   public threshold = 50; // Minimum swipe distance to trigger action
-  public showDirections = false;
   isExpanded = false; // Track the footer's state
-  campusBuildings = { locations: [] as LocationCard[], loading: true };
-  pointsOfInterest = { locations: [] as LocationCard[], loading: true };
+  campusBuildings = { locations: [] as Location[], loading: true }
+  pointsOfInterest = { locations: [] as Location[], loading: true }
+  showDirections$!: Observable<boolean>;
+  showPOIs$!: Observable<boolean>;
 
   constructor(
     private readonly store: Store,
     private readonly placesService: PlacesService,
     private readonly directionsService: DirectionsService
-  ) {}
+  , private visibilityService: VisibilityService) {}
 
   ngOnInit() {
     this.placesService
@@ -51,10 +54,8 @@ export class InteractionBarComponent implements AfterViewInit {
         this.pointsOfInterest = { locations: pointsOfInterest, loading: false };
       });
 
-    this.directionsService.hasBothPoints$.subscribe((hasBoth) => {
-      this.showDirections = hasBoth;
-      this.isExpanded = false;
-    });
+    this.showDirections$ = this.visibilityService.showDirections;
+    this.showPOIs$ = this.visibilityService.showPOIs;
   }
 
   ngAfterViewInit(): void {
