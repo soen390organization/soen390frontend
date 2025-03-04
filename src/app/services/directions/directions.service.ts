@@ -1,14 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, combineLatest, map, Observable } from 'rxjs';
 import { Step } from '../../interfaces/step.interface';
-
-export interface Location {
-  title: string;
-  address: string;
-  coordinates: google.maps.LatLng;
-  image?: string;
-  marker?: google.maps.Marker;
-}
+import { Location } from 'src/app/interfaces/location.interface';
 
 @Injectable({
   providedIn: 'root',

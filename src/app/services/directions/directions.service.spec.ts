@@ -1,4 +1,5 @@
-import { DirectionsService, Location } from './directions.service';
+import { DirectionsService} from './directions.service';
+import { Location } from 'src/app/interfaces/location.interface';
 import { TestBed } from '@angular/core/testing';
 import { Step } from 'src/app/interfaces/step.interface';
 import Joi from 'joi';
