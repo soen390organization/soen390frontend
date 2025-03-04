@@ -1,10 +1,47 @@
-import { DirectionsService} from './directions.service';
+import { DirectionsService } from './directions.service';
 import { Location } from 'src/app/interfaces/location.interface';
 import { TestBed } from '@angular/core/testing';
 import { Step } from 'src/app/interfaces/step.interface';
 import Joi from 'joi';
 import { BehaviorSubject } from 'rxjs';
 import { ShuttleService } from '../shuttle/shuttle.service';
+
+class MockPlacesService {
+  constructor(public map: any) {}
+  getDetails(req: any, callback: (place: any, status: string) => void) {
+    callback(null, 'NOT_FOUND');
+  }
+  nearbySearch(req: any, callback: (results: any[], status: string) => void) {
+    callback([], 'ZERO_RESULTS');
+  }
+  findPlaceFromQuery(
+    req: any,
+    callback: (results: any[], status: string) => void
+  ) {
+    callback([], 'ZERO_RESULTS');
+  }
+}
+
+class MockLatLng {
+  lat: number;
+  lng: number;
+  constructor(latLng: { lat: number; lng: number }) {
+    this.lat = latLng.lat;
+    this.lng = latLng.lng;
+  }
+}
+
+class MockDirectionsService {
+  route = jasmine.createSpy('route');
+}
+
+class MockDirectionsRenderer {
+  setMap = jasmine.createSpy('setMap');
+  setOptions = jasmine.createSpy('setOptions');
+  setDirections = jasmine.createSpy('setDirections');
+  set = jasmine.createSpy('set');
+  getMap = jasmine.createSpy('getMap');
+}
 
 describe('Directions Service', () => {
   let service: DirectionsService;
@@ -21,52 +58,8 @@ describe('Directions Service', () => {
     marker?: google.maps.Marker;
   }
 
-  class MockLatLng {
-    lat: number;
-    lng: number;
-    constructor(latLng: { lat: number; lng: number }) {
-      this.lat = latLng.lat;
-      this.lng = latLng.lng;
-    }
-  }
-
-  class MockPlacesService {
-    constructor(public map: any) {}
-    getDetails(req: any, callback: (place: any, status: string) => void) {
-      callback(null, 'NOT_FOUND');
-    }
-    nearbySearch(req: any, callback: (results: any[], status: string) => void) {
-      callback([], 'ZERO_RESULTS');
-    }
-    findPlaceFromQuery(
-      req: any,
-      callback: (results: any[], status: string) => void
-    ) {
-      callback([], 'ZERO_RESULTS');
-    }
-  }
-
-  class MockDirectionsService {
-    route = jasmine.createSpy('route');
-  }
-
-  class MockDirectionsRenderer {
-    setMap = jasmine.createSpy('setMap');
-    setOptions = jasmine.createSpy('setOptions');
-    setDirections = jasmine.createSpy('setDirections');
-    set = jasmine.createSpy('set');
-    getMap = jasmine.createSpy('getMap');
-  }
-
-  let mockMap: any;
-
   beforeEach(() => {
-    mockMap = {
-      setCenter: jasmine.createSpy('setCenter'),
-      setZoom: jasmine.createSpy('setZoom'),
-      fitBounds: jasmine.createSpy('fitBounds'),
-    };
-
+    // Global google mock for this suite (including places)
     (window as any).google = {
       maps: {
         Map: class {},
@@ -101,7 +94,11 @@ describe('Directions Service', () => {
     service.initialize({} as google.maps.Map);
 
     mockRenderer = new google.maps.DirectionsRenderer();
-    (service as any).directionsRenderer.getMap.and.returnValue(mockMap);
+    (service as any).directionsRenderer.getMap.and.returnValue({
+      setCenter: jasmine.createSpy('setCenter'),
+      setZoom: jasmine.createSpy('setZoom'),
+      fitBounds: jasmine.createSpy('fitBounds'),
+    });
   });
 
   it('should be created', () => {
@@ -176,7 +173,7 @@ describe('Directions Service', () => {
 
   describe('setRouteColor() function', () => {
     describe('given the travel mode is SHUTTLE', () => {
-      it('should return the color red', () => {
+      it('should return the color purple', () => {
         const polylineOptions = service.setRouteColor('SHUTTLE', mockRenderer);
         expect(polylineOptions).toEqual({ strokeColor: 'purple' });
       });
@@ -309,11 +306,21 @@ describe('Directions Service', () => {
     });
 
     it('clearStartPoint should remove marker and clear the route', () => {
-      (service as any).startPoint$.next({ title: 'Test Start', address: 'Test Address', coordinates: {} as google.maps.LatLng, marker: mockMarker });
-      (service as any).destinationPoint$.next({ title: 'Test Dest', address: 'Test Address 2', coordinates: {} as google.maps.LatLng, marker: {
-        setMap: jasmine.createSpy('setMap'),
-        getPosition: () => ({ lat: () => 0, lng: () => 0 })
-      } });
+      (service as any).startPoint$.next({
+        title: 'Test Start',
+        address: 'Test Address',
+        coordinates: {} as google.maps.LatLng,
+        marker: mockMarker,
+      });
+      (service as any).destinationPoint$.next({
+        title: 'Test Dest',
+        address: 'Test Address 2',
+        coordinates: {} as google.maps.LatLng,
+        marker: {
+          setMap: jasmine.createSpy('setMap'),
+          getPosition: () => ({ lat: () => 0, lng: () => 0 }),
+        },
+      });
 
       service.clearStartPoint();
 
@@ -332,11 +339,21 @@ describe('Directions Service', () => {
           .createSpy('getPosition')
           .and.returnValue({ lat: () => 40, lng: () => -80 }),
       };
-      (service as any).destinationPoint$.next({ title: 'Test Dest', address: 'Test Address', coordinates: {} as google.maps.LatLng, marker: destMarker });
-      (service as any).startPoint$.next({ title: 'Test Start', address: 'Test Address 2', coordinates: {} as google.maps.LatLng, marker: {
-        setMap: jasmine.createSpy('setMap'),
-        getPosition: () => ({ lat: () => 0, lng: () => 0 })
-      } });
+      (service as any).destinationPoint$.next({
+        title: 'Test Dest',
+        address: 'Test Address',
+        coordinates: {} as google.maps.LatLng,
+        marker: destMarker,
+      });
+      (service as any).startPoint$.next({
+        title: 'Test Start',
+        address: 'Test Address 2',
+        coordinates: {} as google.maps.LatLng,
+        marker: {
+          setMap: jasmine.createSpy('setMap'),
+          getPosition: () => ({ lat: () => 0, lng: () => 0 }),
+        },
+      });
 
       service.clearDestinationPoint();
 
@@ -367,11 +384,16 @@ describe('DirectionsService - Start/Destination Points and Observables', () => {
     getMap = jasmine.createSpy('getMap');
   }
 
+  // Include the MockPlacesService here (or rely on the global one declared above)
+  // class MockPlacesService { ... } // Already declared above.
+
   beforeEach(() => {
     mockMarker = {
       setPosition: jasmine.createSpy('setPosition'),
       setMap: jasmine.createSpy('setMap'),
-      getPosition: jasmine.createSpy('getPosition').and.returnValue({ lat: () => 45, lng: () => -73 }),
+      getPosition: jasmine
+        .createSpy('getPosition')
+        .and.returnValue({ lat: () => 45, lng: () => -73 }),
     };
 
     mockMap = {
@@ -380,11 +402,11 @@ describe('DirectionsService - Start/Destination Points and Observables', () => {
       fitBounds: jasmine.createSpy('fitBounds'),
     };
 
-    // Correctly mocking Google Maps objects
+    // Updated global google mock including places property.
     (window as any).google = {
       maps: {
-        DirectionsService: MockDirectionsService, // Correctly mocked DirectionsService
-        DirectionsRenderer: MockDirectionsRenderer, // Correctly mocked DirectionsRenderer
+        DirectionsService: MockDirectionsService,
+        DirectionsRenderer: MockDirectionsRenderer,
         LatLngBounds: jasmine.createSpy('LatLngBounds').and.returnValue({
           extend: jasmine.createSpy('extend'),
         }),
@@ -398,6 +420,10 @@ describe('DirectionsService - Start/Destination Points and Observables', () => {
           OK: 'OK',
         },
         SymbolPath: { CIRCLE: 'CIRCLE' },
+        places: {
+          PlacesService: MockPlacesService,
+          PlacesServiceStatus: { OK: 'OK' },
+        },
       },
     };
 
@@ -448,8 +474,16 @@ describe('DirectionsService - Start/Destination Points and Observables', () => {
   });
 
   it('should emit hasBothPoints$ as true when both points are set', (done) => {
-    (service as any).startPoint$.next({ title: 'Start', address: 'Start Address', coordinates: {} as google.maps.LatLng });
-    (service as any).destinationPoint$.next({ title: 'Destination', address: 'Destination Address', coordinates: {} as google.maps.LatLng });
+    (service as any).startPoint$.next({
+      title: 'Start',
+      address: 'Start Address',
+      coordinates: {} as google.maps.LatLng,
+    });
+    (service as any).destinationPoint$.next({
+      title: 'Destination',
+      address: 'Destination Address',
+      coordinates: {} as google.maps.LatLng,
+    });
 
     service.hasBothPoints$.subscribe((hasBoth) => {
       expect(hasBoth).toBeTrue();
@@ -468,13 +502,38 @@ describe('DirectionsService - calculateShortestRoute()', () => {
   let mockCalculateRoute: jasmine.Spy;
 
   beforeEach(() => {
+    // Updated global google mock including places property.
+    (window as any).google = {
+      maps: {
+        DirectionsService: function() {},
+        DirectionsRenderer: function() {},
+        LatLngBounds: jasmine.createSpy('LatLngBounds').and.returnValue({
+          extend: jasmine.createSpy('extend'),
+        }),
+        Marker: jasmine.createSpy('Marker'),
+        TravelMode: {
+          WALKING: 'WALKING',
+          DRIVING: 'DRIVING',
+          TRANSIT: 'TRANSIT',
+        },
+        DirectionsStatus: {
+          OK: 'OK',
+        },
+        SymbolPath: { CIRCLE: 'CIRCLE' },
+        places: {
+          PlacesService: MockPlacesService,
+          PlacesServiceStatus: { OK: 'OK' },
+        },
+      },
+    };
+
     TestBed.configureTestingModule({
       providers: [DirectionsService],
     });
 
     service = TestBed.inject(DirectionsService);
 
-    // Correct mock for calculateRoute function
+    // Correct mock for calculateRoute function: Three parallel calls plus one extra render call.
     mockCalculateRoute = spyOn(service, 'calculateRoute').and.callFake(
       (
         start: string | google.maps.LatLng,
@@ -483,7 +542,6 @@ describe('DirectionsService - calculateShortestRoute()', () => {
         render: boolean
       ): Promise<{ steps: Step[]; eta: string }> => {
         let duration = 0;
-
         switch (mode) {
           case google.maps.TravelMode.DRIVING:
             duration = 500; // 500 seconds
@@ -495,11 +553,10 @@ describe('DirectionsService - calculateShortestRoute()', () => {
             duration = 900; // 900 seconds
             break;
         }
-
         return Promise.resolve({
           steps: [
             {
-              instructions: `Move ${mode}`, // Mocked instruction
+              instructions: `Move ${mode}`,
               start_location: {} as google.maps.LatLng,
               end_location: {} as google.maps.LatLng,
               distance: { text: '1 km', value: 1000 },
@@ -516,25 +573,24 @@ describe('DirectionsService - calculateShortestRoute()', () => {
   it('should calculate the shortest route correctly', async () => {
     const start = 'Start Location';
     const destination = 'Destination Location';
-  
+
     await service.calculateShortestRoute(start, destination);
-  
-    // Verify calculateRoute() was called for all three modes
+
+    // Expect calculateRoute to be called 4 times (three modes plus one extra to render the fastest route)
     expect(mockCalculateRoute).toHaveBeenCalledTimes(4);
-  
+
     // Verify that all routes were stored (3 routes)
     expect((service as any).allRoutesData.length).toBe(3);
-  
+
     // The shortest duration should be for DRIVING (500 seconds)
     expect((service as any).shortestRoute).toEqual({
       mode: google.maps.TravelMode.DRIVING,
-      eta: '8 mins', // 500 seconds = ~8 minutes
-      distance: 1000, // From mock data
+      eta: '8 mins', // 500 seconds ≈ 8 mins
+      distance: 1000,
       duration: 500,
     });
-  
+
     // Ensure calculateRoute was called with the fastest mode
     expect(mockCalculateRoute).toHaveBeenCalledWith(start, destination, google.maps.TravelMode.DRIVING, false);
   });
-  
 });
