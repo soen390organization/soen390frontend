@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { MapSwitcherService, MapType } from 'src/app/services/mapSwitcher.service';
+import { Store } from '@ngrx/store';
+import { MapType, selectCurrentMap } from 'src/app/store/app';
+
 
 @Component({
   selector: 'app-home',
@@ -14,10 +16,10 @@ export class HomePage implements OnInit {
   googleMapInitialized: boolean = false;
   mappedinMapInitialized: boolean = false;
 
-  constructor(private mapSwitcher: MapSwitcherService) {}
+  constructor(private store: Store) {}
 
   ngOnInit(): void {
-    this.mapSwitcher.currentMap$.subscribe(map => {
+    this.store.select(selectCurrentMap).subscribe(map => {
       this.currentMap = map;
     });
   }
@@ -30,7 +32,7 @@ export class HomePage implements OnInit {
   onMappedinMapInitialized(): void {
     this.mappedinMapInitialized = true;
     this.checkInitialization();
-  } 
+  }
 
   private checkInitialization(): void {
     if (this.googleMapInitialized && this.mappedinMapInitialized) {

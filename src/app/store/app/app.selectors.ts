@@ -9,3 +9,8 @@ export const selectSelectedCampus = createSelector(
   selectAppState,
   (state: AppState) => state.selectedCampus
 );
+
+export const selectCurrentMap = createSelector(
+  selectAppState,
+  (state: AppState) => state.currentMap
+);

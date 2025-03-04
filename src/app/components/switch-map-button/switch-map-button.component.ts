@@ -1,6 +1,8 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MapSwitcherService, MapType } from 'src/app/services/mapSwitcher.service';
+import { Store } from '@ngrx/store';
+import { Observable, take } from 'rxjs';
+import { setMapType, MapType, selectCurrentMap } from 'src/app/store/app';
 
 @Component({
   selector: 'app-switch-map-button',
@@ -11,11 +13,16 @@ import { MapSwitcherService, MapType } from 'src/app/services/mapSwitcher.servic
 })
 export class SwitchMapButtonComponent {
   mapType = MapType;
-  currentMap$ = this.mapSwitcherService.currentMap$;
+  currentMap$: Observable<MapType>;
 
-  constructor(private mapSwitcherService: MapSwitcherService) {}
+  constructor(private store: Store) {
+    this.currentMap$ = this.store.select(selectCurrentMap);
+  }
 
   toggleMap(): void {
-    this.mapSwitcherService.toggleMap();
+    this.currentMap$.pipe(take(1)).subscribe(currentMap => {
+      const newMap = currentMap === MapType.Outdoor ? MapType.Indoor : MapType.Outdoor;
+      this.store.dispatch(setMapType({ mapType: newMap }));
+    });
   }
 }
