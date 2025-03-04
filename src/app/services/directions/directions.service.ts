@@ -308,7 +308,8 @@ export class DirectionsService {
 
     // Find the route with the smallest duration.
     this.shortestRoute = results.reduce((fastest, route) =>
-      route.duration < fastest.duration ? route : fastest
+      route.duration < fastest.duration ? route : fastest,
+      results[0] // Initial value: the first route in the array
     );
 
     this.allRoutesData = results;
