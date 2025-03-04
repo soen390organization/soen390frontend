@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MappedinService } from 'src/app/services/mappedIn.service';
+import { MapSwitcherService, MapType } from 'src/app/services/mapSwitcher.service';
 
 @Component({
   selector: 'app-switch-map-button',
@@ -10,9 +10,12 @@ import { MappedinService } from 'src/app/services/mappedIn.service';
   styleUrls: ['./switch-map-button.component.scss']
 })
 export class SwitchMapButtonComponent {
-  constructor(public mappedinService: MappedinService) {}
+  mapType = MapType;
+  currentMap$ = this.mapSwitcherService.currentMap$;
 
-  onClick(): void {
-    this.mappedinService.switchMapMode();
+  constructor(private mapSwitcherService: MapSwitcherService) {}
+
+  toggleMap(): void {
+    this.mapSwitcherService.toggleMap();
   }
 }

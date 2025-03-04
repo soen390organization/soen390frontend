@@ -1,4 +1,4 @@
-import { Component, AfterViewInit, ElementRef, ViewChild, OnDestroy } from '@angular/core';
+import { Component, AfterViewInit, ElementRef, ViewChild, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MappedinService } from 'src/app/services/mappedIn.service';
 
@@ -9,20 +9,16 @@ import { MappedinService } from 'src/app/services/mappedIn.service';
   templateUrl: './mappedin-map.component.html',
   styleUrls: ['./mappedin-map.component.scss'],
 })
-export class MappedinMapComponent implements AfterViewInit, OnDestroy {
+export class MappedinMapComponent implements AfterViewInit {
   @ViewChild('mappedinContainer', { static: false }) mappedinContainer!: ElementRef;
-  loading: boolean = true;
+  @Output() initialized = new EventEmitter<void>();
 
   constructor(private mappedinService: MappedinService) {}
 
   async ngAfterViewInit(): Promise<void> {
-    if (this.mappedinContainer && !this.mappedinService.isInitialized()) {
+    if (this.mappedinContainer) {
       await this.mappedinService.initializeMap(this.mappedinContainer.nativeElement);
+      this.initialized.emit();
     }
-    this.loading = false;
-  }
-
-  ngOnDestroy(): void {
-    this.mappedinService.destroyMap();
   }
 }
