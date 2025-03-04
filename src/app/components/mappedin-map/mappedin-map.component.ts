@@ -18,6 +18,7 @@ export class MappedinMapComponent implements AfterViewInit {
   async ngAfterViewInit(): Promise<void> {
     if (this.mappedinContainer) {
       await this.mappedinService.initializeMap(this.mappedinContainer.nativeElement);
+      console.log('Mappedin Map initialized');
       this.initialized.emit();
     }
   }
