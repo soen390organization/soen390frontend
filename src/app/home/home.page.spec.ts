@@ -3,7 +3,6 @@ import { HomePage } from './home.page';
 import { provideMockStore, MockStore } from '@ngrx/store/testing';
 import { MapType } from 'src/app/store/app';
 
-
 describe('HomePage', () => {
   let component: HomePage;
   let fixture: ComponentFixture<HomePage>;
@@ -27,6 +26,12 @@ describe('HomePage', () => {
     fixture = TestBed.createComponent(HomePage);
     component = fixture.componentInstance;
     fixture.detectChanges();
+  });
+
+  afterEach(() => {
+    // Reset the store state and selectors after each test (avoids inconsitent behaviors)
+    store.setState(initialState);
+    store.resetSelectors();
   });
 
   it('should create the component', () => {

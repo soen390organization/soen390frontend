@@ -27,6 +27,12 @@ describe('SwitchMapButtonComponent', () => {
     fixture.detectChanges();
   });
 
+  afterEach(() => {
+    // Reset the store state and selectors after each test
+    store.setState(initialState);
+    store.resetSelectors();
+  });
+
   it('should create the component', () => {
     expect(component).toBeTruthy();
   });
@@ -58,7 +64,6 @@ describe('SwitchMapButtonComponent', () => {
   it('should dispatch setMapType action to Indoor when current map is Outdoor', () => {
     spyOn(store, 'dispatch');
     // Ensure the current map is Outdoor so that toggling dispatches Indoor.
-    store.overrideSelector(selectCurrentMap, MapType.Outdoor);
     store.refreshState();
     fixture.detectChanges();
 
