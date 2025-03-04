@@ -1,7 +1,9 @@
+<div class="absolute top-[24px] left-1/2 transform -translate-x-1/2 z-[999] flex space-x-4"
+[ngStyle]="{'width': isSearchVisible ? '95%' : 'auto' }">
 <div
   class="rounded-3xl w-full flex text-black bg-white shadow-lg p-2 pb-3 relative"
   [ngStyle]="{ 'height': isSearchVisible ? 'auto' : '48px' }"
->
+    >
   <div
     (click)="toggleSearch()"
     [ngStyle]="{ 'margin-top': isSearchVisible ? '10px' : '0' }"
@@ -31,7 +33,7 @@
         type="text"
         placeholder="Choose starting point..."
         debounce="1000"
-        class="w-full bg-white px-4 py-3 pr-10 rounded-full border border-gray-300 focus:outline-none"
+        class="w-full min-w-[250px] bg-white px-4 py-3 pr-10 rounded-full border border-gray-300 focus:outline-none"
       />
       <div class="absolute inset-y-0 right-2 flex items-center">
         <ng-container
@@ -86,7 +88,7 @@
         (keyup.enter)="directionsService.setDestinationPoint(places[0]); clearList()"
         type="text"
         placeholder="Choose destination point..."
-        class="w-full bg-white px-4 py-3 pr-10 rounded-full border border-gray-300 focus:outline-none"
+        class="w-full min-w-[250px] bg-white px-4 py-3 pr-10 rounded-full border border-gray-300 focus:outline-none"
       />
 
       <div class="absolute inset-y-0 right-2 flex items-center">
@@ -147,4 +149,5 @@
     </div>
 
   </div>
+</div>
 </div>
