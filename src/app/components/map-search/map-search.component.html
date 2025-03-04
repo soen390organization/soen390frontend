@@ -138,8 +138,8 @@
       </div>
       <button
         class="bg-[#912338] text-white py-3 px-8 rounded-full text-lg font-semibold"
-        [ngClass]="{ 'opacity-50 cursor-not-allowed': !(this.directionsService.getStartPoint()  | async) || !(this.directionsService.getDestinationPoint()  | async)||!(enableStart$ | async) }"
-        [disabled]="!(this.directionsService.getStartPoint()  | async) || !(this.directionsService.getDestinationPoint()  | async)||!(enableStart$ | async)"
+        [ngClass]="{ 'opacity-50 cursor-not-allowed': (this.directionsService.getStartPoint()  | async) === null || (this.directionsService.getDestinationPoint()  | async) === null || (enableStart$ | async) === false}"
+        [disabled]="(this.directionsService.getStartPoint()  | async) === null || (this.directionsService.getDestinationPoint()  | async) === null || (enableStart$ | async) === false"
         (click)="onStartClick()"
       >
         Start
