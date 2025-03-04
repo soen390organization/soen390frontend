@@ -6,6 +6,7 @@
     "left": "turn_left",
     "go straight": "straight",
     "straight": "straight",
+    "continue": "arrow_forward",
     "make a u-turn": "u_turn_left",
     "u-turn": "u_turn_left",
     "merge": "merge",
@@ -28,7 +29,8 @@
     "southeast": "south_east",
     "head southwest": "south_west",
     "head south west": "south_west",
-    "southwest": "south_west"
+    "southwest": "south_west",
+    "head south": "south"
   },
   "transit_to_symbols": {
     "bus": "directions_bus",
@@ -54,7 +56,9 @@
     "taxi": "local_taxi",
     "ride share": "hail",
     "parking": "local_parking",
+    "light rail": "light_rail",
     "no more": "bus_alert",
     "no departures": "bus_alert"
   }
 }
+

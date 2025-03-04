@@ -13,6 +13,9 @@ import {
 } from '@angular/animations';
 import { DirectionsService } from 'src/app/services/directions/directions.service';
 import { PlacesService } from 'src/app/services/places.service';
+import { VisibilityService } from 'src/app/services/visibility.service';
+import { combineLatest, Observable } from 'rxjs';
+import { filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-map-search',
@@ -49,25 +52,47 @@ export class MapSearchComponent implements OnInit {
   isSearchVisible = false;
   places: any[] = []; // Array to store the search suggestions
   isSearchingFromStart: boolean = false; // Flag to determine if the search is for the start or destination location
+  currentRouteData: { eta: string | null; distance: number } | null = null;
+  enableStart$!: Observable<boolean>;
 
   constructor(
     public directionsService: DirectionsService,
     private readonly placesService: PlacesService,
     private readonly currentLocationService: CurrentLocationService
-  ) {}
+  , private visibilityService: VisibilityService) {}
 
   ngOnInit(): void {
-    this.directionsService.getStartPoint().subscribe((start) => {
+    this.enableStart$ = this.visibilityService.enableStart;
+    this.directionsService.getStartPoint().subscribe(start => {
       if (start) {
         this.startLocationInput = start.title;
       }
     });
-    this.directionsService.getDestinationPoint().subscribe((destination) => {
+    this.directionsService.getDestinationPoint().subscribe(destination => {
       if (destination) {
         this.destinationLocationInput = destination.title;
         this.isSearchVisible = true;
       }
     });
+
+    combineLatest([
+      this.directionsService.getStartPoint(),
+      this.directionsService.getDestinationPoint()
+    ])
+    .pipe(
+      filter(([start, destination]) => !!start && !!destination)
+    )
+    .subscribe(([start, destination]) => {
+      // Use the available start and destination values.
+      // Here we assume calculateShortestRoute accepts addresses; adjust if you prefer coordinates.
+      this.directionsService.calculateShortestRoute(start!.address, destination!.address)
+        .then(() => {
+          // Retrieve the calculated fastest route data from the service.
+          this.currentRouteData = this.directionsService.getShortestRoute();
+        })
+        .catch(error => console.error('Error calculating route:', error));
+    });
+
   }
 
   toggleSearch() {
@@ -86,6 +111,7 @@ export class MapSearchComponent implements OnInit {
     });
   }
 
+
   async onSearchChange(event: any, type: 'start' | 'destination') {
     this.isSearchingFromStart = type === 'start'; // Set the flag to 'start' or 'destination'
     const query = event.target.value.trim();
@@ -100,15 +126,27 @@ export class MapSearchComponent implements OnInit {
     this.places = [];
   }
 
+  onStartClick(): void {
+    this.visibilityService.toggleDirectionsComponent();
+    this.visibilityService.togglePOIsComponent();
+    this.directionsService.showDirections();
+    this.visibilityService.toggleStartButton();
+    this.toggleSearch();
+
+  }
+
   clearStartInput() {
     this.startLocationInput = '';
     this.clearList();
     this.directionsService.clearStartPoint();
+    this.currentRouteData = null;
   }
+
 
   clearDestinationInput() {
     this.destinationLocationInput = '';
     this.clearList();
     this.directionsService.clearDestinationPoint();
+    this.currentRouteData = null;
   }
 }

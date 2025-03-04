@@ -26,6 +26,10 @@
         (keyup.enter)="directionsService.setStartPoint(places[0]); clearList()"
         type="text"
         placeholder="Choose starting point..."
+        (input)="onSearchChange($event, 'start')"
+        (keyup.enter)="directionsService.setStartPoint(places[0]); clearList()"
+        type="text"
+        placeholder="Choose starting point..."
         debounce="1000"
         class="w-full bg-white px-4 py-3 pr-10 rounded-full border border-gray-300 focus:outline-none"
       />
@@ -75,7 +79,7 @@
       </div>
     </div>
 
-    <div class="relative">
+    <div class="relative z-10">
       <input
         [(ngModel)]="destinationLocationInput"
         (input)="onSearchChange($event, 'destination')"
@@ -84,6 +88,7 @@
         placeholder="Choose destination point..."
         class="w-full bg-white px-4 py-3 pr-10 rounded-full border border-gray-300 focus:outline-none"
       />
+
       <div class="absolute inset-y-0 right-2 flex items-center">
         <ng-container
           *ngIf="destinationLocationInput && destinationLocationInput.trim().length > 0"
@@ -122,5 +127,24 @@
         </ul>
       </div>
     </div>
+
+    <!-- ETA and Start Button -->
+    <div class="mt-2 flex items-center justify-between z-0">
+      <div class="text-lg font-bold text-[#912338]">
+        {{ currentRouteData?.eta || '' }}
+        <span class="text-gray-500 font-bold">
+          {{ currentRouteData?.distance !== null ? '('+currentRouteData.distance + ' m' +')': '' }}
+        </span>
+      </div>
+      <button
+        class="bg-[#912338] text-white py-3 px-8 rounded-full text-lg font-semibold"
+        [ngClass]="{ 'opacity-50 cursor-not-allowed': (this.directionsService.getStartPoint()  | async) === null || (this.directionsService.getDestinationPoint()  | async) === null || (enableStart$ | async) === false}"
+        [disabled]="(this.directionsService.getStartPoint()  | async) === null || (this.directionsService.getDestinationPoint()  | async) === null || (enableStart$ | async) === false"
+        (click)="onStartClick()"
+      >
+        Start
+      </button>
+    </div>
+
   </div>
 </div>

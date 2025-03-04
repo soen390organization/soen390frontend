@@ -145,6 +145,7 @@ export class ShuttleService {
       startAddress,
       terminalCodes[startCampus],
       google.maps.TravelMode.WALKING,
+      true,
       this.renderers[0]
     );
     shuttleSteps.push(...initialWalk.steps);
@@ -153,6 +154,7 @@ export class ShuttleService {
       terminalCodes[startCampus],
       terminalCodes[destinationCampus],
       google.maps.TravelMode.DRIVING,
+      true,
       this.renderers[1]
     );
     shuttleSteps.push({
@@ -164,6 +166,7 @@ export class ShuttleService {
       terminalCodes[destinationCampus],
       destinationAddress,
       google.maps.TravelMode.WALKING,
+      true,
       this.renderers[2]
     );
     shuttleSteps.push(...finalWalk.steps);
