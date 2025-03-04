@@ -17,7 +17,7 @@
   <div
     [@slideInOut]="isSearchVisible ? 'in' : 'out'"
     [ngStyle]="{ 'height': isSearchVisible ? 'auto' : '0', 'overflow': isSearchVisible ? 'visible' : 'hidden' }"
-    class="w-full space-y-2 z-40"
+    class="w-full space-y-2"
   >
     <div class="relative">
       <input
@@ -109,7 +109,7 @@
             (keydown.enter)="directionsService.setDestinationPoint(place); clearList()"
             (keypress.enter)="directionsService.setDestinationPoint(place); clearList()"
             (keyup.enter)="directionsService.setDestinationPoint(place); clearList()"
-            class="flex items-center hover:bg-gray-100 p-3 cursor-pointer"
+            class="flex items-center hover:bg-gray-100 p-3 cursor-pointer z-40"
           >
             <span class="material-symbols-outlined mr-3 p-2 border border-gray-300 rounded-full">
               location_on
@@ -137,7 +137,7 @@
         </span>
       </div>
       <button
-        class="bg-[#912338] text-white py-3 px-8 rounded-full text-lg font-semibold z-0"
+        class="bg-[#912338] text-white py-3 px-8 rounded-full text-lg font-semibold -z-50"
         [ngClass]="{ 'opacity-50 cursor-not-allowed': !(this.directionsService.getStartPoint()  | async) || !(this.directionsService.getDestinationPoint()  | async)||!(enableStart$ | async) }"
         [disabled]="!(this.directionsService.getStartPoint()  | async) || !(this.directionsService.getDestinationPoint()  | async)||!(enableStart$ | async)"
         (click)="onStartClick()"
