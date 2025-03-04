@@ -180,7 +180,7 @@ export class DirectionsComponent implements OnInit, OnDestroy {
     );
 
     try {
-      const { steps, eta } = await this.directionsService.calculateRoute(start.address, destination.address, travelMode, true);
+      const { steps, eta } = await this.directionsService.generateRoute(start.address, destination.address, this.selectedMode);
       this.steps = steps;
       console.log(this.steps);
       this.eta = eta;

@@ -8,6 +8,7 @@ import { Location } from 'src/app/interfaces/location.interface';
 import { filter, forkJoin, Observable, switchMap } from 'rxjs';
 import { DirectionsComponent } from '../directions/directions.component';
 import { VisibilityService } from 'src/app/services/visibility.service';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-interaction-bar',

@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { LocationCardsComponent } from './location-cards.component';
 import { DirectionsService } from 'src/app/services/directions/directions.service';
-import { LocationCard } from 'src/app/interfaces/location-card.interface';
+import { Location } from 'src/app/interfaces/location.interface';
 import { By } from '@angular/platform-browser';
 
 describe('LocationCardsComponent', () => {
@@ -38,7 +38,7 @@ describe('LocationCardsComponent', () => {
   });
 
   it('should set the destination when setDestination is called', () => {
-    const mockLocation: LocationCard = {
+    const mockLocation: Location = {
       name: 'Test Location',
       address: '123 Test St',
       image: 'test-image.jpg',
