@@ -7,20 +7,38 @@ import { CommonModule } from '@angular/common';
 import { CurrentLocationService } from 'src/app/services/geolocation/current-location.service';
 import { DirectionsService } from 'src/app/services/directions/directions.service';
 
-// Mock services
 const mockDirectionsService = {
-  calculateRoute: jasmine.createSpy('calculateRoute').and.returnValue(Promise.resolve({ steps: [], eta: null })),
+  generateRoute: jasmine
+    .createSpy('generateRoute')
+    .and.callFake((start, destination, mode) =>
+      mockDirectionsService.calculateRoute(start, destination, mode)
+    ),
+  calculateRoute: jasmine
+    .createSpy('calculateRoute')
+    .and.returnValue(Promise.resolve({ steps: [], eta: null })),
   getTravelMode: jasmine.createSpy('getTravelMode').and.returnValue('WALKING'),
   hasBothPoints$: of(false),
-  getDestinationPoint: jasmine.createSpy('getDestinationPoint').and.returnValue(of({ address: 'destination address', title: 'Destination', coordinates: {} })),
-  getStartPoint: jasmine.createSpy('getStartPoint').and.returnValue(of({ address: 'start address', title: 'Start', coordinates: {} })),
+  getDestinationPoint: jasmine.createSpy('getDestinationPoint').and.returnValue(
+    of({
+      address: 'destination address',
+      title: 'Destination',
+      coordinates: {},
+    })
+  ),
+  getStartPoint: jasmine
+    .createSpy('getStartPoint')
+    .and.returnValue(
+      of({ address: 'start address', title: 'Start', coordinates: {} })
+    ),
   setStartPoint: jasmine.createSpy('setStartPoint'),
-  setDestinationPoint: jasmine.createSpy('setDestinationPoint')
+  setDestinationPoint: jasmine.createSpy('setDestinationPoint'),
 };
 
 const mockCurrentLocationService = {
-  watchLocation: jasmine.createSpy('watchLocation').and.returnValue(Promise.resolve('123')),
-  clearWatch: jasmine.createSpy('clearWatch')
+  watchLocation: jasmine
+    .createSpy('watchLocation')
+    .and.returnValue(Promise.resolve('123')),
+  clearWatch: jasmine.createSpy('clearWatch'),
 };
 
 describe('DirectionsComponent', () => {
@@ -29,11 +47,14 @@ describe('DirectionsComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [DirectionsComponent, CommonModule], 
+      imports: [DirectionsComponent, CommonModule],
       providers: [
         { provide: DirectionsService, useValue: mockDirectionsService },
-        { provide: CurrentLocationService, useValue: mockCurrentLocationService }
-      ]
+        {
+          provide: CurrentLocationService,
+          useValue: mockCurrentLocationService,
+        },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(DirectionsComponent);
@@ -63,21 +84,23 @@ describe('DirectionsComponent', () => {
           lng: () => -73.5673,
           equals: () => false,
           toJSON: () => ({ lat: 45.5017, lng: -73.5673 }),
-          toUrlValue: () => ''
+          toUrlValue: () => '',
         },
         end_location: {
           lat: () => 44.1232,
           lng: () => -72.4356,
           equals: () => false,
           toJSON: () => ({ lat: 44.1232, lng: -72.4356 }),
-          toUrlValue: () => ''
+          toUrlValue: () => '',
         },
         distance: { text: '200 m', value: 200 },
         duration: { text: '2 mins', value: 2 },
-        transit_details: undefined
-      }
+        transit_details: undefined,
+      },
     ];
-    mockDirectionsService.calculateRoute.and.returnValue(Promise.resolve({ steps: mockSteps, eta: '6 mins' }));
+    mockDirectionsService.calculateRoute.and.returnValue(
+      Promise.resolve({ steps: mockSteps, eta: '6 mins' })
+    );
 
     await component.loadDirections('WALKING');
     expect(component.steps).toEqual(mockSteps);
@@ -86,13 +109,17 @@ describe('DirectionsComponent', () => {
   });
 
   it('should handle errors when loading directions', async () => {
-    mockDirectionsService.calculateRoute.and.returnValue(Promise.reject('API Error'));
+    mockDirectionsService.calculateRoute.and.returnValue(
+      Promise.reject('API Error')
+    );
     await component.loadDirections('WALKING');
     expect(component.isLoading).toBeFalse();
   });
 
   it('should stop event propagation when setMode is called with event', () => {
-    const event = { stopPropagation: jasmine.createSpy('stopPropagation') } as unknown as Event;
+    const event = {
+      stopPropagation: jasmine.createSpy('stopPropagation'),
+    } as unknown as Event;
     component.setMode('DRIVING', event);
     expect(event.stopPropagation).toHaveBeenCalled();
   });
@@ -117,19 +144,19 @@ describe('DirectionsComponent', () => {
           lng: () => -73.5673,
           equals: () => false,
           toJSON: () => ({ lat: 45.5017, lng: -73.5673 }),
-          toUrlValue: () => ''
+          toUrlValue: () => '',
         },
         end_location: {
           lat: () => 44.1232,
           lng: () => -72.4356,
           equals: () => false,
           toJSON: () => ({ lat: 44.1232, lng: -72.4356 }),
-          toUrlValue: () => ''
+          toUrlValue: () => '',
         },
         distance: { text: '200 m', value: 200 },
         duration: { text: '2 mins', value: 2 },
-        transit_details: undefined
-      }
+        transit_details: undefined,
+      },
     ];
     component.onPositionUpdate({ lat: 44.1232, lng: -72.4356 });
     expect(component.steps.length).toBe(0);
@@ -137,7 +164,12 @@ describe('DirectionsComponent', () => {
   });
 
   it('should calculate distance correctly', () => {
-    const distance = component.calculateDistance(45.5017, -73.5673, 44.1232, -72.4356);
+    const distance = component.calculateDistance(
+      45.5017,
+      -73.5673,
+      44.1232,
+      -72.4356
+    );
     expect(distance).toBeCloseTo(177379, -4); // Approximate distance in meters
   });
 
@@ -148,7 +180,9 @@ describe('DirectionsComponent', () => {
 
   it('should update showAllSteps based on component position', () => {
     const mockElement = { getBoundingClientRect: () => ({ top: 100 }) };
-    component.directionsContainer = { nativeElement: mockElement } as ElementRef;
+    component.directionsContainer = {
+      nativeElement: mockElement,
+    } as ElementRef;
     spyOnProperty(window, 'innerHeight').and.returnValue(500);
 
     // Access private method using type assertion
@@ -160,13 +194,17 @@ describe('DirectionsComponent', () => {
   it('should continuously update showAllSteps', () => {
     // Spy on requestAnimationFrame and simulate a single call
     let callback: FrameRequestCallback = () => {};
-    spyOn(window, 'requestAnimationFrame').and.callFake((cb: FrameRequestCallback) => {
-      callback = cb; // Store the callback
-      return 1; // Return a mock handle ID
-    });
+    spyOn(window, 'requestAnimationFrame').and.callFake(
+      (cb: FrameRequestCallback) => {
+        callback = cb; // Store the callback
+        return 1; // Return a mock handle ID
+      }
+    );
 
     const mockElement = { getBoundingClientRect: () => ({ top: 100 }) };
-    component.directionsContainer = { nativeElement: mockElement } as ElementRef;
+    component.directionsContainer = {
+      nativeElement: mockElement,
+    } as ElementRef;
     spyOnProperty(window, 'innerHeight').and.returnValue(500);
 
     // Call observeComponentPosition (which starts the loop)
@@ -187,7 +225,6 @@ describe('DirectionsComponent', () => {
     expect(true).toBeTruthy(); // If it resolves, the test passes
   });
 
-
   it('should do nothing if steps are empty', () => {
     component.steps = [];
     component.onPositionUpdate({ lat: 44.1232, lng: -72.4356 });
@@ -195,7 +232,12 @@ describe('DirectionsComponent', () => {
   });
 
   it('should return 0 for identical coordinates', () => {
-    const distance = component.calculateDistance(45.5017, -73.5673, 45.5017, -73.5673);
+    const distance = component.calculateDistance(
+      45.5017,
+      -73.5673,
+      45.5017,
+      -73.5673
+    );
     expect(distance).toBe(0);
   });
 
@@ -220,7 +262,9 @@ describe('DirectionsComponent', () => {
   });
 
   it('should handle empty response from calculateRoute', async () => {
-    mockDirectionsService.calculateRoute.and.returnValue(Promise.resolve({ steps: [], eta: null }));
+    mockDirectionsService.calculateRoute.and.returnValue(
+      Promise.resolve({ steps: [], eta: null })
+    );
     await component.loadDirections('WALKING');
     expect(component.steps).toEqual([]);
     expect(component.eta).toBeNull();
@@ -231,5 +275,30 @@ describe('DirectionsComponent', () => {
     component.ngAfterViewInit();
     expect((component as any).observeComponentPosition).toHaveBeenCalled();
   });
+    it('should not update showAllSteps if directionsContainer is not defined', () => {
+    // Remove the directionsContainer so that updateShowAllSteps returns immediately.
+    component.directionsContainer = undefined as any;
+    // Set a known value for showAllSteps.
+    component.showAllSteps = false;
+    
+    // Call the private method via type assertion.
+    (component as any).updateShowAllSteps();
+    
+    // Expect showAllSteps to remain unchanged.
+    expect(component.showAllSteps).toBeFalse();
+  });
+  
+  it('should toggle directions and POIs when onEndClick is called', () => {
+    // Access private visibilityService using a type assertion.
+    const visibilityService = (component as any).visibilityService;
+    spyOn(visibilityService, 'toggleDirectionsComponent');
+    spyOn(visibilityService, 'togglePOIsComponent');
+  
+    component.onEndClick();
+  
+    expect(visibilityService.toggleDirectionsComponent).toHaveBeenCalled();
+    expect(visibilityService.togglePOIsComponent).toHaveBeenCalled();
+  });
+  
 
 });

@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input} from '@angular/core';
-import { LocationCard } from 'src/app/interfaces/location-card.interface';
+import { Location } from 'src/app/interfaces/location.interface';
 import { DirectionsService } from 'src/app/services/directions/directions.service';
 
 @Component({
@@ -10,17 +10,23 @@ import { DirectionsService } from 'src/app/services/directions/directions.servic
   styleUrls: ['./location-cards.component.scss'],
 })
 export class LocationCardsComponent{
-  @Input() locations: LocationCard[] = [];
+  @Input() locations: Location[] = [];
   @Input() loading: boolean = false;
 
-  constructor(private directionsService: DirectionsService) { }
+  constructor(private readonly directionsService: DirectionsService) {}
+
+  onImageError(event: Event) {
+    const imgElement = event.target as HTMLImageElement;
+    imgElement.src = 'https://cdn.discordapp.com/attachments/1152015876300754956/1346007857719546017/image.png?ex=67c69f00&is=67c54d80&hm=536b59895f6facbe007133b8c1ab73d1b28060fe55d196a4e4077df61263fa66';
+    imgElement.onerror = null; // Prevent infinite loop if the placeholder fails
+  }
 
   setDestination(location: any) {
     console.log(location);
     this.directionsService.setDestinationPoint({
       title: location.name,
       coordinates: location.coordinates,
-      address: location.address
+      address: location.address,
     });
   }
 }
