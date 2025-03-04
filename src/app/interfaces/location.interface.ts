@@ -1,5 +1,6 @@
 export interface Location {
-  title: string;
+  title?: string;
+  name?: string;
   address: string;
   coordinates: google.maps.LatLng;
   image?: string;

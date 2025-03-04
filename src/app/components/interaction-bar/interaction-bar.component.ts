@@ -9,7 +9,7 @@ import { Store } from '@ngrx/store';
 import { PlacesService } from 'src/app/services/places.service';
 import { DirectionsService } from 'src/app/services/directions/directions.service';
 import { selectSelectedCampus } from 'src/app/store/app';
-import { LocationCard } from 'src/app/interfaces/location-card.interface';
+import { Location } from 'src/app/interfaces/location.interface';
 import { filter, forkJoin, Observable, switchMap } from 'rxjs';
 import { DirectionsComponent } from '../directions/directions.component';
 import { VisibilityService } from 'src/app/services/visibility.service';
@@ -28,8 +28,8 @@ export class InteractionBarComponent implements AfterViewInit {
   public isDragging = false;
   public threshold = 50; // Minimum swipe distance to trigger action
   isExpanded = false; // Track the footer's state
-  campusBuildings = { locations: [] as LocationCard[], loading: true }
-  pointsOfInterest = { locations: [] as LocationCard[], loading: true }
+  campusBuildings = { locations: [] as Location[], loading: true }
+  pointsOfInterest = { locations: [] as Location[], loading: true }
   showDirections$!: Observable<boolean>;
   showPOIs$!: Observable<boolean>;
 
