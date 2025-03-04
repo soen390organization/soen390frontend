@@ -251,7 +251,6 @@ describe('DirectionsService - Start/Destination Points and Observables', () => {
           WALKING: 'WALKING',
           DRIVING: 'DRIVING',
           TRANSIT: 'TRANSIT',
-          BICYCLING: 'BICYCLING',
         },
         DirectionsStatus: {
           OK: 'OK',
@@ -350,9 +349,6 @@ describe('DirectionsService - calculateShortestRoute()', () => {
           case google.maps.TravelMode.WALKING:
             duration = 700; // 700 seconds
             break;
-          case google.maps.TravelMode.BICYCLING:
-            duration = 600; // 600 seconds
-            break;
           case google.maps.TravelMode.TRANSIT:
             duration = 900; // 900 seconds
             break;
@@ -378,15 +374,15 @@ describe('DirectionsService - calculateShortestRoute()', () => {
   it('should calculate the shortest route correctly', async () => {
     const start = 'Start Location';
     const destination = 'Destination Location';
-
+  
     await service.calculateShortestRoute(start, destination);
-
-    // Verify calculateRoute() was called for all four modes
-    expect(mockCalculateRoute).toHaveBeenCalledTimes(5);
-
-    // Verify that all routes were stored
-    expect((service as any).allRoutesData.length).toBe(4);
-
+  
+    // Verify calculateRoute() was called for all three modes
+    expect(mockCalculateRoute).toHaveBeenCalledTimes(4);
+  
+    // Verify that all routes were stored (3 routes)
+    expect((service as any).allRoutesData.length).toBe(3);
+  
     // The shortest duration should be for DRIVING (500 seconds)
     expect((service as any).shortestRoute).toEqual({
       mode: google.maps.TravelMode.DRIVING,
@@ -394,8 +390,9 @@ describe('DirectionsService - calculateShortestRoute()', () => {
       distance: 1000, // From mock data
       duration: 500,
     });
-
+  
     // Ensure calculateRoute was called with the fastest mode
     expect(mockCalculateRoute).toHaveBeenCalledWith(start, destination, google.maps.TravelMode.DRIVING, false);
   });
+  
 });

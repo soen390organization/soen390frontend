@@ -146,8 +146,6 @@ export class DirectionsService {
         return google.maps.TravelMode.TRANSIT;
       case 'DRIVING':
         return google.maps.TravelMode.DRIVING;
-      case 'BICYCLING':
-        return google.maps.TravelMode.BICYCLING;
       default:
         console.warn(`Invalid travel mode: ${mode}, defaulting to WALKING`);
         return google.maps.TravelMode.WALKING;
@@ -268,7 +266,6 @@ export class DirectionsService {
     const modes = [
       google.maps.TravelMode.DRIVING,
       google.maps.TravelMode.WALKING,
-      google.maps.TravelMode.BICYCLING,
       google.maps.TravelMode.TRANSIT,
     ];
 
