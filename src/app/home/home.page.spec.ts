@@ -5,11 +5,6 @@ import { Component, EventEmitter } from '@angular/core';
 
 
 describe('Home Page', () => {
-    // class MockHomePageFunctionality {
-    //     showSearch = jasmine.createSpy('showSearch');
-    //     hideSearch = jasmine.createSpy('hideSearch');
-    // }
-
     let homePageSpy: jasmine.SpyObj<HomePage>;
     let homePage: HomePage;
     let fixture: ComponentFixture<HomePage>;
