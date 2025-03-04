@@ -13,13 +13,18 @@ export class MappedinMapComponent implements AfterViewInit {
   @ViewChild('mappedinContainer', { static: false }) mappedinContainer!: ElementRef;
   @Output() initialized = new EventEmitter<void>();
 
-  constructor(private mappedinService: MappedinService) {}
+  constructor(private readonly mappedinService: MappedinService) {}
 
-  async ngAfterViewInit(): Promise<void> {
+  ngAfterViewInit(): void {
     if (this.mappedinContainer) {
-      await this.mappedinService.initializeMap(this.mappedinContainer.nativeElement);
-      console.log('Mappedin Map initialized: ', this.initialized);
-      this.initialized.emit();
+      this.mappedinService.initializeMap(this.mappedinContainer.nativeElement)
+        .then(() => {
+          console.log('Mappedin Map initialized: ', this.initialized);
+          this.initialized.emit();
+        })
+        .catch(error => {
+          console.error('Error initializing map: ', error);
+        });
     }
-  }
+  } 
 }
