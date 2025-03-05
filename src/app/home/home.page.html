@@ -3,10 +3,34 @@
   <app-map-search searchStateChange="onSearchStateChanged($event)"></app-map-search>
 </div>
 
-<ion-content [fullscreen]="true">
-  <div id="container">
-    <app-google-map></app-google-map>
-  </div>
+<!-- Main content container with no bottom padding -->
+<ion-content [fullscreen]="true" scrollY="false" class="pb-0">
+    <app-google-map
+      class="absolute top-0 left-0 w-full h-full transition-opacity duration-300 ease-linear"
+      [ngClass]="{
+        'opacity-0 pointer-events-none': currentMap === mapType.Indoor,
+        'opacity-100 pointer-events-auto': currentMap !== mapType.Indoor
+      }"
+      (initialized)="onGoogleMapInitialized()">
+    </app-google-map>
+    
+    <app-mappedin-map
+      class="absolute top-0 left-0 w-full h-full transition-opacity duration-300 ease-linear"
+      [ngClass]="{
+        'opacity-0 pointer-events-none': currentMap === mapType.Outdoor,
+        'opacity-100 pointer-events-auto': currentMap !== mapType.Outdoor
+      }"
+      (initialized)="onMappedinMapInitialized()">
+    </app-mappedin-map>
 </ion-content>
 
-<app-interaction-bar></app-interaction-bar>
+<!-- Global spinner -->
+<div *ngIf="loading" class="absolute inset-0 flex items-center justify-center bg-white/50 backdrop-blur-sm z-[50]">
+  <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-red-800"></div>
+</div>
+
+<!-- A button to switch maps -->
+<app-switch-map-button></app-switch-map-button>
+
+<!-- Global interaction bar -->
+<app-interaction-bar class="z-[100]"></app-interaction-bar>

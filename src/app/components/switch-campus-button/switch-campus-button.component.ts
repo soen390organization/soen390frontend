@@ -13,6 +13,7 @@ import data from 'src/assets/ConcordiaData.json';
   templateUrl: './switch-campus-button.component.html',
   styleUrls: ['./switch-campus-button.component.scss'],
 })
+
 export class SwitchCampusButtonComponent {
   selectedCampus$: Observable<string>;
   // Consider Moving to places API or 1 service
