@@ -34,7 +34,7 @@ describe('LocationCardsComponent', () => {
     component.onImageError({ target: imgElement } as unknown as Event);
 
     // Expect the image to be replaced with the placeholder URL
-    expect(imgElement.src).toBe('https://cdn.discordapp.com/attachments/1152015876300754956/1346007857719546017/image.png?ex=67c69f00&is=67c54d80&hm=536b59895f6facbe007133b8c1ab73d1b28060fe55d196a4e4077df61263fa66');
+    expect(imgElement.src).toContain('assets/images/poi_fail.png');
   });
 
   it('should set the destination when setDestination is called', () => {

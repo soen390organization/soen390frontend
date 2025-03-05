@@ -13,6 +13,7 @@ import {
 } from '@angular/animations';
 import { DirectionsService } from 'src/app/services/directions/directions.service';
 import { PlacesService } from 'src/app/services/places.service';
+import { HomePage } from 'src/app/home/home.page';
 import { VisibilityService } from 'src/app/services/visibility.service';
 import { combineLatest, Observable } from 'rxjs';
 import { filter } from 'rxjs/operators';
@@ -45,6 +46,7 @@ import { filter } from 'rxjs/operators';
     ]),
   ],
 })
+
 export class MapSearchComponent implements OnInit {
   @ViewChild(GoogleMapComponent) googleMap!: GoogleMapComponent;
   startLocationInput = '';
@@ -97,6 +99,11 @@ export class MapSearchComponent implements OnInit {
 
   toggleSearch() {
     this.isSearchVisible = !this.isSearchVisible;
+    if (this.isSearchVisible) {
+      HomePage.prototype.showSearch();
+    } else {
+      HomePage.prototype.hideSearch();
+    }
   }
 
   async onSetUsersLocationAsStart(): Promise<void> {
