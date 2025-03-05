@@ -22,7 +22,7 @@ export class HomePage implements OnInit {
   // Search-related property
   isSearchVisible = false;
 
-  constructor(private store: Store) {
+  constructor(private readonly store: Store) {
     // Subscribe to search state changes
     searchStateChange.subscribe((state: boolean) => {
       this.isSearchVisible = state;

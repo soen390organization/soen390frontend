@@ -10,7 +10,7 @@ import { environment } from 'src/environments/environment';
 export class MappedinService {
   private mapView: MapView | undefined;
   
-  private _isMappedin$ = new BehaviorSubject<boolean>(false);
+  private readonly _isMappedin$ = new BehaviorSubject<boolean>(false);
   public isMappedin$ = this._isMappedin$.asObservable();
 
   async initializeMap(container: HTMLElement): Promise<void> {

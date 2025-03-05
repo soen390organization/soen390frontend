@@ -15,7 +15,7 @@ export class SwitchMapButtonComponent {
   mapType = MapType;
   currentMap$: Observable<MapType>;
 
-  constructor(private store: Store) {
+  constructor(private readonly store: Store) {
     this.currentMap$ = this.store.select(selectCurrentMap);
   }
 
