@@ -29,7 +29,6 @@ describe('HomePage', () => {
   });
 
   afterEach(() => {
-    // Reset the store state and selectors after each test (avoids inconsitent behaviors)
     store.setState(initialState);
     store.resetSelectors();
   });
@@ -38,49 +37,62 @@ describe('HomePage', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should subscribe and set currentMap to the emitted value from the store', () => {
-    // Initially should be MapType.Outdoor
-    expect(component.currentMap).toBe(MapType.Outdoor);
+  describe('Store-related tests', () => {
+    it('should subscribe and set currentMap to the emitted value from the store', () => {
+      expect(component.currentMap).toBe(MapType.Outdoor);
 
-    // Update store state and trigger change detection
-    store.setState({
-      app: {
-        selectedCampus: 'sgw',
-        currentMap: MapType.Indoor,
-      }
+      store.setState({
+        app: {
+          selectedCampus: 'sgw',
+          currentMap: MapType.Indoor,
+        }
+      });
+      fixture.detectChanges();
+
+      expect(component.currentMap).toBe(MapType.Indoor);
     });
-    fixture.detectChanges();
 
-    expect(component.currentMap).toBe(MapType.Indoor);
+    it('should set googleMapInitialized to true when onGoogleMapInitialized is called', () => {
+      expect(component.googleMapInitialized).toBeFalse();
+      component.onGoogleMapInitialized();
+      expect(component.googleMapInitialized).toBeTrue();
+    });
+
+    it('should set mappedinMapInitialized to true when onMappedinMapInitialized is called', () => {
+      expect(component.mappedinMapInitialized).toBeFalse();
+      component.onMappedinMapInitialized();
+      expect(component.mappedinMapInitialized).toBeTrue();
+    });
+
+    it('should keep loading true if only one map is initialized', () => {
+      expect(component.loading).toBeTrue();
+      component.onGoogleMapInitialized();
+      expect(component.googleMapInitialized).toBeTrue();
+      expect(component.mappedinMapInitialized).toBeFalse();
+      expect(component.loading).toBeTrue();
+    });
+
+    it('should set loading to false once both maps are initialized', () => {
+      expect(component.loading).toBeTrue();
+      component.onGoogleMapInitialized();
+      expect(component.loading).toBeTrue();
+      component.onMappedinMapInitialized();
+      expect(component.googleMapInitialized).toBeTrue();
+      expect(component.mappedinMapInitialized).toBeTrue();
+      expect(component.loading).toBeFalse();
+    });
   });
 
-  it('should set googleMapInitialized to true when onGoogleMapInitialized is called', () => {
-    expect(component.googleMapInitialized).toBeFalse();
-    component.onGoogleMapInitialized();
-    expect(component.googleMapInitialized).toBeTrue();
-  });
+  describe('Search state tests', () => {
+    it('should toggle search visibility', () => {
+      // Initially false
+      expect(component.isSearchVisible).toBeFalse();
 
-  it('should set mappedinMapInitialized to true when onMappedinMapInitialized is called', () => {
-    expect(component.mappedinMapInitialized).toBeFalse();
-    component.onMappedinMapInitialized();
-    expect(component.mappedinMapInitialized).toBeTrue();
-  });
+      component.showSearch();
+      expect(component.isSearchVisible).toBeTrue();
 
-  it('should keep loading true if only one map is initialized', () => {
-    expect(component.loading).toBeTrue();
-    component.onGoogleMapInitialized();
-    expect(component.googleMapInitialized).toBeTrue();
-    expect(component.mappedinMapInitialized).toBeFalse();
-    expect(component.loading).toBeTrue();
-  });
-
-  it('should set loading to false once both maps are initialized', () => {
-    expect(component.loading).toBeTrue();
-    component.onGoogleMapInitialized();
-    expect(component.loading).toBeTrue();
-    component.onMappedinMapInitialized();
-    expect(component.googleMapInitialized).toBeTrue();
-    expect(component.mappedinMapInitialized).toBeTrue();
-    expect(component.loading).toBeFalse();
+      component.hideSearch();
+      expect(component.isSearchVisible).toBeFalse();
+    });
   });
 });

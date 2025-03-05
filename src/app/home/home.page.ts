@@ -1,7 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, EventEmitter } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { MapType, selectCurrentMap } from 'src/app/store/app';
 
+let isSearchVisible_Global = false;
+let searchStateChange = new EventEmitter<boolean>();
 
 @Component({
   selector: 'app-home',
@@ -10,13 +12,24 @@ import { MapType, selectCurrentMap } from 'src/app/store/app';
   standalone: false
 })
 export class HomePage implements OnInit {
+  // Map-related properties
   currentMap: MapType = MapType.Outdoor;
   mapType = MapType;
   loading: boolean = true;
   googleMapInitialized: boolean = false;
   mappedinMapInitialized: boolean = false;
 
-  constructor(private store: Store) {}
+  // Search-related property
+  isSearchVisible = false;
+
+  constructor(private store: Store) {
+    // Subscribe to search state changes
+    searchStateChange.subscribe((state: boolean) => {
+      this.isSearchVisible = state;
+      isSearchVisible_Global = state;
+      console.log('Search state changed:', state);
+    });
+  }
 
   ngOnInit(): void {
     this.store.select(selectCurrentMap).subscribe(map => {
@@ -38,5 +51,13 @@ export class HomePage implements OnInit {
     if (this.googleMapInitialized && this.mappedinMapInitialized) {
       this.loading = false;
     }
+  }
+
+  showSearch(): void {
+    searchStateChange.emit(true);
+  }
+
+  hideSearch(): void {
+    searchStateChange.emit(false);
   }
 }
