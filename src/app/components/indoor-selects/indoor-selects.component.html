@@ -1,0 +1,21 @@
+<div class="indoor-select-container left-4 flex space-x-2">
+  <select
+    class="flex rounded-full bg-white text-black p-3 shadow font-bold focus:outline-none whitespace-nowrap w-fit!"
+    [(ngModel)]="selectedBuilding"
+    (change)="onBuildingChange()">
+    <option *ngFor="let building of buildings" [value]="building">
+      {{ building }}
+    </option>
+  </select>
+  
+  <select
+    class="flex rounded-full bg-white text-black p-3 shadow font-bold focus:outline-none whitespace-nowrap w-fit!"
+    [(ngModel)]="selectedBuilding"
+    (change)="onBuildingChange()">
+    <option *ngFor="let building of buildings" [value]="building">
+      {{ building }}
+    </option>
+  </select>
+</div>
+
+

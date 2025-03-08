@@ -10,10 +10,11 @@ import { DirectionsComponent } from '../directions/directions.component';
 import { VisibilityService } from 'src/app/services/visibility.service';
 import { CommonModule } from '@angular/common';
 import { SwitchMapButtonComponent } from 'src/app/components/switch-map-button/switch-map-button.component';
+import { IndoorSelectsComponent } from '../indoor-selects/indoor-selects.component';
 
 @Component({
   selector: 'app-interaction-bar',
-  imports: [SwitchMapButtonComponent, LocationCardsComponent, DirectionsComponent, CommonModule],
+  imports: [IndoorSelectsComponent,  SwitchMapButtonComponent, LocationCardsComponent, DirectionsComponent, CommonModule],
   templateUrl: './interaction-bar.component.html',
   styleUrls: ['./interaction-bar.component.scss'],
 })
