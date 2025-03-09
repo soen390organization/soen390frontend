@@ -22,9 +22,9 @@
     <select
       class="appearance-none flex rounded-full bg-white text-black p-3 pr-10 shadow font-bold focus:outline-none whitespace-nowrap"
       [(ngModel)]="selectedBuilding"
-      (change)="onBuildingChange()">
-      <option *ngFor="let building of buildings" [value]="building">
-        {{ building }}
+      (change)="onBuildingChange(selectedBuilding)">
+      <option *ngFor="let building of buildings" [value]="building.indoorMapId">
+        {{ building.abreviation }} Building
       </option>
     </select>
     <span class="material-symbols-outlined text-black absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">

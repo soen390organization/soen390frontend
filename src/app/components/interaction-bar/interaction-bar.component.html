@@ -1,6 +1,6 @@
 <div #footerContainer class="swipe-footer-container">
   <app-switch-map-button class="switch-map-container" [style.opacity]="1 - swipeProgress"></app-switch-map-button>
-  <app-indoor-selects class="" [style.opacity]="1 - swipeProgress"></app-indoor-selects>
+  <app-indoor-selects *ngIf="showIndoorSelects" [style.opacity]="1 - swipeProgress"></app-indoor-selects>
  
 
   <div #handleBar class="handle-bar" (click)="onShowMore()" class="w-[100px] h-[10px] bg-[#d5d5d5] my-[10px] mx-auto rounded-full cursor-pointer"></div>

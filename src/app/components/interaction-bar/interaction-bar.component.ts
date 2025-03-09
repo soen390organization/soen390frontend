@@ -3,7 +3,7 @@ import { LocationCardsComponent } from '../location-cards/location-cards.compone
 import { Store } from '@ngrx/store';
 import { PlacesService } from 'src/app/services/places.service';
 import { DirectionsService } from 'src/app/services/directions/directions.service';
-import { selectSelectedCampus } from 'src/app/store/app';
+import { MapType, selectCurrentMap, selectSelectedCampus } from 'src/app/store/app';
 import { Location } from 'src/app/interfaces/location.interface';
 import { filter, forkJoin, Observable, switchMap } from 'rxjs';
 import { DirectionsComponent } from '../directions/directions.component';
@@ -28,6 +28,7 @@ export class InteractionBarComponent implements AfterViewInit {
   public threshold = 50; // Minimum swipe distance to trigger action
   public swipeProgress: number = 0;
   isExpanded = false; // Track the footer's state
+  showIndoorSelects = false;
   campusBuildings = { locations: [] as Location[], loading: true }
   pointsOfInterest = { locations: [] as Location[], loading: true }
   showDirections$!: Observable<boolean>;
@@ -40,6 +41,14 @@ export class InteractionBarComponent implements AfterViewInit {
   , private visibilityService: VisibilityService) {}
 
   ngOnInit() {
+    this.store.select(selectCurrentMap).subscribe(map => {
+      console.log(map)
+      if (map === MapType.Indoor) {
+        this.showIndoorSelects = true;
+      } else {
+        this.showIndoorSelects = false;
+      }
+    });
     this.placesService
       .isInitialized()
       .pipe(
