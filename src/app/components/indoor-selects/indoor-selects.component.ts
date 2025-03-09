@@ -21,11 +21,16 @@ export class IndoorSelectsComponent implements OnInit {
   isLoadingFloors: boolean = true;
 
   constructor(private store: Store, private mappedInService: MappedinService, private concordiaDataService: ConcordiaDataService) { }
-
+  
   ngOnInit() {
     this.store.select(selectSelectedCampus).subscribe(currentCampus => {
       if (currentCampus) {
         this.buildings = this.concordiaDataService.getBuildings(currentCampus).filter(building => building.indoorMapId);
+        if (this.buildings.length > 0) {
+          this.selectedBuilding = this.buildings[0].indoorMapId;
+          // Force the map to update to the new building's map
+          this.mappedInService.setMapData(this.selectedBuilding);
+        }
       }
     });
     this.mappedInService.getMapData().subscribe(async map => {
@@ -39,6 +44,7 @@ export class IndoorSelectsComponent implements OnInit {
   }
 
   onBuildingChange(selectedBuilding: string) {
+    this.isLoadingFloors = true;
     this.mappedInService.setMapData(selectedBuilding);
   }
 
