@@ -1,7 +1,7 @@
 // mappedin.service.ts
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, firstValueFrom, Observable, take } from 'rxjs';
-import { getMapData, show3dMap, MapData, MapView } from '@mappedin/mappedin-js';
+import { getMapData, show3dMap, MapData, MapView, DOORS} from '@mappedin/mappedin-js';
 import { environment } from 'src/environments/environment';
 
 @Injectable({
@@ -34,7 +34,7 @@ export class MappedinService {
     const { id, name } = this.mapView?.currentFloor;
     return { id, name }
   }
-
+ 
   setFloor(floorId: string) {
     this.mapView.setFloor(floorId);
   }
@@ -87,12 +87,12 @@ export class MappedinService {
             appearance: {
               marker: {
                 foregroundColor: {
-                  active: ['Bathrooms', 'Water Fountains'].includes(poi.name) ? '#1d63dc' : '#000000',
+                  active: ['Bathrooms', 'Water Fountain'].includes(poi.name) ? '#1d63dc' : '#000000',
                   // inactive: color,
                 },
               },
             text: {
-              foregroundColor: ['Bathrooms', 'Water Fountains'].includes(poi.name) ? '#1d63dc' : '#000000',
+              foregroundColor: ['Bathrooms', 'Water Fountain'].includes(poi.name) ? '#1d63dc' : '#000000',
             },
           },
         });
@@ -105,6 +105,18 @@ export class MappedinService {
       if (space.name) {
         this.mapView.Labels.add(space, space.name, { interactive: true });
       }
+    });
+
+    this.mapView.updateState(DOORS.Exterior, {
+      visible: true,
+      color: 'black',
+      opacity: 0.6,
+    });
+
+    this.mapView.updateState(DOORS.Interior, {
+      visible: true,
+      color: 'lightgrey',
+      opacity: 0.3,
     });
   }
 
