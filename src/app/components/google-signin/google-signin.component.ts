@@ -11,7 +11,7 @@ import {
   trigger,
 } from '@angular/animations';
 import { VisibilityService } from 'src/app/services/visibility.service';
-import { combineLatest, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'google-signin',
@@ -51,7 +51,6 @@ export class GoogleSignInComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    
+
   }
 }
- 
