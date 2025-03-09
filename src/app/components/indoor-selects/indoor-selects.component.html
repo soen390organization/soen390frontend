@@ -6,7 +6,7 @@
       class="appearance-none flex rounded-full bg-white text-black p-3 pr-10 shadow font-bold focus:outline-none whitespace-nowrap w-fit min-w-[120px]"
       [(ngModel)]="selectedFloor"
       (change)="onFloorChange(selectedFloor)">
-      <option *ngFor="let floor of floors" [value]="floor.id">
+      <option *ngFor="let floor of floors" [ngValue]="floor.id">
         {{ floor.name }}
       </option>
     </select>
@@ -23,7 +23,7 @@
       class="appearance-none flex rounded-full bg-white text-black p-3 pr-10 shadow font-bold focus:outline-none whitespace-nowrap"
       [(ngModel)]="selectedBuilding"
       (change)="onBuildingChange(selectedBuilding)">
-      <option *ngFor="let building of buildings" [value]="building.indoorMapId">
+      <option *ngFor="let building of buildings" [ngValue]="building.indoorMapId">
         {{ building.abreviation }} Building
       </option>
     </select>
