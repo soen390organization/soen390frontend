@@ -11,6 +11,7 @@ import { InteractionBarComponent } from '../components/interaction-bar/interacti
 import { UserProfileComponent } from '../components/user-profile/user-profile.component';
 import { GoogleSignInComponent } from '../components/google-signin/google-signin.component';
 import { BackButtonComponent } from '../components/back-button/back-button.component';
+import { CalendarList } from '../components/calendar-list/calendar-list.component';
 
 @NgModule({
   imports: [
@@ -21,7 +22,8 @@ import { BackButtonComponent } from '../components/back-button/back-button.compo
     InteractionBarComponent,
     UserProfileComponent,
     GoogleSignInComponent,
-    BackButtonComponent
+    BackButtonComponent,
+    CalendarList
   ],
   declarations: [UserInfoPage]
 })

@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import { CalendarService } from '../services/calendar/calendar.service';
 
 @Component({
@@ -10,11 +9,10 @@ import { CalendarService } from '../services/calendar/calendar.service';
   standalone: false
 })
 
-export class UserInfoPage implements OnInit {
-  constructor(private router: Router, private readonly calendarService: CalendarService) {
-  }
+export class UserInfoPage{
+  calendars: any[] = []
 
-  ngOnInit() {
+  constructor(private router: Router, private readonly calendarService: CalendarService) {
   }
 
   openHomePage() {
