@@ -1,7 +1,6 @@
 export const environment = {
   production: true,
   mappedin: {
-    mapId: 'YOUR_MAPID',
     key: 'YOUR_KEY',
     secret: 'YOUR_SECRET'
   },
