@@ -15,9 +15,9 @@ import { selectSelectedCampus } from 'src/app/store/app';
 })
 export class IndoorSelectsComponent implements OnInit {
   buildings: any[] = [];
-  selectedBuilding: string = '67b39ca55b54d7000b151bdb'; 
+  selectedBuilding: string = '67abe2bb8ea1bf000bb60d14'; 
   floors: any[] = [];
-  selectedFloor: string = 'm_43b5b5ff00439e30';
+  selectedFloor: string = '';
   isLoadingFloors: boolean = true;
 
   constructor(private store: Store, private mappedInService: MappedinService, private concordiaDataService: ConcordiaDataService) { }
@@ -31,6 +31,8 @@ export class IndoorSelectsComponent implements OnInit {
     this.mappedInService.getMapData().subscribe(async map => {
       if (map) {
         this.floors = await this.mappedInService.getFloors();
+        this.selectedFloor = this.mappedInService.getCurrentFloor().id;
+        this.selectedBuilding = this.mappedInService.getMapId();
         this.isLoadingFloors = false;
       }
     });

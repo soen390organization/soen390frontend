@@ -10,6 +10,7 @@ import { environment } from 'src/environments/environment';
 export class MappedinService {
   private mapView: MapView | undefined;
   private mappedInContainer: HTMLElement | undefined;
+  private mapId: string;
   private mapData$ = new BehaviorSubject<MapData | null>(null);
   
   private readonly _isMappedin$ = new BehaviorSubject<boolean>(false);
@@ -41,7 +42,7 @@ export class MappedinService {
 
   async initializeMap(container: HTMLElement): Promise<void> {
     this.mappedInContainer = container;
-    this.setMapData('67b674be13a4e9000b46cf2e');
+    this.setMapData('67b39ca55b54d7000b151bdb');
   }
 
   private initializeConnections(mapData: MapData) {
@@ -60,6 +61,7 @@ export class MappedinService {
         label = 'Elevator';
         labelColor = '#a000c8';
       }
+
       if (coords) {
         this.mapView.Labels.add(coords, label, {
           interactive: true,
@@ -126,6 +128,7 @@ export class MappedinService {
 
   public async setMapData(mapId: string) {
     // Get the map data and update the observable
+    this.mapId = mapId;
     this.mapData$.next(await getMapData({
       mapId,
       key: environment.mappedin.key,
@@ -144,6 +147,10 @@ export class MappedinService {
 
   public getMapData(): Observable<MapData | null> {
     return this.mapData$.asObservable();
+  }
+
+  public getMapId(): string {
+    return this.mapId;
   }
   
   /**
