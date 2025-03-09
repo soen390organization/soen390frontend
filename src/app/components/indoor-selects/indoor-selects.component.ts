@@ -11,6 +11,7 @@ import { MappedinService } from 'src/app/services/mappedIn.service';
 })
 export class IndoorSelectsComponent implements OnInit {
   floors: any[] = [];
+  isLoadingFloors: boolean = true;
   selectedFloor: string = '';
 
   constructor(private mappedInService: MappedinService) { }
@@ -19,6 +20,7 @@ export class IndoorSelectsComponent implements OnInit {
     this.mappedInService.getMapData().subscribe(async map => {
       if (map) {
         this.floors = await this.mappedInService.getFloors();
+        this.isLoadingFloors = false;
         console.log(this.floors);
       }
     });

@@ -26,6 +26,7 @@ export class InteractionBarComponent implements AfterViewInit {
   public currentY = 0;
   public isDragging = false;
   public threshold = 50; // Minimum swipe distance to trigger action
+  public swipeProgress: number = 0;
   isExpanded = false; // Track the footer's state
   campusBuildings = { locations: [] as Location[], loading: true }
   pointsOfInterest = { locations: [] as Location[], loading: true }
@@ -81,6 +82,7 @@ export class InteractionBarComponent implements AfterViewInit {
     footer.style.transform = this.isExpanded
       ? 'translateY(0)'
       : 'translateY(80%)';
+    this.swipeProgress = this.isExpanded ? 1 : 0;
   }
 
   /** Start dragging */
@@ -101,11 +103,14 @@ export class InteractionBarComponent implements AfterViewInit {
 
     // Adjust footer position dynamically
     const footer = this.footerContainer.nativeElement;
-    const translateY = this.isExpanded ? -diff : 80 - diff;
+    const baseTranslate = this.isExpanded ? 0 : 80;
+    const translateY = baseTranslate - diff;
+    const clampedTranslate = Math.min(Math.max(translateY, 0), 80);
     footer.style.transform = `translateY(${Math.min(
       Math.max(translateY, 0),
       80
     )}%)`;
+    this.swipeProgress = (80 - clampedTranslate) / 80;
   }
 
   /** End dragging & determine if expansion should happen */
@@ -125,5 +130,6 @@ export class InteractionBarComponent implements AfterViewInit {
     footer.style.transform = this.isExpanded
       ? 'translateY(0)'
       : 'translateY(80%)';
+    this.swipeProgress = this.isExpanded ? 1 : 0;
   }
 }
