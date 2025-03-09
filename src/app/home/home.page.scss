@@ -19,6 +19,7 @@
 @media (any-pointer: coarse) {
  .moved-down {
    margin-top: 195px;
-   margin-left: 75%;
+   position: absolute;
+   right:10px;
  }
 }
