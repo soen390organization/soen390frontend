@@ -12,6 +12,7 @@ describe('Map - Directions and Route Generation', () => {
     cy.get('input[placeholder="Choose starting point..."]')
       .clear()
       .type('Hall Building Auditorium');
+    cy.wait(2000);
     cy.get('input[placeholder="Choose starting point..."]').type('{enter}');
     cy.wait(2000);
 
@@ -19,7 +20,7 @@ describe('Map - Directions and Route Generation', () => {
     cy.get('input[placeholder="Choose destination point..."]')
       .clear()
       .type('JMSB');
-    cy.wait(1000)
+    cy.wait(3000)
     cy.get('input[placeholder="Choose destination point..."]').type('{enter}');
     cy.wait(2000);
 

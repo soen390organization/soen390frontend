@@ -1,6 +1,21 @@
 describe('Map - Directions and Route Generation for Multi-Transportation Modes', () => {
   beforeEach(() => {
-    cy.visit('/');
+    cy.visit('/', {
+      onBeforeLoad(win) {
+        // Stub geolocation to simulate being inside SGW campus.
+        const testLat = 45.497165958498655;
+        const testLng = -73.57903212232189;
+        cy.stub(win.navigator.geolocation, 'getCurrentPosition').callsFake((cb) => {
+          cb({
+            coords: {
+              latitude: testLat,
+              longitude: testLng,
+              accuracy: 10,
+            },
+          });
+        });
+      },
+    });
     Cypress.config('defaultCommandTimeout', 20000);
   });
 
@@ -12,7 +27,7 @@ describe('Map - Directions and Route Generation for Multi-Transportation Modes',
     cy.get('input[placeholder="Choose starting point..."]')
       .clear()
       .type('JMSB');
-    cy.wait(1000);
+    cy.wait(3000);
     cy.get('input[placeholder="Choose starting point..."]').type('{enter}');
     cy.wait(2000);
 
@@ -20,7 +35,7 @@ describe('Map - Directions and Route Generation for Multi-Transportation Modes',
     cy.get('input[placeholder="Choose destination point..."]')
       .clear()
       .type('Vanier Library');
-    cy.wait(1000);
+    cy.wait(3000);
     cy.get('input[placeholder="Choose destination point..."]').type('{enter}');
     cy.wait(2000);
 

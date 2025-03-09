@@ -1,6 +1,21 @@
 describe('Map - Directions to Mango Bay', () => {
   beforeEach(() => {
-    cy.visit('/');
+    cy.visit('/', {
+      onBeforeLoad(win) {
+        // Stub geolocation to simulate being inside SGW campus.
+        const testLat = 45.497165958498655;
+        const testLng = -73.57903212232189;
+        cy.stub(win.navigator.geolocation, 'getCurrentPosition').callsFake((cb) => {
+          cb({
+            coords: {
+              latitude: testLat,
+              longitude: testLng,
+              accuracy: 10,
+            },
+          });
+        });
+      },
+    });
     Cypress.config('defaultCommandTimeout', 20000);
   });
 
