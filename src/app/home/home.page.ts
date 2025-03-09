@@ -1,6 +1,7 @@
 import { Component, OnInit, EventEmitter } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { MapType, selectCurrentMap } from 'src/app/store/app';
+import { Router } from '@angular/router';
 
 let isSearchVisible_Global = false;
 let searchStateChange = new EventEmitter<boolean>();
@@ -22,7 +23,7 @@ export class HomePage implements OnInit {
   // Search-related property
   isSearchVisible = false;
 
-  constructor(private readonly store: Store) {
+  constructor(private readonly store: Store, private router: Router) {
     // Subscribe to search state changes
     searchStateChange.subscribe((state: boolean) => {
       this.isSearchVisible = state;
@@ -35,6 +36,11 @@ export class HomePage implements OnInit {
     this.store.select(selectCurrentMap).subscribe(map => {
       this.currentMap = map;
     });
+  }
+
+  openUserInfoPage() {
+    this.loading = false;
+    this.router.navigate(['user-info']);
   }
 
   onGoogleMapInitialized(): void {

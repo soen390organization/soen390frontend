@@ -10,6 +10,7 @@ import { SwitchCampusButtonComponent } from '../components/switch-campus-button/
 import { InteractionBarComponent } from "../components/interaction-bar/interaction-bar.component";
 import { MappedinMapComponent } from '../components/mappedin-map/mappedin-map.component';
 import { SwitchMapButtonComponent } from '../components/switch-map-button/switch-map-button.component';
+import { UserProfileComponent } from '../components/user-profile/user-profile.component';
 
 @NgModule({
   imports: [
@@ -23,6 +24,7 @@ import { SwitchMapButtonComponent } from '../components/switch-map-button/switch
     IonicModule,
     HomePageRoutingModule,
     InteractionBarComponent,
+    UserProfileComponent,
 ],
   declarations: [HomePage],
   exports: [GoogleMapComponent]
