@@ -33,6 +33,8 @@ describe('Map - Directions and Route Generation', () => {
     // Click the "Start" button to generate the route.
     cy.contains('button', 'Start').click();
 
+    cy.wait(2000)
+
     // Click the handle bar using the provided class.
     cy.get('.w-\\[100px\\].h-\\[10px\\].bg-\\[\\#d5d5d5\\].my-\\[10px\\].mx-auto.rounded-full.cursor-pointer', { timeout: 10000 })
       .should('be.visible')
@@ -42,7 +44,7 @@ describe('Map - Directions and Route Generation', () => {
 
     // Verify that the directions component is displayed by checking for step instructions.
     // For example, we expect at least one element with the instruction text container.
-    cy.get('div.ml-3.text-xl.font-semibold.text-black.text-left', { timeout: 10000 })
+    cy.get('app-directions', { timeout: 10000 })
       .should('exist')
       .and(($steps) => {
         expect($steps.length, 'At least one step is displayed').to.be.greaterThan(0);
@@ -56,6 +58,12 @@ describe('Map - Directions and Route Generation', () => {
     cy.wait(2000)
 
     // Verify that the directions component disappears.
-    cy.get('div.ml-3.text-xl.font-semibold.text-black.text-left').should('not.exist');
+    cy.get('app-directions').should('not.exist');
+
+    cy.get('.w-\\[100px\\].h-\\[10px\\].bg-\\[\\#d5d5d5\\].my-\\[10px\\].mx-auto.rounded-full.cursor-pointer', { timeout: 10000 })
+      .should('be.visible')
+      .click();
+
+    cy.wait(2000)
   });
 });
