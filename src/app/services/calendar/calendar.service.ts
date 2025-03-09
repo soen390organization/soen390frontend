@@ -34,6 +34,7 @@ export class CalendarService {
       const accessToken = credential.accessToken;
       const calendars = await this.getUserCalendars(accessToken);
       this.calendarsSubject.next(calendars); // Store the list of calendars
+      console.log(calendars)
       return true;
     } catch (error) {
       console.error('Error during Google Sign-In:', error);
