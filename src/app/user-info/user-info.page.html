@@ -1,10 +1,15 @@
 <!-- Main content container with no bottom padding -->
 <ion-content [fullscreen]="true" scrollY="false" class="pb-0">
-  <div class="fullwidth absolute top-[24px] left-1/2 -translate-x-1/2 z-[999] flex space-x-4">
-    <app-back-button (click)="openHomePage()"></app-back-button>
-    <p class="center-title">User Profile</p>
-  </div>
-  <div>
-    <google-signin (click)="signInWithGoogle()"></google-signin>
+  <div class="h-full flex justify-center">
+    <div class="fullwidth absolute top-[24px] left-1/2 -translate-x-1/2 z-[999] flex space-x-4">
+      <app-back-button (click)="openHomePage()"></app-back-button>
+      <p class="center-title">User Profile</p>
+    </div>
+    <div class="flex items-center">
+      <google-signin (click)="signInWithGoogle()"></google-signin>
+    </div>
+    <div>
+      <calendar-list></calendar-list>
+    </div>
   </div>
 </ion-content>
