@@ -5,6 +5,7 @@
     <li
       *ngFor="let calendar of calendars"
       (click)="selectCalendar(calendar.id)"
+      (keydownenter)="selectCalendar(calendar.id)"
       class="flex items-center p-3 rounded-lg cursor-pointer"
       [class.bg-blue-100]="calendar.id === selectedCalendar"
     >
