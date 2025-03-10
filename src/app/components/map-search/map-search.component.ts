@@ -60,10 +60,10 @@ export class MapSearchComponent implements OnInit {
   enableStart$!: Observable<boolean>;
 
   constructor(
-    public directionsService: DirectionsService,
+    public readonly directionsService: DirectionsService,
     private readonly placesService: PlacesService,
-    private readonly currentLocationService: CurrentLocationService
-  , private visibilityService: VisibilityService) {}
+    private readonly currentLocationService: CurrentLocationService,
+    private readonly visibilityService: VisibilityService) {}
 
   ngOnInit(): void {
     this.enableStart$ = this.visibilityService.enableStart;

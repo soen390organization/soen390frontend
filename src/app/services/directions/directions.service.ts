@@ -219,7 +219,7 @@ export class DirectionsService {
 
           resolve({ steps, eta });
         } else {
-          reject(status);
+          reject(Error(status));
         }
       });
     });

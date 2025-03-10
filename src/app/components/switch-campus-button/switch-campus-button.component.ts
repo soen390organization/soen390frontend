@@ -19,7 +19,7 @@ export class SwitchCampusButtonComponent {
   // Consider Moving to places API or 1 service
   campusData: any = data;
 
-  constructor(private store: Store, private googleMapService: GoogleMapService, private placesService: PlacesService) {
+  constructor(private readonly store: Store, private readonly googleMapService: GoogleMapService) {
     this.selectedCampus$ = this.store.select(selectSelectedCampus);
   }
 

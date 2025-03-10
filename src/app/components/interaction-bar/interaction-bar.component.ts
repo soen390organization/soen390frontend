@@ -33,8 +33,7 @@ export class InteractionBarComponent implements AfterViewInit {
   constructor(
     private readonly store: Store,
     private readonly placesService: PlacesService,
-    private readonly directionsService: DirectionsService
-  , private visibilityService: VisibilityService) {}
+    private readonly visibilityService: VisibilityService) {}
 
   ngOnInit() {
     this.placesService
