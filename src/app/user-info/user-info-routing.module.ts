@@ -7,10 +7,6 @@ const routes: Routes = [
   {
     path: '',
     component: UserInfoPage
-  },
-  {
-    path: 'home',
-    component: HomePage
   }
 ];
 

@@ -16,7 +16,7 @@ export class CalendarService {
   private readonly calendarsSubject = new BehaviorSubject<any[]>([]);
   calendars$ = this.calendarsSubject.asObservable();
 
-  private readonly selectedCalendarSubject = new BehaviorSubject<string | null>(null);
+  public selectedCalendarSubject = new BehaviorSubject<string | null>(null);
   selectedCalendar$ = this.selectedCalendarSubject.asObservable();
 
   events$: Observable<any[]> = this.selectedCalendar$.pipe(

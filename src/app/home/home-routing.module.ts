@@ -7,10 +7,6 @@ const routes: Routes = [
   {
     path: '',
     component: HomePage,
-  },
-  {
-    path: 'app-user-info',
-    component: UserInfoPage,
   }
 ];
 
