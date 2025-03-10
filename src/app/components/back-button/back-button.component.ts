@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -7,10 +7,9 @@ import { CommonModule } from '@angular/common';
   styleUrls: ['./back-button.component.scss'],
   standalone: false
 })
-export class BackButtonComponent  implements OnInit {
+export class BackButtonComponent {
 
   constructor() { }
 
   ngOnInit(): void {}
-
 }

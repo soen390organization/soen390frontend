@@ -10,12 +10,11 @@ import {
   transition,
   trigger,
 } from '@angular/animations';
-import { VisibilityService } from 'src/app/services/visibility.service';
 import { Observable } from 'rxjs';
 import { CalendarService } from 'src/app/services/calendar/calendar.service';
 
 @Component({
-  selector: 'google-signin',
+  selector: 'app-google-signin',
   imports: [IonicModule, CommonModule, FormsModule],
   templateUrl: './google-signin.component.html',
   styleUrls: ['./google-signin.component.scss'],

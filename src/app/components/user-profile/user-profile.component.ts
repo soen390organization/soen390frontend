@@ -1,5 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
-import { GoogleMapComponent } from '../google-map/google-map.component';
+import { Component } from '@angular/core';
 import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -10,8 +9,6 @@ import {
   transition,
   trigger,
 } from '@angular/animations';
-import { VisibilityService } from 'src/app/services/visibility.service';
-import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-user-profile',
@@ -42,11 +39,8 @@ import { Observable } from 'rxjs';
   ],
 })
 
-export class UserProfileComponent implements OnInit {
+export class UserProfileComponent{
 
   constructor(
   ) {}
-
-  ngOnInit(): void {
-  }
 }
