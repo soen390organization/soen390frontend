@@ -3,12 +3,12 @@ import { CommonModule } from '@angular/common';
 import { CalendarService } from 'src/app/services/calendar/calendar.service';
 
 @Component({
-  selector: 'calendar-list',
+  selector: 'app-calendar-list',
   templateUrl: './calendar-list.component.html',
   styleUrls: ['./calendar-list.component.scss'],
   imports: [CommonModule]
 })
-export class CalendarList implements OnInit{
+export class CalendarListComponent implements OnInit{
   calendars: any[] = []
   selectedCalendar: any
 
