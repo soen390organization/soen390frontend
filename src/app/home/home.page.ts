@@ -40,7 +40,7 @@ export class HomePage implements OnInit {
 
   openUserInfoPage() {
     this.loading = false;
-    this.router.navigate(['user-info']);
+    this.router.navigate(['profile']);
   }
 
   onGoogleMapInitialized(): void {

@@ -1,7 +1,6 @@
 <div class="fullwidth absolute top-[24px] left-1/2 -translate-x-1/2 z-[999] flex space-x-4">
   <app-switch-campus-button [class.moved-down-switch-campus]="isSearchVisible"></app-switch-campus-button>
   <app-user-profile [class.moved-down-user-profile]="isSearchVisible" (click)="openUserInfoPage()"></app-user-profile>
-  <app-map-search searchStateChange="onSearchStateChanged($event)"></app-map-search>
 </div>
 <app-map-search searchStateChange="onSearchStateChanged($event)"></app-map-search>
 

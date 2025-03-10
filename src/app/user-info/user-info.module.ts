@@ -10,7 +10,6 @@ import { UserInfoPage } from './user-info.page';
 import { InteractionBarComponent } from '../components/interaction-bar/interaction-bar.component';
 import { UserProfileComponent } from '../components/user-profile/user-profile.component';
 import { GoogleSignInComponent } from '../components/google-signin/google-signin.component';
-import { BackButtonComponent } from '../components/back-button/back-button.component';
 import { CalendarListComponent } from '../components/calendar-list/calendar-list.component';
 
 @NgModule({
@@ -24,6 +23,6 @@ import { CalendarListComponent } from '../components/calendar-list/calendar-list
     GoogleSignInComponent,
     CalendarListComponent
   ],
-  declarations: [UserInfoPage, BackButtonComponent]
+  declarations: [UserInfoPage]
 })
 export class UserInfoPageModule {}

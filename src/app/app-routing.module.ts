@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
+import { UserInfoPage } from './user-info/user-info.page';
 
 const routes: Routes = [
   {
@@ -12,8 +13,8 @@ const routes: Routes = [
     pathMatch: 'full'
   },
   {
-    path: 'user-info',
-    redirectTo: 'user-info',
+    path: 'profile',
+    component: UserInfoPage,
     pathMatch: 'full'
   },
   {
