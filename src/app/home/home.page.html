@@ -1,6 +1,7 @@
 <!-- action buttons -->
 <div class="fullwidth absolute top-[24px] left-1/2 -translate-x-1/2 z-[999] flex space-x-4">
-  <app-switch-campus-button [class.moved-down]="isSearchVisible"></app-switch-campus-button>
+  <app-switch-campus-button [class.moved-down-switch-campus]="isSearchVisible"></app-switch-campus-button>
+  <app-user-profile [class.moved-down-user-profile]="isSearchVisible" (click)="openUserInfoPage()" (keydown.enter)="openUserInfoPage()"></app-user-profile>
 </div>
   <app-map-search searchStateChange="onSearchStateChanged($event)" class="pr-2"></app-map-search>
 
@@ -15,7 +16,7 @@
       }"
       (initialized)="onGoogleMapInitialized()">
     </app-google-map>
-    
+
     <app-mappedin-map
       class="absolute top-0 left-0 w-full h-full transition-opacity duration-300 ease-linear"
       [ngClass]="{

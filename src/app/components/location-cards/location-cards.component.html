@@ -3,9 +3,8 @@
 
     <ng-container *ngIf="loading; else showCards">
       <div class="w-[224px] h-[186px] overflow-hidden shrink-0" *ngFor="let _ of [1,2,3,4,5,6]">
-        <img class="bg-gray-200 w-[224px] h-[130px] bg-gray-200 animate-pulse rounded-2xl" />
+        <img class="bg-gray-200 w-[224px] h-[130px] bg-gray-200 animate-pulse rounded-2xl" alt="loading image"/>
         <div class="mt-2">
-          <h3 class="h-4 w-3/4 bg-gray-200 rounded"></h3>
           <p class="h-3 w-1/2 bg-gray-200 rounded mt-1"></p>
         </div>
       </div>

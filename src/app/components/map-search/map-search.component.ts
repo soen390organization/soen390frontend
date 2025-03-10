@@ -18,33 +18,35 @@ import { VisibilityService } from 'src/app/services/visibility.service';
 import { combineLatest, Observable } from 'rxjs';
 import { filter } from 'rxjs/operators';
 
+export const MapSeachAnimation = [
+  trigger('slideInOut', [
+    state(
+      'in',
+      style({
+        width: '100%',
+        opacity: 1,
+        transform: 'translateX(0)',
+      })
+    ),
+    state(
+      'out',
+      style({
+        width: '0px',
+        opacity: 0,
+        transform: 'translateX(-100%)',
+      })
+    ),
+    transition('out => in', animate('0.15s ease-in-out')),
+    transition('in => out', animate('0.15s ease-in-out')),
+  ]),
+]
+
 @Component({
   selector: 'app-map-search',
   imports: [IonicModule, CommonModule, FormsModule],
   templateUrl: './map-search.component.html',
   styleUrls: ['./map-search.component.scss'],
-  animations: [
-    trigger('slideInOut', [
-      state(
-        'in',
-        style({
-          width: '100%',
-          opacity: 1,
-          transform: 'translateX(0)',
-        })
-      ),
-      state(
-        'out',
-        style({
-          width: '0px',
-          opacity: 0,
-          transform: 'translateX(-100%)',
-        })
-      ),
-      transition('out => in', animate('0.15s ease-in-out')),
-      transition('in => out', animate('0.15s ease-in-out')),
-    ]),
-  ],
+  animations: MapSeachAnimation
 })
 
 export class MapSearchComponent implements OnInit {
@@ -58,10 +60,10 @@ export class MapSearchComponent implements OnInit {
   enableStart$!: Observable<boolean>;
 
   constructor(
-    public directionsService: DirectionsService,
+    public readonly directionsService: DirectionsService,
     private readonly placesService: PlacesService,
-    private readonly currentLocationService: CurrentLocationService
-  , private visibilityService: VisibilityService) {}
+    private readonly currentLocationService: CurrentLocationService,
+    private readonly visibilityService: VisibilityService) {}
 
   ngOnInit(): void {
     this.enableStart$ = this.visibilityService.enableStart;

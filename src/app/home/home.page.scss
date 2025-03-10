@@ -15,11 +15,22 @@
   top: 0px;
 }
 
+.fullwidth app-user-profile {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+}
+
 //For mobile display only.
 @media (any-pointer: coarse) {
- .moved-down {
+ .moved-down-switch-campus {
    margin-top: 195px;
    position: absolute;
    right:10px;
  }
+
+  .moved-down-user-profile {
+    margin-top: 195px;
+    margin-left: 75%;
+  }
 }

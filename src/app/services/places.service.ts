@@ -13,7 +13,7 @@ export class PlacesService {
   private placesServiceReady = new BehaviorSubject<boolean>(false);
   private campusData: any = data;
 
-  constructor(private store: Store<AppState>) {}
+  constructor(private readonly store: Store<AppState>) {}
 
   /**
    * Initializes the PlacesService with a given Google Map instance.
