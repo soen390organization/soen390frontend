@@ -8,10 +8,14 @@ import { GoogleMapComponent } from '../components/google-map/google-map.componen
 import { MapSearchComponent } from '../components/map-search/map-search.component';
 import { SwitchCampusButtonComponent } from '../components/switch-campus-button/switch-campus-button.component';
 import { InteractionBarComponent } from "../components/interaction-bar/interaction-bar.component";
+import { MappedinMapComponent } from '../components/mappedin-map/mappedin-map.component';
+import { SwitchMapButtonComponent } from '../components/switch-map-button/switch-map-button.component';
+import { UserProfileComponent } from '../components/user-profile/user-profile.component';
 
 @NgModule({
   imports: [
     SwitchCampusButtonComponent,
+    MappedinMapComponent,
     MapSearchComponent,
     GoogleMapComponent,
     CommonModule,
@@ -19,6 +23,7 @@ import { InteractionBarComponent } from "../components/interaction-bar/interacti
     IonicModule,
     HomePageRoutingModule,
     InteractionBarComponent,
+    UserProfileComponent,
 ],
   declarations: [HomePage],
   exports: [GoogleMapComponent]

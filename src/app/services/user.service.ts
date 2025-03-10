@@ -13,7 +13,7 @@ import { UserInterface } from '../interfaces/user.interface';
   providedIn: 'root',
 })
 export class UserService {
-  constructor(private apiService: ApiService) {}
+  constructor(private readonly apiService: ApiService) {}
 
   public async createUser(user: UserInterface): Promise<void> {
     try {

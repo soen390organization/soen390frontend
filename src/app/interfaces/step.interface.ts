@@ -1,6 +1,7 @@
 export interface Step {
     instructions: string;
     start_location: google.maps.LatLng;
+    end_location: google.maps.LatLng;
     distance?: {
       text: string;
       value: number;

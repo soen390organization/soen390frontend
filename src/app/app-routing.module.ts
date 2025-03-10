@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
+import { UserInfoPage } from './user-info/user-info.page';
 
 const routes: Routes = [
   {
@@ -10,6 +11,15 @@ const routes: Routes = [
     path: '',
     redirectTo: 'home',
     pathMatch: 'full'
+  },
+  {
+    path: 'profile',
+    component: UserInfoPage,
+    pathMatch: 'full'
+  },
+  {
+    path: 'user-info',
+    loadChildren: () => import('./user-info/user-info.module').then( m => m.UserInfoPageModule)
   },
 ];
 

@@ -1,0 +1,34 @@
+<div class="absolute left-2 top-[-120px] flex flex-col gap-2">
+  <!-- Floor select with custom arrow -->
+  <div class="relative inline-block w-fit">
+    <select
+      [ngClass]="{'animate-pulse bg-text-gray-200': isLoadingFloors}"
+      class="appearance-none flex rounded-full bg-white text-black p-3 pr-10 shadow font-bold focus:outline-none whitespace-nowrap w-fit min-w-[120px]"
+      [(ngModel)]="selectedFloor"
+      (change)="onFloorChange(selectedFloor)">
+      <option *ngFor="let floor of floors" [ngValue]="floor.id">
+        {{ floor.name }}
+      </option>
+    </select>
+    <span
+      class="material-symbols-outlined text-black absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none"
+      [ngClass]="{'animate-pulse text-gray-200': isLoadingFloors}">
+      keyboard_arrow_down
+    </span>
+  </div>
+
+  <!-- Building select with custom arrow -->
+  <div class="relative inline-block w-fit">
+    <select
+      class="appearance-none flex rounded-full bg-white text-black p-3 pr-10 shadow font-bold focus:outline-none whitespace-nowrap"
+      [(ngModel)]="selectedBuilding"
+      (change)="onBuildingChange(selectedBuilding)">
+      <option *ngFor="let building of buildings" [ngValue]="building.indoorMapId">
+        {{ building.abreviation }} Building
+      </option>
+    </select>
+    <span class="material-symbols-outlined text-black absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+      keyboard_arrow_down
+    </span>
+  </div>
+</div>

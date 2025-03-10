@@ -1,33 +1,36 @@
-#container {
-  text-align: center;
-
+.fullwidth {
+  display: flex;
   position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
+  width: 100%;
+  justify-content: center;
 }
 
-#container strong {
-  font-size: 20px;
-  line-height: 26px;
+.fullwidth app-switch-campus-button {
+  justify-content: center;
 }
 
-#container p {
-  font-size: 16px;
-  line-height: 22px;
-
-  color: #8c8c8c;
-
-  margin: 0;
+.fullwidth app-map-search {
+  position: absolute;
+  right: 0px;
+  top: 0px;
 }
 
-#container a {
-  text-decoration: none;
+.fullwidth app-user-profile {
+  position: absolute;
+  left: 0px;
+  top: 0px;
 }
 
-.ios {
-  ion-searchbar{
-    padding: 8px 12px;
+//For mobile display only.
+@media (any-pointer: coarse) {
+ .moved-down-switch-campus {
+   margin-top: 195px;
+   position: absolute;
+   right:10px;
+ }
+
+  .moved-down-user-profile {
+    margin-top: 195px;
+    margin-left: 75%;
   }
 }

@@ -13,12 +13,13 @@ import data from 'src/assets/ConcordiaData.json';
   templateUrl: './switch-campus-button.component.html',
   styleUrls: ['./switch-campus-button.component.scss'],
 })
+
 export class SwitchCampusButtonComponent {
   selectedCampus$: Observable<string>;
   // Consider Moving to places API or 1 service
   campusData: any = data;
 
-  constructor(private store: Store, private googleMapService: GoogleMapService, private placesService: PlacesService) {
+  constructor(private readonly store: Store, private readonly googleMapService: GoogleMapService) {
     this.selectedCampus$ = this.store.select(selectSelectedCampus);
   }
 

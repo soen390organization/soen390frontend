@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input} from '@angular/core';
-import { LocationCard } from 'src/app/interfaces/location-card.interface';
+import { Location } from 'src/app/interfaces/location.interface';
+import { DirectionsService } from 'src/app/services/directions/directions.service';
 
 @Component({
   selector: 'app-location-cards',
@@ -9,10 +10,23 @@ import { LocationCard } from 'src/app/interfaces/location-card.interface';
   styleUrls: ['./location-cards.component.scss'],
 })
 export class LocationCardsComponent{
-  @Input() locations: LocationCard[] = [];
+  @Input() locations: Location[] = [];
   @Input() loading: boolean = false;
 
-  constructor() { }
+  constructor(private readonly directionsService: DirectionsService) {}
 
+  onImageError(event: Event) {
+    const imgElement = event.target as HTMLImageElement;
+    imgElement.src = 'assets/images/poi_fail.png';
+    imgElement.onerror = null; // Prevent infinite loop if the placeholder fails
+  }
 
+  setDestination(location: any) {
+    console.log(location);
+    this.directionsService.setDestinationPoint({
+      title: location.name,
+      coordinates: location.coordinates,
+      address: location.address,
+    });
+  }
 }

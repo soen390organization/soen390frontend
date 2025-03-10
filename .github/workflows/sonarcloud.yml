@@ -36,6 +36,11 @@ jobs:
               storageBucket: '${{ secrets.FIREBASE_STORAGE_BUCKET }}',
               messagingSenderId: '${{ secrets.FIREBASE_MESSENGER_SENDER_ID }}',
               appId: '${{ secrets.FIREBASE_APP_ID }}',
+            },
+            mappedin: {
+              mapId: '${{ secrets.MAPPEDIN_MAP_ID }}',
+              key: '${{ secrets.MAPPEDIN_KEY }}',
+              secret: '${{ secrets.MAPPEDIN_SECRET }}'
             }
           };
           EOF

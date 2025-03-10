@@ -1,11 +1,10 @@
 <div class="flex flex-col items-start">
-  <div class="flex gap-4 overflow-x-auto w-full">
+  <div class="flex gap-4 overflow-x-auto w-full touch-pan-x">
 
     <ng-container *ngIf="loading; else showCards">
       <div class="w-[224px] h-[186px] overflow-hidden shrink-0" *ngFor="let _ of [1,2,3,4,5,6]">
-        <img class="bg-gray-200 w-[224px] h-[130px] bg-gray-200 animate-pulse rounded-2xl" />
+        <img class="bg-gray-200 w-[224px] h-[130px] bg-gray-200 animate-pulse rounded-2xl" alt="loading image"/>
         <div class="mt-2">
-          <h3 class="h-4 w-3/4 bg-gray-200 rounded"></h3>
           <p class="h-3 w-1/2 bg-gray-200 rounded mt-1"></p>
         </div>
       </div>
@@ -13,8 +12,12 @@
 
 
     <ng-template #showCards>
-      <div class="w-[224px] h-[186px] bg-white overflow-hidden shrink-0" *ngFor="let location of locations">
-        <img [src]="location.image" class="bg-gray-200 w-[224px] h-[130px] object-cover rounded-2xl" />
+      <div
+        *ngFor="let location of locations"
+        (click)="setDestination(location)"
+        class="w-[224px] h-[186px] bg-white overflow-hidden shrink-0 hover:cursor-pointer "
+      >
+        <img [src]="location.image" class="bg-gray-200 w-[224px] h-[130px] object-cover rounded-2xl" (error)="onImageError($event)" alt="location"/>
         <div class="mt-2">
           <h3 class="text-left text-lg font-bold text-gray-800"> {{ location.name | slice:0:22 }}{{ location.name.length
             > 22 ? '...' : '' }}</h3>

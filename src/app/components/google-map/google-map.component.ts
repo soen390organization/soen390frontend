@@ -1,5 +1,5 @@
 /// <reference types="google.maps" />
-import { Component, AfterViewInit, ElementRef, ViewChild } from '@angular/core';
+import { Component, AfterViewInit, ElementRef, ViewChild, Output, EventEmitter } from '@angular/core';
 import { PolygonBuilder } from 'src/app/builders/polygon.builder';
 import data from 'src/assets/ConcordiaData.json';
 import { CurrentLocationService } from 'src/app/services/geolocation/current-location.service';
@@ -15,6 +15,7 @@ import { IonicModule } from '@ionic/angular';
 })
 export class GoogleMapComponent implements AfterViewInit {
   @ViewChild('mapContainer', { static: false }) mapContainer!: ElementRef;
+  @Output() initialized = new EventEmitter<void>();
   currentLocationService: CurrentLocationService = new CurrentLocationService();
   geolocationService: GeolocationService = new GeolocationService();
   buildingPolygon!: google.maps.Polygon;
@@ -42,8 +43,7 @@ export class GoogleMapComponent implements AfterViewInit {
     return new Promise((resolve) => {
       (window as any).initMap = () => resolve(); // This is the callback from the script
       const script = document.createElement('script');
-    
-      script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyApYbY5rSV5IyZJ1WMLDMM-I3M5VZQTC9g&callback=initMap&libraries=geometry,places';
+      script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyDWKEjdfWBjgMoRhicU_t4XDhoUnMr5LDM&callback=initMap&libraries=geometry,places&loading=async';
       script.async = true;
       script.defer = true;
       document.body.appendChild(script);
@@ -57,6 +57,8 @@ export class GoogleMapComponent implements AfterViewInit {
       center: data.sgw.coordinates
     }));
     await this.loadBuildings();
+    this.initialized.emit();
+    console.log('Google Map initialized: ', this.initialized);
   }
 
   async loadBuildings() {

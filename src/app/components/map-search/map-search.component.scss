@@ -22,3 +22,13 @@ ion-searchbar {
   position: relative; 
 }
 
+@media (max-width: 700px) {
+  .centered-mobile {
+    right: auto !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+  }
+}
+
+
+
