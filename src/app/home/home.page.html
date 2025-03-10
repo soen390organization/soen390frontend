@@ -3,6 +3,7 @@
   <app-user-profile [class.moved-down-user-profile]="isSearchVisible" (click)="openUserInfoPage()"></app-user-profile>
   <app-map-search searchStateChange="onSearchStateChanged($event)"></app-map-search>
 </div>
+<app-map-search searchStateChange="onSearchStateChanged($event)"></app-map-search>
 
 <!-- Main content container with no bottom padding -->
 <ion-content [fullscreen]="true" scrollY="false" class="pb-0">
@@ -34,4 +35,4 @@
 <app-switch-map-button></app-switch-map-button>
 
 <!-- Global interaction bar -->
-<app-interaction-bar class="z-[100]"></app-interaction-bar>
+<app-interaction-bar class="z-[1000]"></app-interaction-bar>
