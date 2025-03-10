@@ -12,7 +12,7 @@ import { CalendarService } from '../services/calendar/calendar.service';
 export class UserInfoPage{
   calendars: any[] = []
 
-  constructor(private router: Router, private readonly calendarService: CalendarService) {
+  constructor(private readonly router: Router, private readonly calendarService: CalendarService) {
   }
 
   openHomePage() {

@@ -3,13 +3,6 @@ import { GoogleMapComponent } from '../google-map/google-map.component';
 import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import {
-  animate,
-  state,
-  style,
-  transition,
-  trigger,
-} from '@angular/animations';
 import { Observable } from 'rxjs';
 import { CalendarService } from 'src/app/services/calendar/calendar.service';
 

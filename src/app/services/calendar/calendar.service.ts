@@ -38,7 +38,7 @@ export class CalendarService {
       const result = await signInWithPopup(this.auth, this.googleProvider);
       const credential = GoogleAuthProvider.credentialFromResult(result);
 
-      if (!credential || !credential.accessToken) {
+      if (!credential?.accessToken) {
         throw new Error('No credential or access token found');
       }
 
