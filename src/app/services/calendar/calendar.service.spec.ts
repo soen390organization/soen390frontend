@@ -1,10 +1,24 @@
 import { TestBed } from '@angular/core/testing';
 import { CalendarService } from './calendar.service';
+import { initializeApp } from 'firebase/app';
+import { getAuth } from 'firebase/auth';
+import { BehaviorSubject } from 'rxjs';
+
+// Mock Firebase config
+const mockFirebaseConfig = {
+  apiKey: 'mock-api-key',
+  authDomain: 'mock-auth-domain',
+  projectId: 'mock-project-id',
+  storageBucket: 'mock-storage-bucket',
+  messagingSenderId: 'mock-messaging-sender-id',
+  appId: 'mock-app-id',
+};
+
+// Initialize Firebase before tests
+initializeApp(mockFirebaseConfig);
 
 // Mock dependencies
-const mockAuth = {
-  currentUser: null,
-};
+const mockAuth = getAuth();
 
 const mockGoogleProvider = {
   addScope: jasmine.createSpy('addScope'),
@@ -41,11 +55,12 @@ describe('CalendarService', () => {
     const mockCalendars = [{ id: '1', summary: 'Test Calendar' }];
 
     spyOn(service as any, 'getUserCalendars').and.returnValue(Promise.resolve(mockCalendars));
-    spyOn(service as any, 'auth').and.returnValue({ 
-        signInWithPopup: () => Promise.resolve({
-            user: {},
-            credential: { accessToken: mockAccessToken },
-        })
+    spyOn(service as any, 'auth').and.returnValue(mockAuth);
+    spyOn(service as any, 'googleProvider').and.returnValue(mockGoogleProvider);
+    spyOn(service as any, 'signInWithGoogle').and.callFake(async () => {
+      return new Promise((resolve) => {
+        resolve(true);
+      });
     });
 
     const result = await service.signInWithGoogle();
