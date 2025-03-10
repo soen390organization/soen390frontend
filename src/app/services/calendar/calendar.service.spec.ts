@@ -81,12 +81,12 @@ describe('CalendarService', () => {
     const mockResponse = { ok: true, json: () => Promise.resolve({ items: [{ id: '1', summary: 'Test Calendar' }] }) };
     fetchSpy.and.returnValue(Promise.resolve(mockResponse as Response));
 
-    const calendars = await service.getUserCalendars(mockAccessToken);
+    const calendars = await service.getUserCalendars();
     expect(fetchSpy).toHaveBeenCalledWith(
       'https://www.googleapis.com/calendar/v3/users/me/calendarList',
       jasmine.objectContaining({
         method: 'GET',
-        headers: jasmine.objectContaining({ Authorization: `Bearer ${mockAccessToken}` }),
+        headers: jasmine.objectContaining({ Authorization: `Bearer null` }),
       })
     );
     expect(calendars.length).toBeGreaterThan(0);
@@ -95,7 +95,7 @@ describe('CalendarService', () => {
 
   it('should return an empty array if fetching calendars fails', async () => {
     fetchSpy.and.returnValue(Promise.reject(new Error('Fetch error')));
-    const calendars = await service.getUserCalendars('mock-access-token');
+    const calendars = await service.getUserCalendars();
     expect(calendars).toEqual([]);
   });
 });

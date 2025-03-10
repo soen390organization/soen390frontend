@@ -12,6 +12,7 @@ import {
 } from '@angular/animations';
 import { VisibilityService } from 'src/app/services/visibility.service';
 import { Observable } from 'rxjs';
+import { CalendarService } from 'src/app/services/calendar/calendar.service';
 
 @Component({
   selector: 'google-signin',
@@ -45,12 +46,20 @@ import { Observable } from 'rxjs';
 export class GoogleSignInComponent implements OnInit {
   @ViewChild(GoogleMapComponent) googleMap!: GoogleMapComponent;
   enableStart$!: Observable<boolean>;
+  calendars: any[] = [];
+  selectedCalendar: any;
 
   constructor(
-   private visibilityService: VisibilityService
+   private readonly calendarService: CalendarService
   ) {}
 
   ngOnInit(): void {
+    this.calendarService.calendars$.subscribe((calendars) => {
+      this.calendars = calendars;
+    });
 
+    this.calendarService.selectedCalendar$.subscribe((selectedCalendar) => {
+      this.selectedCalendar = selectedCalendar;
+    });
   }
 }
