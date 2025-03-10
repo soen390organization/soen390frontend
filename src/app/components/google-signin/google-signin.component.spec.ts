@@ -1,14 +1,14 @@
 import { of } from 'rxjs';
 import { ComponentFixture, TestBed, fakeAsync, tick, flushMicrotasks} from '@angular/core/testing';
-import { UserProfileComponent } from './user-profile.component';
+import { GoogleSignInComponent } from './google-signin.component';
 import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 describe('MapSearchComponent', () => {
-  let component: UserProfileComponent;
-  let fixture: ComponentFixture<UserProfileComponent>;
+  let component: GoogleSignInComponent;
+  let fixture: ComponentFixture<GoogleSignInComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -17,7 +17,7 @@ describe('MapSearchComponent', () => {
         CommonModule,
         FormsModule,
         BrowserAnimationsModule, // Needed if testing animations
-        UserProfileComponent,
+        GoogleSignInComponent,
       ],
       providers: [
         
@@ -26,7 +26,7 @@ describe('MapSearchComponent', () => {
   });
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(UserProfileComponent);
+    fixture = TestBed.createComponent(GoogleSignInComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
