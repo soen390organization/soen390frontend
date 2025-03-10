@@ -145,24 +145,26 @@ export class MappedinService {
   //   });
   // }
 
-  public async setMapData(mapId: string) {
-    // Get the map data and update the observable
-    this.mapId = mapId;
-    this.mapData$.next(await getMapData({
+  public fetchMapData(mapId: string): Promise<MapData> {
+    return getMapData({
       mapId,
       key: environment.mappedin.key,
       secret: environment.mappedin.secret,
-    }));
+    });
+  }
   
-    // Resolve the observable to get the MapData object
-    const mapData = await firstValueFrom(this.mapData$);
-    // Pass the resolved mapData to show3dMap
+  public async setMapData(mapId: string) {
+    this.mapId = mapId;
+    const mapData = await this.fetchMapData(mapId);
+    this.mapData$.next(mapData);
+  
     this.mapView = await this.show3dMap(this.mappedInContainer, mapData);
-
+  
     this.initializeSpaces(mapData);
     this.initializePointsOfInterests(mapData);
     this.initializeConnections(mapData);
   }
+  
 
   public getMapData(): Observable<MapData | null> {
     return this.mapData$.asObservable();
