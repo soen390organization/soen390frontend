@@ -1,12 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CalendarService } from 'src/app/services/calendar/calendar.service';
+import { IonicModule } from '@ionic/angular';
 
 @Component({
   selector: 'calendar-list',
   templateUrl: './calendar-list.component.html',
   styleUrls: ['./calendar-list.component.scss'],
-  imports: [CommonModule]
+  imports: [CommonModule, IonicModule]
 })
 export class CalendarList implements OnInit{
   calendars: any[] = []
@@ -17,13 +18,15 @@ export class CalendarList implements OnInit{
   ngOnInit(): void {
     this.calendarService.calendars$.subscribe(calendars => {
       this.calendars = calendars;
-      console.log('Updated Calendars:', this.calendars);
     });
 
     this.calendarService.selectedCalendar$.subscribe(selectedCalendar => {
       this.selectedCalendar = selectedCalendar
-      console.log("updated selectedCalendar:", this.selectedCalendar)
     })
+  }
+
+  selectCalendar(calendarId: string): void {
+    this.calendarService.setSelectedCalendar(calendarId)
   }
 
 }
