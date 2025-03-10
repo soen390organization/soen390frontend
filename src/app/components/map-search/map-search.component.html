@@ -29,10 +29,6 @@
           (keyup.enter)="directionsService.setStartPoint(places[0]); clearList()"
           type="text"
           placeholder="Choose starting point..."
-          (input)="onSearchChange($event, 'start')"
-          (keyup.enter)="directionsService.setStartPoint(places[0]); clearList()"
-          type="text"
-          placeholder="Choose starting point..."
           debounce="1000"
           class="w-full bg-white px-4 py-3 pr-10 rounded-full border border-gray-300 focus:outline-none"
         />
@@ -60,9 +56,7 @@
             <li
               *ngFor="let place of places"
               (click)="directionsService.setStartPoint(place); clearList()"
-              (keydown.enter)="directionsService.setStartPoint(place); clearList()"
-              (keypress.enter)="directionsService.setStartPoint(place); clearList()"
-              (keyup.enter)="directionsService.setStartPoint(place); clearList()"
+              (keydown.enter)="directionsService.setStartPoint(place); clearList()"              
               class="flex items-center hover:bg-gray-100 p-3 cursor-pointer"
             >
               <span class="material-symbols-outlined mr-3 p-2 border border-gray-300 rounded-full">
@@ -110,8 +104,6 @@
               *ngFor="let place of places"
               (click)="directionsService.setDestinationPoint(place); clearList()"
               (keydown.enter)="directionsService.setDestinationPoint(place); clearList()"
-              (keypress.enter)="directionsService.setDestinationPoint(place); clearList()"
-              (keyup.enter)="directionsService.setDestinationPoint(place); clearList()"
               class="flex items-center hover:bg-gray-100 p-3 cursor-pointer"
             >
               <span class="material-symbols-outlined mr-3 p-2 border border-gray-300 rounded-full">

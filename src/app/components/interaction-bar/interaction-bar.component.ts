@@ -3,16 +3,18 @@ import { LocationCardsComponent } from '../location-cards/location-cards.compone
 import { Store } from '@ngrx/store';
 import { PlacesService } from 'src/app/services/places.service';
 import { DirectionsService } from 'src/app/services/directions/directions.service';
-import { selectSelectedCampus } from 'src/app/store/app';
+import { MapType, selectCurrentMap, selectSelectedCampus } from 'src/app/store/app';
 import { Location } from 'src/app/interfaces/location.interface';
 import { filter, forkJoin, Observable, switchMap } from 'rxjs';
 import { DirectionsComponent } from '../directions/directions.component';
 import { VisibilityService } from 'src/app/services/visibility.service';
 import { CommonModule } from '@angular/common';
+import { SwitchMapButtonComponent } from 'src/app/components/switch-map-button/switch-map-button.component';
+import { IndoorSelectsComponent } from '../indoor-selects/indoor-selects.component';
 
 @Component({
   selector: 'app-interaction-bar',
-  imports: [LocationCardsComponent, DirectionsComponent, CommonModule],
+  imports: [IndoorSelectsComponent,  SwitchMapButtonComponent, LocationCardsComponent, DirectionsComponent, CommonModule],
   templateUrl: './interaction-bar.component.html',
   styleUrls: ['./interaction-bar.component.scss'],
 })
@@ -24,7 +26,9 @@ export class InteractionBarComponent implements AfterViewInit {
   public currentY = 0;
   public isDragging = false;
   public threshold = 50; // Minimum swipe distance to trigger action
+  public swipeProgress: number = 0;
   isExpanded = false; // Track the footer's state
+  showIndoorSelects = false;
   campusBuildings = { locations: [] as Location[], loading: true }
   pointsOfInterest = { locations: [] as Location[], loading: true }
   showDirections$!: Observable<boolean>;
@@ -37,6 +41,14 @@ export class InteractionBarComponent implements AfterViewInit {
   , private visibilityService: VisibilityService) {}
 
   ngOnInit() {
+    this.store.select(selectCurrentMap).subscribe(map => {
+      console.log(map)
+      if (map === MapType.Indoor) {
+        this.showIndoorSelects = true;
+      } else {
+        this.showIndoorSelects = false;
+      }
+    });
     this.placesService
       .isInitialized()
       .pipe(
@@ -79,6 +91,7 @@ export class InteractionBarComponent implements AfterViewInit {
     footer.style.transform = this.isExpanded
       ? 'translateY(0)'
       : 'translateY(80%)';
+    this.swipeProgress = this.isExpanded ? 1 : 0;
   }
 
   /** Start dragging */
@@ -99,11 +112,14 @@ export class InteractionBarComponent implements AfterViewInit {
 
     // Adjust footer position dynamically
     const footer = this.footerContainer.nativeElement;
-    const translateY = this.isExpanded ? -diff : 80 - diff;
+    const baseTranslate = this.isExpanded ? 0 : 80;
+    const translateY = baseTranslate - diff;
+    const clampedTranslate = Math.min(Math.max(translateY, 0), 80);
     footer.style.transform = `translateY(${Math.min(
       Math.max(translateY, 0),
       80
     )}%)`;
+    this.swipeProgress = (80 - clampedTranslate) / 80;
   }
 
   /** End dragging & determine if expansion should happen */
@@ -123,5 +139,6 @@ export class InteractionBarComponent implements AfterViewInit {
     footer.style.transform = this.isExpanded
       ? 'translateY(0)'
       : 'translateY(80%)';
+    this.swipeProgress = this.isExpanded ? 1 : 0;
   }
 }

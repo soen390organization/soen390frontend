@@ -6,6 +6,7 @@ import { ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CurrentLocationService } from 'src/app/services/geolocation/current-location.service';
 import { DirectionsService } from 'src/app/services/directions/directions.service';
+import { VisibilityService } from 'src/app/services/visibility.service';
 
 const mockDirectionsService = {
   generateRoute: jasmine
@@ -17,7 +18,7 @@ const mockDirectionsService = {
     .createSpy('calculateRoute')
     .and.returnValue(Promise.resolve({ steps: [], eta: null })),
   getTravelMode: jasmine.createSpy('getTravelMode').and.returnValue('WALKING'),
-  hasBothPoints$: of(false),
+  hasBothPoints$: of(true),
   getDestinationPoint: jasmine.createSpy('getDestinationPoint').and.returnValue(
     of({
       address: 'destination address',
@@ -41,6 +42,12 @@ const mockCurrentLocationService = {
   clearWatch: jasmine.createSpy('clearWatch'),
 };
 
+const mockVisibilityService = {
+  toggleDirectionsComponent: jasmine.createSpy('toggleDirectionsComponent'),
+  togglePOIsComponent: jasmine.createSpy('togglePOIsComponent'),
+  toggleStartButton: jasmine.createSpy('toggleStartButton'),
+};
+
 describe('DirectionsComponent', () => {
   let component: DirectionsComponent;
   let fixture: ComponentFixture<DirectionsComponent>;
@@ -50,10 +57,8 @@ describe('DirectionsComponent', () => {
       imports: [DirectionsComponent, CommonModule],
       providers: [
         { provide: DirectionsService, useValue: mockDirectionsService },
-        {
-          provide: CurrentLocationService,
-          useValue: mockCurrentLocationService,
-        },
+        { provide: CurrentLocationService, useValue: mockCurrentLocationService },
+        { provide: VisibilityService, useValue: mockVisibilityService },
       ],
     }).compileComponents();
 
@@ -289,16 +294,16 @@ describe('DirectionsComponent', () => {
   });
   
   it('should toggle directions and POIs when onEndClick is called', () => {
-    // Access private visibilityService using a type assertion.
+    // Access the private visibilityService from the component.
     const visibilityService = (component as any).visibilityService;
-    spyOn(visibilityService, 'toggleDirectionsComponent');
-    spyOn(visibilityService, 'togglePOIsComponent');
+    
+    // Reset call history if needed.
+    (visibilityService.toggleDirectionsComponent as jasmine.Spy).calls.reset();
+    (visibilityService.togglePOIsComponent as jasmine.Spy).calls.reset();
   
     component.onEndClick();
   
     expect(visibilityService.toggleDirectionsComponent).toHaveBeenCalled();
     expect(visibilityService.togglePOIsComponent).toHaveBeenCalled();
-  });
-  
-
+  });  
 });
