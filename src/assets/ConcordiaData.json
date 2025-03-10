@@ -229,6 +229,7 @@
       {
         "name": "Hall",
         "abreviation": "H",
+        "indoorMapId":"67b674be13a4e9000b46cf2e",
         "address": "1455 Blvd. De Maisonneuve Ouest, Montreal, Quebec H3G 1M8",
         "coordinates": { "lat": 45.49732887794189, "lng": -73.5790258502087 },
         "image": "assets/images/hall-building.jpg",
@@ -255,6 +256,7 @@
       {
         "name": "John Molson School of Business",
         "abreviation": "JMSB",
+        "indoorMapId":"67b39ca55b54d7000b151bdb",
         "address": "1450 Guy St, Montreal, Quebec H3H 0A1",
         "coordinates": { "lat": 45.49549521890683, "lng": -73.57917148051556 },
         "image": "assets/images/jmsb-building.jpg",
@@ -315,6 +317,7 @@
       {
         "name": "Central Building",
         "abreviation": "CC",
+        "indoorMapId":"67b544ea13a4e9000b46cf04",
         "address": "7141 Sherbrooke St W, Montreal, Quebec H4B 1R6",
         "coordinates": { "lat": 45.45849007178699, "lng": -73.64064018870205 },
         "image": "assets/images/cc-building.jpg",
@@ -475,6 +478,7 @@
       {
         "name": "Vanier Library",
         "abreviation": "VL",
+        "indoorMapId":"67c74fae8e15de000bed1a9a",
         "address": "7141 Sherbrooke St. W. Montreal, Quebec, Canada H4B 1R6",
         "coordinates": { "lat": 45.45905565, "lng": -73.63840962048661 },
         "image": "assets/images/vl-building.jpg",
@@ -542,6 +546,7 @@
       {
         "name": "Vanier Extension",
         "abreviation": "VE",
+        "indoorMapId":"67c74fae8e15de000bed1a9a",
         "address": "7141 Sherbrooke St. W. Montreal, Quebec, Canada H4B 1R6",
         "coordinates": { "lat": 45.45905565, "lng": -73.63840962048661 },
         "image": "assets/images/ve-building.jpg",

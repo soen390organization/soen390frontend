@@ -15,7 +15,6 @@ import { UserProfileComponent } from '../components/user-profile/user-profile.co
 @NgModule({
   imports: [
     SwitchCampusButtonComponent,
-    SwitchMapButtonComponent,
     MappedinMapComponent,
     MapSearchComponent,
     GoogleMapComponent,

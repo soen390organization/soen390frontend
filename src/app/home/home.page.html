@@ -1,8 +1,10 @@
+<!-- action buttons -->
 <div class="fullwidth absolute top-[24px] left-1/2 -translate-x-1/2 z-[999] flex space-x-4">
   <app-switch-campus-button [class.moved-down-switch-campus]="isSearchVisible"></app-switch-campus-button>
   <app-user-profile [class.moved-down-user-profile]="isSearchVisible" (click)="openUserInfoPage()" (keydown.enter)="openUserInfoPage()"></app-user-profile>
 </div>
-<app-map-search searchStateChange="onSearchStateChanged($event)"></app-map-search>
+  <app-map-search searchStateChange="onSearchStateChanged($event)" class="pr-2"></app-map-search>
+
 
 <!-- Main content container with no bottom padding -->
 <ion-content [fullscreen]="true" scrollY="false" class="pb-0">
@@ -29,9 +31,6 @@
 <div *ngIf="loading" class="absolute inset-0 flex items-center justify-center bg-white/50 backdrop-blur-sm z-[50]">
   <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-red-800"></div>
 </div>
-
-<!-- A button to switch maps -->
-<app-switch-map-button></app-switch-map-button>
 
 <!-- Global interaction bar -->
 <app-interaction-bar class="z-[1000]"></app-interaction-bar>
