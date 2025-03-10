@@ -4,7 +4,7 @@ import { CalendarService } from 'src/app/services/calendar/calendar.service';
 import { IonicModule } from '@ionic/angular';
 
 @Component({
-  selector: 'calendar-list',
+  selector: 'app-calendar-list',
   templateUrl: './calendar-list.component.html',
   styleUrls: ['./calendar-list.component.scss'],
   imports: [CommonModule, IonicModule]
