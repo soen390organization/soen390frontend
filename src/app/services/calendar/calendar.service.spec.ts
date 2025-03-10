@@ -1,10 +1,10 @@
 import { TestBed } from '@angular/core/testing';
 import { CalendarService } from './calendar.service';
 import { initializeApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
-import { BehaviorSubject } from 'rxjs';
+import { getAuth, GoogleAuthProvider, OAuthCredential } from 'firebase/auth';
+import { BehaviorSubject, Subscription, of } from 'rxjs';
+import * as firebaseAuth from 'firebase/auth';
 
-// Mock Firebase config
 const mockFirebaseConfig = {
   apiKey: 'mock-api-key',
   authDomain: 'mock-auth-domain',
@@ -17,24 +17,23 @@ const mockFirebaseConfig = {
 // Initialize Firebase before tests
 initializeApp(mockFirebaseConfig);
 
-// Mock dependencies
-const mockAuth = getAuth();
-
-const mockGoogleProvider = {
-  addScope: jasmine.createSpy('addScope'),
-};
-
 describe('CalendarService', () => {
   let service: CalendarService;
   let fetchSpy: jasmine.Spy;
+  let subscription: Subscription;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [CalendarService],
     });
     service = TestBed.inject(CalendarService);
-
     fetchSpy = spyOn(window, 'fetch');
+  });
+
+  afterEach(() => {
+    if (subscription) {
+      subscription.unsubscribe();
+    }
   });
 
   it('should be created', () => {
@@ -51,17 +50,18 @@ describe('CalendarService', () => {
   });
 
   it('should call signInWithGoogle and fetch calendars on success', async () => {
-    const mockAccessToken = 'mock-access-token';
     const mockCalendars = [{ id: '1', summary: 'Test Calendar' }];
-
-    spyOn(service as any, 'getUserCalendars').and.returnValue(Promise.resolve(mockCalendars));
-    spyOn(service as any, 'auth').and.returnValue(mockAuth);
-    spyOn(service as any, 'googleProvider').and.returnValue(mockGoogleProvider);
-    spyOn(service as any, 'signInWithGoogle').and.callFake(async () => {
-      return new Promise((resolve) => {
-        resolve(true);
-      });
+    spyOn(service as any, 'getUserCalendars').and.returnValue(
+      Promise.resolve(mockCalendars)
+    );
+    // Mocks to avoid real calls
+    spyOn(service as any, 'auth').and.returnValue(getAuth());
+    spyOn(service as any, 'googleProvider').and.returnValue({
+      addScope: jasmine.createSpy('addScope'),
     });
+    spyOn(service as any, 'signInWithGoogle').and.callFake(async () =>
+      Promise.resolve(true)
+    );
 
     const result = await service.signInWithGoogle();
     expect(result).toBeTrue();
@@ -77,9 +77,12 @@ describe('CalendarService', () => {
   });
 
   it('should fetch user calendars successfully', async () => {
-    const mockAccessToken = 'mock-access-token';
-    const mockResponse = { ok: true, json: () => Promise.resolve({ items: [{ id: '1', summary: 'Test Calendar' }] }) };
-    fetchSpy.and.returnValue(Promise.resolve(mockResponse as Response));
+    const mockResponse = {
+      ok: true,
+      json: () =>
+        Promise.resolve({ items: [{ id: '1', summary: 'Test Calendar' }] }),
+    } as Response;
+    fetchSpy.and.returnValue(Promise.resolve(mockResponse));
 
     const calendars = await service.getUserCalendars();
     expect(fetchSpy).toHaveBeenCalledWith(
@@ -97,5 +100,53 @@ describe('CalendarService', () => {
     fetchSpy.and.returnValue(Promise.reject(new Error('Fetch error')));
     const calendars = await service.getUserCalendars();
     expect(calendars).toEqual([]);
+  });
+
+  // -----------------------------
+  // Additional tests for coverage
+  // -----------------------------
+
+  it('should emit an empty array from events$ if no calendar is selected', (done) => {
+    subscription = service.events$.subscribe((events) => {
+      expect(events).toEqual([]);
+      done();
+    });
+  });
+
+  it('should emit events from events$ if a calendar is selected', async () => {
+    const mockEvents = [{ id: 'e1' }, { id: 'e2' }];
+    spyOn(service, 'fetchEvents').and.returnValue(Promise.resolve(mockEvents));
+    let emittedValues: any[] = [];
+
+    subscription = service.events$.subscribe((events) => {
+      emittedValues = events;
+    });
+
+    service.setSelectedCalendar('test-calendar');
+    await Promise.resolve(); // allow switchMap to execute
+
+    expect(service.fetchEvents).toHaveBeenCalledWith('test-calendar');
+    expect(emittedValues).toEqual(mockEvents);
+  });
+
+  it('should use previouslyFetchedEvents cache and skip network call', async () => {
+    service['previouslyFetchedEvents']['cached-calendar'] = [
+      { id: 'cached-event' },
+    ];
+    const result = await service.fetchEvents('cached-calendar');
+    expect(fetchSpy).not.toHaveBeenCalled();
+    expect(result).toEqual([{ id: 'cached-event' }]);
+  });
+
+  it('should return an empty array on non-ok response when fetching events', async () => {
+    fetchSpy.and.returnValue(
+      Promise.resolve({
+        ok: false,
+        statusText: 'Not Found',
+      } as Response)
+    );
+
+    const events = await service.fetchEvents('some-calendar-id');
+    expect(events).toEqual([]);
   });
 });
