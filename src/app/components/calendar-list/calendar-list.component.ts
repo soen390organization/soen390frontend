@@ -9,7 +9,7 @@ import { IonicModule } from '@ionic/angular';
   styleUrls: ['./calendar-list.component.scss'],
   imports: [CommonModule, IonicModule]
 })
-export class CalendarList implements OnInit{
+export class CalendarListComponent implements OnInit{
   calendars: any[] = []
   selectedCalendar: any
 
