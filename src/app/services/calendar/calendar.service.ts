@@ -6,14 +6,14 @@ import { getAuth, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
   providedIn: 'root',
 })
 export class CalendarService {
-  private auth = getAuth();
-  private googleProvider = new GoogleAuthProvider();
+  private readonly auth = getAuth();
+  private readonly googleProvider = new GoogleAuthProvider();
   private accessToken: string | null = null;
   private previouslyFetchedEvents: {
     [calendarId: string]: any[];
   } = {}
 
-  private calendarsSubject = new BehaviorSubject<any[]>([]);
+  private readonly calendarsSubject = new BehaviorSubject<any[]>([]);
   calendars$ = this.calendarsSubject.asObservable();
 
   public selectedCalendarSubject = new BehaviorSubject<string | null>(null);
