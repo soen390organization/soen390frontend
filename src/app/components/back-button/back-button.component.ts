@@ -6,7 +6,7 @@ import { CommonModule } from '@angular/common';
   templateUrl: './back-button.component.html',
   styleUrls: ['./back-button.component.scss'],
   imports: [CommonModule],
-  standalone: false
+  standalone: true
 })
 export class BackButtonComponent  implements OnInit {
 
