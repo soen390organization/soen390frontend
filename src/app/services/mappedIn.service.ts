@@ -32,9 +32,13 @@ export class MappedinService {
   }
 
   getCurrentFloor() {
-    const { id, name } = this.mapView?.currentFloor;
-    return { id, name }
+    if (!this.mapView || !this.mapView.currentFloor) {
+      return null;
+    }
+    const { id, name } = this.mapView.currentFloor;
+    return { id, name };
   }
+  
  
   setFloor(floorId: string) {
     this.mapView.setFloor(floorId);
@@ -42,7 +46,7 @@ export class MappedinService {
 
   async initializeMap(container: HTMLElement): Promise<void> {
     this.mappedInContainer = container;
-    this.setMapData('67b39ca55b54d7000b151bdb');
+    this.setMapData('67b674be13a4e9000b46cf2e');
   }
 
   private initializeConnections(mapData: MapData) {
@@ -103,18 +107,21 @@ export class MappedinService {
   }
 
   private initializeSpaces(mapData: MapData) {
-    mapData.getByType('space').forEach((space) => {
+    const spaces = mapData.getByType('space');
+  
+    spaces.forEach((space) => {
       if (space.name) {
+        /* I'm using this for now to find the room names */
+        /* console.log('Adding label for room:', space.name); */
         this.mapView.Labels.add(space, space.name, { interactive: true });
       }
     });
-
+  
     this.mapView.updateState(DOORS.Exterior, {
       visible: true,
       color: 'black',
       opacity: 0.6,
     });
-
     this.mapView.updateState(DOORS.Interior, {
       visible: true,
       color: 'lightgrey',

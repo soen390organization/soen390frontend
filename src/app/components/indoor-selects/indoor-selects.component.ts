@@ -29,7 +29,9 @@ export class IndoorSelectsComponent implements OnInit {
         if (this.buildings.length > 0) {
           this.selectedBuilding = this.buildings[0].indoorMapId;
           // Force the map to update to the new building's map
-          this.mappedInService.setMapData(this.selectedBuilding);
+          if (this.mappedInService.getMapId() !== this.selectedBuilding) {
+            this.mappedInService.setMapData(this.selectedBuilding);
+          }
         }
       }
     });
