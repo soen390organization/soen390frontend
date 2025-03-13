@@ -1,10 +1,10 @@
 import data from '../../../assets/concordia-data.json';
 import { DirectionsService } from '../directions/directions.service';
 import { Injectable, Injector } from '@angular/core';
-import shuttleData from '../../../assets/ShuttleData.json';
+import shuttleData from '../../../assets/shuttle-data.json';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class ShuttleService {
   private placesService!: google.maps.places.PlacesService;
@@ -44,11 +44,11 @@ export class ShuttleService {
    */
   public async calculateShuttleBusRoute(
     startAddress: string | google.maps.LatLng,
-    destinationAddress: string | google.maps.LatLng,
+    destinationAddress: string | google.maps.LatLng
   ) {
     const { startCampus, destinationCampus } = await this.fetchCoordinates(
       startAddress,
-      destinationAddress,
+      destinationAddress
     );
 
     const date = new Date();
@@ -66,7 +66,7 @@ export class ShuttleService {
           destinationAddress,
           startCampus,
           destinationCampus,
-          nextBus,
+          nextBus
         );
 
     return { steps: steps.steps, eta: steps.eta };
@@ -77,7 +77,7 @@ export class ShuttleService {
    */
   private async fetchCoordinates(
     startAddress: string | google.maps.LatLng,
-    destinationAddress: string | google.maps.LatLng,
+    destinationAddress: string | google.maps.LatLng
   ) {
     const startCoords = await this.findCoords(startAddress);
     const destinationCoords = await this.findCoords(destinationAddress);
@@ -92,10 +92,7 @@ export class ShuttleService {
    * Helper to check if the nextBus string means that no bus is available.
    */
   private isNoBusAvailable(nextBus: string): boolean {
-    return (
-      nextBus === 'No more shuttle buses today :(' ||
-      nextBus === 'No departures for today.'
-    );
+    return nextBus === 'No more shuttle buses today :(' || nextBus === 'No departures for today.';
   }
 
   /**
@@ -106,10 +103,10 @@ export class ShuttleService {
       steps: [
         {
           instructions: nextBus,
-          location: null,
-        },
+          location: null
+        }
       ],
-      eta: 'N/A',
+      eta: 'N/A'
     };
   }
 
@@ -118,12 +115,12 @@ export class ShuttleService {
    */
   private async buildSameCampusSteps(
     startAddress: string | google.maps.LatLng,
-    destinationAddress: string | google.maps.LatLng,
+    destinationAddress: string | google.maps.LatLng
   ) {
     const result = await this.routeService.calculateRoute(
       startAddress,
       destinationAddress,
-      google.maps.TravelMode.WALKING,
+      google.maps.TravelMode.WALKING
     );
     return { steps: result.steps, eta: result.eta };
   }
@@ -136,7 +133,7 @@ export class ShuttleService {
     destinationAddress: string | google.maps.LatLng,
     startCampus: string,
     destinationCampus: string,
-    nextBus: string,
+    nextBus: string
   ) {
     const terminalCodes = this.getTerminalCodes();
     const shuttleSteps: any[] = [];
@@ -146,7 +143,7 @@ export class ShuttleService {
       terminalCodes[startCampus],
       google.maps.TravelMode.WALKING,
       true,
-      this.renderers[0],
+      this.renderers[0]
     );
     shuttleSteps.push(...initialWalk.steps);
 
@@ -155,11 +152,11 @@ export class ShuttleService {
       terminalCodes[destinationCampus],
       google.maps.TravelMode.DRIVING,
       true,
-      this.renderers[1],
+      this.renderers[1]
     );
     shuttleSteps.push({
       instructions: `Next shuttle at ${nextBus} on ${startCampus.toUpperCase()} terminal.`,
-      location: null,
+      location: null
     });
 
     const finalWalk = await this.routeService.calculateRoute(
@@ -167,7 +164,7 @@ export class ShuttleService {
       destinationAddress,
       google.maps.TravelMode.WALKING,
       true,
-      this.renderers[2],
+      this.renderers[2]
     );
     shuttleSteps.push(...finalWalk.steps);
 
@@ -185,7 +182,7 @@ export class ShuttleService {
   private getTerminalCodes() {
     return {
       sgw: `${shuttleData.terminals.sgw.terminal.lat}, ${shuttleData.terminals.sgw.terminal.lng}`,
-      loy: `${shuttleData.terminals.loy.terminal.lat}, ${shuttleData.terminals.loy.terminal.lng}`,
+      loy: `${shuttleData.terminals.loy.terminal.lat}, ${shuttleData.terminals.loy.terminal.lng}`
     };
   }
 
@@ -195,11 +192,11 @@ export class ShuttleService {
   public getNearestCampus(coords: google.maps.LatLng) {
     const distanceToSGW = Math.sqrt(
       Math.pow(coords.lat() - data.sgw.coordinates.lat, 2) +
-        Math.pow(coords.lng() - data.sgw.coordinates.lng, 2),
+        Math.pow(coords.lng() - data.sgw.coordinates.lng, 2)
     );
     const distanceToLOY = Math.sqrt(
       Math.pow(coords.lat() - data.loy.coordinates.lat, 2) +
-        Math.pow(coords.lng() - data.loy.coordinates.lng, 2),
+        Math.pow(coords.lng() - data.loy.coordinates.lng, 2)
     );
 
     return distanceToSGW < distanceToLOY ? 'sgw' : 'loy';
@@ -208,9 +205,7 @@ export class ShuttleService {
   /**
    * Retrieves google.maps.LatLng from string or returns the same LatLng if already provided.
    */
-  private findCoords(
-    query: string | google.maps.LatLng,
-  ): Promise<google.maps.LatLng | null> {
+  private findCoords(query: string | google.maps.LatLng): Promise<google.maps.LatLng | null> {
     if (query instanceof google.maps.LatLng) {
       return Promise.resolve(query);
     }
@@ -218,15 +213,12 @@ export class ShuttleService {
       this.placesService.findPlaceFromQuery(
         { query, fields: ['geometry', 'formatted_address'] },
         (results: any, status: any) => {
-          if (
-            status === google.maps.places.PlacesServiceStatus.OK &&
-            results.length > 0
-          ) {
+          if (status === google.maps.places.PlacesServiceStatus.OK && results.length > 0) {
             resolve(results[0].geometry.location);
           } else {
             reject(new Error('Error finding coords'));
           }
-        },
+        }
       );
     });
   }
