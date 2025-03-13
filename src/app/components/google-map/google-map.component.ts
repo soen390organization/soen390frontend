@@ -6,6 +6,7 @@ import { CurrentLocationService } from 'src/app/services/geolocation/current-loc
 import { GeolocationService } from 'src/app/services/geolocation/geolocation.service';
 import { GoogleMapService } from 'src/app/services/googeMap.service';
 import { IonicModule } from '@ionic/angular';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-google-map',
@@ -43,7 +44,7 @@ export class GoogleMapComponent implements AfterViewInit {
     return new Promise((resolve) => {
       (window as any).initMap = () => resolve(); // This is the callback from the script
       const script = document.createElement('script');
-      script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyDWKEjdfWBjgMoRhicU_t4XDhoUnMr5LDM&callback=initMap&libraries=geometry,places&loading=async';
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${environment.googleApiKey}&callback=initMap&libraries=geometry,places&loading=async`;
       script.async = true;
       script.defer = true;
       document.body.appendChild(script);
