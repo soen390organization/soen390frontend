@@ -23,7 +23,7 @@ export class IndoorSelectsComponent implements OnInit {
   constructor(
     private store: Store,
     private mappedInService: MappedinService,
-    private concordiaDataService: ConcordiaDataService
+    private concordiaDataService: ConcordiaDataService,
   ) {}
 
   ngOnInit() {

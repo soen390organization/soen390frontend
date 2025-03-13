@@ -7,7 +7,10 @@ import { loadUser, loadUserSuccess, loadUserFailure } from './user.actions';
 
 @Injectable()
 export class UserEffects {
-  constructor(private readonly actions$: Actions, private readonly userService: UserService) {}
+  constructor(
+    private readonly actions$: Actions,
+    private readonly userService: UserService,
+  ) {}
 
   loadUser$ = createEffect(() =>
     this.actions$.pipe(
@@ -18,9 +21,9 @@ export class UserEffects {
         this.userService.getUser().pipe(
           // Map recieved obj into successful action
           map((user) => loadUserSuccess({ user })),
-          catchError((error) => of(loadUserFailure({ error })))
-        )
-      )
-    )
+          catchError((error) => of(loadUserFailure({ error }))),
+        ),
+      ),
+    ),
   );
 }

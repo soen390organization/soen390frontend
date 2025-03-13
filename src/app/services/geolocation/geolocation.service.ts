@@ -17,10 +17,7 @@ export class GeolocationService {
     if (currentLocation == null) {
       return null;
     }
-    const buildings = [
-      ...data.sgw.buildings,
-      ...data.loy.buildings
-    ];
+    const buildings = [...data.sgw.buildings, ...data.loy.buildings];
 
     const foundBuilding = buildings.find((building) => {
       const outline = new google.maps.Polygon({ paths: building.boundaries });

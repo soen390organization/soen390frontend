@@ -8,15 +8,17 @@ describe('Map - Highlight Current Building with Polygon', () => {
         const testLng = -73.57903212232189;
 
         // Override the geolocation API before the app initializes
-        cy.stub(win.navigator.geolocation, 'getCurrentPosition').callsFake((cb) => {
-          cb({
-            coords: {
-              latitude: testLat,
-              longitude: testLng,
-              accuracy: 10,
-            },
-          } as GeolocationPosition);
-        });
+        cy.stub(win.navigator.geolocation, 'getCurrentPosition').callsFake(
+          (cb) => {
+            cb({
+              coords: {
+                latitude: testLat,
+                longitude: testLng,
+                accuracy: 10,
+              },
+            } as GeolocationPosition);
+          },
+        );
       },
     });
 

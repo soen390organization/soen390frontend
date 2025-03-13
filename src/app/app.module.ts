@@ -17,9 +17,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
     BrowserModule,
     StoreModule.forRoot(reducers),
     EffectsModule.forRoot(effects),
-    IonicModule.forRoot(
-      { mode: 'ios' }
-    ),
+    IonicModule.forRoot({ mode: 'ios' }),
     AppRoutingModule,
   ],
   providers: [{ provide: RouteReuseStrategy, useClass: IonicRouteStrategy }],

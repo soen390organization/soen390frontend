@@ -21,8 +21,8 @@ import { CalendarListComponent } from '../components/calendar-list/calendar-list
     InteractionBarComponent,
     UserProfileComponent,
     GoogleSignInComponent,
-    CalendarListComponent
+    CalendarListComponent,
   ],
-  declarations: [UserInfoPage]
+  declarations: [UserInfoPage],
 })
 export class UserInfoPageModule {}

@@ -1,11 +1,20 @@
 <div #footerContainer class="swipe-footer-container">
-  <app-switch-map-button class="switch-map-container" [style.opacity]="1 - swipeProgress"></app-switch-map-button>
-  <app-indoor-selects *ngIf="showIndoorSelects" [style.opacity]="1 - swipeProgress"></app-indoor-selects>
- 
+  <app-switch-map-button
+    class="switch-map-container"
+    [style.opacity]="1 - swipeProgress"
+  ></app-switch-map-button>
+  <app-indoor-selects
+    *ngIf="showIndoorSelects"
+    [style.opacity]="1 - swipeProgress"
+  ></app-indoor-selects>
 
-  <div #handleBar class="handle-bar" (click)="onShowMore()" class="w-[100px] h-[10px] bg-[#d5d5d5] my-[10px] mx-auto rounded-full cursor-pointer"></div>
+  <div
+    #handleBar
+    class="handle-bar"
+    (click)="onShowMore()"
+    class="w-[100px] h-[10px] bg-[#d5d5d5] my-[10px] mx-auto rounded-full cursor-pointer"
+  ></div>
   <div class="footer-content px-5">
-
     <div *ngIf="showDirections$ | async">
       <h2 class="flex text-2xl font-bold text-gray-900 my-4">Directions</h2>
       <app-directions></app-directions>
@@ -13,9 +22,17 @@
 
     <div *ngIf="showPOIs$ | async">
       <h2 class="flex text-2xl font-bold text-gray-900 mb-4">Buildings</h2>
-      <app-location-cards [locations]="campusBuildings.locations" [loading] = "campusBuildings.loading"></app-location-cards>
-      <h2 class="flex text-2xl font-bold text-gray-900 my-4">Points of Interest</h2>
-      <app-location-cards [locations]="pointsOfInterest.locations" [loading] = "pointsOfInterest.loading" ></app-location-cards>
+      <app-location-cards
+        [locations]="campusBuildings.locations"
+        [loading]="campusBuildings.loading"
+      ></app-location-cards>
+      <h2 class="flex text-2xl font-bold text-gray-900 my-4">
+        Points of Interest
+      </h2>
+      <app-location-cards
+        [locations]="pointsOfInterest.locations"
+        [loading]="pointsOfInterest.loading"
+      ></app-location-cards>
     </div>
   </div>
 </div>

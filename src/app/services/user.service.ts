@@ -4,7 +4,7 @@ import { ApiService } from './api.service';
 import { ref, get } from 'firebase/database';
 import {
   createUserWithEmailAndPassword,
-  signInWithEmailAndPassword
+  signInWithEmailAndPassword,
 } from 'firebase/auth';
 import { auth, db as database } from '../../firebase.config';
 import { UserInterface } from '../interfaces/user.interface';
@@ -20,7 +20,7 @@ export class UserService {
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         user.email,
-        user.password
+        user.password,
       );
 
       const userId = userCredential.user.uid;
@@ -38,9 +38,16 @@ export class UserService {
     await this.apiService.updateOrCreate('users', user);
   }
 
-  public async signIn(email: string, password: string): Promise<UserInterface | null> {
+  public async signIn(
+    email: string,
+    password: string,
+  ): Promise<UserInterface | null> {
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password,
+      );
       const userId = userCredential.user.uid;
 
       const userRef = ref(database, `users/${userId}`);
@@ -64,5 +71,4 @@ export class UserService {
     // Mock API call
     return of({ id: '1', name: 'Laurel', email: 'laurel@example.com' });
   }
-
 }

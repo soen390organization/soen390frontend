@@ -14,6 +14,9 @@ export const initialState: AppState = {
 
 export const appReducer = createReducer(
   initialState,
-  on(setSelectedCampus, (state, { campus }) => ({ ...state, selectedCampus: campus })),
-  on(setMapType, (state, { mapType }) => ({ ...state, currentMap: mapType }))
+  on(setSelectedCampus, (state, { campus }) => ({
+    ...state,
+    selectedCampus: campus,
+  })),
+  on(setMapType, (state, { mapType }) => ({ ...state, currentMap: mapType })),
 );

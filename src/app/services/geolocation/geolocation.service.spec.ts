@@ -83,7 +83,7 @@ describe('GeolocationService', () => {
             return google.maps.geometry.poly.containsLocation(point, outline);
           });
           return foundBuilding ? foundBuilding.name : null;
-        }
+        },
       );
 
       // Test for a location inside the Hall building
@@ -91,9 +91,8 @@ describe('GeolocationService', () => {
         lat: 45.49724206314789,
         lng: -73.57905238471409,
       };
-      const currentBuildingName = await service.getCurrentBuilding(
-        currentLocation
-      );
+      const currentBuildingName =
+        await service.getCurrentBuilding(currentLocation);
       expect(currentBuildingName).toBe('Hall');
     });
 
@@ -102,17 +101,15 @@ describe('GeolocationService', () => {
         lat: 45.49666690990893,
         lng: -73.57928799583352,
       };
-      const currentBuildingName = await service.getCurrentBuilding(
-        currentLocation
-      );
+      const currentBuildingName =
+        await service.getCurrentBuilding(currentLocation);
       expect(currentBuildingName).toBeNull();
     });
 
     it('should return null if the location is null', async () => {
       const currentLocation = null;
-      const currentBuildingName = await service.getCurrentBuilding(
-        currentLocation
-      );
+      const currentBuildingName =
+        await service.getCurrentBuilding(currentLocation);
       expect(currentBuildingName).toBeNull();
     });
   });

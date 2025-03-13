@@ -52,7 +52,7 @@ describe('CalendarService', () => {
   it('should call signInWithGoogle and fetch calendars on success', async () => {
     const mockCalendars = [{ id: '1', summary: 'Test Calendar' }];
     spyOn(service as any, 'getUserCalendars').and.returnValue(
-      Promise.resolve(mockCalendars)
+      Promise.resolve(mockCalendars),
     );
     // Mocks to avoid real calls
     spyOn(service as any, 'auth').and.returnValue(getAuth());
@@ -60,7 +60,7 @@ describe('CalendarService', () => {
       addScope: jasmine.createSpy('addScope'),
     });
     spyOn(service as any, 'signInWithGoogle').and.callFake(async () =>
-      Promise.resolve(true)
+      Promise.resolve(true),
     );
 
     const result = await service.signInWithGoogle();
@@ -90,7 +90,7 @@ describe('CalendarService', () => {
       jasmine.objectContaining({
         method: 'GET',
         headers: jasmine.objectContaining({ Authorization: `Bearer null` }),
-      })
+      }),
     );
     expect(calendars.length).toBeGreaterThan(0);
     expect(calendars[0].summary).toBe('Test Calendar');
@@ -143,7 +143,7 @@ describe('CalendarService', () => {
       Promise.resolve({
         ok: false,
         statusText: 'Not Found',
-      } as Response)
+      } as Response),
     );
 
     const events = await service.fetchEvents('some-calendar-id');

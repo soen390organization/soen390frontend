@@ -15,10 +15,10 @@ export class DirectionsService {
   private destinationPoint$ = new BehaviorSubject<Location | null>(null);
 
   private allRoutesData: {
-      mode: google.maps.TravelMode;
-      eta: string | null;
-      distance: number;
-      duration: number;
+    mode: google.maps.TravelMode;
+    eta: string | null;
+    distance: number;
+    duration: number;
   }[] = [];
 
   private shortestRoute: {
@@ -27,7 +27,6 @@ export class DirectionsService {
     distance: number;
     duration: number;
   } | null = null;
-
 
   constructor(private readonly shuttleService: ShuttleService) {}
 
@@ -59,14 +58,16 @@ export class DirectionsService {
   }
 
   setStartPoint(location: Location): void {
-    const marker = this.startPoint$.value?.marker ?? new google.maps.Marker({
-      position: location.coordinates,
-      map: this.directionsRenderer.getMap(),
-      icon: {
-        url: 'https://upload.wikimedia.org/wikipedia/commons/8/8e/Icone_Verde.svg',
-        scaledSize: new google.maps.Size(40, 40)
-      }
-    });
+    const marker =
+      this.startPoint$.value?.marker ??
+      new google.maps.Marker({
+        position: location.coordinates,
+        map: this.directionsRenderer.getMap(),
+        icon: {
+          url: 'https://upload.wikimedia.org/wikipedia/commons/8/8e/Icone_Verde.svg',
+          scaledSize: new google.maps.Size(40, 40),
+        },
+      });
 
     marker.setPosition(location.coordinates);
 
@@ -83,14 +84,16 @@ export class DirectionsService {
   }
 
   setDestinationPoint(location: Location): void {
-    const marker = this.destinationPoint$.value?.marker ?? new google.maps.Marker({
-      position: location.coordinates,
-      map: this.directionsRenderer.getMap(),
-      icon: {
-        url: 'https://upload.wikimedia.org/wikipedia/commons/8/8e/Icone_Verde.svg',
-        scaledSize: new google.maps.Size(40, 40)
-      }
-    });
+    const marker =
+      this.destinationPoint$.value?.marker ??
+      new google.maps.Marker({
+        position: location.coordinates,
+        map: this.directionsRenderer.getMap(),
+        icon: {
+          url: 'https://upload.wikimedia.org/wikipedia/commons/8/8e/Icone_Verde.svg',
+          scaledSize: new google.maps.Size(40, 40),
+        },
+      });
 
     marker.setPosition(location.coordinates);
 
@@ -100,7 +103,7 @@ export class DirectionsService {
 
   get hasBothPoints$(): Observable<boolean> {
     return combineLatest([this.startPoint$, this.destinationPoint$]).pipe(
-      map(([start, destination]) => !!start && !!destination)
+      map(([start, destination]) => !!start && !!destination),
     );
   }
 
@@ -116,7 +119,12 @@ export class DirectionsService {
     const destinationPoint = this.destinationPoint$.value;
 
     if (startPoint && destinationPoint) {
-      this.calculateRoute(startPoint.address, destinationPoint.address, google.maps.TravelMode.WALKING, true);
+      this.calculateRoute(
+        startPoint.address,
+        destinationPoint.address,
+        google.maps.TravelMode.WALKING,
+        true,
+      );
       const bounds = new google.maps.LatLngBounds();
       bounds.extend(startPoint.marker.getPosition()!);
       bounds.extend(destinationPoint.marker.getPosition()!);
@@ -174,7 +182,7 @@ export class DirectionsService {
     destinationAddress: string | google.maps.LatLng,
     travelMode: google.maps.TravelMode = google.maps.TravelMode.WALKING,
     render: boolean = true,
-    renderer: google.maps.DirectionsRenderer = this.directionsRenderer
+    renderer: google.maps.DirectionsRenderer = this.directionsRenderer,
   ): Promise<{
     steps: Step[];
     eta: string | null;
@@ -191,8 +199,7 @@ export class DirectionsService {
         if (status === google.maps.DirectionsStatus.OK && response) {
           if (render) {
             console.log(response);
-          renderer.setDirections(response);
-
+            renderer.setDirections(response);
           }
           const steps: Step[] = [];
           let eta: string | null = null;
@@ -228,26 +235,27 @@ export class DirectionsService {
   async generateRoute(
     startAddress: string | google.maps.LatLng,
     destinationAddress: string | google.maps.LatLng,
-    travelMode: string | google.maps.TravelMode = google.maps.TravelMode.WALKING
+    travelMode: string | google.maps.TravelMode = google.maps.TravelMode
+      .WALKING,
   ) {
     this.shuttleService.clearMapDirections();
     if (travelMode === 'SHUTTLE') {
       return this.shuttleService.calculateShuttleBusRoute(
         startAddress,
-        destinationAddress
+        destinationAddress,
       );
     } else {
       return await this.calculateRoute(
         startAddress,
         destinationAddress,
-        this.getTravelMode(travelMode)
+        this.getTravelMode(travelMode),
       );
     }
   }
 
   setRouteColor(
     travelMode: google.maps.TravelMode | string,
-    renderer: google.maps.DirectionsRenderer
+    renderer: google.maps.DirectionsRenderer,
   ): google.maps.PolylineOptions {
     const polylineOptions: google.maps.PolylineOptions = {};
 
@@ -282,7 +290,7 @@ export class DirectionsService {
 
   public async calculateShortestRoute(
     start: string | google.maps.LatLng,
-    destination: string | google.maps.LatLng
+    destination: string | google.maps.LatLng,
   ): Promise<void> {
     const modes = [
       google.maps.TravelMode.DRIVING,
@@ -293,28 +301,38 @@ export class DirectionsService {
     // Calculate routes for each mode in parallel.
     const results = await Promise.all(
       modes.map(async (mode) => {
-        const { steps, eta } = await this.calculateRoute(start, destination, mode, false);
+        const { steps, eta } = await this.calculateRoute(
+          start,
+          destination,
+          mode,
+          false,
+        );
         const { totalDistance, totalDuration } = (steps ?? []).reduce(
           (acc, step) => ({
             totalDistance: acc.totalDistance + (step.distance?.value ?? 0),
             totalDuration: acc.totalDuration + (step.duration?.value ?? 0),
           }),
-          { totalDistance: 0, totalDuration: 0 }
+          { totalDistance: 0, totalDuration: 0 },
         );
 
         return { mode, eta, distance: totalDistance, duration: totalDuration };
-      })
+      }),
     );
 
     // Find the route with the smallest duration.
-    this.shortestRoute = results.reduce((fastest, route) =>
-      route.duration < fastest.duration ? route : fastest,
-      results[0] // Initial value: the first route in the array
+    this.shortestRoute = results.reduce(
+      (fastest, route) => (route.duration < fastest.duration ? route : fastest),
+      results[0], // Initial value: the first route in the array
     );
 
     this.allRoutesData = results;
 
-    await this.calculateRoute(start, destination, this.shortestRoute.mode, false);
+    await this.calculateRoute(
+      start,
+      destination,
+      this.shortestRoute.mode,
+      false,
+    );
   }
 
   clearStartPoint(): void {
@@ -332,5 +350,4 @@ export class DirectionsService {
     this.destinationPoint$.next(null);
     this.updateMapView();
   }
-
 }

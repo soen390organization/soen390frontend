@@ -16,7 +16,7 @@ class MockPlacesService {
   }
   findPlaceFromQuery(
     req: any,
-    callback: (results: any[], status: string) => void
+    callback: (results: any[], status: string) => void,
   ) {
     callback([], 'ZERO_RESULTS');
   }
@@ -113,8 +113,8 @@ describe('Directions Service', () => {
             request: google.maps.DirectionsRequest,
             callback: (
               result: google.maps.DirectionsResult,
-              status: google.maps.DirectionsStatus
-            ) => void
+              status: google.maps.DirectionsStatus,
+            ) => void,
           ) => {
             const mockResponse = {
               routes: [
@@ -139,7 +139,7 @@ describe('Directions Service', () => {
             } as unknown as google.maps.DirectionsResult;
 
             callback(mockResponse, google.maps.DirectionsStatus.OK);
-          }
+          },
         );
 
         const schema = Joi.object({
@@ -158,7 +158,7 @@ describe('Directions Service', () => {
                   value: Joi.number().required(),
                 }).optional(),
                 transit_details: Joi.any().optional(),
-              })
+              }),
             )
             .required(),
           eta: Joi.string().allow(null).required(),
@@ -183,7 +183,7 @@ describe('Directions Service', () => {
       it('should return the color red', () => {
         const polylineOptions = service.setRouteColor(
           google.maps.TravelMode.DRIVING,
-          mockRenderer
+          mockRenderer,
         );
         expect(polylineOptions).toEqual({ strokeColor: 'red' });
       });
@@ -193,7 +193,7 @@ describe('Directions Service', () => {
       it('should return the color green', () => {
         const polylineOptions = service.setRouteColor(
           google.maps.TravelMode.TRANSIT,
-          mockRenderer
+          mockRenderer,
         );
         expect(polylineOptions).toEqual({ strokeColor: 'green' });
       });
@@ -203,7 +203,7 @@ describe('Directions Service', () => {
       it('should return a specific json', () => {
         const polylineOptions = service.setRouteColor(
           google.maps.TravelMode.WALKING,
-          mockRenderer
+          mockRenderer,
         );
         expect(polylineOptions).toEqual({
           strokeColor: '#0096FF',
@@ -239,7 +239,7 @@ describe('Directions Service', () => {
       };
 
       (service as any).startPoint$ = new BehaviorSubject<Location | null>(
-        mockLocation
+        mockLocation,
       );
 
       service.getStartPoint().subscribe((location) => {
@@ -258,7 +258,7 @@ describe('Directions Service', () => {
       };
 
       (service as any).destinationPoint$ = new BehaviorSubject<Location | null>(
-        mockLocation
+        mockLocation,
       );
 
       service.getDestinationPoint().subscribe((location) => {
@@ -272,7 +272,7 @@ describe('Directions Service', () => {
     beforeEach(() => {
       spyOn(shuttleService, 'clearMapDirections').and.callThrough();
       spyOn(shuttleService, 'calculateShuttleBusRoute').and.returnValue(
-        Promise.resolve({ steps: [], eta: '10 mins' }) // Ensuring successful response
+        Promise.resolve({ steps: [], eta: '10 mins' }), // Ensuring successful response
       );
     });
 
@@ -282,12 +282,12 @@ describe('Directions Service', () => {
       const result = await service.generateRoute(
         origin,
         destination,
-        'SHUTTLE'
+        'SHUTTLE',
       );
 
       expect(shuttleService.calculateShuttleBusRoute).toHaveBeenCalledWith(
         origin,
-        destination
+        destination,
       );
       expect(result).toEqual(expectedResponse);
     });
@@ -328,7 +328,7 @@ describe('Directions Service', () => {
       expect((service as any).startPoint$.value).toBeNull();
       expect((service as any).directionsRenderer.set).toHaveBeenCalledWith(
         'directions',
-        null
+        null,
       );
     });
 
@@ -361,7 +361,7 @@ describe('Directions Service', () => {
       expect((service as any).destinationPoint$.value).toBeNull();
       expect((service as any).directionsRenderer.set).toHaveBeenCalledWith(
         'directions',
-        null
+        null,
       );
     });
   });
@@ -463,7 +463,10 @@ describe('DirectionsService - Start/Destination Points and Observables', () => {
 
   it('should return shortest route if it exists', () => {
     (service as any).shortestRoute = { eta: '10 mins', distance: 5000 };
-    expect(service.getShortestRoute()).toEqual({ eta: '10 mins', distance: 5000 });
+    expect(service.getShortestRoute()).toEqual({
+      eta: '10 mins',
+      distance: 5000,
+    });
   });
 
   it('should emit hasBothPoints$ as false when points are missing', (done) => {
@@ -505,8 +508,8 @@ describe('DirectionsService - calculateShortestRoute()', () => {
     // Updated global google mock including places property.
     (window as any).google = {
       maps: {
-        DirectionsService: function() {},
-        DirectionsRenderer: function() {},
+        DirectionsService: function () {},
+        DirectionsRenderer: function () {},
         LatLngBounds: jasmine.createSpy('LatLngBounds').and.returnValue({
           extend: jasmine.createSpy('extend'),
         }),
@@ -539,7 +542,7 @@ describe('DirectionsService - calculateShortestRoute()', () => {
         start: string | google.maps.LatLng,
         destination: string | google.maps.LatLng,
         mode: google.maps.TravelMode,
-        render: boolean
+        render: boolean,
       ): Promise<{ steps: Step[]; eta: string }> => {
         let duration = 0;
         switch (mode) {
@@ -566,7 +569,7 @@ describe('DirectionsService - calculateShortestRoute()', () => {
           ],
           eta: `${Math.round(duration / 60)} mins`,
         });
-      }
+      },
     );
   });
 
@@ -591,6 +594,11 @@ describe('DirectionsService - calculateShortestRoute()', () => {
     });
 
     // Ensure calculateRoute was called with the fastest mode
-    expect(mockCalculateRoute).toHaveBeenCalledWith(start, destination, google.maps.TravelMode.DRIVING, false);
+    expect(mockCalculateRoute).toHaveBeenCalledWith(
+      start,
+      destination,
+      google.maps.TravelMode.DRIVING,
+      false,
+    );
   });
 });

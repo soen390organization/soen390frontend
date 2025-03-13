@@ -10,7 +10,7 @@ let searchStateChange = new EventEmitter<boolean>();
   selector: 'app-home',
   templateUrl: './home.page.html',
   styleUrls: ['./home.page.scss'],
-  standalone: false
+  standalone: false,
 })
 export class HomePage implements OnInit {
   // Map-related properties
@@ -23,7 +23,10 @@ export class HomePage implements OnInit {
   // Search-related property
   isSearchVisible = false;
 
-  constructor(private readonly store: Store, private readonly router: Router) {
+  constructor(
+    private readonly store: Store,
+    private readonly router: Router,
+  ) {
     // Subscribe to search state changes
     searchStateChange.subscribe((state: boolean) => {
       this.isSearchVisible = state;
@@ -33,7 +36,7 @@ export class HomePage implements OnInit {
   }
 
   ngOnInit(): void {
-    this.store.select(selectCurrentMap).subscribe(map => {
+    this.store.select(selectCurrentMap).subscribe((map) => {
       this.currentMap = map;
     });
   }

@@ -9,26 +9,31 @@ describe('MappedinService', () => {
   const fakeMapData = {
     getByType: (type: string) => {
       switch (type) {
-        case 'floor': return [{ id: 'floor1', name: 'Floor 1' }];
-        case 'space': return [{ id: 'space1', name: 'Room 1' }];
-        case 'connection': return [];
-        case 'point-of-interest': return [];
-        default: return [];
+        case 'floor':
+          return [{ id: 'floor1', name: 'Floor 1' }];
+        case 'space':
+          return [{ id: 'space1', name: 'Room 1' }];
+        case 'connection':
+          return [];
+        case 'point-of-interest':
+          return [];
+        default:
+          return [];
       }
-    }
+    },
   } as unknown as MapData;
 
   // Create a fake MapView with minimal implementation for testing.
   const fakeMapView = {
     currentFloor: { id: 'floor1', name: 'Floor 1' },
     Labels: {
-      add: jasmine.createSpy('add')
+      add: jasmine.createSpy('add'),
     },
     updateState: jasmine.createSpy('updateState'),
     setFloor: jasmine.createSpy('setFloor'),
     Navigation: {
-      draw: jasmine.createSpy('draw')
-    }
+      draw: jasmine.createSpy('draw'),
+    },
   } as unknown as MapView;
 
   beforeEach(() => {
@@ -43,7 +48,7 @@ describe('MappedinService', () => {
   });
 
   /* This is a test that needs to be fixed, keep it as is */
-/*   describe('initializeMap', () => {
+  /*   describe('initializeMap', () => {
     let container: HTMLElement;
 
     beforeEach(() => {

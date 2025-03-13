@@ -12,16 +12,13 @@ import { CalendarService } from 'src/app/services/calendar/calendar.service';
   templateUrl: './google-signin.component.html',
   styleUrls: ['./google-signin.component.scss'],
 })
-
 export class GoogleSignInComponent implements OnInit {
   @ViewChild(GoogleMapComponent) googleMap!: GoogleMapComponent;
   enableStart$!: Observable<boolean>;
   calendars: any[] = [];
   selectedCalendar: any;
 
-  constructor(
-   private readonly calendarService: CalendarService
-  ) {}
+  constructor(private readonly calendarService: CalendarService) {}
 
   ngOnInit(): void {
     this.calendarService.calendars$.subscribe((calendars) => {

@@ -26,7 +26,7 @@ export const MapSeachAnimation = [
         width: '100%',
         opacity: 1,
         transform: 'translateX(0)',
-      })
+      }),
     ),
     state(
       'out',
@@ -34,21 +34,20 @@ export const MapSeachAnimation = [
         width: '0px',
         opacity: 0,
         transform: 'translateX(-100%)',
-      })
+      }),
     ),
     transition('out => in', animate('0.15s ease-in-out')),
     transition('in => out', animate('0.15s ease-in-out')),
   ]),
-]
+];
 
 @Component({
   selector: 'app-map-search',
   imports: [IonicModule, CommonModule, FormsModule],
   templateUrl: './map-search.component.html',
   styleUrls: ['./map-search.component.scss'],
-  animations: MapSeachAnimation
+  animations: MapSeachAnimation,
 })
-
 export class MapSearchComponent implements OnInit {
   @ViewChild(GoogleMapComponent) googleMap!: GoogleMapComponent;
   startLocationInput = '';
@@ -63,16 +62,17 @@ export class MapSearchComponent implements OnInit {
     public readonly directionsService: DirectionsService,
     private readonly placesService: PlacesService,
     private readonly currentLocationService: CurrentLocationService,
-    private readonly visibilityService: VisibilityService) {}
+    private readonly visibilityService: VisibilityService,
+  ) {}
 
   ngOnInit(): void {
     this.enableStart$ = this.visibilityService.enableStart;
-    this.directionsService.getStartPoint().subscribe(start => {
+    this.directionsService.getStartPoint().subscribe((start) => {
       if (start) {
         this.startLocationInput = start.title;
       }
     });
-    this.directionsService.getDestinationPoint().subscribe(destination => {
+    this.directionsService.getDestinationPoint().subscribe((destination) => {
       if (destination) {
         this.destinationLocationInput = destination.title;
         this.isSearchVisible = true;
@@ -81,22 +81,20 @@ export class MapSearchComponent implements OnInit {
 
     combineLatest([
       this.directionsService.getStartPoint(),
-      this.directionsService.getDestinationPoint()
+      this.directionsService.getDestinationPoint(),
     ])
-    .pipe(
-      filter(([start, destination]) => !!start && !!destination)
-    )
-    .subscribe(([start, destination]) => {
-      // Use the available start and destination values.
-      // Here we assume calculateShortestRoute accepts addresses; adjust if you prefer coordinates.
-      this.directionsService.calculateShortestRoute(start!.address, destination!.address)
-        .then(() => {
-          // Retrieve the calculated fastest route data from the service.
-          this.currentRouteData = this.directionsService.getShortestRoute();
-        })
-        .catch(error => console.error('Error calculating route:', error));
-    });
-
+      .pipe(filter(([start, destination]) => !!start && !!destination))
+      .subscribe(([start, destination]) => {
+        // Use the available start and destination values.
+        // Here we assume calculateShortestRoute accepts addresses; adjust if you prefer coordinates.
+        this.directionsService
+          .calculateShortestRoute(start!.address, destination!.address)
+          .then(() => {
+            // Retrieve the calculated fastest route data from the service.
+            this.currentRouteData = this.directionsService.getShortestRoute();
+          })
+          .catch((error) => console.error('Error calculating route:', error));
+      });
   }
 
   toggleSearch() {
@@ -120,7 +118,6 @@ export class MapSearchComponent implements OnInit {
     });
   }
 
-
   async onSearchChange(event: any, type: 'start' | 'destination') {
     this.isSearchingFromStart = type === 'start'; // Set the flag to 'start' or 'destination'
     const query = event.target.value.trim();
@@ -141,7 +138,6 @@ export class MapSearchComponent implements OnInit {
     this.directionsService.showDirections();
     this.visibilityService.toggleStartButton();
     this.toggleSearch();
-
   }
 
   clearStartInput() {
@@ -150,7 +146,6 @@ export class MapSearchComponent implements OnInit {
     this.directionsService.clearStartPoint();
     this.currentRouteData = null;
   }
-
 
   clearDestinationInput() {
     this.destinationLocationInput = '';

@@ -1,4 +1,9 @@
-import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
+import {
+  ComponentFixture,
+  fakeAsync,
+  TestBed,
+  tick,
+} from '@angular/core/testing';
 import { SwitchCampusButtonComponent } from './switch-campus-button.component';
 import { Store } from '@ngrx/store';
 import { GoogleMapService } from 'src/app/services/googeMap.service';
@@ -24,14 +29,20 @@ describe('SwitchCampusButtonComponent', () => {
         ...((window as any).google?.maps || {}),
         // Provide a simple LatLng constructor that matches what the component expects.
         LatLng: class {
-          constructor(public lat: number, public lng: number) {}
+          constructor(
+            public lat: number,
+            public lng: number,
+          ) {}
         },
       },
     };
   });
 
   beforeEach(() => {
-    const mockStore = jasmine.createSpyObj<Store>('Store', ['select', 'dispatch']);
+    const mockStore = jasmine.createSpyObj<Store>('Store', [
+      'select',
+      'dispatch',
+    ]);
     mockStore.select.and.returnValue(of('sgw')); // Default return value for store.select
 
     TestBed.configureTestingModule({
@@ -58,12 +69,14 @@ describe('SwitchCampusButtonComponent', () => {
     store.select.and.returnValue(of('sgw')); // Simulate current campus as 'sgw'
     component.switchCampus();
 
-    expect(store.dispatch).toHaveBeenCalledWith(setSelectedCampus({ campus: 'loy' }));
+    expect(store.dispatch).toHaveBeenCalledWith(
+      setSelectedCampus({ campus: 'loy' }),
+    );
     expect(googleMapService.updateMapLocation).toHaveBeenCalledWith(
       new google.maps.LatLng(
         data.loy.coordinates.lat,
-        data.loy.coordinates.lng
-      )
+        data.loy.coordinates.lng,
+      ),
     );
   });
 });

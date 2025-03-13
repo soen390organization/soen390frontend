@@ -50,7 +50,7 @@ export class DirectionsComponent implements OnInit, OnDestroy {
   constructor(
     private readonly directionsService: DirectionsService,
     private currentLocationService: CurrentLocationService,
-    private visibilityService: VisibilityService
+    private visibilityService: VisibilityService,
   ) {}
 
   ngOnInit(): void {
@@ -61,7 +61,7 @@ export class DirectionsComponent implements OnInit, OnDestroy {
     // });
     this.directionsService.hasBothPoints$.subscribe((hasBoth) => {
       if (hasBoth) {
-        this.loadDirections("WALKING");
+        this.loadDirections('WALKING');
         this.startWatchingLocation();
       }
     });
@@ -130,7 +130,7 @@ export class DirectionsComponent implements OnInit, OnDestroy {
       position.lat,
       position.lng,
       stepLat(),
-      stepLng()
+      stepLng(),
     );
 
     console.log(`Current distance to next step: ${distance.toFixed(2)} meters`);
@@ -150,7 +150,7 @@ export class DirectionsComponent implements OnInit, OnDestroy {
     lat1: number,
     lng1: number,
     lat2: number,
-    lng2: number
+    lng2: number,
   ): number {
     const toRad = (x: number) => (x * Math.PI) / 180;
     const R = 6371e3; // Earth's radius in meters
@@ -176,11 +176,15 @@ export class DirectionsComponent implements OnInit, OnDestroy {
     this.hasArrived = false; // Reset arrival status when loading new directions
     const start = await firstValueFrom(this.directionsService.getStartPoint());
     const destination = await firstValueFrom(
-      this.directionsService.getDestinationPoint()
+      this.directionsService.getDestinationPoint(),
     );
 
     try {
-      const { steps, eta } = await this.directionsService.generateRoute(start.address, destination.address, this.selectedMode);
+      const { steps, eta } = await this.directionsService.generateRoute(
+        start.address,
+        destination.address,
+        this.selectedMode,
+      );
       this.steps = steps;
       console.log(this.steps);
       this.eta = eta;
@@ -234,6 +238,4 @@ export class DirectionsComponent implements OnInit, OnDestroy {
     this.visibilityService.togglePOIsComponent();
     this.visibilityService.toggleStartButton();
   }
-
-
 }

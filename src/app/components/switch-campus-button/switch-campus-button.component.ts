@@ -13,20 +13,25 @@ import data from 'src/assets/ConcordiaData.json';
   templateUrl: './switch-campus-button.component.html',
   styleUrls: ['./switch-campus-button.component.scss'],
 })
-
 export class SwitchCampusButtonComponent {
   selectedCampus$: Observable<string>;
   // Consider Moving to places API or 1 service
   campusData: any = data;
 
-  constructor(private readonly store: Store, private readonly googleMapService: GoogleMapService) {
+  constructor(
+    private readonly store: Store,
+    private readonly googleMapService: GoogleMapService,
+  ) {
     this.selectedCampus$ = this.store.select(selectSelectedCampus);
   }
 
   switchCampus() {
-    this.selectedCampus$.pipe(take(1)).subscribe(currentCampus => {
+    this.selectedCampus$.pipe(take(1)).subscribe((currentCampus) => {
       let campus = currentCampus === 'sgw' ? 'loy' : 'sgw';
-      let location = new google.maps.LatLng(this.campusData[campus].coordinates.lat, this.campusData[campus].coordinates.lng);
+      let location = new google.maps.LatLng(
+        this.campusData[campus].coordinates.lat,
+        this.campusData[campus].coordinates.lng,
+      );
 
       this.store.dispatch(setSelectedCampus({ campus }));
       this.googleMapService.updateMapLocation(location);

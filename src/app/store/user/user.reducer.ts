@@ -1,5 +1,10 @@
 import { createReducer, on } from '@ngrx/store';
-import { loadUser, loadUserSuccess, loadUserFailure, setUserName } from './user.actions';
+import {
+  loadUser,
+  loadUserSuccess,
+  loadUserFailure,
+  setUserName,
+} from './user.actions';
 
 export interface UserState {
   user: { id: string; name: string; email: string } | null;
@@ -29,5 +34,5 @@ export const userReducer = createReducer(
   on(setUserName, (state, { name }) => ({
     ...state,
     user: state.user ? { ...state.user, name } : null,
-  }))
+  })),
 );

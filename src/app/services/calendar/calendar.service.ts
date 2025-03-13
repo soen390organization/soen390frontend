@@ -11,7 +11,7 @@ export class CalendarService {
   private accessToken: string | null = null;
   private previouslyFetchedEvents: {
     [calendarId: string]: any[];
-  } = {}
+  } = {};
 
   private readonly calendarsSubject = new BehaviorSubject<any[]>([]);
   calendars$ = this.calendarsSubject.asObservable();
@@ -20,14 +20,16 @@ export class CalendarService {
   selectedCalendar$ = this.selectedCalendarSubject.asObservable();
 
   events$: Observable<any[]> = this.selectedCalendar$.pipe(
-    switchMap(calendarId => {
+    switchMap((calendarId) => {
       if (!calendarId) return of([]);
       return this.fetchEvents(calendarId);
-    })
+    }),
   );
 
   constructor() {
-    this.googleProvider.addScope('https://www.googleapis.com/auth/calendar.readonly');
+    this.googleProvider.addScope(
+      'https://www.googleapis.com/auth/calendar.readonly',
+    );
   }
 
   /**
@@ -45,7 +47,7 @@ export class CalendarService {
       this.accessToken = credential.accessToken;
       const calendars = await this.getUserCalendars();
       this.calendarsSubject.next(calendars);
-      this.setSelectedCalendar(calendars[0].id)
+      this.setSelectedCalendar(calendars[0].id);
       return true;
     } catch (error) {
       console.error('Error during Google Sign-In:', error);
@@ -66,7 +68,7 @@ export class CalendarService {
             Authorization: `Bearer ${this.accessToken}`,
             Accept: 'application/json',
           },
-        }
+        },
       );
 
       if (!response.ok) {
@@ -83,7 +85,7 @@ export class CalendarService {
 
   async fetchEvents(calendarId: string): Promise<any[]> {
     try {
-      if(calendarId in this.previouslyFetchedEvents) {
+      if (calendarId in this.previouslyFetchedEvents) {
         return this.previouslyFetchedEvents[calendarId];
       }
       const now = new Date().toISOString();
@@ -95,7 +97,7 @@ export class CalendarService {
             Authorization: `Bearer ${this.accessToken}`,
             Accept: 'application/json',
           },
-        }
+        },
       );
 
       if (!response.ok) {
@@ -104,7 +106,7 @@ export class CalendarService {
 
       const data = await response.json();
 
-      this.previouslyFetchedEvents[calendarId] = data.items
+      this.previouslyFetchedEvents[calendarId] = data.items;
       return data.items || [];
     } catch (error) {
       console.error('Error fetching Google Calendar events:', error);

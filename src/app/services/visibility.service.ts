@@ -4,27 +4,26 @@ import { BehaviorSubject } from 'rxjs';
 @Injectable({
   providedIn: 'root',
 })
-
 export class VisibilityService {
   private showDirections$ = new BehaviorSubject<boolean>(false);
   private showPOIs$ = new BehaviorSubject<boolean>(true);
-  private enableStart$ = new BehaviorSubject<boolean>(true)
+  private enableStart$ = new BehaviorSubject<boolean>(true);
 
   constructor() {}
 
   // Toggle visibility of Directions component
   toggleDirectionsComponent(): void {
-    this.showDirections$.next(!this.showDirections$.getValue());  // Toggle Component 1
+    this.showDirections$.next(!this.showDirections$.getValue()); // Toggle Component 1
   }
 
   // Toggle visibility of points of interest and buildings component
   togglePOIsComponent(): void {
-    this.showPOIs$.next(!this.showPOIs$.getValue());  // Toggle Component 2
+    this.showPOIs$.next(!this.showPOIs$.getValue()); // Toggle Component 2
   }
 
   toggleStartButton(): void {
     this.enableStart$.next(!this.enableStart$.getValue());
-    console.log("Switched enable start")
+    console.log('Switched enable start');
   }
 
   // Observables for other components to subscribe
@@ -36,7 +35,7 @@ export class VisibilityService {
     return this.showPOIs$.asObservable();
   }
 
-  get enableStart(){
+  get enableStart() {
     return this.enableStart$.asObservable();
   }
 }

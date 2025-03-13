@@ -11,15 +11,13 @@ describe('HomePage', () => {
     app: {
       selectedCampus: 'sgw',
       currentMap: MapType.Outdoor,
-    }
+    },
   };
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [HomePage],
-      providers: [
-        provideMockStore({ initialState })
-      ]
+      providers: [provideMockStore({ initialState })],
     }).compileComponents();
 
     store = TestBed.inject(MockStore);
@@ -45,7 +43,7 @@ describe('HomePage', () => {
         app: {
           selectedCampus: 'sgw',
           currentMap: MapType.Indoor,
-        }
+        },
       });
       fixture.detectChanges();
 

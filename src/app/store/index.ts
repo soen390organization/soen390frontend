@@ -9,7 +9,7 @@ export interface GlobalState {
 
 export const reducers: ActionReducerMap<GlobalState> = {
   user: userReducer,
-  app: appReducer
+  app: appReducer,
 };
 
 export const effects = [UserEffects];

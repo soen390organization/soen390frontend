@@ -22,11 +22,11 @@ describe('ShuttleService', () => {
   class MockPlacesService {
     findPlaceFromQuery(
       request: any,
-      callback: (results: any, status: any) => void
+      callback: (results: any, status: any) => void,
     ) {
       callback(
         [{ geometry: { location: new MockLatLng(45.5017, -73.5673) } }],
-        'OK'
+        'OK',
       );
     }
   }
@@ -63,13 +63,13 @@ describe('ShuttleService', () => {
 
     service = TestBed.inject(ShuttleService);
     routeServiceSpy = TestBed.inject(
-      DirectionsService
+      DirectionsService,
     ) as jasmine.SpyObj<DirectionsService>;
 
     (service as any).placesService = new MockPlacesService();
 
     routeServiceSpy.calculateRoute.and.returnValue(
-      Promise.resolve({ steps: [], eta: '0 minutes' })
+      Promise.resolve({ steps: [], eta: '0 minutes' }),
     );
 
     service['routeService'] = routeServiceSpy;
@@ -85,7 +85,7 @@ describe('ShuttleService', () => {
     it("should return 'sgw' given coordinates near SGW", async () => {
       const coordsNearSgw = new google.maps.LatLng(
         45.49750005500292,
-        -73.57751531044308
+        -73.57751531044308,
       );
       const sgw = service.getNearestCampus(coordsNearSgw);
       expect(sgw).toBe('sgw');
@@ -94,7 +94,7 @@ describe('ShuttleService', () => {
     it("should return 'loy' given coordinates near loyola", async () => {
       const coordsNearLoy = new google.maps.LatLng(
         45.45736351335173,
-        -73.64365638900644
+        -73.64365638900644,
       );
       const loy = service.getNearestCampus(coordsNearLoy);
       expect(loy).toBe('loy');
@@ -138,10 +138,10 @@ describe('ShuttleService', () => {
       spyOn((service as any).placesService, 'findPlaceFromQuery').and.callFake(
         (req: any, cb: any) => {
           cb([], 'OK'); // Return no results
-        }
+        },
       );
       await expectAsync(
-        (service as any).findCoords('Invalid place')
+        (service as any).findCoords('Invalid place'),
       ).toBeRejectedWith(new Error('Error finding coords'));
     });
   });
@@ -150,14 +150,14 @@ describe('ShuttleService', () => {
     describe('isNoBusAvailable()', () => {
       it('should return true for "No more shuttle buses today :("', () => {
         const result = (service as any).isNoBusAvailable(
-          'No more shuttle buses today :('
+          'No more shuttle buses today :(',
         );
         expect(result).toBeTrue();
       });
 
       it('should return true for "No departures for today."', () => {
         const result = (service as any).isNoBusAvailable(
-          'No departures for today.'
+          'No departures for today.',
         );
         expect(result).toBeTrue();
       });
@@ -189,7 +189,7 @@ describe('ShuttleService', () => {
 
         const result = await (service as any).fetchCoordinates(
           'Start',
-          'Destination'
+          'Destination',
         );
         expect(result.startCoords.lat()).toBe(45.497);
         expect(result.startCampus).toBe('sgw');
@@ -210,18 +210,18 @@ describe('ShuttleService', () => {
               },
             ],
             eta: 'N/A',
-          })
+          }),
         );
 
         const result = await (service as any).buildSameCampusSteps(
           'Start',
-          'Destination'
+          'Destination',
         );
         expect(routeServiceSpy.calculateRoute).toHaveBeenCalledTimes(1);
         expect(routeServiceSpy.calculateRoute).toHaveBeenCalledWith(
           'Start',
           'Destination',
-          google.maps.TravelMode.WALKING
+          google.maps.TravelMode.WALKING,
         );
         expect(result.steps.length).toBe(1);
         expect(result.steps[0].instructions).toBe('Walk');
@@ -243,7 +243,7 @@ describe('ShuttleService', () => {
               },
             ],
             eta: 'TBD',
-          })
+          }),
         );
 
         // Mock shuttle bus
@@ -258,7 +258,7 @@ describe('ShuttleService', () => {
               },
             ],
             eta: 'TBD',
-          })
+          }),
         );
 
         // Mock final walk
@@ -273,7 +273,7 @@ describe('ShuttleService', () => {
               },
             ],
             eta: 'TBD',
-          })
+          }),
         );
 
         const result = await (service as any).buildDifferentCampusSteps(
@@ -281,14 +281,14 @@ describe('ShuttleService', () => {
           'Destination',
           'sgw',
           'loy',
-          '10:00 AM'
+          '10:00 AM',
         );
 
         expect(routeServiceSpy.calculateRoute).toHaveBeenCalledTimes(3);
         // Adjust to whatever final total steps you expect:
         expect(result.steps.length).toBe(3);
         expect(
-          result.steps.some((s) => s.instructions.includes('Next shuttle at'))
+          result.steps.some((s) => s.instructions.includes('Next shuttle at')),
         ).toBeTrue();
         expect(result.eta).toBeDefined();
       });
@@ -302,18 +302,18 @@ describe('ShuttleService', () => {
             destinationCoords: new MockLatLng(45.458, -73.64),
             startCampus: 'sgw',
             destinationCampus: 'loy',
-          })
+          }),
         );
         spyOn(service, 'getNextBus').and.returnValue(
-          'No more shuttle buses today :('
+          'No more shuttle buses today :(',
         );
 
         const result = await service.calculateShuttleBusRoute(
           'Start',
-          'Destination'
+          'Destination',
         );
         expect(result.steps[0].instructions).toBe(
-          'No more shuttle buses today :('
+          'No more shuttle buses today :(',
         );
         expect(result.eta).toBe('N/A');
         expect(routeServiceSpy.calculateRoute).not.toHaveBeenCalled();
@@ -326,24 +326,24 @@ describe('ShuttleService', () => {
             destinationCoords: new MockLatLng(45.497, -73.578),
             startCampus: 'sgw',
             destinationCampus: 'sgw',
-          })
+          }),
         );
         spyOn(service, 'getNextBus').and.returnValue('10:00 AM');
 
         // Return an object with steps and eta:
         const sameCampusSpy = spyOn(
           service as any,
-          'buildSameCampusSteps'
+          'buildSameCampusSteps',
         ).and.returnValue(
           Promise.resolve({
             steps: [{ instructions: 'Walk around campus' }],
             eta: 'TBD',
-          })
+          }),
         );
 
         const result = await service.calculateShuttleBusRoute(
           'Start',
-          'Destination'
+          'Destination',
         );
         expect(sameCampusSpy).toHaveBeenCalled();
         expect(result.steps[0].instructions).toBe('Walk around campus');
@@ -357,24 +357,24 @@ describe('ShuttleService', () => {
             destinationCoords: new MockLatLng(45.457, -73.643),
             startCampus: 'sgw',
             destinationCampus: 'loy',
-          })
+          }),
         );
         spyOn(service, 'getNextBus').and.returnValue('10:00 AM');
 
         // Return an object with steps and eta:
         const differentCampusSpy = spyOn(
           service as any,
-          'buildDifferentCampusSteps'
+          'buildDifferentCampusSteps',
         ).and.returnValue(
           Promise.resolve({
             steps: [{ instructions: 'Steps for Inter-campus' }],
             eta: 'TBD',
-          })
+          }),
         );
 
         const result = await service.calculateShuttleBusRoute(
           'Start',
-          'Destination'
+          'Destination',
         );
         expect(differentCampusSpy).toHaveBeenCalled();
         expect(result.steps[0].instructions).toBe('Steps for Inter-campus');

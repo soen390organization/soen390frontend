@@ -1,35 +1,52 @@
 <!-- action buttons -->
-<div class="fullwidth absolute top-[24px] left-1/2 -translate-x-1/2 z-[999] flex space-x-4">
-  <app-switch-campus-button [class.moved-down-switch-campus]="isSearchVisible"></app-switch-campus-button>
-  <app-user-profile [class.moved-down-user-profile]="isSearchVisible" (click)="openUserInfoPage()" (keydown.enter)="openUserInfoPage()"></app-user-profile>
+<div
+  class="fullwidth absolute top-[24px] left-1/2 -translate-x-1/2 z-[999] flex space-x-4"
+>
+  <app-switch-campus-button
+    [class.moved-down-switch-campus]="isSearchVisible"
+  ></app-switch-campus-button>
+  <app-user-profile
+    [class.moved-down-user-profile]="isSearchVisible"
+    (click)="openUserInfoPage()"
+    (keydown.enter)="openUserInfoPage()"
+  ></app-user-profile>
 </div>
-  <app-map-search searchStateChange="onSearchStateChanged($event)" class="pr-2"></app-map-search>
-
+<app-map-search
+  searchStateChange="onSearchStateChanged($event)"
+  class="pr-2"
+></app-map-search>
 
 <!-- Main content container with no bottom padding -->
 <ion-content [fullscreen]="true" scrollY="false" class="pb-0">
-    <app-google-map
-      class="absolute top-0 left-0 w-full h-full transition-opacity duration-300 ease-linear"
-      [ngClass]="{
+  <app-google-map
+    class="absolute top-0 left-0 w-full h-full transition-opacity duration-300 ease-linear"
+    [ngClass]="{
         'opacity-0 pointer-events-none': currentMap === mapType.Indoor,
         'opacity-100 pointer-events-auto': currentMap !== mapType.Indoor
       }"
-      (initialized)="onGoogleMapInitialized()">
-    </app-google-map>
+    (initialized)="onGoogleMapInitialized()"
+  >
+  </app-google-map>
 
-    <app-mappedin-map
-      class="absolute top-0 left-0 w-full h-full transition-opacity duration-300 ease-linear"
-      [ngClass]="{
+  <app-mappedin-map
+    class="absolute top-0 left-0 w-full h-full transition-opacity duration-300 ease-linear"
+    [ngClass]="{
         'opacity-0 pointer-events-none': currentMap === mapType.Outdoor,
         'opacity-100 pointer-events-auto': currentMap !== mapType.Outdoor
       }"
-      (initialized)="onMappedinMapInitialized()">
-    </app-mappedin-map>
+    (initialized)="onMappedinMapInitialized()"
+  >
+  </app-mappedin-map>
 </ion-content>
 
 <!-- Global spinner -->
-<div *ngIf="loading" class="absolute inset-0 flex items-center justify-center bg-white/50 backdrop-blur-sm z-[50]">
-  <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-red-800"></div>
+<div
+  *ngIf="loading"
+  class="absolute inset-0 flex items-center justify-center bg-white/50 backdrop-blur-sm z-[50]"
+>
+  <div
+    class="animate-spin rounded-full h-12 w-12 border-t-4 border-red-800"
+  ></div>
 </div>
 
 <!-- Global interaction bar -->

@@ -1,5 +1,12 @@
 /// <reference types="google.maps" />
-import { Component, AfterViewInit, ElementRef, ViewChild, Output, EventEmitter } from '@angular/core';
+import {
+  Component,
+  AfterViewInit,
+  ElementRef,
+  ViewChild,
+  Output,
+  EventEmitter,
+} from '@angular/core';
 import { PolygonBuilder } from 'src/app/builders/polygon.builder';
 import data from 'src/assets/ConcordiaData.json';
 import { CurrentLocationService } from 'src/app/services/geolocation/current-location.service';
@@ -21,11 +28,11 @@ export class GoogleMapComponent implements AfterViewInit {
   buildingPolygon!: google.maps.Polygon;
   mapOptions: google.maps.MapOptions = {
     zoom: 18,
-    mapTypeControl: false,       // Disable Map/Satellite button
-    fullscreenControl: false,    // Disable Fullscreen button
-    streetViewControl: false,    // Disable Street View Pegman
-    zoomControl: false           // Disable Zoom control buttons
-  }
+    mapTypeControl: false, // Disable Map/Satellite button
+    fullscreenControl: false, // Disable Fullscreen button
+    streetViewControl: false, // Disable Street View Pegman
+    zoomControl: false, // Disable Zoom control buttons
+  };
 
   constructor(private readonly googleMapService: GoogleMapService) {}
 
@@ -43,7 +50,8 @@ export class GoogleMapComponent implements AfterViewInit {
     return new Promise((resolve) => {
       (window as any).initMap = () => resolve(); // This is the callback from the script
       const script = document.createElement('script');
-      script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyDWKEjdfWBjgMoRhicU_t4XDhoUnMr5LDM&callback=initMap&libraries=geometry,places&loading=async';
+      script.src =
+        'https://maps.googleapis.com/maps/api/js?key=AIzaSyDWKEjdfWBjgMoRhicU_t4XDhoUnMr5LDM&callback=initMap&libraries=geometry,places&loading=async';
       script.async = true;
       script.defer = true;
       document.body.appendChild(script);
@@ -52,23 +60,24 @@ export class GoogleMapComponent implements AfterViewInit {
 
   async initMap() {
     if (!this.mapContainer) return;
-    this.googleMapService.initialize(new google.maps.Map(this.mapContainer.nativeElement, {
-      ...this.mapOptions,
-      center: data.sgw.coordinates
-    }));
+    this.googleMapService.initialize(
+      new google.maps.Map(this.mapContainer.nativeElement, {
+        ...this.mapOptions,
+        center: data.sgw.coordinates,
+      }),
+    );
     await this.loadBuildings();
     this.initialized.emit();
     console.log('Google Map initialized: ', this.initialized);
   }
 
   async loadBuildings() {
-    const userCurrentLocation = await this.currentLocationService.getCurrentLocation();
-    const userCurrentBuilding = await this.geolocationService.getCurrentBuilding(userCurrentLocation);
+    const userCurrentLocation =
+      await this.currentLocationService.getCurrentLocation();
+    const userCurrentBuilding =
+      await this.geolocationService.getCurrentBuilding(userCurrentLocation);
 
-    const buildings = [
-      ...data.sgw.buildings,
-      ...data.loy.buildings
-    ];
+    const buildings = [...data.sgw.buildings, ...data.loy.buildings];
 
     buildings.forEach((building) => {
       let polygonBuilder = new PolygonBuilder();

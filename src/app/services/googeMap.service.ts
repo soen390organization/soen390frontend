@@ -10,7 +10,7 @@ export class GoogleMapService {
 
   constructor(
     private readonly routeService: DirectionsService,
-    private readonly placesService: PlacesService
+    private readonly placesService: PlacesService,
   ) {}
 
   initialize(map: google.maps.Map) {
@@ -32,7 +32,7 @@ export class GoogleMapService {
 
   createMarker(
     position: google.maps.LatLng,
-    iconUrl: string
+    iconUrl: string,
   ): google.maps.Marker {
     return new google.maps.Marker({
       position,

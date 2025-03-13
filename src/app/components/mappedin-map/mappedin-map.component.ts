@@ -24,7 +24,7 @@ export class MappedinMapComponent implements AfterViewInit {
 
   constructor(
     private readonly mappedinService: MappedinService,
-    private readonly indoorDirectionsService: IndoorDirectionsService
+    private readonly indoorDirectionsService: IndoorDirectionsService,
   ) {}
 
   ngAfterViewInit(): void {

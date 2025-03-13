@@ -7,10 +7,10 @@ export const selectAppState = createFeatureSelector<AppState>('app');
 // Selector to Get the Selected Campus
 export const selectSelectedCampus = createSelector(
   selectAppState,
-  (state: AppState) => state.selectedCampus
+  (state: AppState) => state.selectedCampus,
 );
 
 export const selectCurrentMap = createSelector(
   selectAppState,
-  (state: AppState) => state.currentMap
+  (state: AppState) => state.currentMap,
 );

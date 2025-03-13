@@ -5,8 +5,8 @@ import { UserInfoPage } from './user-info.page';
 const routes: Routes = [
   {
     path: '',
-    component: UserInfoPage
-  }
+    component: UserInfoPage,
+  },
 ];
 
 @NgModule({

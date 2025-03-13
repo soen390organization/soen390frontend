@@ -6,20 +6,21 @@ import { CalendarService } from '../services/calendar/calendar.service';
   selector: 'app-user-info',
   templateUrl: './user-info.page.html',
   styleUrls: ['./user-info.page.scss'],
-  standalone: false
+  standalone: false,
 })
+export class UserInfoPage {
+  calendars: any[] = [];
 
-export class UserInfoPage{
-  calendars: any[] = []
-
-  constructor(private readonly router: Router, private readonly calendarService: CalendarService) {
-  }
+  constructor(
+    private readonly router: Router,
+    private readonly calendarService: CalendarService,
+  ) {}
 
   openHomePage() {
     this.router.navigate(['home']);
   }
 
   async signInWithGoogle() {
-    this.calendarService.signInWithGoogle()
+    this.calendarService.signInWithGoogle();
   }
 }

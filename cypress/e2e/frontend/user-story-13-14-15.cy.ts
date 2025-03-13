@@ -5,15 +5,17 @@ describe('Map - Directions and Route Generation for Multi-Transportation Modes',
         // Stub geolocation to simulate being inside SGW campus.
         const testLat = 45.497165958498655;
         const testLng = -73.57903212232189;
-        cy.stub(win.navigator.geolocation, 'getCurrentPosition').callsFake((cb) => {
-          cb({
-            coords: {
-              latitude: testLat,
-              longitude: testLng,
-              accuracy: 10,
-            },
-          });
-        });
+        cy.stub(win.navigator.geolocation, 'getCurrentPosition').callsFake(
+          (cb) => {
+            cb({
+              coords: {
+                latitude: testLat,
+                longitude: testLng,
+                accuracy: 10,
+              },
+            });
+          },
+        );
       },
     });
     Cypress.config('defaultCommandTimeout', 20000);
@@ -40,8 +42,10 @@ describe('Map - Directions and Route Generation for Multi-Transportation Modes',
     cy.wait(2000);
 
     // Verify that two markers are displayed (assuming markers contain "Icone_Verde.svg").
-    cy.get('.gm-style img[src*="Icone_Verde.svg"]', { timeout: 10000 })
-      .should('have.length', 2);
+    cy.get('.gm-style img[src*="Icone_Verde.svg"]', { timeout: 10000 }).should(
+      'have.length',
+      2,
+    );
 
     // Check that the ETA "19 mins (8310m)" is visible.
     cy.contains('18 mins (8099 m)').should('be.visible');
@@ -51,7 +55,10 @@ describe('Map - Directions and Route Generation for Multi-Transportation Modes',
     cy.wait(2000);
 
     // Click on the handle bar using the provided class.
-    cy.get('.w-\\[100px\\].h-\\[10px\\].bg-\\[\\#d5d5d5\\].my-\\[10px\\].mx-auto.rounded-full.cursor-pointer', { timeout: 10000 })
+    cy.get(
+      '.w-\\[100px\\].h-\\[10px\\].bg-\\[\\#d5d5d5\\].my-\\[10px\\].mx-auto.rounded-full.cursor-pointer',
+      { timeout: 10000 },
+    )
       .should('be.visible')
       .click();
     cy.wait(2000);
@@ -60,42 +67,81 @@ describe('Map - Directions and Route Generation for Multi-Transportation Modes',
     cy.get('app-directions', { timeout: 10000 }).should('exist');
 
     // Capture the initial directions text.
-    cy.get('app-directions').invoke('text').then((initialText) => {
-
-      // Click the Bus button (icon: "directions_bus").
-      cy.get('app-directions').contains('span', 'directions_bus').parents('button').click();
-      cy.wait(3000);
-      cy.get('app-directions').invoke('text').should((busText) => {
-        expect(busText, 'Directions text should update for bus').to.not.equal(initialText);
-      });
-
-      // Click the Shuttle button (icon: "directions_transit").
-      cy.get('app-directions').invoke('text').then((busUpdatedText) => {
-        cy.get('app-directions').contains('span', 'directions_transit').parents('button').click();
+    cy.get('app-directions')
+      .invoke('text')
+      .then((initialText) => {
+        // Click the Bus button (icon: "directions_bus").
+        cy.get('app-directions')
+          .contains('span', 'directions_bus')
+          .parents('button')
+          .click();
         cy.wait(3000);
-        cy.get('app-directions').invoke('text').should((shuttleText) => {
-          expect(shuttleText, 'Directions text should update for shuttle').to.not.equal(busUpdatedText);
-        });
-
-        // Click the Car button (icon: "directions_car").
-        cy.get('app-directions').invoke('text').then((shuttleUpdatedText) => {
-          cy.get('app-directions').contains('span', 'directions_car').parents('button').click();
-          cy.wait(3000);
-          cy.get('app-directions').invoke('text').should((carText) => {
-            expect(carText, 'Directions text should update for car').to.not.equal(shuttleUpdatedText);
+        cy.get('app-directions')
+          .invoke('text')
+          .should((busText) => {
+            expect(
+              busText,
+              'Directions text should update for bus',
+            ).to.not.equal(initialText);
           });
 
-          // Click the Walking button (icon: "directions_walk").
-          cy.get('app-directions').invoke('text').then((carUpdatedText) => {
-            cy.get('app-directions').contains('span', 'directions_walk').parents('button').click();
+        // Click the Shuttle button (icon: "directions_transit").
+        cy.get('app-directions')
+          .invoke('text')
+          .then((busUpdatedText) => {
+            cy.get('app-directions')
+              .contains('span', 'directions_transit')
+              .parents('button')
+              .click();
             cy.wait(3000);
-            cy.get('app-directions').invoke('text').should((walkText) => {
-              expect(walkText, 'Directions text should update for walking').to.not.equal(carUpdatedText);
-            });
+            cy.get('app-directions')
+              .invoke('text')
+              .should((shuttleText) => {
+                expect(
+                  shuttleText,
+                  'Directions text should update for shuttle',
+                ).to.not.equal(busUpdatedText);
+              });
+
+            // Click the Car button (icon: "directions_car").
+            cy.get('app-directions')
+              .invoke('text')
+              .then((shuttleUpdatedText) => {
+                cy.get('app-directions')
+                  .contains('span', 'directions_car')
+                  .parents('button')
+                  .click();
+                cy.wait(3000);
+                cy.get('app-directions')
+                  .invoke('text')
+                  .should((carText) => {
+                    expect(
+                      carText,
+                      'Directions text should update for car',
+                    ).to.not.equal(shuttleUpdatedText);
+                  });
+
+                // Click the Walking button (icon: "directions_walk").
+                cy.get('app-directions')
+                  .invoke('text')
+                  .then((carUpdatedText) => {
+                    cy.get('app-directions')
+                      .contains('span', 'directions_walk')
+                      .parents('button')
+                      .click();
+                    cy.wait(3000);
+                    cy.get('app-directions')
+                      .invoke('text')
+                      .should((walkText) => {
+                        expect(
+                          walkText,
+                          'Directions text should update for walking',
+                        ).to.not.equal(carUpdatedText);
+                      });
+                  });
+              });
           });
-        });
       });
-    });
 
     // Click the "End" button to hide the directions.
     cy.contains('button', 'End').click();

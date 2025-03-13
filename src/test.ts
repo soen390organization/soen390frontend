@@ -8,7 +8,7 @@ import {
 // First, initialize the Angular testing environment.
 getTestBed().initTestEnvironment(
   BrowserDynamicTestingModule,
-  platformBrowserDynamicTesting()
+  platformBrowserDynamicTesting(),
 );
 
 // Global Google Maps Stub definition:
@@ -47,7 +47,10 @@ class Circle {
 }
 
 class Map {
-  constructor(public element: HTMLElement, public options: any) {}
+  constructor(
+    public element: HTMLElement,
+    public options: any,
+  ) {}
   setCenter(latLng: any): void {
     // intentionally left blank
   }
@@ -59,13 +62,19 @@ class Map {
 class AutocompleteService {
   getPlacePredictions(
     req: any,
-    callback: (predictions: google.maps.places.AutocompletePrediction[] | null, status: string) => void
+    callback: (
+      predictions: google.maps.places.AutocompletePrediction[] | null,
+      status: string,
+    ) => void,
   ) {
     callback(null, 'ZERO_RESULTS');
   }
   getQueryPredictions(
     req: any,
-    callback: (predictions: google.maps.places.QueryAutocompletePrediction[] | null, status: string) => void
+    callback: (
+      predictions: google.maps.places.QueryAutocompletePrediction[] | null,
+      status: string,
+    ) => void,
   ) {
     callback(null, 'ZERO_RESULTS');
   }
@@ -85,7 +94,10 @@ class DirectionsService {
   constructor(public map: any) {}
   route(
     request: google.maps.DirectionsRequest,
-    callback: (result: google.maps.DirectionsResult, status: google.maps.DirectionsStatus) => void
+    callback: (
+      result: google.maps.DirectionsResult,
+      status: google.maps.DirectionsStatus,
+    ) => void,
   ): void {
     callback(null, 'NOT_FOUND' as any);
   }
