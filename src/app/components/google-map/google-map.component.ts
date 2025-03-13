@@ -8,7 +8,7 @@ import {
   EventEmitter
 } from '@angular/core';
 import { PolygonBuilder } from 'src/app/builders/polygon.builder';
-import data from 'src/assets/ConcordiaData.json';
+import data from 'src/assets/concordia-data.json';
 import { CurrentLocationService } from 'src/app/services/current-location/current-location.service';
 import { GeolocationService } from 'src/app/services/geolocation/geolocation.service';
 import { GoogleMapService } from 'src/app/services/google-map.service';

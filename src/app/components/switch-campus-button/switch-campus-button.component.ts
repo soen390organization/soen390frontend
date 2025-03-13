@@ -5,7 +5,7 @@ import { selectSelectedCampus, setSelectedCampus } from 'src/app/store/app';
 import { GoogleMapService } from 'src/app/services/google-map.service';
 import { PlacesService } from 'src/app/services/places/places.service';
 import { Observable, take } from 'rxjs';
-import data from 'src/assets/ConcordiaData.json';
+import data from 'src/assets/concordia-data.json';
 
 @Component({
   selector: 'app-switch-campus-button',

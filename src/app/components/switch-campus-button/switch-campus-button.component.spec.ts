@@ -4,7 +4,7 @@ import { Store } from '@ngrx/store';
 import { GoogleMapService } from 'src/app/services/google-map.service';
 import { setSelectedCampus } from 'src/app/store/app';
 import { of } from 'rxjs';
-import data from 'src/assets/ConcordiaData.json';
+import data from 'src/assets/concordia-data.json';
 
 class MockGoogleMapService {
   updateMapLocation = jasmine.createSpy('updateMapLocation');

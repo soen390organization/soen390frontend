@@ -1,4 +1,4 @@
-import data from '../../../assets/ConcordiaData.json';
+import data from '../../../assets/concordia-data.json';
 import { DirectionsService } from '../directions/directions.service';
 import { Injectable, Injector } from '@angular/core';
 import shuttleData from '../../../assets/ShuttleData.json';

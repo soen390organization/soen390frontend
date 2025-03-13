@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Location } from '../../interfaces/location.interface';
-import data from 'src/assets/ConcordiaData.json';
+import data from 'src/assets/concordia-data.json';
 import { selectSelectedCampus, AppState } from '../../store/app';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { Store } from '@ngrx/store';
