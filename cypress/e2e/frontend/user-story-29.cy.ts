@@ -8,18 +8,16 @@ describe('Map Search - Use Current Location as Start', () => {
         const testLng = -73.57903212232189;
 
         // Override the geolocation API before the app initializes
-        cy.stub(win.navigator.geolocation, 'getCurrentPosition').callsFake(
-          (cb) => {
-            cb({
-              coords: {
-                latitude: testLat,
-                longitude: testLng,
-                accuracy: 10,
-              },
-            } as GeolocationPosition);
-          },
-        );
-      },
+        cy.stub(win.navigator.geolocation, 'getCurrentPosition').callsFake((cb) => {
+          cb({
+            coords: {
+              latitude: testLat,
+              longitude: testLng,
+              accuracy: 10
+            }
+          } as GeolocationPosition);
+        });
+      }
     });
 
     // Increase timeout globally to avoid flakiness
@@ -44,13 +42,9 @@ describe('Map Search - Use Current Location as Start', () => {
     });
 
     // Ensure the marker appears on the map (retry until it does)
-    cy.get('.gm-style img[src*="Icone_Verde.svg"]', { timeout: 15000 }).should(
-      'exist',
-    );
+    cy.get('.gm-style img[src*="Icone_Verde.svg"]', { timeout: 15000 }).should('exist');
 
     // Log that the test successfully validated everything
-    cy.log(
-      '✅ Test completed: Current location set successfully, marker found.',
-    );
+    cy.log('✅ Test completed: Current location set successfully, marker found.');
   });
 });

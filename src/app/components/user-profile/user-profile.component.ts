@@ -9,7 +9,7 @@ import { MapSeachAnimation } from '../map-search/map-search.component';
   imports: [IonicModule, CommonModule, FormsModule],
   templateUrl: './user-profile.component.html',
   styleUrls: ['./user-profile.component.scss'],
-  animations: MapSeachAnimation,
+  animations: MapSeachAnimation
 })
 export class UserProfileComponent {
   constructor() {}

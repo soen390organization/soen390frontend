@@ -16,9 +16,7 @@
         (change)="selectCalendar(calendar.id)"
         [ngStyle]="{
           'background-color':
-            calendar.id === selectedCalendar
-              ? calendar.backgroundColor
-              : 'transparent',
+            calendar.id === selectedCalendar ? calendar.backgroundColor : 'transparent'
         }"
         class="appearance-none h-6 w-6 border border-gray-300 rounded-sm mr-2"
       />

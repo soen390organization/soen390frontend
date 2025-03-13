@@ -17,18 +17,13 @@ describe('Map - Directions and Route Generation', () => {
     cy.wait(2000);
 
     // Enter destination and then press Enter.
-    cy.get('input[placeholder="Choose destination point..."]')
-      .clear()
-      .type('JMSB');
+    cy.get('input[placeholder="Choose destination point..."]').clear().type('JMSB');
     cy.wait(3000);
     cy.get('input[placeholder="Choose destination point..."]').type('{enter}');
     cy.wait(2000);
 
     // Verify that two markers are displayed (assuming markers contain "Icone_Verde.svg").
-    cy.get('.gm-style img[src*="Icone_Verde.svg"]', { timeout: 10000 }).should(
-      'have.length',
-      2,
-    );
+    cy.get('.gm-style img[src*="Icone_Verde.svg"]', { timeout: 10000 }).should('have.length', 2);
 
     // Check that the ETA "1 min (212 m)" is visible.
     cy.contains('1 min (212 m)').should('be.visible');
@@ -41,7 +36,7 @@ describe('Map - Directions and Route Generation', () => {
     // Click the handle bar using the provided class.
     cy.get(
       '.w-\\[100px\\].h-\\[10px\\].bg-\\[\\#d5d5d5\\].my-\\[10px\\].mx-auto.rounded-full.cursor-pointer',
-      { timeout: 10000 },
+      { timeout: 10000 }
     )
       .should('be.visible')
       .click();
@@ -53,15 +48,9 @@ describe('Map - Directions and Route Generation', () => {
     cy.get('app-directions', { timeout: 10000 })
       .should('exist')
       .and(($steps) => {
-        expect(
-          $steps.length,
-          'At least one step is displayed',
-        ).to.be.greaterThan(0);
+        expect($steps.length, 'At least one step is displayed').to.be.greaterThan(0);
         const stepText = $steps.first().text().trim();
-        expect(
-          stepText,
-          'Step instruction should not be empty',
-        ).to.have.length.greaterThan(0);
+        expect(stepText, 'Step instruction should not be empty').to.have.length.greaterThan(0);
       });
 
     // Click the "End" button to end directions.
@@ -74,7 +63,7 @@ describe('Map - Directions and Route Generation', () => {
 
     cy.get(
       '.w-\\[100px\\].h-\\[10px\\].bg-\\[\\#d5d5d5\\].my-\\[10px\\].mx-auto.rounded-full.cursor-pointer',
-      { timeout: 10000 },
+      { timeout: 10000 }
     )
       .should('be.visible')
       .click();

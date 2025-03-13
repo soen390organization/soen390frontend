@@ -1,11 +1,5 @@
 import { of } from 'rxjs';
-import {
-  ComponentFixture,
-  TestBed,
-  fakeAsync,
-  tick,
-  flushMicrotasks,
-} from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, tick, flushMicrotasks } from '@angular/core/testing';
 import { UserProfileComponent } from './user-profile.component';
 import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
@@ -23,9 +17,9 @@ describe('MapSearchComponent', () => {
         CommonModule,
         FormsModule,
         BrowserAnimationsModule, // Needed if testing animations
-        UserProfileComponent,
+        UserProfileComponent
       ],
-      providers: [],
+      providers: []
     }).compileComponents();
   });
 

@@ -11,13 +11,13 @@ describe('SwitchMapButtonComponent', () => {
   let fixture: ComponentFixture<SwitchMapButtonComponent>;
   let store: MockStore;
   const initialState = {
-    app: { selectedCampus: 'sgw', currentMap: MapType.Outdoor },
+    app: { selectedCampus: 'sgw', currentMap: MapType.Outdoor }
   };
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [SwitchMapButtonComponent],
-      providers: [provideMockStore({ initialState })],
+      providers: [provideMockStore({ initialState })]
     }).compileComponents();
 
     store = TestBed.inject(MockStore);
@@ -71,9 +71,7 @@ describe('SwitchMapButtonComponent', () => {
 
     component.toggleMap();
 
-    expect(store.dispatch).toHaveBeenCalledWith(
-      setMapType({ mapType: MapType.Indoor }),
-    );
+    expect(store.dispatch).toHaveBeenCalledWith(setMapType({ mapType: MapType.Indoor }));
   });
 
   it('should dispatch setMapType action to Outdoor when current map is Indoor', () => {
@@ -85,9 +83,7 @@ describe('SwitchMapButtonComponent', () => {
 
     component.toggleMap();
 
-    expect(store.dispatch).toHaveBeenCalledWith(
-      setMapType({ mapType: MapType.Outdoor }),
-    );
+    expect(store.dispatch).toHaveBeenCalledWith(setMapType({ mapType: MapType.Outdoor }));
   });
 
   it('should call toggleMap when the button is clicked', () => {

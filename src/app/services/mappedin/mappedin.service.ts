@@ -1,17 +1,11 @@
 // mappedin.service.ts
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, firstValueFrom, Observable, take } from 'rxjs';
-import {
-  getMapData,
-  show3dMap,
-  MapData,
-  MapView,
-  DOORS,
-} from '@mappedin/mappedin-js';
+import { getMapData, show3dMap, MapData, MapView, DOORS } from '@mappedin/mappedin-js';
 import { environment } from 'src/environments/environment';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class MappedinService {
   private mapView: MapView | undefined;
@@ -33,7 +27,7 @@ export class MappedinService {
     // Get floors by type 'floor' and map them to a simplified structure
     return mapData.getByType('floor').map((floor) => ({
       id: floor.id,
-      name: floor.name,
+      name: floor.name
     }));
   }
 
@@ -60,7 +54,7 @@ export class MappedinService {
       let labelColor;
       // Find the coordinates for the current floor.
       const coords = connection.coordinates.find(
-        (coord) => coord.floorId === this.mapView.currentFloor.id,
+        (coord) => coord.floorId === this.mapView.currentFloor.id
       );
       // Label the connection.
       if (connection.type == 'stairs') {
@@ -77,14 +71,14 @@ export class MappedinService {
           appearance: {
             marker: {
               foregroundColor: {
-                active: labelColor,
+                active: labelColor
                 // inactive: color,
-              },
+              }
             },
             text: {
-              foregroundColor: labelColor,
-            },
-          },
+              foregroundColor: labelColor
+            }
+          }
         });
       }
     });
@@ -98,20 +92,16 @@ export class MappedinService {
           appearance: {
             marker: {
               foregroundColor: {
-                active: ['Bathrooms', 'Water Fountain'].includes(poi.name)
-                  ? '#1d63dc'
-                  : '#000000',
+                active: ['Bathrooms', 'Water Fountain'].includes(poi.name) ? '#1d63dc' : '#000000'
                 // inactive: color,
-              },
+              }
             },
             text: {
-              foregroundColor: ['Bathrooms', 'Water Fountain'].includes(
-                poi.name,
-              )
+              foregroundColor: ['Bathrooms', 'Water Fountain'].includes(poi.name)
                 ? '#1d63dc'
-                : '#000000',
-            },
-          },
+                : '#000000'
+            }
+          }
         });
       }
     });
@@ -131,12 +121,12 @@ export class MappedinService {
     this.mapView.updateState(DOORS.Exterior, {
       visible: true,
       color: 'black',
-      opacity: 0.6,
+      opacity: 0.6
     });
     this.mapView.updateState(DOORS.Interior, {
       visible: true,
       color: 'lightgrey',
-      opacity: 0.3,
+      opacity: 0.3
     });
   }
 
@@ -160,7 +150,7 @@ export class MappedinService {
     return getMapData({
       mapId,
       key: environment.mappedin.key,
-      secret: environment.mappedin.secret,
+      secret: environment.mappedin.secret
     });
   }
 
@@ -188,10 +178,7 @@ export class MappedinService {
    * Protected method that wraps the external show3dMap API call.
    * Tests can override or spy on this method.
    */
-  protected show3dMap(
-    container: HTMLElement,
-    mapData: MapData,
-  ): Promise<MapView> {
+  protected show3dMap(container: HTMLElement, mapData: MapData): Promise<MapView> {
     return show3dMap(container, mapData);
   }
 }

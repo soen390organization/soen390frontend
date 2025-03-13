@@ -23,9 +23,9 @@ import { UserProfileComponent } from '../components/user-profile/user-profile.co
     IonicModule,
     HomePageRoutingModule,
     InteractionBarComponent,
-    UserProfileComponent,
+    UserProfileComponent
   ],
   declarations: [HomePage],
-  exports: [GoogleMapComponent],
+  exports: [GoogleMapComponent]
 })
 export class HomePageModule {}

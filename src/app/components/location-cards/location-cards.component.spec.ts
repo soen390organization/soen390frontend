@@ -10,20 +10,16 @@ describe('LocationCardsComponent', () => {
   let directionsServiceSpy: jasmine.SpyObj<DirectionsService>;
 
   beforeEach(async () => {
-    const spy = jasmine.createSpyObj('DirectionsService', [
-      'setDestinationPoint',
-    ]);
+    const spy = jasmine.createSpyObj('DirectionsService', ['setDestinationPoint']);
 
     await TestBed.configureTestingModule({
       imports: [LocationCardsComponent],
-      providers: [{ provide: DirectionsService, useValue: spy }],
+      providers: [{ provide: DirectionsService, useValue: spy }]
     }).compileComponents();
 
     fixture = TestBed.createComponent(LocationCardsComponent);
     component = fixture.componentInstance;
-    directionsServiceSpy = TestBed.inject(
-      DirectionsService,
-    ) as jasmine.SpyObj<DirectionsService>;
+    directionsServiceSpy = TestBed.inject(DirectionsService) as jasmine.SpyObj<DirectionsService>;
   });
 
   it('should create', () => {
@@ -46,7 +42,7 @@ describe('LocationCardsComponent', () => {
       name: 'Test Location',
       address: '123 Test St',
       image: 'test-image.jpg',
-      coordinates: new google.maps.LatLng(12.345, 67.89),
+      coordinates: new google.maps.LatLng(12.345, 67.89)
     };
 
     component.setDestination(mockLocation);
@@ -54,7 +50,7 @@ describe('LocationCardsComponent', () => {
     expect(directionsServiceSpy.setDestinationPoint).toHaveBeenCalledWith({
       title: mockLocation.name,
       coordinates: mockLocation.coordinates,
-      address: mockLocation.address,
+      address: mockLocation.address
     });
   });
 });

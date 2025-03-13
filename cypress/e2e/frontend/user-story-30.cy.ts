@@ -21,23 +21,16 @@ describe('Map Search - Select Start and Destination Buildings', () => {
     cy.wait(3000);
 
     // Enter "JMSB" in the destination input and press Enter
-    cy.get('input[placeholder="Choose destination point..."]').type(
-      'JMSB{enter}',
-      { force: true },
-    );
+    cy.get('input[placeholder="Choose destination point..."]').type('JMSB{enter}', { force: true });
 
     // Wait for the second marker to be added
     cy.wait(3000);
 
     // Verify that the start marker exists (adjust the selector if needed)
-    cy.get('.gm-style img[src*="Icone_Verde.svg"]', { timeout: 10000 }).should(
-      'exist',
-    );
+    cy.get('.gm-style img[src*="Icone_Verde.svg"]', { timeout: 10000 }).should('exist');
 
     // Verify that the destination marker exists (adjust the selector if needed)
-    cy.get('.gm-style img[src*="Icone_Verde.svg"]', { timeout: 10000 }).should(
-      'exist',
-    );
+    cy.get('.gm-style img[src*="Icone_Verde.svg"]', { timeout: 10000 }).should('exist');
 
     //@TODO: need to deferentiate between icons
     //@TODO: need to verify that the directions are displayed

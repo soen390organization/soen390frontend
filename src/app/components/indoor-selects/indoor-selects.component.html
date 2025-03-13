@@ -26,10 +26,7 @@
       [(ngModel)]="selectedBuilding"
       (change)="onBuildingChange(selectedBuilding)"
     >
-      <option
-        *ngFor="let building of buildings"
-        [ngValue]="building.indoorMapId"
-      >
+      <option *ngFor="let building of buildings" [ngValue]="building.indoorMapId">
         {{ building.abreviation }} Building
       </option>
     </select>

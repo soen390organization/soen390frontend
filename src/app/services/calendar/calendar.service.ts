@@ -3,7 +3,7 @@ import { BehaviorSubject, Observable, of, switchMap } from 'rxjs';
 import { getAuth, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class CalendarService {
   private readonly auth = getAuth();
@@ -23,13 +23,11 @@ export class CalendarService {
     switchMap((calendarId) => {
       if (!calendarId) return of([]);
       return this.fetchEvents(calendarId);
-    }),
+    })
   );
 
   constructor() {
-    this.googleProvider.addScope(
-      'https://www.googleapis.com/auth/calendar.readonly',
-    );
+    this.googleProvider.addScope('https://www.googleapis.com/auth/calendar.readonly');
   }
 
   /**
@@ -60,16 +58,13 @@ export class CalendarService {
    */
   async getUserCalendars(): Promise<any[]> {
     try {
-      const response = await fetch(
-        'https://www.googleapis.com/calendar/v3/users/me/calendarList',
-        {
-          method: 'GET',
-          headers: {
-            Authorization: `Bearer ${this.accessToken}`,
-            Accept: 'application/json',
-          },
-        },
-      );
+      const response = await fetch('https://www.googleapis.com/calendar/v3/users/me/calendarList', {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${this.accessToken}`,
+          Accept: 'application/json'
+        }
+      });
 
       if (!response.ok) {
         throw new Error(`Google Calendar API error: ${response.statusText}`);
@@ -95,9 +90,9 @@ export class CalendarService {
           method: 'GET',
           headers: {
             Authorization: `Bearer ${this.accessToken}`,
-            Accept: 'application/json',
-          },
-        },
+            Accept: 'application/json'
+          }
+        }
       );
 
       if (!response.ok) {

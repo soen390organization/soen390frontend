@@ -2,14 +2,11 @@ import 'zone.js/testing';
 import { getTestBed } from '@angular/core/testing';
 import {
   BrowserDynamicTestingModule,
-  platformBrowserDynamicTesting,
+  platformBrowserDynamicTesting
 } from '@angular/platform-browser-dynamic/testing';
 
 // First, initialize the Angular testing environment.
-getTestBed().initTestEnvironment(
-  BrowserDynamicTestingModule,
-  platformBrowserDynamicTesting(),
-);
+getTestBed().initTestEnvironment(BrowserDynamicTestingModule, platformBrowserDynamicTesting());
 
 // Global Google Maps Stub definition:
 interface LatLngLiteral {
@@ -49,7 +46,7 @@ class Circle {
 class Map {
   constructor(
     public element: HTMLElement,
-    public options: any,
+    public options: any
   ) {}
   setCenter(latLng: any): void {
     // intentionally left blank
@@ -64,8 +61,8 @@ class AutocompleteService {
     req: any,
     callback: (
       predictions: google.maps.places.AutocompletePrediction[] | null,
-      status: string,
-    ) => void,
+      status: string
+    ) => void
   ) {
     callback(null, 'ZERO_RESULTS');
   }
@@ -73,8 +70,8 @@ class AutocompleteService {
     req: any,
     callback: (
       predictions: google.maps.places.QueryAutocompletePrediction[] | null,
-      status: string,
-    ) => void,
+      status: string
+    ) => void
   ) {
     callback(null, 'ZERO_RESULTS');
   }
@@ -94,10 +91,7 @@ class DirectionsService {
   constructor(public map: any) {}
   route(
     request: google.maps.DirectionsRequest,
-    callback: (
-      result: google.maps.DirectionsResult,
-      status: google.maps.DirectionsStatus,
-    ) => void,
+    callback: (result: google.maps.DirectionsResult, status: google.maps.DirectionsStatus) => void
   ): void {
     callback(null, 'NOT_FOUND' as any);
   }
@@ -118,16 +112,16 @@ class DirectionsRenderer {
 const TravelMode = {
   DRIVING: 'DRIVING',
   TRANSIT: 'TRANSIT',
-  WALKING: 'WALKING',
+  WALKING: 'WALKING'
 };
 
 const DirectionsStatus = {
   OK: 'OK',
-  NOT_FOUND: 'NOT_FOUND',
+  NOT_FOUND: 'NOT_FOUND'
 };
 
 const SymbolPath = {
-  CIRCLE: 'CIRCLE',
+  CIRCLE: 'CIRCLE'
 };
 
 const containsLocation = (point: LatLngLiteral, polygon: Polygon): boolean => {
@@ -148,18 +142,18 @@ const containsLocation = (point: LatLngLiteral, polygon: Polygon): boolean => {
     Circle,
     Map,
     geometry: {
-      poly: { containsLocation },
+      poly: { containsLocation }
     },
     places: {
       AutocompleteService,
-      PlacesService,
+      PlacesService
     },
     DirectionsService,
     DirectionsRenderer,
     TravelMode,
     DirectionsStatus,
-    SymbolPath,
-  },
+    SymbolPath
+  }
 };
 
 // Save and Global Restoration after each test

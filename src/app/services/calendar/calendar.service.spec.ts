@@ -11,7 +11,7 @@ const mockFirebaseConfig = {
   projectId: 'mock-project-id',
   storageBucket: 'mock-storage-bucket',
   messagingSenderId: 'mock-messaging-sender-id',
-  appId: 'mock-app-id',
+  appId: 'mock-app-id'
 };
 
 // Initialize Firebase before tests
@@ -24,7 +24,7 @@ describe('CalendarService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [CalendarService],
+      providers: [CalendarService]
     });
     service = TestBed.inject(CalendarService);
     fetchSpy = spyOn(window, 'fetch');
@@ -51,17 +51,13 @@ describe('CalendarService', () => {
 
   it('should call signInWithGoogle and fetch calendars on success', async () => {
     const mockCalendars = [{ id: '1', summary: 'Test Calendar' }];
-    spyOn(service as any, 'getUserCalendars').and.returnValue(
-      Promise.resolve(mockCalendars),
-    );
+    spyOn(service as any, 'getUserCalendars').and.returnValue(Promise.resolve(mockCalendars));
     // Mocks to avoid real calls
     spyOn(service as any, 'auth').and.returnValue(getAuth());
     spyOn(service as any, 'googleProvider').and.returnValue({
-      addScope: jasmine.createSpy('addScope'),
+      addScope: jasmine.createSpy('addScope')
     });
-    spyOn(service as any, 'signInWithGoogle').and.callFake(async () =>
-      Promise.resolve(true),
-    );
+    spyOn(service as any, 'signInWithGoogle').and.callFake(async () => Promise.resolve(true));
 
     const result = await service.signInWithGoogle();
     expect(result).toBeTrue();
@@ -70,7 +66,7 @@ describe('CalendarService', () => {
 
   it('should return false if signInWithGoogle fails', async () => {
     spyOn(service as any, 'auth').and.returnValue({
-      signInWithPopup: () => Promise.reject(new Error('Sign-in error')),
+      signInWithPopup: () => Promise.reject(new Error('Sign-in error'))
     });
     const result = await service.signInWithGoogle();
     expect(result).toBeFalse();
@@ -79,8 +75,7 @@ describe('CalendarService', () => {
   it('should fetch user calendars successfully', async () => {
     const mockResponse = {
       ok: true,
-      json: () =>
-        Promise.resolve({ items: [{ id: '1', summary: 'Test Calendar' }] }),
+      json: () => Promise.resolve({ items: [{ id: '1', summary: 'Test Calendar' }] })
     } as Response;
     fetchSpy.and.returnValue(Promise.resolve(mockResponse));
 
@@ -89,8 +84,8 @@ describe('CalendarService', () => {
       'https://www.googleapis.com/calendar/v3/users/me/calendarList',
       jasmine.objectContaining({
         method: 'GET',
-        headers: jasmine.objectContaining({ Authorization: `Bearer null` }),
-      }),
+        headers: jasmine.objectContaining({ Authorization: `Bearer null` })
+      })
     );
     expect(calendars.length).toBeGreaterThan(0);
     expect(calendars[0].summary).toBe('Test Calendar');
@@ -130,9 +125,7 @@ describe('CalendarService', () => {
   });
 
   it('should use previouslyFetchedEvents cache and skip network call', async () => {
-    service['previouslyFetchedEvents']['cached-calendar'] = [
-      { id: 'cached-event' },
-    ];
+    service['previouslyFetchedEvents']['cached-calendar'] = [{ id: 'cached-event' }];
     const result = await service.fetchEvents('cached-calendar');
     expect(fetchSpy).not.toHaveBeenCalled();
     expect(result).toEqual([{ id: 'cached-event' }]);
@@ -142,8 +135,8 @@ describe('CalendarService', () => {
     fetchSpy.and.returnValue(
       Promise.resolve({
         ok: false,
-        statusText: 'Not Found',
-      } as Response),
+        statusText: 'Not Found'
+      } as Response)
     );
 
     const events = await service.fetchEvents('some-calendar-id');

@@ -7,7 +7,7 @@ import { IonicModule } from '@ionic/angular';
   selector: 'app-calendar-list',
   templateUrl: './calendar-list.component.html',
   styleUrls: ['./calendar-list.component.scss'],
-  imports: [CommonModule, IonicModule],
+  imports: [CommonModule, IonicModule]
 })
 export class CalendarListComponent implements OnInit {
   calendars: any[] = [];

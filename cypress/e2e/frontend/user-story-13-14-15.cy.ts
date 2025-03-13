@@ -5,18 +5,16 @@ describe('Map - Directions and Route Generation for Multi-Transportation Modes',
         // Stub geolocation to simulate being inside SGW campus.
         const testLat = 45.497165958498655;
         const testLng = -73.57903212232189;
-        cy.stub(win.navigator.geolocation, 'getCurrentPosition').callsFake(
-          (cb) => {
-            cb({
-              coords: {
-                latitude: testLat,
-                longitude: testLng,
-                accuracy: 10,
-              },
-            });
-          },
-        );
-      },
+        cy.stub(win.navigator.geolocation, 'getCurrentPosition').callsFake((cb) => {
+          cb({
+            coords: {
+              latitude: testLat,
+              longitude: testLng,
+              accuracy: 10
+            }
+          });
+        });
+      }
     });
     Cypress.config('defaultCommandTimeout', 20000);
   });
@@ -26,26 +24,19 @@ describe('Map - Directions and Route Generation for Multi-Transportation Modes',
     cy.get('.material-symbols-outlined').contains('search').click();
 
     // Enter start location (JMSB) then press Enter.
-    cy.get('input[placeholder="Choose starting point..."]')
-      .clear()
-      .type('JMSB');
+    cy.get('input[placeholder="Choose starting point..."]').clear().type('JMSB');
     cy.wait(3000);
     cy.get('input[placeholder="Choose starting point..."]').type('{enter}');
     cy.wait(2000);
 
     // Enter destination (Vanier Library) then press Enter.
-    cy.get('input[placeholder="Choose destination point..."]')
-      .clear()
-      .type('Vanier Library');
+    cy.get('input[placeholder="Choose destination point..."]').clear().type('Vanier Library');
     cy.wait(3000);
     cy.get('input[placeholder="Choose destination point..."]').type('{enter}');
     cy.wait(2000);
 
     // Verify that two markers are displayed (assuming markers contain "Icone_Verde.svg").
-    cy.get('.gm-style img[src*="Icone_Verde.svg"]', { timeout: 10000 }).should(
-      'have.length',
-      2,
-    );
+    cy.get('.gm-style img[src*="Icone_Verde.svg"]', { timeout: 10000 }).should('have.length', 2);
 
     // Check that the ETA "19 mins (8310m)" is visible.
     cy.contains('18 mins (8099 m)').should('be.visible');
@@ -57,7 +48,7 @@ describe('Map - Directions and Route Generation for Multi-Transportation Modes',
     // Click on the handle bar using the provided class.
     cy.get(
       '.w-\\[100px\\].h-\\[10px\\].bg-\\[\\#d5d5d5\\].my-\\[10px\\].mx-auto.rounded-full.cursor-pointer',
-      { timeout: 10000 },
+      { timeout: 10000 }
     )
       .should('be.visible')
       .click();
@@ -71,18 +62,12 @@ describe('Map - Directions and Route Generation for Multi-Transportation Modes',
       .invoke('text')
       .then((initialText) => {
         // Click the Bus button (icon: "directions_bus").
-        cy.get('app-directions')
-          .contains('span', 'directions_bus')
-          .parents('button')
-          .click();
+        cy.get('app-directions').contains('span', 'directions_bus').parents('button').click();
         cy.wait(3000);
         cy.get('app-directions')
           .invoke('text')
           .should((busText) => {
-            expect(
-              busText,
-              'Directions text should update for bus',
-            ).to.not.equal(initialText);
+            expect(busText, 'Directions text should update for bus').to.not.equal(initialText);
           });
 
         // Click the Shuttle button (icon: "directions_transit").
@@ -97,10 +82,9 @@ describe('Map - Directions and Route Generation for Multi-Transportation Modes',
             cy.get('app-directions')
               .invoke('text')
               .should((shuttleText) => {
-                expect(
-                  shuttleText,
-                  'Directions text should update for shuttle',
-                ).to.not.equal(busUpdatedText);
+                expect(shuttleText, 'Directions text should update for shuttle').to.not.equal(
+                  busUpdatedText
+                );
               });
 
             // Click the Car button (icon: "directions_car").
@@ -115,10 +99,9 @@ describe('Map - Directions and Route Generation for Multi-Transportation Modes',
                 cy.get('app-directions')
                   .invoke('text')
                   .should((carText) => {
-                    expect(
-                      carText,
-                      'Directions text should update for car',
-                    ).to.not.equal(shuttleUpdatedText);
+                    expect(carText, 'Directions text should update for car').to.not.equal(
+                      shuttleUpdatedText
+                    );
                   });
 
                 // Click the Walking button (icon: "directions_walk").
@@ -133,10 +116,9 @@ describe('Map - Directions and Route Generation for Multi-Transportation Modes',
                     cy.get('app-directions')
                       .invoke('text')
                       .should((walkText) => {
-                        expect(
-                          walkText,
-                          'Directions text should update for walking',
-                        ).to.not.equal(carUpdatedText);
+                        expect(walkText, 'Directions text should update for walking').to.not.equal(
+                          carUpdatedText
+                        );
                       });
                   });
               });

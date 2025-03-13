@@ -73,9 +73,8 @@ export class GoogleMapComponent implements AfterViewInit {
 
   async loadBuildings() {
     const userCurrentLocation = await this.currentLocationService.getCurrentLocation();
-    const userCurrentBuilding = await this.geolocationService.getCurrentBuilding(
-      userCurrentLocation
-    );
+    const userCurrentBuilding =
+      await this.geolocationService.getCurrentBuilding(userCurrentLocation);
 
     const buildings = [...data.sgw.buildings, ...data.loy.buildings];
 

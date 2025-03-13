@@ -9,7 +9,7 @@ import { setMapType, MapType, selectCurrentMap } from 'src/app/store/app';
   standalone: true,
   imports: [CommonModule],
   templateUrl: './switch-map-button.component.html',
-  styleUrls: ['./switch-map-button.component.scss'],
+  styleUrls: ['./switch-map-button.component.scss']
 })
 export class SwitchMapButtonComponent {
   mapType = MapType;
@@ -21,8 +21,7 @@ export class SwitchMapButtonComponent {
 
   toggleMap(): void {
     this.currentMap$.pipe(take(1)).subscribe((currentMap) => {
-      const newMap =
-        currentMap === MapType.Outdoor ? MapType.Indoor : MapType.Outdoor;
+      const newMap = currentMap === MapType.Outdoor ? MapType.Indoor : MapType.Outdoor;
       this.store.dispatch(setMapType({ mapType: newMap }));
     });
   }

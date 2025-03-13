@@ -11,6 +11,6 @@ export default defineConfig({
     },
     supportFile: 'cypress/support/e2e.ts',
     video: true, // Disable video recording (optional)
-    chromeWebSecurity: false,
-  },
+    chromeWebSecurity: false
+  }
 });

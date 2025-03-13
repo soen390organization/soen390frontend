@@ -9,7 +9,7 @@ import { loadUser, loadUserSuccess, loadUserFailure } from './user.actions';
 export class UserEffects {
   constructor(
     private readonly actions$: Actions,
-    private readonly userService: UserService,
+    private readonly userService: UserService
   ) {}
 
   loadUser$ = createEffect(() =>
@@ -21,9 +21,9 @@ export class UserEffects {
         this.userService.getUser().pipe(
           // Map recieved obj into successful action
           map((user) => loadUserSuccess({ user })),
-          catchError((error) => of(loadUserFailure({ error }))),
-        ),
-      ),
-    ),
+          catchError((error) => of(loadUserFailure({ error })))
+        )
+      )
+    )
   );
 }

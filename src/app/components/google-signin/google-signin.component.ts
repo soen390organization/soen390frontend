@@ -10,7 +10,7 @@ import { CalendarService } from 'src/app/services/calendar/calendar.service';
   selector: 'app-google-signin',
   imports: [IonicModule, CommonModule, FormsModule],
   templateUrl: './google-signin.component.html',
-  styleUrls: ['./google-signin.component.scss'],
+  styleUrls: ['./google-signin.component.scss']
 })
 export class GoogleSignInComponent implements OnInit {
   @ViewChild(GoogleMapComponent) googleMap!: GoogleMapComponent;

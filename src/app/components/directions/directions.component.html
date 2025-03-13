@@ -10,9 +10,7 @@
       >
         <span
           class="material-symbols-outlined"
-          [ngClass]="
-            selectedMode === transport.mode ? 'text-white' : 'text-black'
-          "
+          [ngClass]="selectedMode === transport.mode ? 'text-white' : 'text-black'"
           [style.color]="selectedMode === transport.mode ? 'white' : 'black'"
         >
           {{ transport.icon }}
@@ -32,9 +30,7 @@
 
 <!-- Loading State -->
 <div *ngIf="isLoading" class="flex justify-center items-center mt-3">
-  <span class="material-symbols-outlined animate-spin text-3xl"
-    >hourglass_empty</span
-  >
+  <span class="material-symbols-outlined animate-spin text-3xl">hourglass_empty</span>
   <span class="ml-2 text-lg text-gray-600">Loading directions...</span>
 </div>
 
@@ -42,13 +38,8 @@
 <div #directionsContainer>
   <!-- Show steps based on component's position -->
   <div *ngIf="!isLoading && steps.length > 0">
-    <div
-      *ngFor="let step of showAllSteps ? steps : [steps[0]]"
-      class="flex items-center mb-2"
-    >
-      <span class="material-symbols-outlined">{{
-        getDirectionIcon(step.instructions)
-      }}</span>
+    <div *ngFor="let step of showAllSteps ? steps : [steps[0]]" class="flex items-center mb-2">
+      <span class="material-symbols-outlined">{{ getDirectionIcon(step.instructions) }}</span>
       <div
         class="ml-3 text-xl font-semibold text-black text-left"
         [innerHTML]="step.instructions"
@@ -57,10 +48,7 @@
   </div>
 
   <!-- Show arrival message when all steps are completed -->
-  <div
-    *ngIf="!isLoading && hasArrived"
-    class="text-center text-xl font-bold text-green-600"
-  >
+  <div *ngIf="!isLoading && hasArrived" class="text-center text-xl font-bold text-green-600">
     You have arrived at your destination!
   </div>
 

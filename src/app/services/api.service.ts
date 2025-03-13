@@ -3,7 +3,7 @@ import { db as database } from '../../firebase.config';
 import { ref, set, get, update, push, remove } from 'firebase/database';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class ApiService {
   private async generateUniqueId(route: string): Promise<string> {
@@ -46,10 +46,7 @@ export class ApiService {
         console.log(`Data created at ${route}/${id}`);
       }
     } catch (error) {
-      console.error(
-        `Failed to update or create data at ${route}/${data.id}:`,
-        error,
-      );
+      console.error(`Failed to update or create data at ${route}/${data.id}:`, error);
     }
   }
 

@@ -24,7 +24,10 @@ describe('SwitchCampusButtonComponent', () => {
         ...((window as any).google?.maps || {}),
         // Provide a simple LatLng constructor that matches what the component expects.
         LatLng: class {
-          constructor(public lat: number, public lng: number) {}
+          constructor(
+            public lat: number,
+            public lng: number
+          ) {}
         }
       }
     };
