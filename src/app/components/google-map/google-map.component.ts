@@ -79,7 +79,12 @@ export class GoogleMapComponent implements AfterViewInit {
       building.boundaries.forEach((boundary) => {
         polygonBuilder.setLatLng(boundary);
       });
-      polygonBuilder.build();
+      const polygon = polygonBuilder.build();
+
+      polygon.addListener('click', () => {
+        alert(`You clicked on ${building.name}`); 
+      }
+      );
     });
   }
 }
