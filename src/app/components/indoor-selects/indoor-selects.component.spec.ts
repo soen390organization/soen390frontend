@@ -4,7 +4,7 @@ import { Store } from '@ngrx/store';
 import { of } from 'rxjs';
 import { IndoorSelectsComponent } from './indoor-selects.component';
 import { ConcordiaDataService } from 'src/app/services/concordia-data.service';
-import { MappedinService } from 'src/app/services/mappedIn.service';
+import { MappedinService } from 'src/app/services/mappedin/mappedin.service';
 
 describe('IndoorSelectsComponent', () => {
   let component: IndoorSelectsComponent;
@@ -14,15 +14,11 @@ describe('IndoorSelectsComponent', () => {
   const fakeCampus = { id: 'campus1', name: 'Campus One' };
 
   // Define a fake building list (must include a building with an indoorMapId).
-  const fakeBuildings = [
-    { indoorMapId: '67abe2bb8ea1bf000bb60d14', name: 'Building 1' },
-  ];
+  const fakeBuildings = [{ indoorMapId: '67abe2bb8ea1bf000bb60d14', name: 'Building 1' }];
 
   // Create a fake MappedinService with the minimal methods needed.
   const fakeMappedinService = {
-    getMapId: jasmine
-      .createSpy('getMapId')
-      .and.returnValue('67abe2bb8ea1bf000bb60d14'),
+    getMapId: jasmine.createSpy('getMapId').and.returnValue('67abe2bb8ea1bf000bb60d14'),
     setMapData: jasmine.createSpy('setMapData'),
     getMapData: jasmine.createSpy('getMapData').and.returnValue(of({})),
     getFloors: jasmine
@@ -31,21 +27,19 @@ describe('IndoorSelectsComponent', () => {
     getCurrentFloor: jasmine
       .createSpy('getCurrentFloor')
       .and.returnValue({ id: 'floor1', name: 'Floor 1' }),
-    setFloor: jasmine.createSpy('setFloor'),
+    setFloor: jasmine.createSpy('setFloor')
   };
 
   // Create a fake ConcordiaDataService with the minimal method needed.
   const fakeConcordiaDataService = {
-    getBuildings: jasmine
-      .createSpy('getBuildings')
-      .and.returnValue(fakeBuildings),
+    getBuildings: jasmine.createSpy('getBuildings').and.returnValue(fakeBuildings)
   };
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       imports: [
         IndoorSelectsComponent, // Assuming this is a standalone component with 'imports' defined.
-        IonicModule.forRoot(),
+        IonicModule.forRoot()
       ],
       providers: [
         {
@@ -53,12 +47,12 @@ describe('IndoorSelectsComponent', () => {
           useValue: {
             dispatch: jasmine.createSpy('dispatch'),
             // Provide a select function that returns an observable emitting our fake campus.
-            select: jasmine.createSpy('select').and.returnValue(of(fakeCampus)),
-          },
+            select: jasmine.createSpy('select').and.returnValue(of(fakeCampus))
+          }
         },
         { provide: MappedinService, useValue: fakeMappedinService },
-        { provide: ConcordiaDataService, useValue: fakeConcordiaDataService },
-      ],
+        { provide: ConcordiaDataService, useValue: fakeConcordiaDataService }
+      ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(IndoorSelectsComponent);

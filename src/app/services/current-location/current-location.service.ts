@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
-import { Geo } from './geolocation-wrapper.service';
+import { Geo } from '../geolocation/geolocation-wrapper.service';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class CurrentLocationService {
   constructor() {}
@@ -16,7 +16,7 @@ export class CurrentLocationService {
       const coordinates = await Geo.getCurrentPosition();
       return {
         lat: coordinates.coords.latitude,
-        lng: coordinates.coords.longitude,
+        lng: coordinates.coords.longitude
       };
     } catch (error) {
       console.log(error);
@@ -30,9 +30,7 @@ export class CurrentLocationService {
    * @param callback Function to execute on location change.
    * @returns Watch ID (to stop watching later).
    */
-  watchLocation(
-    callback: (position: { lat: number; lng: number }) => void,
-  ): Promise<string> {
+  watchLocation(callback: (position: { lat: number; lng: number }) => void): Promise<string> {
     const watchId = Geo.watchPosition({}, (position, err) => {
       if (err) {
         console.error('Error watching location:', err);
@@ -41,7 +39,7 @@ export class CurrentLocationService {
       if (position) {
         callback({
           lat: position.coords.latitude,
-          lng: position.coords.longitude,
+          lng: position.coords.longitude
         });
       }
     });

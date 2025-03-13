@@ -4,10 +4,10 @@ import {
   ElementRef,
   ViewChild,
   Output,
-  EventEmitter,
+  EventEmitter
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MappedinService } from 'src/app/services/mappedIn.service';
+import { MappedinService } from 'src/app/services/mappedin/mappedin.service';
 import { IndoorDirectionsService } from 'src/app/services/indoor-directions.service';
 
 @Component({
@@ -15,7 +15,7 @@ import { IndoorDirectionsService } from 'src/app/services/indoor-directions.serv
   standalone: true,
   imports: [CommonModule],
   templateUrl: './mappedin-map.component.html',
-  styleUrls: ['./mappedin-map.component.scss'],
+  styleUrls: ['./mappedin-map.component.scss']
 })
 export class MappedinMapComponent implements AfterViewInit {
   @ViewChild('mappedinContainer', { static: false })
@@ -24,7 +24,7 @@ export class MappedinMapComponent implements AfterViewInit {
 
   constructor(
     private readonly mappedinService: MappedinService,
-    private readonly indoorDirectionsService: IndoorDirectionsService,
+    private readonly indoorDirectionsService: IndoorDirectionsService
   ) {}
 
   ngAfterViewInit(): void {

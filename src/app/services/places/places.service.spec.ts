@@ -12,11 +12,11 @@ describe('PlacesService', () => {
   beforeEach(() => {
     // Mock the Store
     storeMock = {
-      select: jasmine.createSpy().and.returnValue(of('campusKey')),
+      select: jasmine.createSpy().and.returnValue(of('campusKey'))
     };
 
     TestBed.configureTestingModule({
-      providers: [PlacesService, { provide: Store, useValue: storeMock }],
+      providers: [PlacesService, { provide: Store, useValue: storeMock }]
     });
     service = TestBed.inject(PlacesService);
 
@@ -34,10 +34,10 @@ describe('PlacesService', () => {
             name: 'Building 1',
             coordinates: { lat: 1, lng: 1 },
             address: 'Address 1',
-            image: 'image1.jpg',
-          },
-        ],
-      },
+            image: 'image1.jpg'
+          }
+        ]
+      }
     };
 
     service['placesServiceReady'].next(true);
@@ -68,10 +68,10 @@ describe('PlacesService', () => {
               name: 'Building 1',
               coordinates: { lat: 1, lng: 1 },
               address: 'Address 1',
-              image: 'image1.jpg',
-            },
-          ],
-        },
+              image: 'image1.jpg'
+            }
+          ]
+        }
       };
       service['campusData'] = mockCampusData;
 
@@ -85,8 +85,8 @@ describe('PlacesService', () => {
       // Mock the campus data and store behavior
       const mockCampusData = {
         campusKey: {
-          coordinates: new google.maps.LatLng(1, 1),
-        },
+          coordinates: new google.maps.LatLng(1, 1)
+        }
       };
       service['campusData'] = mockCampusData;
 
@@ -102,22 +102,19 @@ describe('PlacesService', () => {
               getUrl: () => 'image-url',
               height: 0,
               html_attributions: [],
-              width: 0,
-            },
-          ],
-        },
+              width: 0
+            }
+          ]
+        }
       ];
 
       placesServiceMock.nearbySearch.and.callFake(
         (
           request: google.maps.places.PlaceSearchRequest,
-          callback: (
-            results: google.maps.places.PlaceResult[],
-            status: any,
-          ) => void,
+          callback: (results: google.maps.places.PlaceResult[], status: any) => void
         ) => {
           callback(mockResults, 'OK');
-        },
+        }
       );
 
       service['placesServiceReady'].next(true);
@@ -139,29 +136,22 @@ describe('PlacesService', () => {
           business_status: 'OPERATIONAL' as any,
           name: 'Restaurant 1',
           geometry: { location: new google.maps.LatLng(1, 1) },
-          vicinity: 'Address 1',
-        },
+          vicinity: 'Address 1'
+        }
       ];
 
       placesServiceMock.nearbySearch.and.callFake(
         (
           request: google.maps.places.PlaceSearchRequest,
-          callback: (
-            results: google.maps.places.PlaceResult[],
-            status: any,
-          ) => void,
+          callback: (results: google.maps.places.PlaceResult[], status: any) => void
         ) => {
           callback(mockResults, 'OK');
-        },
+        }
       );
 
       service['placesServiceReady'].next(true);
 
-      const places = await service['getPlaces'](
-        mockLocation,
-        250,
-        'restaurant',
-      );
+      const places = await service['getPlaces'](mockLocation, 250, 'restaurant');
 
       expect(places.length).toBe(1);
       expect(places[0].name).toBe('Restaurant 1');
@@ -179,8 +169,8 @@ describe('PlacesService', () => {
     it('should retrieve points of interest using getPointsOfInterest', async () => {
       const mockCampusData = {
         campusKey: {
-          coordinates: new google.maps.LatLng(1, 1),
-        },
+          coordinates: new google.maps.LatLng(1, 1)
+        }
       };
       service['campusData'] = mockCampusData;
       const mockResults: google.maps.places.PlaceResult[] = [
@@ -194,22 +184,19 @@ describe('PlacesService', () => {
               getUrl: () => 'image-url',
               height: 0,
               html_attributions: [],
-              width: 0,
-            },
-          ],
-        },
+              width: 0
+            }
+          ]
+        }
       ];
 
       placesServiceMock.nearbySearch.and.callFake(
         (
           request: google.maps.places.PlaceSearchRequest,
-          callback: (
-            results: google.maps.places.PlaceResult[],
-            status: any,
-          ) => void,
+          callback: (results: google.maps.places.PlaceResult[], status: any) => void
         ) => {
           callback(mockResults, 'OK');
-        },
+        }
       );
 
       service['placesServiceReady'].next(true);
@@ -225,9 +212,7 @@ describe('PlacesService', () => {
       const mockLocation = new google.maps.LatLng(1, 1);
 
       // Simulate rejection by mocking getPlaces to reject
-      spyOn(service as any, 'getPlaces').and.returnValue(
-        Promise.reject('Failed to get places'),
-      );
+      spyOn(service as any, 'getPlaces').and.returnValue(Promise.reject('Failed to get places'));
 
       // Call getPointsOfInterest and verify that the result is an empty array when failure occurs
       const places = await service.getPointsOfInterest();
@@ -244,10 +229,10 @@ describe('PlacesService', () => {
               name: 'Building 1',
               coordinates: { lat: 1, lng: 1 },
               address: 'Address 1',
-              image: 'image1.jpg',
-            },
-          ],
-        },
+              image: 'image1.jpg'
+            }
+          ]
+        }
       };
       storeMock.select.and.returnValue(of('campusKey'));
       service['campusData'] = mockCampusData;
@@ -269,7 +254,7 @@ describe('PlacesService', () => {
 
       it('should return empty array if AutocompleteService returns an error', async () => {
         service['campusData'] = {
-          campusKey: { coordinates: { lat: 1, lng: 1 } },
+          campusKey: { coordinates: { lat: 1, lng: 1 } }
         };
 
         const fakeAutocompleteService = {
@@ -279,14 +264,12 @@ describe('PlacesService', () => {
               (
                 req: any,
                 callback: (
-                  predictions:
-                    | google.maps.places.AutocompletePrediction[]
-                    | null,
-                  status: string,
-                ) => void,
+                  predictions: google.maps.places.AutocompletePrediction[] | null,
+                  status: string
+                ) => void
               ) => {
                 callback(null, 'ERROR_STATUS');
-              },
+              }
             ),
           getQueryPredictions: jasmine
             .createSpy('getQueryPredictions')
@@ -294,18 +277,16 @@ describe('PlacesService', () => {
               (
                 req: any,
                 callback: (
-                  predictions:
-                    | google.maps.places.QueryAutocompletePrediction[]
-                    | null,
-                  status: string,
-                ) => void,
+                  predictions: google.maps.places.QueryAutocompletePrediction[] | null,
+                  status: string
+                ) => void
               ) => {
                 callback(null, 'ERROR_STATUS');
-              },
-            ),
+              }
+            )
         };
         spyOn(window.google.maps.places, 'AutocompleteService').and.returnValue(
-          fakeAutocompleteService,
+          fakeAutocompleteService
         );
 
         const suggestions = await service.getPlaceSuggestions('test');
@@ -314,12 +295,12 @@ describe('PlacesService', () => {
 
       it('should return suggestions when predictions and details are valid', async () => {
         service['campusData'] = {
-          campusKey: { coordinates: { lat: 1, lng: 1 } },
+          campusKey: { coordinates: { lat: 1, lng: 1 } }
         };
 
         const fakePrediction = {
           place_id: 'test123',
-          structured_formatting: { main_text: 'Test Place' },
+          structured_formatting: { main_text: 'Test Place' }
         } as google.maps.places.AutocompletePrediction;
 
         const fakeAutocompleteService = {
@@ -329,14 +310,12 @@ describe('PlacesService', () => {
               (
                 req: any,
                 callback: (
-                  predictions:
-                    | google.maps.places.AutocompletePrediction[]
-                    | null,
-                  status: string,
-                ) => void,
+                  predictions: google.maps.places.AutocompletePrediction[] | null,
+                  status: string
+                ) => void
               ) => {
                 callback([fakePrediction], 'OK');
-              },
+              }
             ),
           getQueryPredictions: jasmine
             .createSpy('getQueryPredictions')
@@ -344,38 +323,34 @@ describe('PlacesService', () => {
               (
                 req: any,
                 callback: (
-                  predictions:
-                    | google.maps.places.QueryAutocompletePrediction[]
-                    | null,
-                  status: string,
-                ) => void,
+                  predictions: google.maps.places.QueryAutocompletePrediction[] | null,
+                  status: string
+                ) => void
               ) => {
                 callback(null, 'OK');
-              },
-            ),
+              }
+            )
         };
         spyOn(window.google.maps.places, 'AutocompleteService').and.returnValue(
-          fakeAutocompleteService,
+          fakeAutocompleteService
         );
 
         service['placesService'].getDetails = jasmine
           .createSpy('getDetails')
-          .and.callFake(
-            (request: any, callback: (place: any, status: string) => void) => {
-              callback(
-                {
-                  formatted_address: '123 Test St',
-                  geometry: {
-                    location: {
-                      lat: () => 1,
-                      lng: () => 2,
-                    },
-                  },
-                },
-                'OK',
-              );
-            },
-          );
+          .and.callFake((request: any, callback: (place: any, status: string) => void) => {
+            callback(
+              {
+                formatted_address: '123 Test St',
+                geometry: {
+                  location: {
+                    lat: () => 1,
+                    lng: () => 2
+                  }
+                }
+              },
+              'OK'
+            );
+          });
 
         const suggestions = await service.getPlaceSuggestions('test');
         expect(suggestions.length).toBe(1);
@@ -389,17 +364,15 @@ describe('PlacesService', () => {
     describe('getPlaceDetail (private)', () => {
       const fakePrediction = {
         place_id: 'dummy123',
-        structured_formatting: { main_text: 'Dummy Place' },
+        structured_formatting: { main_text: 'Dummy Place' }
       } as google.maps.places.AutocompletePrediction;
 
       it('should return null if getDetails callback returns error', async () => {
         service['placesService'].getDetails = jasmine
           .createSpy('getDetails')
-          .and.callFake(
-            (req: any, callback: (place: any, status: string) => void) => {
-              callback(null, 'NOT_OK');
-            },
-          );
+          .and.callFake((req: any, callback: (place: any, status: string) => void) => {
+            callback(null, 'NOT_OK');
+          });
         const detail = await service['getPlaceDetail'](fakePrediction);
         expect(detail).toBeNull();
       });
@@ -407,22 +380,20 @@ describe('PlacesService', () => {
       it('should return valid detail when getDetails is successful', async () => {
         service['placesService'].getDetails = jasmine
           .createSpy('getDetails')
-          .and.callFake(
-            (req: any, callback: (place: any, status: string) => void) => {
-              callback(
-                {
-                  formatted_address: '456 Success Ave',
-                  geometry: {
-                    location: {
-                      lat: () => 3,
-                      lng: () => 4,
-                    },
-                  },
-                },
-                'OK',
-              );
-            },
-          );
+          .and.callFake((req: any, callback: (place: any, status: string) => void) => {
+            callback(
+              {
+                formatted_address: '456 Success Ave',
+                geometry: {
+                  location: {
+                    lat: () => 3,
+                    lng: () => 4
+                  }
+                }
+              },
+              'OK'
+            );
+          });
         const detail = await service['getPlaceDetail'](fakePrediction);
         expect(detail).not.toBeNull();
         if (detail) {
@@ -456,17 +427,14 @@ describe('PlacesService', () => {
         placesServiceMock.nearbySearch.and.callFake(
           (
             req: google.maps.places.PlaceSearchRequest,
-            callback: (
-              results: google.maps.places.PlaceResult[],
-              status: string,
-            ) => void,
+            callback: (results: google.maps.places.PlaceResult[], status: string) => void
           ) => {
             callback([], 'ZERO_RESULTS');
-          },
+          }
         );
-        await expectAsync(
-          service['getPlaces'](mockLocation, 250, 'restaurant'),
-        ).toBeRejectedWith('ZERO_RESULTS');
+        await expectAsync(service['getPlaces'](mockLocation, 250, 'restaurant')).toBeRejectedWith(
+          'ZERO_RESULTS'
+        );
       });
     });
   });

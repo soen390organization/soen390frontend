@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { filter } from 'rxjs/operators';
-import { MappedinService } from './mappedIn.service';
+import { MappedinService } from './mappedin/mappedin.service';
 import { MapData, MapView } from '@mappedin/mappedin-js';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class IndoorDirectionsService {
   constructor(private mappedinService: MappedinService) {}
@@ -33,7 +33,7 @@ export class IndoorDirectionsService {
    */
   public async navigateDefault(): Promise<void> {
     const mapData: MapData = await firstValueFrom(
-      this.mappedinService.getMapData().pipe(filter((data) => data !== null)),
+      this.mappedinService.getMapData().pipe(filter((data) => data !== null))
     );
 
     const mapView: MapView = await this.waitForMapView();
@@ -43,12 +43,8 @@ export class IndoorDirectionsService {
     }
 
     // Hardcoded for demo purposes
-    const startRoom = mapData
-      .getByType('space')
-      .find((space) => space.name === '819');
-    const destinationRoom = mapData
-      .getByType('space')
-      .find((space) => space.name === '150');
+    const startRoom = mapData.getByType('space').find((space) => space.name === '819');
+    const destinationRoom = mapData.getByType('space').find((space) => space.name === '150');
 
     if (startRoom && destinationRoom) {
       const directions = mapData.getDirections(startRoom, destinationRoom);
@@ -56,9 +52,7 @@ export class IndoorDirectionsService {
         mapView.Navigation.draw(directions);
         console.log('Navigation route drawn between room 819 and room 150');
       } else {
-        console.error(
-          'Unable to generate directions between room 819 and room 150.',
-        );
+        console.error('Unable to generate directions between room 819 and room 150.');
       }
     } else {
       console.error('Start room or destination room not found in map data.');

@@ -1,12 +1,12 @@
 import { Injectable } from '@angular/core';
-import { Location } from '../interfaces/location.interface';
+import { Location } from '../../interfaces/location.interface';
 import data from 'src/assets/ConcordiaData.json';
-import { selectSelectedCampus, AppState } from '../store/app';
+import { selectSelectedCampus, AppState } from '../../store/app';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { Store } from '@ngrx/store';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class PlacesService {
   private placesService!: google.maps.places.PlacesService;
@@ -36,60 +36,52 @@ export class PlacesService {
   }
 
   public async getPlaceSuggestions(
-    input: string,
-  ): Promise<
-    { title: string; address: string; coordinates: google.maps.LatLng }[]
-  > {
-    const campusKey = await firstValueFrom(
-      this.store.select(selectSelectedCampus),
-    );
+    input: string
+  ): Promise<{ title: string; address: string; coordinates: google.maps.LatLng }[]> {
+    const campusKey = await firstValueFrom(this.store.select(selectSelectedCampus));
     const campusCoordinates = this.campusData[campusKey]?.coordinates;
     if (!campusCoordinates) {
       return [];
     }
 
     const autocompleteService = new google.maps.places.AutocompleteService();
-    const predictions = await new Promise<
-      google.maps.places.AutocompletePrediction[]
-    >((resolve) => {
-      autocompleteService.getPlacePredictions(
-        {
-          input,
-          componentRestrictions: { country: 'CA' },
-          locationBias: new google.maps.Circle({
-            center: new google.maps.LatLng(campusCoordinates),
-            radius: 500,
-          }),
-        },
-        (predictions, status) => {
-          if (status !== 'OK' || !predictions) {
-            resolve([]);
-          } else {
-            resolve(predictions);
+    const predictions = await new Promise<google.maps.places.AutocompletePrediction[]>(
+      (resolve) => {
+        autocompleteService.getPlacePredictions(
+          {
+            input,
+            componentRestrictions: { country: 'CA' },
+            locationBias: new google.maps.Circle({
+              center: new google.maps.LatLng(campusCoordinates),
+              radius: 500
+            })
+          },
+          (predictions, status) => {
+            if (status !== 'OK' || !predictions) {
+              resolve([]);
+            } else {
+              resolve(predictions);
+            }
           }
-        },
-      );
-    });
-
-    const detailsPromises = predictions.map((prediction) =>
-      this.getPlaceDetail(prediction),
+        );
+      }
     );
+
+    const detailsPromises = predictions.map((prediction) => this.getPlaceDetail(prediction));
     const details = await Promise.all(detailsPromises);
     // Filter out any null values (failed details)
     return details.filter(
       (
-        detail,
+        detail
       ): detail is {
         title: string;
         address: string;
         coordinates: google.maps.LatLng;
-      } => detail !== null,
+      } => detail !== null
     );
   }
 
-  private getPlaceDetail(
-    prediction: google.maps.places.AutocompletePrediction,
-  ): Promise<{
+  private getPlaceDetail(prediction: google.maps.places.AutocompletePrediction): Promise<{
     title: string;
     address: string;
     coordinates: google.maps.LatLng;
@@ -98,7 +90,7 @@ export class PlacesService {
       this.placesService.getDetails(
         {
           placeId: prediction.place_id,
-          fields: ['geometry', 'formatted_address', 'address_components'],
+          fields: ['geometry', 'formatted_address', 'address_components']
         },
         (place, status) => {
           if (status === 'OK' && place?.geometry?.location) {
@@ -107,13 +99,13 @@ export class PlacesService {
               address: place.formatted_address,
               coordinates: new google.maps.LatLng({
                 lat: place.geometry.location.lat(),
-                lng: place.geometry.location.lng(),
-              }),
+                lng: place.geometry.location.lng()
+              })
             });
           } else {
             resolve(null);
           }
-        },
+        }
       );
     });
   }
@@ -123,15 +115,13 @@ export class PlacesService {
    * @returns A promise resolving to an array of LocationCard objects representing campus buildings.
    */
   public async getCampusBuildings(): Promise<Location[]> {
-    const campusKey = await firstValueFrom(
-      this.store.select(selectSelectedCampus),
-    );
+    const campusKey = await firstValueFrom(this.store.select(selectSelectedCampus));
 
     return this.campusData[campusKey].buildings.map((building: Location) => ({
       name: building.name,
       coordinates: new google.maps.LatLng(building.coordinates),
       address: building.address,
-      image: building.image,
+      image: building.image
     }));
   }
 
@@ -142,14 +132,12 @@ export class PlacesService {
    * @returns A promise resolving to an array of LocationCard objects representing points of interest.
    */
   public async getPointsOfInterest(): Promise<Location[]> {
-    const campusKey = await firstValueFrom(
-      this.store.select(selectSelectedCampus),
-    );
+    const campusKey = await firstValueFrom(this.store.select(selectSelectedCampus));
 
     const places = await this.getPlaces(
       this.campusData[campusKey]?.coordinates,
       250,
-      'restaurant',
+      'restaurant'
     ).catch(() => []); // Catch any error and return an empty array
 
     console.log(places);
@@ -157,7 +145,7 @@ export class PlacesService {
       name: place.name ?? 'No name available',
       coordinates: place.geometry?.location as google.maps.LatLng,
       address: place.vicinity ?? 'No address available',
-      image: place.photos[0]?.getUrl(),
+      image: place.photos[0]?.getUrl()
     }));
   }
 
@@ -171,19 +159,19 @@ export class PlacesService {
   private getPlaces(
     location: google.maps.LatLng,
     radius: number,
-    type: string,
+    type: string
   ): Promise<google.maps.places.PlaceResult[]> {
     return new Promise((resolve, reject) => {
       const request: google.maps.places.PlaceSearchRequest = {
         location,
         radius,
-        type,
+        type
       };
 
       this.placesService.nearbySearch(request, (results, status) => {
         if (status === 'OK' && results) {
           const operationalResults = results.filter(
-            (place) => place.business_status === 'OPERATIONAL',
+            (place) => place.business_status === 'OPERATIONAL'
           );
 
           resolve(operationalResults);

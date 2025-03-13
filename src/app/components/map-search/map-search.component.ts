@@ -3,16 +3,10 @@ import { GoogleMapComponent } from '../google-map/google-map.component';
 import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { CurrentLocationService } from 'src/app/services/geolocation/current-location.service';
-import {
-  animate,
-  state,
-  style,
-  transition,
-  trigger,
-} from '@angular/animations';
+import { CurrentLocationService } from 'src/app/services/current-location/current-location.service';
+import { animate, state, style, transition, trigger } from '@angular/animations';
 import { DirectionsService } from 'src/app/services/directions/directions.service';
-import { PlacesService } from 'src/app/services/places.service';
+import { PlacesService } from 'src/app/services/places/places.service';
 import { HomePage } from 'src/app/home/home.page';
 import { VisibilityService } from 'src/app/services/visibility.service';
 import { combineLatest, Observable } from 'rxjs';
@@ -25,20 +19,20 @@ export const MapSeachAnimation = [
       style({
         width: '100%',
         opacity: 1,
-        transform: 'translateX(0)',
-      }),
+        transform: 'translateX(0)'
+      })
     ),
     state(
       'out',
       style({
         width: '0px',
         opacity: 0,
-        transform: 'translateX(-100%)',
-      }),
+        transform: 'translateX(-100%)'
+      })
     ),
     transition('out => in', animate('0.15s ease-in-out')),
-    transition('in => out', animate('0.15s ease-in-out')),
-  ]),
+    transition('in => out', animate('0.15s ease-in-out'))
+  ])
 ];
 
 @Component({
@@ -46,7 +40,7 @@ export const MapSeachAnimation = [
   imports: [IonicModule, CommonModule, FormsModule],
   templateUrl: './map-search.component.html',
   styleUrls: ['./map-search.component.scss'],
-  animations: MapSeachAnimation,
+  animations: MapSeachAnimation
 })
 export class MapSearchComponent implements OnInit {
   @ViewChild(GoogleMapComponent) googleMap!: GoogleMapComponent;
@@ -62,7 +56,7 @@ export class MapSearchComponent implements OnInit {
     public readonly directionsService: DirectionsService,
     private readonly placesService: PlacesService,
     private readonly currentLocationService: CurrentLocationService,
-    private readonly visibilityService: VisibilityService,
+    private readonly visibilityService: VisibilityService
   ) {}
 
   ngOnInit(): void {
@@ -81,7 +75,7 @@ export class MapSearchComponent implements OnInit {
 
     combineLatest([
       this.directionsService.getStartPoint(),
-      this.directionsService.getDestinationPoint(),
+      this.directionsService.getDestinationPoint()
     ])
       .pipe(filter(([start, destination]) => !!start && !!destination))
       .subscribe(([start, destination]) => {
@@ -114,7 +108,7 @@ export class MapSearchComponent implements OnInit {
     this.directionsService.setStartPoint({
       title: 'Your Location',
       address: `${position.lat}, ${position.lng}`,
-      coordinates: new google.maps.LatLng(position),
+      coordinates: new google.maps.LatLng(position)
     });
   }
 

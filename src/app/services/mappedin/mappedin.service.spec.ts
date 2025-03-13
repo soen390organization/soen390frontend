@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { MappedinService } from './mappedIn.service';
+import { MappedinService } from './mappedin.service';
 import { MapData, MapView } from '@mappedin/mappedin-js';
 
 describe('MappedinService', () => {
@@ -20,25 +20,25 @@ describe('MappedinService', () => {
         default:
           return [];
       }
-    },
+    }
   } as unknown as MapData;
 
   // Create a fake MapView with minimal implementation for testing.
   const fakeMapView = {
     currentFloor: { id: 'floor1', name: 'Floor 1' },
     Labels: {
-      add: jasmine.createSpy('add'),
+      add: jasmine.createSpy('add')
     },
     updateState: jasmine.createSpy('updateState'),
     setFloor: jasmine.createSpy('setFloor'),
     Navigation: {
-      draw: jasmine.createSpy('draw'),
-    },
+      draw: jasmine.createSpy('draw')
+    }
   } as unknown as MapView;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [MappedinService],
+      providers: [MappedinService]
     });
     service = TestBed.inject(MappedinService);
   });

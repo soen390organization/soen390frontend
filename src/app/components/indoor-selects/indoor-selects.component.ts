@@ -4,14 +4,14 @@ import { FormsModule } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { take } from 'rxjs';
 import { ConcordiaDataService } from 'src/app/services/concordia-data.service';
-import { MappedinService } from 'src/app/services/mappedIn.service';
+import { MappedinService } from 'src/app/services/mappedin/mappedin.service';
 import { selectSelectedCampus } from 'src/app/store/app';
 
 @Component({
   selector: 'app-indoor-selects',
   imports: [FormsModule, CommonModule],
   templateUrl: './indoor-selects.component.html',
-  styleUrls: ['./indoor-selects.component.scss'],
+  styleUrls: ['./indoor-selects.component.scss']
 })
 export class IndoorSelectsComponent implements OnInit {
   buildings: any[] = [];
@@ -23,7 +23,7 @@ export class IndoorSelectsComponent implements OnInit {
   constructor(
     private store: Store,
     private mappedInService: MappedinService,
-    private concordiaDataService: ConcordiaDataService,
+    private concordiaDataService: ConcordiaDataService
   ) {}
 
   ngOnInit() {

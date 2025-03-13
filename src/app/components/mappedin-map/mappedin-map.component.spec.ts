@@ -1,17 +1,9 @@
-import {
-  ComponentFixture,
-  TestBed,
-  waitForAsync,
-  fakeAsync,
-  tick,
-} from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync, fakeAsync, tick } from '@angular/core/testing';
 import { MappedinMapComponent } from './mappedin-map.component';
-import { MappedinService } from 'src/app/services/mappedIn.service';
+import { MappedinService } from 'src/app/services/mappedin/mappedin.service';
 
 class MockMappedinService {
-  initializeMap = jasmine
-    .createSpy('initializeMap')
-    .and.returnValue(Promise.resolve());
+  initializeMap = jasmine.createSpy('initializeMap').and.returnValue(Promise.resolve());
 }
 
 describe('MappedinMapComponent', () => {
@@ -22,16 +14,14 @@ describe('MappedinMapComponent', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       imports: [MappedinMapComponent],
-      providers: [{ provide: MappedinService, useClass: MockMappedinService }],
+      providers: [{ provide: MappedinService, useClass: MockMappedinService }]
     }).compileComponents();
   }));
 
   beforeEach(() => {
     fixture = TestBed.createComponent(MappedinMapComponent);
     component = fixture.componentInstance;
-    mappedinService = TestBed.inject(
-      MappedinService,
-    ) as unknown as MockMappedinService;
+    mappedinService = TestBed.inject(MappedinService) as unknown as MockMappedinService;
     fixture.detectChanges(); // triggers ngAfterViewInit asynchronously
   });
 
@@ -46,8 +36,6 @@ describe('MappedinMapComponent', () => {
     expect(mappedinService.initializeMap).toHaveBeenCalled();
 
     const containerElement = fixture.nativeElement.querySelector('div');
-    expect(mappedinService.initializeMap).toHaveBeenCalledWith(
-      containerElement,
-    );
+    expect(mappedinService.initializeMap).toHaveBeenCalledWith(containerElement);
   }));
 });

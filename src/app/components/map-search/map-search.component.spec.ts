@@ -1,18 +1,12 @@
 import { of } from 'rxjs';
-import {
-  ComponentFixture,
-  TestBed,
-  fakeAsync,
-  tick,
-  flushMicrotasks,
-} from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, tick, flushMicrotasks } from '@angular/core/testing';
 import { MapSearchComponent } from './map-search.component';
 import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DirectionsService } from 'src/app/services/directions/directions.service';
-import { PlacesService } from 'src/app/services/places.service';
-import { CurrentLocationService } from 'src/app/services/geolocation/current-location.service';
+import { PlacesService } from 'src/app/services/places/places.service';
+import { CurrentLocationService } from 'src/app/services/current-location/current-location.service';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 describe('MapSearchComponent', () => {
@@ -32,18 +26,16 @@ describe('MapSearchComponent', () => {
       'getStartPoint',
       'getDestinationPoint',
       'clearStartPoint',
-      'clearDestinationPoint',
+      'clearDestinationPoint'
     ]);
     // Ensure getDestinationPoint() returns an observable
     directionsServiceSpy.getStartPoint.and.returnValue(of(null));
     directionsServiceSpy.getDestinationPoint.and.returnValue(
-      of({ title: 'Default Destination', address: '', coordinates: null }),
+      of({ title: 'Default Destination', address: '', coordinates: null })
     );
-    placesServiceSpy = jasmine.createSpyObj('PlacesService', [
-      'getPlaceSuggestions',
-    ]);
+    placesServiceSpy = jasmine.createSpyObj('PlacesService', ['getPlaceSuggestions']);
     currentLocationServiceSpy = jasmine.createSpyObj('CurrentLocationService', [
-      'getCurrentLocation',
+      'getCurrentLocation'
     ]);
 
     await TestBed.configureTestingModule({
@@ -52,16 +44,16 @@ describe('MapSearchComponent', () => {
         CommonModule,
         FormsModule,
         BrowserAnimationsModule, // Needed if testing animations
-        MapSearchComponent,
+        MapSearchComponent
       ],
       providers: [
         { provide: DirectionsService, useValue: directionsServiceSpy },
         { provide: PlacesService, useValue: placesServiceSpy },
         {
           provide: CurrentLocationService,
-          useValue: currentLocationServiceSpy,
-        },
-      ],
+          useValue: currentLocationServiceSpy
+        }
+      ]
     }).compileComponents();
   });
 
@@ -109,25 +101,21 @@ describe('MapSearchComponent', () => {
         {
           title: 'Pizza Palace',
           address: '123 Main St',
-          coordinates: new google.maps.LatLng(10, 20),
+          coordinates: new google.maps.LatLng(10, 20)
         },
         {
           title: 'Pizza Haven',
           address: '456 Side St',
-          coordinates: new google.maps.LatLng(30, 40),
-        },
+          coordinates: new google.maps.LatLng(30, 40)
+        }
       ];
 
-      placesServiceSpy.getPlaceSuggestions.and.returnValue(
-        Promise.resolve(mockPlaces),
-      );
+      placesServiceSpy.getPlaceSuggestions.and.returnValue(Promise.resolve(mockPlaces));
 
       await component.onSearchChange(event, 'start');
 
       expect(component.isSearchingFromStart).toBeTrue();
-      expect(placesServiceSpy.getPlaceSuggestions).toHaveBeenCalledWith(
-        'pizza',
-      );
+      expect(placesServiceSpy.getPlaceSuggestions).toHaveBeenCalledWith('pizza');
       expect(component.places).toEqual(mockPlaces);
     });
 
@@ -137,19 +125,15 @@ describe('MapSearchComponent', () => {
         {
           title: 'Art Museum',
           address: '789 Park Ave',
-          coordinates: new google.maps.LatLng(10, 20),
-        },
+          coordinates: new google.maps.LatLng(10, 20)
+        }
       ];
-      placesServiceSpy.getPlaceSuggestions.and.returnValue(
-        Promise.resolve(mockPlaces),
-      );
+      placesServiceSpy.getPlaceSuggestions.and.returnValue(Promise.resolve(mockPlaces));
 
       await component.onSearchChange(event, 'destination');
 
       expect(component.isSearchingFromStart).toBeFalse();
-      expect(placesServiceSpy.getPlaceSuggestions).toHaveBeenCalledWith(
-        'museum',
-      );
+      expect(placesServiceSpy.getPlaceSuggestions).toHaveBeenCalledWith('museum');
       expect(component.places).toEqual(mockPlaces);
     });
   });
@@ -192,7 +176,7 @@ describe('MapSearchComponent', () => {
     it('should retrieve current location and set start point via DirectionsService', fakeAsync(() => {
       // Mock the service to resolve a location
       currentLocationServiceSpy.getCurrentLocation.and.returnValue(
-        Promise.resolve({ lat: 10, lng: 20 }),
+        Promise.resolve({ lat: 10, lng: 20 })
       );
 
       component.onSetUsersLocationAsStart();
@@ -202,20 +186,18 @@ describe('MapSearchComponent', () => {
       expect(directionsServiceSpy.setStartPoint).toHaveBeenCalledWith({
         title: 'Your Location',
         address: '10, 20',
-        coordinates: jasmine.any(Object),
+        coordinates: jasmine.any(Object)
       });
     }));
 
     it('should throw an error if current location is null', async () => {
       // Mock the service to return null
-      currentLocationServiceSpy.getCurrentLocation.and.returnValue(
-        Promise.resolve(null),
-      );
+      currentLocationServiceSpy.getCurrentLocation.and.returnValue(Promise.resolve(null));
       spyOn(console, 'error'); // to suppress or check error logs
 
-      await expectAsync(
-        component.onSetUsersLocationAsStart(),
-      ).toBeRejectedWithError('Current location is null.');
+      await expectAsync(component.onSetUsersLocationAsStart()).toBeRejectedWithError(
+        'Current location is null.'
+      );
     });
   });
 
@@ -227,7 +209,7 @@ describe('MapSearchComponent', () => {
       const selectedPlace = {
         title: 'Start Place',
         address: 'Somewhere',
-        coordinates: new google.maps.LatLng(10, 20),
+        coordinates: new google.maps.LatLng(10, 20)
       };
       component.places = [selectedPlace];
       directionsServiceSpy.setStartPoint.calls.reset();
@@ -236,9 +218,7 @@ describe('MapSearchComponent', () => {
       directionsServiceSpy.setStartPoint(component.places[0]);
       component.clearList();
 
-      expect(directionsServiceSpy.setStartPoint).toHaveBeenCalledWith(
-        selectedPlace,
-      );
+      expect(directionsServiceSpy.setStartPoint).toHaveBeenCalledWith(selectedPlace);
       expect(component.places.length).toBe(0);
     });
 
@@ -246,7 +226,7 @@ describe('MapSearchComponent', () => {
       const selectedPlace = {
         title: 'Destination Place',
         address: 'Somewhere',
-        coordinates: new google.maps.LatLng(30, 40),
+        coordinates: new google.maps.LatLng(30, 40)
       };
       component.places = [selectedPlace];
       directionsServiceSpy.setDestinationPoint.calls.reset();
@@ -255,9 +235,7 @@ describe('MapSearchComponent', () => {
       directionsServiceSpy.setDestinationPoint(component.places[0]);
       component.clearList();
 
-      expect(directionsServiceSpy.setDestinationPoint).toHaveBeenCalledWith(
-        selectedPlace,
-      );
+      expect(directionsServiceSpy.setDestinationPoint).toHaveBeenCalledWith(selectedPlace);
       expect(component.places.length).toBe(0);
     });
   });
@@ -272,7 +250,7 @@ describe('MapSearchComponent', () => {
       lat: () => 10,
       lng: () => 20,
       toJSON: () => ({ lat: 10, lng: 20 }),
-      toUrlValue: () => '10,20',
+      toUrlValue: () => '10,20'
     } as google.maps.LatLng;
 
     beforeEach(() => {
@@ -281,15 +259,15 @@ describe('MapSearchComponent', () => {
         of({
           title: 'Start Place',
           address: 'start address',
-          coordinates: dummyLatLng,
-        }),
+          coordinates: dummyLatLng
+        })
       );
       directionsServiceSpy.getDestinationPoint.and.returnValue(
         of({
           title: 'Destination Place',
           address: 'destination address',
-          coordinates: dummyLatLng,
-        }),
+          coordinates: dummyLatLng
+        })
       );
       // Set the spy for calculateShortestRoute to return a resolved promise.
       directionsServiceSpy.calculateShortestRoute = jasmine
@@ -309,26 +287,22 @@ describe('MapSearchComponent', () => {
       await fixtureWithRoute.whenStable();
 
       expect(componentWithRoute.startLocationInput).toBe('Start Place');
-      expect(componentWithRoute.destinationLocationInput).toBe(
-        'Destination Place',
-      );
+      expect(componentWithRoute.destinationLocationInput).toBe('Destination Place');
       expect(componentWithRoute.isSearchVisible).toBeTrue();
       expect(directionsServiceSpy.calculateShortestRoute).toHaveBeenCalledWith(
         'start address',
-        'destination address',
+        'destination address'
       );
       expect(componentWithRoute.currentRouteData).toEqual({
         eta: '10 mins',
-        distance: 5,
+        distance: 5
       });
     });
 
     it('should handle error in calculateShortestRoute gracefully', fakeAsync(() => {
       const error = new Error('Route calculation failed');
       // Simulate a rejected promise in calculateShortestRoute.
-      directionsServiceSpy.calculateShortestRoute.and.returnValue(
-        Promise.reject(error),
-      );
+      directionsServiceSpy.calculateShortestRoute.and.returnValue(Promise.reject(error));
       // Create a new instance for this error case.
       const errorFixture = TestBed.createComponent(MapSearchComponent);
       const errorComponent = errorFixture.componentInstance;
@@ -336,10 +310,7 @@ describe('MapSearchComponent', () => {
       errorFixture.detectChanges();
       tick();
       flushMicrotasks();
-      expect(console.error).toHaveBeenCalledWith(
-        'Error calculating route:',
-        error,
-      );
+      expect(console.error).toHaveBeenCalledWith('Error calculating route:', error);
       // currentRouteData should remain null if route calculation fails.
       expect(errorComponent.currentRouteData).toBeNull();
     }));
@@ -353,8 +324,8 @@ describe('MapSearchComponent', () => {
         of({
           title: 'Destination Only',
           address: 'destination only address',
-          coordinates: dummyLatLng,
-        }),
+          coordinates: dummyLatLng
+        })
       );
       // Create a new component instance for this scenario.
       const incompleteFixture = TestBed.createComponent(MapSearchComponent);
@@ -362,13 +333,9 @@ describe('MapSearchComponent', () => {
       incompleteFixture.detectChanges();
       tick();
       flushMicrotasks();
-      expect(
-        directionsServiceSpy.calculateShortestRoute,
-      ).not.toHaveBeenCalled();
+      expect(directionsServiceSpy.calculateShortestRoute).not.toHaveBeenCalled();
       // Even though the combineLatest branch doesn't run, the destination observable subscription should set its value.
-      expect(incompleteComponent.destinationLocationInput).toBe(
-        'Destination Only',
-      );
+      expect(incompleteComponent.destinationLocationInput).toBe('Destination Only');
     }));
   });
 
