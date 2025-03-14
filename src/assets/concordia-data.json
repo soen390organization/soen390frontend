@@ -79,7 +79,8 @@
           "Gina Cody School of Engineering and Computer Science"
         ],
         "accessibility": "https://img.icons8.com/?size=100&id=15959&format=png&color=000000",
-        "description": "Opened in September 2005, the EV Building houses the Faculty of Engineering and Computer Science, as well as the Faculty of Fine Arts. It is directly connected to the Guy\u2013Concordia Metro station and also features 'Le Gym', a facility of Concordia's Department of Recreation and Athletics."
+        "description": "Opened in September 2005, the EV Building houses the Faculty of Engineering and Computer Science, as well as the Faculty of Fine Arts. It is directly connected to the Guy\u2013Concordia Metro station and also features 'Le Gym', a facility of Concordia's Department of Recreation and Athletics.",
+        "funFact": "The EV Building is directly connected to the Guy Concordia Metro station and houses Le Gym, a facility of Concordia's Department of Recreation and Athletics."
       },
       {
         "name": "ER Building",
@@ -108,7 +109,8 @@
             "lat": 45.496158734866206,
             "lng": -73.58000531527546
           }
-        ]
+        ],
+        "funFact": "The ER Building houses various engineering research laboratories and facilities, contributing significantly to Concordia's research output."
       },
       {
         "name": "Webster Library",
@@ -243,16 +245,17 @@
           }
         ],
         "faculties": [
-          "J.A.  Cinema",
+          "J.A. DeS\u00e8ve Cinema",
           "R. Howard Webster Library",
           "Campus Bookstore",
-          "Departments of Education, English, Etudes FranCaises, History, Mathematics & Statistics",
+          "Departments of Education, English, \u00c9tudes Fran\u00e7aises, History, Mathematics & Statistics",
           "Birks Student Centre and Welcome Centre",
           "Leonard and Bina Ellen Art Gallery",
           "Print Services"
         ],
         "accessibility": "https://img.icons8.com/?size=100&id=15959&format=png&color=000000",
-        "description": "Opened in 1992, the J.W. McConnell Building houses the R. Howard Webster Library, the Departments of Education, English, \u00c9tudes Fran\u00e7aises, History, and Mathematics & Statistics. It also features the Leonard and Bina Ellen Art Gallery and the J.A. DeS\u00e8ve Cinema."
+        "description": "Opened in 1992, the J.W. McConnell Building houses the R. Howard Webster Library, the Departments of Education, English, \u00c9tudes Fran\u00e7aises, History, and Mathematics & Statistics. It also features the Leonard and Bina Ellen Art Gallery and the J.A. DeS\u00e8ve Cinema.",
+        "funFact": "The Webster Library is one of the largest libraries in Montreal, featuring state-of-the-art study pods, 3D printing services, and a vast collection of digital resources."
       },
       {
         "name": "Hall",
@@ -288,7 +291,8 @@
           "Faculty of Arts and Science"
         ],
         "accessibility": "https://img.icons8.com/?size=100&id=15959&format=png&color=000000",
-        "description": "Inaugurated on October 14, 1966, the Hall Building is a central hub of the Sir George Williams Campus. It houses various faculties, including social sciences, humanities, and engineering, and has been a focal point for significant events in the university's history."
+        "description": "Inaugurated on October 14, 1966, the Hall Building is a central hub of the Sir George Williams Campus. It houses various faculties, including social sciences, humanities, and engineering, and has been a focal point for significant events in the university's history.",
+        "funFact": "The Henry F. Hall Building is home to one of Montreals busiest escalators, constantly moving students between floors. It also played a role in the 1969 student protests for racial justice."
       },
       {
         "name": "John Molson School of Business",
@@ -526,7 +530,8 @@
         "faculties": [
           "Faculty of Arts and Science"
         ],
-        "accessibility": "https://img.icons8.com/?size=100&id=15959&format=png&color=000000"
+        "accessibility": "https://img.icons8.com/?size=100&id=15959&format=png&color=000000",
+        "funFact": "The Richard J. Renaud Science Complex at Loyola is known for housing state-of-the-art biology and chemistry laboratories."
       },
       {
         "name": "Vanier Library",
@@ -600,7 +605,8 @@
         "faculties": [
           "Vanier Library"
         ],
-        "accessibility": "https://img.icons8.com/?size=100&id=15959&format=png&color=000000"
+        "accessibility": "https://img.icons8.com/?size=100&id=15959&format=png&color=000000",
+        "funFact": "The Vanier Library at Loyola Campus has a collection of rare books, including first editions of notable literary works."
       },
       {
         "name": "Vanier Extension",
