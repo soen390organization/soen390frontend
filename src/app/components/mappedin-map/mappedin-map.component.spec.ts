@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed, waitForAsync, fakeAsync, tick } from '@angular/core/testing';
 import { MappedinMapComponent } from './mappedin-map.component';
-import { MappedinService } from 'src/app/services/mappedIn.service';
+import { MappedinService } from 'src/app/services/mappedin/mappedin.service';
 
 class MockMappedinService {
   initializeMap = jasmine.createSpy('initializeMap').and.returnValue(Promise.resolve());
@@ -14,9 +14,7 @@ describe('MappedinMapComponent', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       imports: [MappedinMapComponent],
-      providers: [
-        { provide: MappedinService, useClass: MockMappedinService },
-      ],
+      providers: [{ provide: MappedinService, useClass: MockMappedinService }]
     }).compileComponents();
   }));
 

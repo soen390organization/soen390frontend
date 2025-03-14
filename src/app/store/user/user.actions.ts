@@ -7,12 +7,6 @@ export const loadUserSuccess = createAction(
   props<{ user: { id: string; name: string; email: string } }>()
 );
 
-export const loadUserFailure = createAction(
-  '[User] Load User Failure',
-  props<{ error: any }>()
-);
+export const loadUserFailure = createAction('[User] Load User Failure', props<{ error: any }>());
 
-export const setUserName = createAction(
-  '[User] Successfully set User',
-  props<{ name: string; }>()
-);
+export const setUserName = createAction('[User] Successfully set User', props<{ name: string }>());

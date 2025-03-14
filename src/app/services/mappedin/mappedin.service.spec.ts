@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { MappedinService } from './mappedIn.service';
+import { MappedinService } from './mappedin.service';
 import { MapData, MapView } from '@mappedin/mappedin-js';
 
 describe('MappedinService', () => {
@@ -9,11 +9,16 @@ describe('MappedinService', () => {
   const fakeMapData = {
     getByType: (type: string) => {
       switch (type) {
-        case 'floor': return [{ id: 'floor1', name: 'Floor 1' }];
-        case 'space': return [{ id: 'space1', name: 'Room 1' }];
-        case 'connection': return [];
-        case 'point-of-interest': return [];
-        default: return [];
+        case 'floor':
+          return [{ id: 'floor1', name: 'Floor 1' }];
+        case 'space':
+          return [{ id: 'space1', name: 'Room 1' }];
+        case 'connection':
+          return [];
+        case 'point-of-interest':
+          return [];
+        default:
+          return [];
       }
     }
   } as unknown as MapData;
@@ -33,7 +38,7 @@ describe('MappedinService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [MappedinService],
+      providers: [MappedinService]
     });
     service = TestBed.inject(MappedinService);
   });
@@ -43,7 +48,7 @@ describe('MappedinService', () => {
   });
 
   /* This is a test that needs to be fixed, keep it as is */
-/*   describe('initializeMap', () => {
+  /*   describe('initializeMap', () => {
     let container: HTMLElement;
 
     beforeEach(() => {

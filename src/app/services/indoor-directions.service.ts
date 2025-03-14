@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { filter } from 'rxjs/operators';
-import { MappedinService } from './mappedIn.service';
+import { MappedinService } from './mappedin/mappedin.service';
 import { MapData, MapView } from '@mappedin/mappedin-js';
 
 @Injectable({
@@ -33,7 +33,7 @@ export class IndoorDirectionsService {
    */
   public async navigateDefault(): Promise<void> {
     const mapData: MapData = await firstValueFrom(
-      this.mappedinService.getMapData().pipe(filter(data => data !== null))
+      this.mappedinService.getMapData().pipe(filter((data) => data !== null))
     );
 
     const mapView: MapView = await this.waitForMapView();
@@ -43,8 +43,8 @@ export class IndoorDirectionsService {
     }
 
     // Hardcoded for demo purposes
-    const startRoom = mapData.getByType('space').find(space => space.name === '819');
-    const destinationRoom = mapData.getByType('space').find(space => space.name === '150');
+    const startRoom = mapData.getByType('space').find((space) => space.name === '819');
+    const destinationRoom = mapData.getByType('space').find((space) => space.name === '150');
 
     if (startRoom && destinationRoom) {
       const directions = mapData.getDirections(startRoom, destinationRoom);

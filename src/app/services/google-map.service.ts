@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
-import { PlacesService } from './places.service';
+import { PlacesService } from './places/places.service';
 import { DirectionsService } from './directions/directions.service';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class GoogleMapService {
   private map!: google.maps.Map;
@@ -30,14 +30,11 @@ export class GoogleMapService {
     }
   }
 
-  createMarker(
-    position: google.maps.LatLng,
-    iconUrl: string
-  ): google.maps.Marker {
+  createMarker(position: google.maps.LatLng, iconUrl: string): google.maps.Marker {
     return new google.maps.Marker({
       position,
       map: this.map,
-      icon: { url: iconUrl, scaledSize: new google.maps.Size(40, 40) },
+      icon: { url: iconUrl, scaledSize: new google.maps.Size(40, 40) }
     });
   }
 }

@@ -20,7 +20,7 @@ describe('CalendarListComponent', () => {
 
     await TestBed.configureTestingModule({
       imports: [IonicModule, CalendarListComponent],
-      providers: [{ provide: CalendarService, useValue: mockService }],
+      providers: [{ provide: CalendarService, useValue: mockService }]
     }).compileComponents();
   });
 

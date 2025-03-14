@@ -5,10 +5,7 @@ import { UserState } from './user.reducer';
 export const selectUserState = createFeatureSelector<UserState>('user');
 
 // Selector for the user object
-export const selectUser = createSelector(
-  selectUserState,
-  (state: UserState) => state.user
-);
+export const selectUser = createSelector(selectUserState, (state: UserState) => state.user);
 
 // Selector for the user's loading state
 export const selectUserLoading = createSelector(
@@ -17,25 +14,13 @@ export const selectUserLoading = createSelector(
 );
 
 // Selector for the user's error state
-export const selectUserError = createSelector(
-  selectUserState,
-  (state: UserState) => state.error
-);
+export const selectUserError = createSelector(selectUserState, (state: UserState) => state.error);
 
 // Selector for the user's name
-export const selectUserName = createSelector(
-  selectUser,
-  (user) => user?.name || null
-);
+export const selectUserName = createSelector(selectUser, (user) => user?.name || null);
 
 // Selector for the user's email
-export const selectUserEmail = createSelector(
-  selectUser,
-  (user) => user?.email || null
-);
+export const selectUserEmail = createSelector(selectUser, (user) => user?.email || null);
 
 // Example: Derived selector to check if a user is logged in
-export const selectIsUserLoggedIn = createSelector(
-  selectUser,
-  (user) => !!user
-);
+export const selectIsUserLoggedIn = createSelector(selectUser, (user) => !!user);

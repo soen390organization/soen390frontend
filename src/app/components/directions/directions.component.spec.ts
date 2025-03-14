@@ -4,7 +4,7 @@ import { DirectionsComponent } from './directions.component';
 import { Step } from 'src/app/interfaces/step.interface';
 import { ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { CurrentLocationService } from 'src/app/services/geolocation/current-location.service';
+import { CurrentLocationService } from 'src/app/services/current-location/current-location.service';
 import { DirectionsService } from 'src/app/services/directions/directions.service';
 import { VisibilityService } from 'src/app/services/visibility.service';
 
@@ -23,29 +23,25 @@ const mockDirectionsService = {
     of({
       address: 'destination address',
       title: 'Destination',
-      coordinates: {},
+      coordinates: {}
     })
   ),
   getStartPoint: jasmine
     .createSpy('getStartPoint')
-    .and.returnValue(
-      of({ address: 'start address', title: 'Start', coordinates: {} })
-    ),
+    .and.returnValue(of({ address: 'start address', title: 'Start', coordinates: {} })),
   setStartPoint: jasmine.createSpy('setStartPoint'),
-  setDestinationPoint: jasmine.createSpy('setDestinationPoint'),
+  setDestinationPoint: jasmine.createSpy('setDestinationPoint')
 };
 
 const mockCurrentLocationService = {
-  watchLocation: jasmine
-    .createSpy('watchLocation')
-    .and.returnValue(Promise.resolve('123')),
-  clearWatch: jasmine.createSpy('clearWatch'),
+  watchLocation: jasmine.createSpy('watchLocation').and.returnValue(Promise.resolve('123')),
+  clearWatch: jasmine.createSpy('clearWatch')
 };
 
 const mockVisibilityService = {
   toggleDirectionsComponent: jasmine.createSpy('toggleDirectionsComponent'),
   togglePOIsComponent: jasmine.createSpy('togglePOIsComponent'),
-  toggleStartButton: jasmine.createSpy('toggleStartButton'),
+  toggleStartButton: jasmine.createSpy('toggleStartButton')
 };
 
 describe('DirectionsComponent', () => {
@@ -57,9 +53,12 @@ describe('DirectionsComponent', () => {
       imports: [DirectionsComponent, CommonModule],
       providers: [
         { provide: DirectionsService, useValue: mockDirectionsService },
-        { provide: CurrentLocationService, useValue: mockCurrentLocationService },
-        { provide: VisibilityService, useValue: mockVisibilityService },
-      ],
+        {
+          provide: CurrentLocationService,
+          useValue: mockCurrentLocationService
+        },
+        { provide: VisibilityService, useValue: mockVisibilityService }
+      ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(DirectionsComponent);
@@ -89,19 +88,19 @@ describe('DirectionsComponent', () => {
           lng: () => -73.5673,
           equals: () => false,
           toJSON: () => ({ lat: 45.5017, lng: -73.5673 }),
-          toUrlValue: () => '',
+          toUrlValue: () => ''
         },
         end_location: {
           lat: () => 44.1232,
           lng: () => -72.4356,
           equals: () => false,
           toJSON: () => ({ lat: 44.1232, lng: -72.4356 }),
-          toUrlValue: () => '',
+          toUrlValue: () => ''
         },
         distance: { text: '200 m', value: 200 },
         duration: { text: '2 mins', value: 2 },
-        transit_details: undefined,
-      },
+        transit_details: undefined
+      }
     ];
     mockDirectionsService.calculateRoute.and.returnValue(
       Promise.resolve({ steps: mockSteps, eta: '6 mins' })
@@ -114,16 +113,14 @@ describe('DirectionsComponent', () => {
   });
 
   it('should handle errors when loading directions', async () => {
-    mockDirectionsService.calculateRoute.and.returnValue(
-      Promise.reject('API Error')
-    );
+    mockDirectionsService.calculateRoute.and.returnValue(Promise.reject('API Error'));
     await component.loadDirections('WALKING');
     expect(component.isLoading).toBeFalse();
   });
 
   it('should stop event propagation when setMode is called with event', () => {
     const event = {
-      stopPropagation: jasmine.createSpy('stopPropagation'),
+      stopPropagation: jasmine.createSpy('stopPropagation')
     } as unknown as Event;
     component.setMode('DRIVING', event);
     expect(event.stopPropagation).toHaveBeenCalled();
@@ -149,19 +146,19 @@ describe('DirectionsComponent', () => {
           lng: () => -73.5673,
           equals: () => false,
           toJSON: () => ({ lat: 45.5017, lng: -73.5673 }),
-          toUrlValue: () => '',
+          toUrlValue: () => ''
         },
         end_location: {
           lat: () => 44.1232,
           lng: () => -72.4356,
           equals: () => false,
           toJSON: () => ({ lat: 44.1232, lng: -72.4356 }),
-          toUrlValue: () => '',
+          toUrlValue: () => ''
         },
         distance: { text: '200 m', value: 200 },
         duration: { text: '2 mins', value: 2 },
-        transit_details: undefined,
-      },
+        transit_details: undefined
+      }
     ];
     component.onPositionUpdate({ lat: 44.1232, lng: -72.4356 });
     expect(component.steps.length).toBe(0);
@@ -169,12 +166,7 @@ describe('DirectionsComponent', () => {
   });
 
   it('should calculate distance correctly', () => {
-    const distance = component.calculateDistance(
-      45.5017,
-      -73.5673,
-      44.1232,
-      -72.4356
-    );
+    const distance = component.calculateDistance(45.5017, -73.5673, 44.1232, -72.4356);
     expect(distance).toBeCloseTo(177379, -4); // Approximate distance in meters
   });
 
@@ -186,7 +178,7 @@ describe('DirectionsComponent', () => {
   it('should update showAllSteps based on component position', () => {
     const mockElement = { getBoundingClientRect: () => ({ top: 100 }) };
     component.directionsContainer = {
-      nativeElement: mockElement,
+      nativeElement: mockElement
     } as ElementRef;
     spyOnProperty(window, 'innerHeight').and.returnValue(500);
 
@@ -199,16 +191,14 @@ describe('DirectionsComponent', () => {
   it('should continuously update showAllSteps', () => {
     // Spy on requestAnimationFrame and simulate a single call
     let callback: FrameRequestCallback = () => {};
-    spyOn(window, 'requestAnimationFrame').and.callFake(
-      (cb: FrameRequestCallback) => {
-        callback = cb; // Store the callback
-        return 1; // Return a mock handle ID
-      }
-    );
+    spyOn(window, 'requestAnimationFrame').and.callFake((cb: FrameRequestCallback) => {
+      callback = cb; // Store the callback
+      return 1; // Return a mock handle ID
+    });
 
     const mockElement = { getBoundingClientRect: () => ({ top: 100 }) };
     component.directionsContainer = {
-      nativeElement: mockElement,
+      nativeElement: mockElement
     } as ElementRef;
     spyOnProperty(window, 'innerHeight').and.returnValue(500);
 
@@ -237,12 +227,7 @@ describe('DirectionsComponent', () => {
   });
 
   it('should return 0 for identical coordinates', () => {
-    const distance = component.calculateDistance(
-      45.5017,
-      -73.5673,
-      45.5017,
-      -73.5673
-    );
+    const distance = component.calculateDistance(45.5017, -73.5673, 45.5017, -73.5673);
     expect(distance).toBe(0);
   });
 
@@ -267,9 +252,7 @@ describe('DirectionsComponent', () => {
   });
 
   it('should handle empty response from calculateRoute', async () => {
-    mockDirectionsService.calculateRoute.and.returnValue(
-      Promise.resolve({ steps: [], eta: null })
-    );
+    mockDirectionsService.calculateRoute.and.returnValue(Promise.resolve({ steps: [], eta: null }));
     await component.loadDirections('WALKING');
     expect(component.steps).toEqual([]);
     expect(component.eta).toBeNull();
@@ -280,30 +263,30 @@ describe('DirectionsComponent', () => {
     component.ngAfterViewInit();
     expect((component as any).observeComponentPosition).toHaveBeenCalled();
   });
-    it('should not update showAllSteps if directionsContainer is not defined', () => {
+  it('should not update showAllSteps if directionsContainer is not defined', () => {
     // Remove the directionsContainer so that updateShowAllSteps returns immediately.
     component.directionsContainer = undefined as any;
     // Set a known value for showAllSteps.
     component.showAllSteps = false;
-    
+
     // Call the private method via type assertion.
     (component as any).updateShowAllSteps();
-    
+
     // Expect showAllSteps to remain unchanged.
     expect(component.showAllSteps).toBeFalse();
   });
-  
+
   it('should toggle directions and POIs when onEndClick is called', () => {
     // Access the private visibilityService from the component.
     const visibilityService = (component as any).visibilityService;
-    
+
     // Reset call history if needed.
     (visibilityService.toggleDirectionsComponent as jasmine.Spy).calls.reset();
     (visibilityService.togglePOIsComponent as jasmine.Spy).calls.reset();
-  
+
     component.onEndClick();
-  
+
     expect(visibilityService.toggleDirectionsComponent).toHaveBeenCalled();
     expect(visibilityService.togglePOIsComponent).toHaveBeenCalled();
-  });  
+  });
 });

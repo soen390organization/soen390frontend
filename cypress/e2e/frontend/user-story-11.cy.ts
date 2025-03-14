@@ -10,11 +10,11 @@ describe('Map - Verify Campus Building Polygon Creation', () => {
             coords: {
               latitude: testLat,
               longitude: testLng,
-              accuracy: 10,
-            },
+              accuracy: 10
+            }
           });
         });
-      },
+      }
     });
     Cypress.config('defaultCommandTimeout', 20000);
   });
@@ -23,6 +23,5 @@ describe('Map - Verify Campus Building Polygon Creation', () => {
     // Wait for the map container to be visible and allow time for buildings to load.
     cy.get('.map-container', { timeout: 20000 }).should('be.visible');
     cy.log('est completed: User is in sgw campus, campus buildings should appear as red polygons.');
-
   });
 });

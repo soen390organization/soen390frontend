@@ -1,18 +1,18 @@
 // mappedin.service.ts
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, firstValueFrom, Observable, take } from 'rxjs';
-import { getMapData, show3dMap, MapData, MapView, DOORS} from '@mappedin/mappedin-js';
+import { getMapData, show3dMap, MapData, MapView, DOORS } from '@mappedin/mappedin-js';
 import { environment } from 'src/environments/environment';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class MappedinService {
   private mapView: MapView | undefined;
   private mappedInContainer: HTMLElement | undefined;
   private mapId: string;
   private mapData$ = new BehaviorSubject<MapData | null>(null);
-  
+
   private readonly _isMappedin$ = new BehaviorSubject<boolean>(false);
   public isMappedin$ = this._isMappedin$.asObservable();
 
@@ -21,13 +21,13 @@ export class MappedinService {
     const mapData = await firstValueFrom(this.mapData$);
     // Safely check if mapData is null or undefined
     if (!mapData) {
-      return [];  // Return an empty array if no map data is available
+      return []; // Return an empty array if no map data is available
     }
-    
+
     // Get floors by type 'floor' and map them to a simplified structure
-    return mapData.getByType('floor').map(floor => ({
+    return mapData.getByType('floor').map((floor) => ({
       id: floor.id,
-      name: floor.name,
+      name: floor.name
     }));
   }
 
@@ -38,8 +38,7 @@ export class MappedinService {
     const { id, name } = this.mapView.currentFloor;
     return { id, name };
   }
-  
- 
+
   setFloor(floorId: string) {
     this.mapView.setFloor(floorId);
   }
@@ -50,7 +49,7 @@ export class MappedinService {
   }
 
   private initializeConnections(mapData: MapData) {
-    mapData.getByType("connection").forEach((connection) => {
+    mapData.getByType('connection').forEach((connection) => {
       let label;
       let labelColor;
       // Find the coordinates for the current floor.
@@ -72,15 +71,15 @@ export class MappedinService {
           appearance: {
             marker: {
               foregroundColor: {
-                active: labelColor,
+                active: labelColor
                 // inactive: color,
-              },
+              }
             },
-          text: {
-            foregroundColor: labelColor,
-          },
-        },
-      });
+            text: {
+              foregroundColor: labelColor
+            }
+          }
+        });
       }
     });
   }
@@ -89,18 +88,20 @@ export class MappedinService {
     mapData.getByType('point-of-interest').forEach((poi) => {
       if (poi.name) {
         this.mapView.Labels.add(poi, poi.name, {
-            interactive: true,
-            appearance: {
-              marker: {
-                foregroundColor: {
-                  active: ['Bathrooms', 'Water Fountain'].includes(poi.name) ? '#1d63dc' : '#000000',
-                  // inactive: color,
-                },
-              },
-            text: {
-              foregroundColor: ['Bathrooms', 'Water Fountain'].includes(poi.name) ? '#1d63dc' : '#000000',
+          interactive: true,
+          appearance: {
+            marker: {
+              foregroundColor: {
+                active: ['Bathrooms', 'Water Fountain'].includes(poi.name) ? '#1d63dc' : '#000000'
+                // inactive: color,
+              }
             },
-          },
+            text: {
+              foregroundColor: ['Bathrooms', 'Water Fountain'].includes(poi.name)
+                ? '#1d63dc'
+                : '#000000'
+            }
+          }
         });
       }
     });
@@ -108,7 +109,7 @@ export class MappedinService {
 
   private initializeSpaces(mapData: MapData) {
     const spaces = mapData.getByType('space');
-  
+
     spaces.forEach((space) => {
       if (space.name) {
         /* I'm using this for now to find the room names */
@@ -116,16 +117,16 @@ export class MappedinService {
         this.mapView.Labels.add(space, space.name, { interactive: true });
       }
     });
-  
+
     this.mapView.updateState(DOORS.Exterior, {
       visible: true,
       color: 'black',
-      opacity: 0.6,
+      opacity: 0.6
     });
     this.mapView.updateState(DOORS.Interior, {
       visible: true,
       color: 'lightgrey',
-      opacity: 0.3,
+      opacity: 0.3
     });
   }
 
@@ -136,7 +137,7 @@ export class MappedinService {
   // protected async getMapData(): Promise<Observable<MapData>>  {
   //   // Use firstValueFrom to get the first emitted value
   //   const mapId = await firstValueFrom(this.selectedMap$);  // Convert to promise and await the value
-  
+
   //   // Now pass the mapId as a string value
   //   return getMapData({
   //     mapId: mapId,
@@ -149,22 +150,21 @@ export class MappedinService {
     return getMapData({
       mapId,
       key: environment.mappedin.key,
-      secret: environment.mappedin.secret,
+      secret: environment.mappedin.secret
     });
   }
-  
+
   public async setMapData(mapId: string) {
     this.mapId = mapId;
     const mapData = await this.fetchMapData(mapId);
     this.mapData$.next(mapData);
-  
+
     this.mapView = await this.show3dMap(this.mappedInContainer, mapData);
-  
+
     this.initializeSpaces(mapData);
     this.initializePointsOfInterests(mapData);
     this.initializeConnections(mapData);
   }
-  
 
   public getMapData(): Observable<MapData | null> {
     return this.mapData$.asObservable();
@@ -173,7 +173,7 @@ export class MappedinService {
   public getMapId(): string {
     return this.mapId;
   }
-  
+
   /**
    * Protected method that wraps the external show3dMap API call.
    * Tests can override or spy on this method.

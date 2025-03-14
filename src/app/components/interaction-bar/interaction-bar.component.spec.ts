@@ -4,7 +4,7 @@ import { ElementRef } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { of } from 'rxjs';
 import { MapType, selectCurrentMap, selectSelectedCampus } from 'src/app/store/app';
-import { PlacesService } from 'src/app/services/places.service';
+import { PlacesService } from 'src/app/services/places/places.service';
 import { DirectionsService } from 'src/app/services/directions/directions.service';
 import { VisibilityService } from 'src/app/services/visibility.service';
 
@@ -38,7 +38,7 @@ describe('InteractionBarComponent', () => {
     };
 
     const mockDirectionsService = {
-      hasBothPoints$: of(true),
+      hasBothPoints$: of(true)
     };
     mockVisibilityService = {
       showDirections: of(true),
@@ -76,7 +76,9 @@ describe('InteractionBarComponent', () => {
   it('should move footer on touchmove', () => {
     component.isDragging = true;
     component.startY = 300;
-    const fakeEvent = { preventDefault: jasmine.createSpy('preventDefault') } as any;
+    const fakeEvent = {
+      preventDefault: jasmine.createSpy('preventDefault')
+    } as any;
 
     component.onDragMove(250, fakeEvent);
 
@@ -88,7 +90,7 @@ describe('InteractionBarComponent', () => {
   it('should expand on swipe up', () => {
     component.isDragging = true;
     component.startY = 300;
-    component.currentY = 200; 
+    component.currentY = 200;
 
     component.onDragEnd();
     expect(component.isExpanded).toBe(true);
@@ -97,15 +99,17 @@ describe('InteractionBarComponent', () => {
   it('should collapse on swipe down', () => {
     component.isDragging = true;
     component.startY = 200;
-    component.currentY = 300; 
-    component.isExpanded = true; 
+    component.currentY = 300;
+    component.isExpanded = true;
 
     component.onDragEnd();
     expect(component.isExpanded).toBe(false);
   });
 
   it('should prevent scrolling while swiping', () => {
-    const fakeEvent = { preventDefault: jasmine.createSpy('preventDefault') } as any;
+    const fakeEvent = {
+      preventDefault: jasmine.createSpy('preventDefault')
+    } as any;
     component.isDragging = true;
     component.onDragMove(250, fakeEvent);
     expect(fakeEvent.preventDefault).toHaveBeenCalled();
@@ -122,6 +126,8 @@ describe('InteractionBarComponent', () => {
     component.footerContainer.nativeElement.style.transition = 'transform 0.3s ease-out';
     component.isExpanded = true;
     component.onDragEnd();
-    expect(component.footerContainer.nativeElement.style.transition).toContain('transform 0.3s ease-out');
+    expect(component.footerContainer.nativeElement.style.transition).toContain(
+      'transform 0.3s ease-out'
+    );
   });
 });

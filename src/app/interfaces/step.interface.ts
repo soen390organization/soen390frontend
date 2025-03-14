@@ -1,14 +1,14 @@
 export interface Step {
-    instructions: string;
-    start_location: google.maps.LatLng;
-    end_location: google.maps.LatLng;
-    distance?: {
-      text: string;
-      value: number;
-    };
-    duration?: {
-      text: string;
-      value: number;
-    };
-    transit_details?: google.maps.TransitDetails
+  instructions: string;
+  start_location: google.maps.LatLng;
+  end_location: google.maps.LatLng;
+  distance?: {
+    text: string;
+    value: number;
+  };
+  duration?: {
+    text: string;
+    value: number;
+  };
+  transit_details?: google.maps.TransitDetails;
 }

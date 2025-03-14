@@ -9,7 +9,9 @@ describe('Map - Nearby Points of Interest', () => {
     cy.wait(1000);
 
     // Click the handle bar to reveal the locations section.
-    cy.get('.w-\\[100px\\].h-\\[10px\\].bg-\\[\\#d5d5d5\\].my-\\[10px\\].mx-auto.rounded-full.cursor-pointer')
+    cy.get(
+      '.w-\\[100px\\].h-\\[10px\\].bg-\\[\\#d5d5d5\\].my-\\[10px\\].mx-auto.rounded-full.cursor-pointer'
+    )
       .should('be.visible')
       .click();
     cy.wait(1000);
@@ -39,19 +41,19 @@ describe('Map - Nearby Points of Interest', () => {
     cy.get('div.flex.flex-col.items-start > div.flex.gap-4.overflow-x-auto.w-full.touch-pan-x')
       .eq(1)
       .within(() => {
-        cy.contains("Mango Bay").should('exist');
+        cy.contains('Mango Bay').should('exist');
       });
     cy.wait(1000);
 
     // Click on the "McKibbin's" card in the POI section.
     cy.get('div.flex.flex-col.items-start > div.flex.gap-4.overflow-x-auto.w-full.touch-pan-x')
       .eq(1)
-      .contains("Mango Bay")
+      .contains('Mango Bay')
       .click();
     cy.wait(1000);
 
     // Verify that the destination input now shows "McKibbin's".
-    cy.get('input[placeholder="Choose destination point..."]').should('have.value', "Mango Bay");
+    cy.get('input[placeholder="Choose destination point..."]').should('have.value', 'Mango Bay');
     cy.wait(1000);
   });
 });

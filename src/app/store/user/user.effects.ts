@@ -7,7 +7,10 @@ import { loadUser, loadUserSuccess, loadUserFailure } from './user.actions';
 
 @Injectable()
 export class UserEffects {
-  constructor(private readonly actions$: Actions, private readonly userService: UserService) {}
+  constructor(
+    private readonly actions$: Actions,
+    private readonly userService: UserService
+  ) {}
 
   loadUser$ = createEffect(() =>
     this.actions$.pipe(
