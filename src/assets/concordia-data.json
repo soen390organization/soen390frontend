@@ -2,21 +2,26 @@
   "sgw": {
     "name": "Sir George William",
     "abreviation": "SGW",
-    "coordinates": { "lat": 45.49508674774648, "lng": -73.57795691041848 },
+    "coordinates": {
+      "lat": 45.49508674774648,
+      "lng": -73.57795691041848
+    },
     "shuttleBus": {
       "terminal": {
         "lat": 45.49713286141489,
         "lng": -73.57851866143918
       }
     },
-
     "schedule": [],
     "buildings": [
       {
         "name": "Engineering and Visual Arts",
         "abreviation": "EV",
         "address": "1515 Saint-Catherine St W #1428, Montreal, Quebec H3G 1S6",
-        "coordinates": { "lat": 45.49541909930391, "lng": -73.57769260301784 },
+        "coordinates": {
+          "lat": 45.49541909930391,
+          "lng": -73.57769260301784
+        },
         "image": "assets/images/ev-building.jpg",
         "entrances": [],
         "boundaries": [
@@ -68,13 +73,22 @@
             "lat": 45.49559582161234,
             "lng": -73.57876199003452
           }
-        ]
+        ],
+        "faculties": [
+          "Faculty of Fine Arts",
+          "Gina Cody School of Engineering and Computer Science"
+        ],
+        "accessibility": "https://img.icons8.com/?size=100&id=15959&format=png&color=000000",
+        "description": "Opened in September 2005, the EV Building houses the Faculty of Engineering and Computer Science, as well as the Faculty of Fine Arts. It is directly connected to the Guy\u2013Concordia Metro station and also features 'Le Gym', a facility of Concordia's Department of Recreation and Athletics."
       },
       {
         "name": "ER Building",
         "abreviation": "ER",
         "address": "2155 Guy St, Montreal, Quebec H3H 2L9",
-        "coordinates": { "lat": 45.49619913491374, "lng": -73.58013324104284 },
+        "coordinates": {
+          "lat": 45.49619913491374,
+          "lng": -73.58013324104284
+        },
         "image": "assets/images/er-building.jpg",
         "entrances": [],
         "boundaries": [
@@ -100,7 +114,10 @@
         "name": "Webster Library",
         "abreviation": "LB",
         "address": "1400 Blvd. De Maisonneuve Ouest, Montreal, Quebec H3G 2V8",
-        "coordinates": { "lat": 45.496856674256634, "lng": -73.57802308456793 },
+        "coordinates": {
+          "lat": 45.496856674256634,
+          "lng": -73.57802308456793
+        },
         "image": "assets/images/webster-building.jpg",
         "entrances": [],
         "boundaries": [
@@ -224,14 +241,28 @@
             "lat": 45.49701966382335,
             "lng": -73.57829434512279
           }
-        ]
+        ],
+        "faculties": [
+          "J.A.  Cinema",
+          "R. Howard Webster Library",
+          "Campus Bookstore",
+          "Departments of Education, English, Etudes FranCaises, History, Mathematics & Statistics",
+          "Birks Student Centre and Welcome Centre",
+          "Leonard and Bina Ellen Art Gallery",
+          "Print Services"
+        ],
+        "accessibility": "https://img.icons8.com/?size=100&id=15959&format=png&color=000000",
+        "description": "Opened in 1992, the J.W. McConnell Building houses the R. Howard Webster Library, the Departments of Education, English, \u00c9tudes Fran\u00e7aises, History, and Mathematics & Statistics. It also features the Leonard and Bina Ellen Art Gallery and the J.A. DeS\u00e8ve Cinema."
       },
       {
         "name": "Hall",
         "abreviation": "H",
         "indoorMapId": "67b674be13a4e9000b46cf2e",
         "address": "1455 Blvd. De Maisonneuve Ouest, Montreal, Quebec H3G 1M8",
-        "coordinates": { "lat": 45.49732887794189, "lng": -73.5790258502087 },
+        "coordinates": {
+          "lat": 45.49732887794189,
+          "lng": -73.5790258502087
+        },
         "image": "assets/images/hall-building.jpg",
         "entrances": [],
         "boundaries": [
@@ -251,14 +282,23 @@
             "lat": 45.497165958498655,
             "lng": -73.57954266006095
           }
-        ]
+        ],
+        "faculties": [
+          "Gina Cody School of Engineering and Computer Science",
+          "Faculty of Arts and Science"
+        ],
+        "accessibility": "https://img.icons8.com/?size=100&id=15959&format=png&color=000000",
+        "description": "Inaugurated on October 14, 1966, the Hall Building is a central hub of the Sir George Williams Campus. It houses various faculties, including social sciences, humanities, and engineering, and has been a focal point for significant events in the university's history."
       },
       {
         "name": "John Molson School of Business",
         "abreviation": "JMSB",
         "indoorMapId": "67b39ca55b54d7000b151bdb",
         "address": "1450 Guy St, Montreal, Quebec H3H 0A1",
-        "coordinates": { "lat": 45.49549521890683, "lng": -73.57917148051556 },
+        "coordinates": {
+          "lat": 45.49549521890683,
+          "lng": -73.57917148051556
+        },
         "image": "assets/images/jmsb-building.jpg",
         "entrances": [],
         "boundaries": [
@@ -305,7 +345,10 @@
   "loy": {
     "name": "Loyola",
     "abreviation": "LOY",
-    "coordinates": { "lat": 45.45812810976341, "lng": -73.6393513063634 },
+    "coordinates": {
+      "lat": 45.45812810976341,
+      "lng": -73.6393513063634
+    },
     "shuttleBus": {
       "terminal": {
         "lat": 45.45789692831165,
@@ -319,7 +362,10 @@
         "abreviation": "CC",
         "indoorMapId": "67b544ea13a4e9000b46cf04",
         "address": "7141 Sherbrooke St W, Montreal, Quebec H4B 1R6",
-        "coordinates": { "lat": 45.45849007178699, "lng": -73.64064018870205 },
+        "coordinates": {
+          "lat": 45.45849007178699,
+          "lng": -73.64064018870205
+        },
         "image": "assets/images/cc-building.jpg",
         "entrances": [],
         "boundaries": [
@@ -400,8 +446,11 @@
       {
         "name": "Richard J. Renaud Science Complex",
         "abreviation": "SP",
-        "address": "3475 Rue West Broadway, Montréal, QC H4B 2A7",
-        "coordinates": { "lat": 45.45784653344979, "lng": -73.64157117911424 },
+        "address": "3475 Rue West Broadway, Montr\u00e9al, QC H4B 2A7",
+        "coordinates": {
+          "lat": 45.45784653344979,
+          "lng": -73.64157117911424
+        },
         "image": "assets/images/sp-building.jpg",
         "entrances": [],
         "boundaries": [
@@ -473,14 +522,21 @@
             "lat": 45.45767453764288,
             "lng": -73.6419273037453
           }
-        ]
+        ],
+        "faculties": [
+          "Faculty of Arts and Science"
+        ],
+        "accessibility": "https://img.icons8.com/?size=100&id=15959&format=png&color=000000"
       },
       {
         "name": "Vanier Library",
         "abreviation": "VL",
         "indoorMapId": "67c74fae8e15de000bed1a9a",
         "address": "7141 Sherbrooke St. W. Montreal, Quebec, Canada H4B 1R6",
-        "coordinates": { "lat": 45.45905565, "lng": -73.63840962048661 },
+        "coordinates": {
+          "lat": 45.45905565,
+          "lng": -73.63840962048661
+        },
         "image": "assets/images/vl-building.jpg",
         "entrances": [],
         "boundaries": [
@@ -540,14 +596,21 @@
             "lat": 45.45901064810901,
             "lng": -73.63889166238613
           }
-        ]
+        ],
+        "faculties": [
+          "Vanier Library"
+        ],
+        "accessibility": "https://img.icons8.com/?size=100&id=15959&format=png&color=000000"
       },
       {
         "name": "Vanier Extension",
         "abreviation": "VE",
         "indoorMapId": "67c74fae8e15de000bed1a9a",
         "address": "7141 Sherbrooke St. W. Montreal, Quebec, Canada H4B 1R6",
-        "coordinates": { "lat": 45.45905565, "lng": -73.63840962048661 },
+        "coordinates": {
+          "lat": 45.45905565,
+          "lng": -73.63840962048661
+        },
         "image": "assets/images/ve-building.jpg",
         "entrances": [],
         "boundaries": [
