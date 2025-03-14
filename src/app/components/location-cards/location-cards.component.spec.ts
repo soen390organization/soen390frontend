@@ -42,7 +42,7 @@ describe('LocationCardsComponent', () => {
       name: 'Test Location',
       address: '123 Test St',
       image: 'test-image.jpg',
-      coordinates: new google.maps.LatLng(12.345, 67.890)
+      coordinates: new google.maps.LatLng(12.345, 67.89)
     };
 
     component.setDestination(mockLocation);

@@ -2,14 +2,14 @@ import { TestBed } from '@angular/core/testing';
 import { CurrentLocationService } from './current-location.service';
 
 // Import the wrapper, *not* the Capacitor plugin directly
-import { Geo } from './geolocation-wrapper.service';
+import { Geo } from '../geolocation/geolocation-wrapper.service';
 
 describe('CurrentLocationService', () => {
   let service: CurrentLocationService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [CurrentLocationService],
+      providers: [CurrentLocationService]
     });
     service = TestBed.inject(CurrentLocationService);
   });
@@ -23,8 +23,8 @@ describe('CurrentLocationService', () => {
       // Spy on our wrapper's getCurrentPosition
       spyOn(Geo, 'getCurrentPosition').and.returnValue(
         Promise.resolve({
-          coords: { latitude: 10, longitude: 20 },
-        } as GeolocationPosition),
+          coords: { latitude: 10, longitude: 20 }
+        } as GeolocationPosition)
       );
 
       const result = await service.getCurrentLocation();
@@ -32,17 +32,12 @@ describe('CurrentLocationService', () => {
     });
 
     it('should return null if an error occurs', async () => {
-      spyOn(Geo, 'getCurrentPosition').and.returnValue(
-        Promise.reject('some error'),
-      );
+      spyOn(Geo, 'getCurrentPosition').and.returnValue(Promise.reject('some error'));
       const consoleSpy = spyOn(console, 'error');
 
       const result = await service.getCurrentLocation();
       expect(result).toBeNull();
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'Error getting location:',
-        'some error',
-      );
+      expect(consoleSpy).toHaveBeenCalledWith('Error getting location:', 'some error');
     });
   });
 
@@ -50,10 +45,7 @@ describe('CurrentLocationService', () => {
     it('should call the callback when position updates', async () => {
       // We simulate watchPosition calling the callback with a position
       spyOn(Geo, 'watchPosition').and.callFake((_, callback) => {
-        callback(
-          { coords: { latitude: 1, longitude: 2 } } as GeolocationPosition,
-          null,
-        );
+        callback({ coords: { latitude: 1, longitude: 2 } } as GeolocationPosition, null);
         return Promise.resolve('mock-watch-id');
       });
 
@@ -75,10 +67,7 @@ describe('CurrentLocationService', () => {
       const watchId = await service.watchLocation(callbackFn);
 
       expect(watchId).toBe('mock-watch-id');
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'Error watching location:',
-        new Error('watch error'),
-      );
+      expect(consoleSpy).toHaveBeenCalledWith('Error watching location:', new Error('watch error'));
       // callback should not be called if there's an error
       expect(callbackFn).not.toHaveBeenCalled();
     });

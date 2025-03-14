@@ -46,6 +46,9 @@ jobs:
           EOF
         shell: bash
 
+      - name: Apply formatting
+        run: npx prettier --write .
+
       - name: Install Dependencies
         run: npm install
 

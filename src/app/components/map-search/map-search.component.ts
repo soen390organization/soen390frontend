@@ -3,16 +3,10 @@ import { GoogleMapComponent } from '../google-map/google-map.component';
 import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { CurrentLocationService } from 'src/app/services/geolocation/current-location.service';
-import {
-  animate,
-  state,
-  style,
-  transition,
-  trigger,
-} from '@angular/animations';
+import { CurrentLocationService } from 'src/app/services/current-location/current-location.service';
+import { animate, state, style, transition, trigger } from '@angular/animations';
 import { DirectionsService } from 'src/app/services/directions/directions.service';
-import { PlacesService } from 'src/app/services/places.service';
+import { PlacesService } from 'src/app/services/places/places.service';
 import { HomePage } from 'src/app/home/home.page';
 import { VisibilityService } from 'src/app/services/visibility.service';
 import { combineLatest, Observable } from 'rxjs';
@@ -25,7 +19,7 @@ export const MapSeachAnimation = [
       style({
         width: '100%',
         opacity: 1,
-        transform: 'translateX(0)',
+        transform: 'translateX(0)'
       })
     ),
     state(
@@ -33,13 +27,13 @@ export const MapSeachAnimation = [
       style({
         width: '0px',
         opacity: 0,
-        transform: 'translateX(-100%)',
+        transform: 'translateX(-100%)'
       })
     ),
     transition('out => in', animate('0.15s ease-in-out')),
-    transition('in => out', animate('0.15s ease-in-out')),
-  ]),
-]
+    transition('in => out', animate('0.15s ease-in-out'))
+  ])
+];
 
 @Component({
   selector: 'app-map-search',
@@ -48,7 +42,6 @@ export const MapSeachAnimation = [
   styleUrls: ['./map-search.component.scss'],
   animations: MapSeachAnimation
 })
-
 export class MapSearchComponent implements OnInit {
   @ViewChild(GoogleMapComponent) googleMap!: GoogleMapComponent;
   startLocationInput = '';
@@ -63,16 +56,17 @@ export class MapSearchComponent implements OnInit {
     public readonly directionsService: DirectionsService,
     private readonly placesService: PlacesService,
     private readonly currentLocationService: CurrentLocationService,
-    private readonly visibilityService: VisibilityService) {}
+    private readonly visibilityService: VisibilityService
+  ) {}
 
   ngOnInit(): void {
     this.enableStart$ = this.visibilityService.enableStart;
-    this.directionsService.getStartPoint().subscribe(start => {
+    this.directionsService.getStartPoint().subscribe((start) => {
       if (start) {
         this.startLocationInput = start.title;
       }
     });
-    this.directionsService.getDestinationPoint().subscribe(destination => {
+    this.directionsService.getDestinationPoint().subscribe((destination) => {
       if (destination) {
         this.destinationLocationInput = destination.title;
         this.isSearchVisible = true;
@@ -83,20 +77,18 @@ export class MapSearchComponent implements OnInit {
       this.directionsService.getStartPoint(),
       this.directionsService.getDestinationPoint()
     ])
-    .pipe(
-      filter(([start, destination]) => !!start && !!destination)
-    )
-    .subscribe(([start, destination]) => {
-      // Use the available start and destination values.
-      // Here we assume calculateShortestRoute accepts addresses; adjust if you prefer coordinates.
-      this.directionsService.calculateShortestRoute(start!.address, destination!.address)
-        .then(() => {
-          // Retrieve the calculated fastest route data from the service.
-          this.currentRouteData = this.directionsService.getShortestRoute();
-        })
-        .catch(error => console.error('Error calculating route:', error));
-    });
-
+      .pipe(filter(([start, destination]) => !!start && !!destination))
+      .subscribe(([start, destination]) => {
+        // Use the available start and destination values.
+        // Here we assume calculateShortestRoute accepts addresses; adjust if you prefer coordinates.
+        this.directionsService
+          .calculateShortestRoute(start!.address, destination!.address)
+          .then(() => {
+            // Retrieve the calculated fastest route data from the service.
+            this.currentRouteData = this.directionsService.getShortestRoute();
+          })
+          .catch((error) => console.error('Error calculating route:', error));
+      });
   }
 
   toggleSearch() {
@@ -116,10 +108,9 @@ export class MapSearchComponent implements OnInit {
     this.directionsService.setStartPoint({
       title: 'Your Location',
       address: `${position.lat}, ${position.lng}`,
-      coordinates: new google.maps.LatLng(position),
+      coordinates: new google.maps.LatLng(position)
     });
   }
-
 
   async onSearchChange(event: any, type: 'start' | 'destination') {
     this.isSearchingFromStart = type === 'start'; // Set the flag to 'start' or 'destination'
@@ -141,7 +132,6 @@ export class MapSearchComponent implements OnInit {
     this.directionsService.showDirections();
     this.visibilityService.toggleStartButton();
     this.toggleSearch();
-
   }
 
   clearStartInput() {
@@ -150,7 +140,6 @@ export class MapSearchComponent implements OnInit {
     this.directionsService.clearStartPoint();
     this.currentRouteData = null;
   }
-
 
   clearDestinationInput() {
     this.destinationLocationInput = '';

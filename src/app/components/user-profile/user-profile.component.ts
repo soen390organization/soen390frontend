@@ -11,9 +11,6 @@ import { MapSeachAnimation } from '../map-search/map-search.component';
   styleUrls: ['./user-profile.component.scss'],
   animations: MapSeachAnimation
 })
-
-export class UserProfileComponent{
-
-  constructor(
-  ) {}
+export class UserProfileComponent {
+  constructor() {}
 }

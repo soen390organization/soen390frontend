@@ -10,7 +10,9 @@ describe('SwitchMapButtonComponent', () => {
   let component: SwitchMapButtonComponent;
   let fixture: ComponentFixture<SwitchMapButtonComponent>;
   let store: MockStore;
-  const initialState = { app: { selectedCampus: 'sgw', currentMap: MapType.Outdoor } };
+  const initialState = {
+    app: { selectedCampus: 'sgw', currentMap: MapType.Outdoor }
+  };
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({

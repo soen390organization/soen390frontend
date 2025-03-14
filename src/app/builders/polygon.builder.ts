@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class PolygonBuilder {
   map!: google.maps.Map;
@@ -34,7 +34,7 @@ export class PolygonBuilder {
       strokeOpacity: 0.8,
       strokeWeight: 2,
       fillColor: this.fill,
-      fillOpacity: 0.35,
+      fillOpacity: 0.35
     }).setMap(this.map);
   }
 }
