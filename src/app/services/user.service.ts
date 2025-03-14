@@ -2,26 +2,19 @@ import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { ApiService } from './api.service';
 import { ref, get } from 'firebase/database';
-import {
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword
-} from 'firebase/auth';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import { auth, db as database } from '../../firebase.config';
 import { UserInterface } from '../interfaces/user.interface';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class UserService {
   constructor(private readonly apiService: ApiService) {}
 
   public async createUser(user: UserInterface): Promise<void> {
     try {
-      const userCredential = await createUserWithEmailAndPassword(
-        auth,
-        user.email,
-        user.password
-      );
+      const userCredential = await createUserWithEmailAndPassword(auth, user.email, user.password);
 
       const userId = userCredential.user.uid;
       const userData = { ...user, id: userId };
@@ -64,5 +57,4 @@ export class UserService {
     // Mock API call
     return of({ id: '1', name: 'Laurel', email: 'laurel@example.com' });
   }
-
 }

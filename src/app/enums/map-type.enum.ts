@@ -1,5 +1,4 @@
 export enum MapType {
-    Indoor = 'INDOOR',
-    Outdoor = 'OUTDOOR'
-  }
-  
+  Indoor = 'INDOOR',
+  Outdoor = 'OUTDOOR'
+}

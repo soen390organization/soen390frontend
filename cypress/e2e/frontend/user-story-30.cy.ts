@@ -1,4 +1,4 @@
- describe('Map Search - Select Start and Destination Buildings', () => {
+describe('Map Search - Select Start and Destination Buildings', () => {
   beforeEach(() => {
     // Visit the homepage
     cy.visit('/');
@@ -34,6 +34,5 @@
 
     //@TODO: need to deferentiate between icons
     //@TODO: need to verify that the directions are displayed
-
   });
 });

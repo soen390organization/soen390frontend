@@ -19,9 +19,7 @@ class MockPolygon {
 
   containsLocation(latLng: any): boolean {
     // Mock the containsLocation method to always return true for specific coordinates
-    return (
-      latLng.lat === 45.49724206314789 && latLng.lng === -73.57905238471409
-    );
+    return latLng.lat === 45.49724206314789 && latLng.lng === -73.57905238471409;
   }
 }
 
@@ -36,15 +34,14 @@ describe('GeolocationService', () => {
         LatLng: MockLatLng,
         geometry: {
           poly: {
-            containsLocation: (latLng: any, polygon: any) =>
-              polygon.containsLocation(latLng),
-          },
-        },
-      },
+            containsLocation: (latLng: any, polygon: any) => polygon.containsLocation(latLng)
+          }
+        }
+      }
     };
 
     TestBed.configureTestingModule({
-      providers: [GeolocationService],
+      providers: [GeolocationService]
     });
 
     service = TestBed.inject(GeolocationService);
@@ -58,18 +55,18 @@ describe('GeolocationService', () => {
           {
             name: 'Hall',
             boundaries: [
-              { lat: 45.49724206314789, lng: -73.57905238471409 },
+              { lat: 45.49724206314789, lng: -73.57905238471409 }
               // Add more coordinates for Hall boundaries if necessary
-            ],
+            ]
           },
           {
             name: 'JMSB',
             boundaries: [
-              { lat: 45.495269700671045, lng: -73.57892221858457 },
+              { lat: 45.495269700671045, lng: -73.57892221858457 }
               // Add more coordinates for JMSB boundaries if necessary
-            ],
-          },
-        ],
+            ]
+          }
+        ]
       };
 
       // Mock service method to return the mock data
@@ -77,7 +74,7 @@ describe('GeolocationService', () => {
         async (currentLocation: { lat: number; lng: number }) => {
           const foundBuilding = mockData.buildings.find((building) => {
             const outline = new google.maps.Polygon({
-              paths: building.boundaries,
+              paths: building.boundaries
             });
             const point = new google.maps.LatLng(currentLocation);
             return google.maps.geometry.poly.containsLocation(point, outline);
@@ -89,30 +86,24 @@ describe('GeolocationService', () => {
       // Test for a location inside the Hall building
       const currentLocation = {
         lat: 45.49724206314789,
-        lng: -73.57905238471409,
+        lng: -73.57905238471409
       };
-      const currentBuildingName = await service.getCurrentBuilding(
-        currentLocation
-      );
+      const currentBuildingName = await service.getCurrentBuilding(currentLocation);
       expect(currentBuildingName).toBe('Hall');
     });
 
     it('should return null if the location is outside any building boundaries', async () => {
       const currentLocation = {
         lat: 45.49666690990893,
-        lng: -73.57928799583352,
+        lng: -73.57928799583352
       };
-      const currentBuildingName = await service.getCurrentBuilding(
-        currentLocation
-      );
+      const currentBuildingName = await service.getCurrentBuilding(currentLocation);
       expect(currentBuildingName).toBeNull();
     });
 
     it('should return null if the location is null', async () => {
       const currentLocation = null;
-      const currentBuildingName = await service.getCurrentBuilding(
-        currentLocation
-      );
+      const currentBuildingName = await service.getCurrentBuilding(currentLocation);
       expect(currentBuildingName).toBeNull();
     });
   });

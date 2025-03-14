@@ -15,7 +15,7 @@ export const db = getDatabase(app);
 
 // Attach Firebase to window for Cypress testing
 if (typeof window !== 'undefined') {
-    (window as any).firebaseApp = app;
-    (window as any).firebaseAuth = auth;
-    (window as any).firebaseDB = db;
-  }
+  (window as any).firebaseApp = app;
+  (window as any).firebaseAuth = auth;
+  (window as any).firebaseDB = db;
+}

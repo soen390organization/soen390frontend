@@ -1,9 +1,9 @@
-import { Injectable } from "@angular/core";
+import { Injectable } from '@angular/core';
 import { db as database } from '../../firebase.config';
 import { ref, set, get, update, push, remove } from 'firebase/database';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class ApiService {
   private async generateUniqueId(route: string): Promise<string> {
@@ -14,7 +14,7 @@ export class ApiService {
       uniqueId = push(ref(database)).key;
 
       if (!uniqueId) {
-        throw new Error("Failed to generate a unique ID.");
+        throw new Error('Failed to generate a unique ID.');
       }
 
       const idRef = ref(database, `${route}/${uniqueId}`);
@@ -31,11 +31,11 @@ export class ApiService {
       if (!data.id) {
         data.id = await this.generateUniqueId(route);
       }
-  
+
       const { id, ...dataWithoutId } = data;
       const dataRef = ref(database, `${route}/${id}`);
       const snapshot = await get(dataRef);
-  
+
       if (snapshot.exists()) {
         // Update if the data already exists
         await update(dataRef, dataWithoutId);

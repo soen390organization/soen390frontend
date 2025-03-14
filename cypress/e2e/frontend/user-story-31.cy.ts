@@ -13,11 +13,11 @@ describe('Map - Highlight Current Building with Polygon', () => {
             coords: {
               latitude: testLat,
               longitude: testLng,
-              accuracy: 10,
-            },
+              accuracy: 10
+            }
           } as GeolocationPosition);
         });
-      },
+      }
     });
 
     // Increase timeout to allow Google Maps to load

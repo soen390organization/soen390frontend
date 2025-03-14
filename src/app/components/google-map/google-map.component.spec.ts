@@ -11,8 +11,8 @@ describe('GoogleMapComponent', () => {
       imports: [GoogleMapComponent],
       providers: [
         // Provide a mock store to satisfy any service that depends on 'Store'
-        provideMockStore({ initialState: {} }),
-      ],
+        provideMockStore({ initialState: {} })
+      ]
     }).compileComponents();
   }));
 

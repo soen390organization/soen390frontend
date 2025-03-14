@@ -5,7 +5,7 @@ import { UserInfoPage } from './user-info/user-info.page';
 const routes: Routes = [
   {
     path: 'home',
-    loadChildren: () => import('./home/home.module').then( m => m.HomePageModule)
+    loadChildren: () => import('./home/home.module').then((m) => m.HomePageModule)
   },
   {
     path: '',
@@ -19,14 +19,12 @@ const routes: Routes = [
   },
   {
     path: 'user-info',
-    loadChildren: () => import('./user-info/user-info.module').then( m => m.UserInfoPageModule)
-  },
+    loadChildren: () => import('./user-info/user-info.module').then((m) => m.UserInfoPageModule)
+  }
 ];
 
 @NgModule({
-  imports: [
-    RouterModule.forRoot(routes, { preloadingStrategy: PreloadAllModules })
-  ],
+  imports: [RouterModule.forRoot(routes, { preloadingStrategy: PreloadAllModules })],
   exports: [RouterModule]
 })
-export class AppRoutingModule { }
+export class AppRoutingModule {}

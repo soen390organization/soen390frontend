@@ -3,7 +3,7 @@ import { BehaviorSubject, Observable, of, switchMap } from 'rxjs';
 import { getAuth, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class CalendarService {
   private readonly auth = getAuth();
@@ -11,7 +11,7 @@ export class CalendarService {
   private accessToken: string | null = null;
   private previouslyFetchedEvents: {
     [calendarId: string]: any[];
-  } = {}
+  } = {};
 
   private readonly calendarsSubject = new BehaviorSubject<any[]>([]);
   calendars$ = this.calendarsSubject.asObservable();
@@ -20,7 +20,7 @@ export class CalendarService {
   selectedCalendar$ = this.selectedCalendarSubject.asObservable();
 
   events$: Observable<any[]> = this.selectedCalendar$.pipe(
-    switchMap(calendarId => {
+    switchMap((calendarId) => {
       if (!calendarId) return of([]);
       return this.fetchEvents(calendarId);
     })
@@ -45,7 +45,7 @@ export class CalendarService {
       this.accessToken = credential.accessToken;
       const calendars = await this.getUserCalendars();
       this.calendarsSubject.next(calendars);
-      this.setSelectedCalendar(calendars[0].id)
+      this.setSelectedCalendar(calendars[0].id);
       return true;
     } catch (error) {
       console.error('Error during Google Sign-In:', error);
@@ -58,16 +58,13 @@ export class CalendarService {
    */
   async getUserCalendars(): Promise<any[]> {
     try {
-      const response = await fetch(
-        'https://www.googleapis.com/calendar/v3/users/me/calendarList',
-        {
-          method: 'GET',
-          headers: {
-            Authorization: `Bearer ${this.accessToken}`,
-            Accept: 'application/json',
-          },
+      const response = await fetch('https://www.googleapis.com/calendar/v3/users/me/calendarList', {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${this.accessToken}`,
+          Accept: 'application/json'
         }
-      );
+      });
 
       if (!response.ok) {
         throw new Error(`Google Calendar API error: ${response.statusText}`);
@@ -83,7 +80,7 @@ export class CalendarService {
 
   async fetchEvents(calendarId: string): Promise<any[]> {
     try {
-      if(calendarId in this.previouslyFetchedEvents) {
+      if (calendarId in this.previouslyFetchedEvents) {
         return this.previouslyFetchedEvents[calendarId];
       }
       const now = new Date().toISOString();
@@ -93,8 +90,8 @@ export class CalendarService {
           method: 'GET',
           headers: {
             Authorization: `Bearer ${this.accessToken}`,
-            Accept: 'application/json',
-          },
+            Accept: 'application/json'
+          }
         }
       );
 
@@ -104,7 +101,7 @@ export class CalendarService {
 
       const data = await response.json();
 
-      this.previouslyFetchedEvents[calendarId] = data.items
+      this.previouslyFetchedEvents[calendarId] = data.items;
       return data.items || [];
     } catch (error) {
       console.error('Error fetching Google Calendar events:', error);

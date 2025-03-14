@@ -20,7 +20,7 @@ export class SwitchMapButtonComponent {
   }
 
   toggleMap(): void {
-    this.currentMap$.pipe(take(1)).subscribe(currentMap => {
+    this.currentMap$.pipe(take(1)).subscribe((currentMap) => {
       const newMap = currentMap === MapType.Outdoor ? MapType.Indoor : MapType.Outdoor;
       this.store.dispatch(setMapType({ mapType: newMap }));
     });

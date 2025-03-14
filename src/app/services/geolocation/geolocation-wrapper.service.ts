@@ -4,5 +4,5 @@ import { Geolocation } from '@capacitor/geolocation';
 export const Geo = {
   getCurrentPosition: Geolocation.getCurrentPosition,
   watchPosition: Geolocation.watchPosition,
-  clearWatch: Geolocation.clearWatch,
+  clearWatch: Geolocation.clearWatch
 };

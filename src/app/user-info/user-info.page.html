@@ -2,10 +2,17 @@
 <ion-content [fullscreen]="true" scrollY="false" class="pb-0">
   <div class="h-full flex flex-col justify-center items-center gap-4">
     <div class="fullwidth absolute top-[24px] left-1/2 -translate-x-1/2 z-[999] flex space-x-4">
-      <div (click)="openHomePage()" (keydown.enter)="openHomePage()" class="back-button rounded-3xl flex text-black bg-white shadow-lg p-2 pb-3 relative"
-        [ngStyle]="{ 'height': '48px' }">
+      <div
+        (click)="openHomePage()"
+        (keydown.enter)="openHomePage()"
+        class="back-button rounded-3xl flex text-black bg-white shadow-lg p-2 pb-3 relative"
+        [ngStyle]="{ 'height': '48px' }"
+      >
         <div [ngStyle]="{ 'margin-top': '0' }">
-          <span class="material-symbols-outlined rounded-full p-1 cursor-pointer" [ngStyle]="{'padding-right': '4px'}">
+          <span
+            class="material-symbols-outlined rounded-full p-1 cursor-pointer"
+            [ngStyle]="{'padding-right': '4px'}"
+          >
             {{ 'arrow_back' }}
           </span>
         </div>
@@ -13,7 +20,10 @@
       <p class="center-title">User Profile</p>
     </div>
     <div class="flex items-center">
-      <app-google-signin (click)="signInWithGoogle()" (keydown.enter)="signInWithGoogle()"></app-google-signin>
+      <app-google-signin
+        (click)="signInWithGoogle()"
+        (keydown.enter)="signInWithGoogle()"
+      ></app-google-signin>
     </div>
     <div class="w-full">
       <app-calendar-list></app-calendar-list>
