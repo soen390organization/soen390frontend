@@ -42,6 +42,7 @@ All of these components are accessible when using `import { IonicModule } from '
 1. Pull the project repository from GitHub using the following command: `git clone <repo-url>`
 2. Navigate to the project folder within your terminal and run `npm install` _(Make sure you are on node v20.11.1)_
 3. Run `ionic serve` to see the app on your browser at http://localhost:8100
+4. To run the app in production mode, and have access to the google api, run `ionic serve --configuration=production`
 
 ## Angular Basics
 

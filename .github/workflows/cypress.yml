@@ -34,6 +34,7 @@ jobs:
           cat <<EOF > src/environments/environment.ts
           export const environment = {
             production: false,
+            googleApiKey: '${{ secrets.GOOGLE_API_KEY }}',
             firebaseConfig: {
               apiKey: '${{ secrets.FIREBASE_API_KEY }}',
               authDomain: '${{ secrets.FIREBASE_AUTH_DOMAIN }}',
