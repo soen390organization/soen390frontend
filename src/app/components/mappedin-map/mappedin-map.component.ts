@@ -37,7 +37,7 @@ export class MappedinMapComponent implements AfterViewInit {
 
           // Render hardcoded navigation instructions using IndoorDirectionsService
           this.indoorDirectionsService
-            .navigateDefault()
+            .navigate()
             .then(() => {
               console.log('Hardcoded navigation instructions rendered.');
             })
