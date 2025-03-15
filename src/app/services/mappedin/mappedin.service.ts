@@ -12,7 +12,7 @@ export class MappedinService {
   private mappedInContainer: HTMLElement | undefined;
   private mapId: string;
   private mapData$ = new BehaviorSubject<MapData | null>(null);
-
+  private mapView$ = new BehaviorSubject<MapView | null>(null);
   private readonly _isMappedin$ = new BehaviorSubject<boolean>(false);
   public isMappedin$ = this._isMappedin$.asObservable();
 
@@ -169,6 +169,11 @@ export class MappedinService {
   public getMapData(): Observable<MapData | null> {
     return this.mapData$.asObservable();
   }
+
+  public getMapView(): Observable<MapView | null> {
+    return this.mapView$.asObservable();
+  }
+
 
   public getMapId(): string {
     return this.mapId;

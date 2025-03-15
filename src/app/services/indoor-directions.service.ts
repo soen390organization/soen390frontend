@@ -10,44 +10,58 @@ import { MapData, MapView } from '@mappedin/mappedin-js';
 export class IndoorDirectionsService {
   constructor(private mappedinService: MappedinService) {}
 
-  /**
-   * Helper function that polls until mapView is available from MappedinService.
-   */
-  private async waitForMapView(): Promise<MapView> {
-    return new Promise((resolve) => {
-      const checkMapView = () => {
-        const mapView: MapView = (this.mappedinService as any).mapView;
-        if (mapView) {
-          resolve(mapView);
-        } else {
-          setTimeout(checkMapView, 100);
-        }
-      };
-      checkMapView();
-    });
-  }
+  private startRoom: any | null = null;
+  private destinationRoom: any | null = null;
+  
 
-  /**
-   * Hardcoded default navigation between room "860.03" and room "860.05".
-   * Ensure that your map has been fully initialized before calling this method.
-   */
-  public async navigateDefault(): Promise<void> {
+
+  public async setStartPoint(roomName: string, mapId: string): Promise<void> {
     const mapData: MapData = await firstValueFrom(
       this.mappedinService.getMapData().pipe(filter((data) => data !== null))
     );
 
-    const mapView: MapView = await this.waitForMapView();
-    if (!mapView) {
-      console.error('MapView is not available yet.');
-      return;
+    const room = mapData.getByType('space').find((space) => space.name === roomName);
+    if (room) {
+      this.startRoom = room;
+      console.log(`Start room set to: ${roomName}`);
+    } else {
+      console.error(`Start room '${roomName}' not found.`);
     }
+  }
 
-    // Hardcoded for demo purposes
-    const startRoom = mapData.getByType('space').find((space) => space.name === '819');
-    const destinationRoom = mapData.getByType('space').find((space) => space.name === '150');
+   /**
+   * Set the destination point externally.
+   */
+    public async setDestinationPoint(roomName: string, mapId: string): Promise<void> {
+      const mapData: MapData = await firstValueFrom(
+        this.mappedinService.getMapData().pipe(filter((data) => data !== null))
+      );
+  
+      const room = mapData.getByType('space').find((space) => space.name === roomName);
+      if (room) {
+        this.destinationRoom = room;
+        console.log(`Destination room set to: ${roomName}`);
+      } else {
+        console.error(`Destination room '${roomName}' not found.`);
+      }
+    }
+    
 
-    if (startRoom && destinationRoom) {
-      const directions = mapData.getDirections(startRoom, destinationRoom);
+  /**
+   * Ensure that your map has been fully initialized before calling this method.
+   */
+  public async navigate(): Promise<void> {
+    const mapData: MapData = await firstValueFrom(
+      this.mappedinService.getMapData().pipe(filter((data) => data !== null))
+    );
+
+    const mapView: MapView = await firstValueFrom(
+      this.mappedinService.getMapView().pipe(filter((data) => data !== null))
+    );
+
+
+    if (this.startRoom && this.destinationRoom) {
+      const directions = mapData.getDirections(this.startRoom, this.destinationRoom);
       if (directions) {
         mapView.Navigation.draw(directions);
         console.log('Navigation route drawn between room 819 and room 150');

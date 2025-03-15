@@ -12,7 +12,7 @@ import { VisibilityService } from 'src/app/services/visibility.service';
 import { combineLatest, Observable } from 'rxjs';
 import { filter } from 'rxjs/operators';
 
-export const MapSeachAnimation = [
+export const MapSearchAnimation = [
   trigger('slideInOut', [
     state(
       'in',
@@ -40,7 +40,7 @@ export const MapSeachAnimation = [
   imports: [IonicModule, CommonModule, FormsModule],
   templateUrl: './map-search.component.html',
   styleUrls: ['./map-search.component.scss'],
-  animations: MapSeachAnimation
+  animations: MapSearchAnimation
 })
 export class MapSearchComponent implements OnInit {
   @ViewChild(GoogleMapComponent) googleMap!: GoogleMapComponent;
