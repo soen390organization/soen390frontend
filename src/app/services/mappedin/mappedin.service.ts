@@ -2,7 +2,9 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, firstValueFrom, Observable, take } from 'rxjs';
 import { getMapData, show3dMap, MapData, MapView, DOORS } from '@mappedin/mappedin-js';
+import { ConcordiaDataService } from 'src/app/services/concordia-data.service';
 import { environment } from 'src/environments/environment';
+import { map } from 'cypress/types/bluebird';
 
 @Injectable({
   providedIn: 'root'
@@ -13,8 +15,12 @@ export class MappedinService {
   private mapId: string;
   private mapData$ = new BehaviorSubject<MapData | null>(null);
   private mapView$ = new BehaviorSubject<MapView | null>(null);
+  private campusMapData = {};
+
   private readonly _isMappedin$ = new BehaviorSubject<boolean>(false);
   public isMappedin$ = this._isMappedin$.asObservable();
+
+  constructor(private concordiaDataService: ConcordiaDataService) {}
 
   async getFloors() {
     // Fetch the map data first
@@ -45,6 +51,26 @@ export class MappedinService {
 
   async initializeMap(container: HTMLElement): Promise<void> {
     this.mappedInContainer = container;
+
+    // Create buildings array for both campuses, filter for only MappedIn buildings
+    let buildings = [
+      ...this.concordiaDataService.getBuildings('sgw'),
+      ...this.concordiaDataService.getBuildings('loy')
+    ].filter((building) => building.indoorMapId);
+
+    // Iterate over each building, grab mapData from MappedIn, index the building data
+    buildings.forEach(async item => {
+      let mapId = item.indoorMapId;
+      const mapData = await this.fetchMapData(mapId);
+
+      this.campusMapData[mapId] = {
+        name: item.name,
+        abbreviation: item.abbreviation,
+        address: item.address,
+        mapData
+      }
+    })
+
     this.setMapData('67b674be13a4e9000b46cf2e');
   }
 
@@ -152,6 +178,10 @@ export class MappedinService {
       key: environment.mappedin.key,
       secret: environment.mappedin.secret
     });
+  }
+
+  public getCampusMapData() {
+    return this.campusMapData;
   }
 
   public async setMapData(mapId: string) {
