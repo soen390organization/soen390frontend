@@ -35,6 +35,8 @@ export class GoogleMapComponent implements AfterViewInit {
     zoomControl: false // Disable Zoom control buttons
   };
 
+  currentInfoWindow: google.maps.InfoWindow | null = null;
+
   constructor(private readonly googleMapService: GoogleMapService) {}
 
   ngAfterViewInit() {
@@ -71,6 +73,8 @@ export class GoogleMapComponent implements AfterViewInit {
     console.log('Google Map initialized: ', this.initialized);
   }
 
+  
+
   async loadBuildings() {
     const userCurrentLocation = await this.currentLocationService.getCurrentLocation();
     const userCurrentBuilding =
@@ -89,10 +93,64 @@ export class GoogleMapComponent implements AfterViewInit {
       });
       const polygon = polygonBuilder.build();
 
-      polygon.addListener('click', () => {
-        alert(`You clicked on ${building.name}`); 
-      }
-      );
+      polygon.addListener('click', (event) => {
+        this.showInfoWindow(building, event.latLng);
+      });
+
+      this.googleMapService.getMap().addListener('click', () => {
+        if (this.currentInfoWindow) {
+          this.currentInfoWindow.close(); 
+          this.currentInfoWindow = null;  
+        }
+      });
     });
   }
+
+  showInfoWindow(building: any, latLng: google.maps.LatLng) {
+  if (this.currentInfoWindow) {
+    this.currentInfoWindow.close();
+  }
+  const contentString = `
+    <div style="font-family: Arial, sans-serif;">
+      <div style="display: flex; vertical-align: middle; align-items: center;">
+        <div><ion-icon name="information-circle-outline" style="font-size: 33px; color:rgb(0, 0, 0); font-weight: 600"></ion-icon></div>
+        <div><div style="color: #2a3d56; padding-left: 4px; font-size: 15px; font-weight: 600; text-align: left;">${building.name}</div></div>
+      </div>
+      <div style="text-align: left;padding-left:5px;">
+        <h2 style="color: #555;margin-bottom: 5px;">${building.address || 'No address available'}</h2>
+        <p style="color: #912338; font-weight: 600; margin-bottom: 3px;"> Faculties</p>
+        <p style="color: #555; margin: 0; padding-left: 10px;">
+          ${building.faculties 
+            ? building.faculties.map(faculty => `<span style="display: block; text-indent: -10px;">&#8226; ${faculty}</span>`).join('') 
+            : 'No faculties available'}
+        </p>
+    </div>
+          </div>
+        <div style="position: absolute; bottom: 10px; right: 5px;">
+          ${building.accessibility ? `<img src="${building.accessibility}" alt="information icon" style="width: 25px; height: 25px; object-fit: contain;">`
+          : ''}
+        </div>
+  `;
+
+  this.currentInfoWindow = new google.maps.InfoWindow({
+    content: contentString,
+    maxWidth: 200 
+
+  });
+  this.currentInfoWindow.setContent(contentString);
+  this.currentInfoWindow.setPosition(latLng);
+  this.currentInfoWindow.open(this.googleMapService.getMap());
+  const style = document.createElement('style');
+  style.innerHTML = `
+    .gm-style-iw button {
+      display: none !important;
+    }
+      .gm-style-iw.gm-style-iw-c {
+    border-radius: 24px;
+    }
+  `;
+  document.head.appendChild(style);
+
+}
+
 }
