@@ -25,6 +25,14 @@ export class IndoorDirectionsService {
     this.navigate()
   }   
 
+  public getDestinationPoint(): any{
+    return this.destinationRoom;
+  }
+
+  public getStartPoint(): any{
+    return this.startRoom;
+  }
+
   public async getEntrances() {
     
     const mapData: MapData = await firstValueFrom(
