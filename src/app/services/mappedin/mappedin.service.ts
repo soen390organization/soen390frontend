@@ -6,6 +6,13 @@ import { ConcordiaDataService } from 'src/app/services/concordia-data.service';
 import { environment } from 'src/environments/environment';
 import { map } from 'cypress/types/bluebird';
 
+export interface BuildingData{
+  name: string;
+  abbreviation: string;
+  address: string;
+  mapData: MapData;
+}
+
 @Injectable({
   providedIn: 'root'
 })

@@ -4,6 +4,7 @@ import data from 'src/assets/concordia-data.json';
 import { selectSelectedCampus, AppState } from '../../store/app';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { Store } from '@ngrx/store';
+import { MappedinService, BuildingData } from '../mappedin/mappedin.service';
 
 @Injectable({
   providedIn: 'root'
@@ -12,8 +13,8 @@ export class PlacesService {
   private placesService!: google.maps.places.PlacesService;
   private placesServiceReady = new BehaviorSubject<boolean>(false);
   private campusData: any = data;
-
-  constructor(private readonly store: Store<AppState>) {}
+  
+  constructor(private readonly store: Store<AppState>, private mappedInService: MappedinService) {}
 
   /**
    * Initializes the PlacesService with a given Google Map instance.
@@ -37,7 +38,7 @@ export class PlacesService {
 
   public async getPlaceSuggestions(
     input: string
-  ): Promise<{ title: string; address: string; coordinates: google.maps.LatLng }[]> {
+  ): Promise<any[]> {
     const campusKey = await firstValueFrom(this.store.select(selectSelectedCampus));
     const campusCoordinates = this.campusData[campusKey]?.coordinates;
     if (!campusCoordinates) {
@@ -56,19 +57,56 @@ export class PlacesService {
               radius: 500
             })
           },
-          (predictions, status) => {
-            if (status !== 'OK' || !predictions) {
-              resolve([]);
-            } else {
-              resolve(predictions);
-            }
-          }
-        );
+          (predictions, status) => {  
+            resolve(predictions || []);
+        });
       }
     );
 
+    let rooms = [];
+    // const campusBuildings:BuildingData[]= Object.values(this.mappedInService.getCampusMapData()) || [];
+    // console.log(campusBuildings);
+    // campusBuildings.forEach((building: BuildingData) => {
+    for (const [key, building] of Object.entries(this.mappedInService.getCampusMapData()) as [string, BuildingData ][]) {
+      rooms = [
+        ...rooms,
+        ...building.mapData?.getByType('space').filter(space => space.name)
+        .map(space => ({ 
+          title: building.abbreviation + ' ' + space.name,
+          address: building.address,
+          fullName: building.name + ' '+ space.name,
+          abbreviation: building.abbreviation,
+          indoorMapId: key,
+          room: space
+        })),
+        ...building.mapData?.getByType('point-of-interest').filter(poi => poi.name)
+        .map(poi => ({ 
+          title: building.abbreviation + ' ' + poi.name,
+          address: building.address,
+          fullName: building.name + ' '+ poi.name,
+          abbreviation: building.abbreviation, 
+          indoorMapId: key,
+          room: poi
+        })),
+      ]
+    } 
+    
+    const normalizeString = (str: string) => str.toLowerCase().replace(/[^a-zA-Z0-9]/g, '');
+    const searchTerm = normalizeString(input); 
+
+    const selectedBuildingRooms = rooms.filter(room => 
+      [room.title, room.fullName, room.abbreviation]  // Check abbreviation, full name, and short name
+        .some(field => field && normalizeString(field).includes(searchTerm))
+    );
+
     const detailsPromises = predictions.map((prediction) => this.getPlaceDetail(prediction));
-    const details = await Promise.all(detailsPromises);
+    let details = await Promise.all(detailsPromises);
+    details = [
+      ...selectedBuildingRooms.slice(0,3),
+      ...details
+    ]
+
+    console.log(details)
     // Filter out any null values (failed details)
     return details.filter(
       (
@@ -79,7 +117,7 @@ export class PlacesService {
         coordinates: google.maps.LatLng;
       } => detail !== null
     );
-  }
+  };
 
   private getPlaceDetail(prediction: google.maps.places.AutocompletePrediction): Promise<{
     title: string;
