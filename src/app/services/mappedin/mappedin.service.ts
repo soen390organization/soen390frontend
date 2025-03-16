@@ -17,7 +17,7 @@ export interface BuildingData{
   providedIn: 'root'
 })
 export class MappedinService {
-  private mapView: MapView | undefined;
+  public mapView: MapView | undefined;
   private mappedInContainer: HTMLElement | undefined;
   private mapId: string;
   private mapData$ = new BehaviorSubject<MapData | null>(null);

@@ -11,6 +11,7 @@ import { HomePage } from 'src/app/home/home.page';
 import { VisibilityService } from 'src/app/services/visibility.service';
 import { combineLatest, Observable } from 'rxjs';
 import { filter } from 'rxjs/operators';
+import { IndoorDirectionsService } from 'src/app/services/indoor-directions.service';
 
 export const MapSearchAnimation = [
   trigger('slideInOut', [
@@ -54,6 +55,7 @@ export class MapSearchComponent implements OnInit {
 
   constructor(
     public readonly directionsService: DirectionsService,
+    public readonly indoorDirectionService: IndoorDirectionsService,
     private readonly placesService: PlacesService,
     private readonly currentLocationService: CurrentLocationService,
     private readonly visibilityService: VisibilityService
@@ -146,5 +148,24 @@ export class MapSearchComponent implements OnInit {
     this.clearList();
     this.directionsService.clearDestinationPoint();
     this.currentRouteData = null;
+  }
+
+  setStart(place: any){
+    this.startLocationInput = place.title
+    if (place.indoorMapId){
+      this.indoorDirectionService.setStartPoint(place)
+      return;
+    }
+    this.directionsService.setStartPoint(place)
+
+  }
+
+  setDestination(place: any){
+    this.destinationLocationInput = place.title
+    if (place.indoorMapId){
+      this.indoorDirectionService.setDestinationPoint(place)
+      return;
+    }
+    this.directionsService.setDestinationPoint(place)
   }
 }

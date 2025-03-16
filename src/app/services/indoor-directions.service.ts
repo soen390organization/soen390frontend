@@ -14,38 +14,15 @@ export class IndoorDirectionsService {
   private destinationRoom: any | null = null;
   
 
-
-  public async setStartPoint(roomName: string, mapId: string): Promise<void> {
-    const mapData: MapData = await firstValueFrom(
-      this.mappedinService.getMapData().pipe(filter((data) => data !== null))
-    );
-
-    const room = mapData.getByType('space').find((space) => space.name === roomName);
-    if (room) {
-      this.startRoom = room;
-      console.log(`Start room set to: ${roomName}`);
-    } else {
-      console.error(`Start room '${roomName}' not found.`);
-    }
+  public  setStartPoint(room: any){
+    this.startRoom = room;
+    
   }
 
-   /**
-   * Set the destination point externally.
-   */
-    public async setDestinationPoint(roomName: string, mapId: string): Promise<void> {
-      const mapData: MapData = await firstValueFrom(
-        this.mappedinService.getMapData().pipe(filter((data) => data !== null))
-      );
-  
-      const room = mapData.getByType('space').find((space) => space.name === roomName);
-      if (room) {
-        this.destinationRoom = room;
-        console.log(`Destination room set to: ${roomName}`);
-      } else {
-        console.error(`Destination room '${roomName}' not found.`);
-      }
-    }
-    
+  public  setDestinationPoint(room: any){
+    this.destinationRoom = room;
+    this.navigate()
+  }   
 
   /**
    * Ensure that your map has been fully initialized before calling this method.
@@ -55,18 +32,17 @@ export class IndoorDirectionsService {
       this.mappedinService.getMapData().pipe(filter((data) => data !== null))
     );
 
-    const mapView: MapView = await firstValueFrom(
-      this.mappedinService.getMapView().pipe(filter((data) => data !== null))
-    );
+    const mapView: MapView = this.mappedinService.mapView;
 
 
     if (this.startRoom && this.destinationRoom) {
-      const directions = mapData.getDirections(this.startRoom, this.destinationRoom);
+      console.log(mapData);
+      const directions = mapData.getDirections(this.startRoom.room, this.destinationRoom.room);
       if (directions) {
         mapView.Navigation.draw(directions);
-        console.log('Navigation route drawn between room 819 and room 150');
+        console.log('Navigation route drawn');
       } else {
-        console.error('Unable to generate directions between room 819 and room 150.');
+        console.error('Unable to generate directions between rooms.');
       }
     } else {
       console.error('Start room or destination room not found in map data.');
