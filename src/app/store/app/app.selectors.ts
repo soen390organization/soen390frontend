@@ -14,3 +14,8 @@ export const selectCurrentMap = createSelector(
   selectAppState,
   (state: AppState) => state.currentMap
 );
+
+export const selectCurrentCalendar = createSelector(
+  selectAppState,
+  (state: AppState) => state.currentCalendar
+);

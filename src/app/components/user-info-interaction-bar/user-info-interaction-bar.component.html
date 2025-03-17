@@ -1,0 +1,18 @@
+<div #footerContainer class="swipe-footer-container">
+
+  <div
+    #handleBar
+    class="handle-bar"
+    (click)="onShowMore()"
+    class="w-[100px] h-[10px] bg-[#d5d5d5] my-[10px] mx-auto rounded-full cursor-pointer"
+  ></div>
+  <div class="footer-content px-5">
+    <div>
+      <h2 class="flex text-2xl font-bold text-gray-900 mb-4">Upcoming Events</h2>
+      <app-event-display
+        [events]="calendarEvents.events"
+        [loading]="calendarEvents.loading"
+      ></app-event-display>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,35 @@
+<div class="flex flex-col items-start">
+  <div class="flex gap-4 overflow-x-auto w-full touch-pan-x">
+    <!-- <ng-container *ngIf="loading; else showCards">
+      <div
+        class="w-[224px] h-[186px] overflow-hidden shrink-0"
+        *ngFor="let _ of [1, 2, 3, 4, 5, 6]"
+      >
+        <img
+          class="bg-gray-200 w-[224px] h-[130px] bg-gray-200 animate-pulse rounded-2xl"
+          alt="loading image"
+        />
+        <div class="mt-2">
+          <p class="h-3 w-1/2 bg-gray-200 rounded mt-1"></p>
+        </div>
+      </div>
+    </ng-container> -->
+
+    <ng-template #showCards>
+        <div 
+        *ngFor="let event of events"
+        class="w-[224px] h-[186px] bg-white overflow-hidden shrink-0 hover:cursor-pointer">
+        <div class="mt-2">
+          <h3 class="text-left text-lg font-bold text-gray-800">
+            {{ event.name | slice: 0 : 22 }}{{ event.name.length > 22 ? '...' : '' }}
+          </h3>
+          <h5 class="text-left text-lg font-bold text-gray-800">
+            {{ event.description | slice: 0 : 22 }}{{ event.description.length > 22 ? '...' : '' }}
+          </h5>
+          <p class="text-left text-sm text-gray-600">{{ event.start_datetime }}</p>
+          <p class="text-left text-sm text-gray-600">{{ event.end_datetime }}</p>
+        </div>
+      </div>
+    </ng-template>
+  </div>
+</div>

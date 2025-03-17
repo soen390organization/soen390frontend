@@ -11,6 +11,8 @@ import { InteractionBarComponent } from '../components/interaction-bar/interacti
 import { UserProfileComponent } from '../components/user-profile/user-profile.component';
 import { GoogleSignInComponent } from '../components/google-signin/google-signin.component';
 import { CalendarListComponent } from '../components/calendar-list/calendar-list.component';
+import { EventDisplayComponent } from '../components/event-display/event-display.component';
+import { UserInfoInteractionBarComponent } from '../components/user-info-interaction-bar/user-info-interaction-bar.component';
 
 @NgModule({
   imports: [
@@ -21,7 +23,9 @@ import { CalendarListComponent } from '../components/calendar-list/calendar-list
     InteractionBarComponent,
     UserProfileComponent,
     GoogleSignInComponent,
-    CalendarListComponent
+    CalendarListComponent,
+    EventDisplayComponent,
+    UserInfoInteractionBarComponent
   ],
   declarations: [UserInfoPage]
 })

@@ -1,0 +1,28 @@
+.swipe-footer-container {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: calc(100vh - 96px);
+    background: white;
+    transition: transform 0.3s ease-out;
+    transform: translateY(80%);
+    border-radius: 24px 24px 0 0;
+    box-shadow: 0px -2px 10px rgba(0, 0, 0, 0.2);
+    touch-action: none;
+  }
+  
+  .swipe-footer-container.expanded {
+    transform: translateY(0);
+  }
+  
+  .footer-content {
+    text-align: center;
+  }
+  
+  .switch-map-container {
+    position: absolute;
+    top: -64px;
+    right: 8px;
+  }
+  
