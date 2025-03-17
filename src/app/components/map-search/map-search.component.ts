@@ -11,6 +11,8 @@ import { HomePage } from 'src/app/home/home.page';
 import { VisibilityService } from 'src/app/services/visibility.service';
 import { combineLatest, Observable } from 'rxjs';
 import { filter } from 'rxjs/operators';
+import { NavigationCoordinatorService } from 'src/app/services/navigation-coordinator.service';
+import { Location, CompleteRoute } from 'src/app/interfaces/routing-strategy.interface';
 
 export const MapSeachAnimation = [
   trigger('slideInOut', [
@@ -49,14 +51,16 @@ export class MapSearchComponent implements OnInit {
   isSearchVisible = false;
   places: any[] = []; // Array to store the search suggestions
   isSearchingFromStart: boolean = false; // Flag to determine if the search is for the start or destination location
-  currentRouteData: { eta: string | null; distance: number } | null = null;
+/*   currentRouteData: { eta: string | null; distance: number } | null = null; */
+  currentRouteData!: CompleteRoute | null;
   enableStart$!: Observable<boolean>;
 
   constructor(
     public readonly directionsService: DirectionsService,
     private readonly placesService: PlacesService,
     private readonly currentLocationService: CurrentLocationService,
-    private readonly visibilityService: VisibilityService
+    private readonly visibilityService: VisibilityService,
+    private readonly coordinator: NavigationCoordinatorService
   ) {}
 
   ngOnInit(): void {
@@ -73,11 +77,12 @@ export class MapSearchComponent implements OnInit {
       }
     });
 
+    /* @TODO: We can consider abstracting this even more to the coordinator! */
     combineLatest([
       this.directionsService.getStartPoint(),
       this.directionsService.getDestinationPoint()
     ])
-      .pipe(filter(([start, destination]) => !!start && !!destination))
+      /* .pipe(filter(([start, destination]) => !!start && !!destination))
       .subscribe(([start, destination]) => {
         // Use the available start and destination values.
         // Here we assume calculateShortestRoute accepts addresses; adjust if you prefer coordinates.
@@ -88,7 +93,29 @@ export class MapSearchComponent implements OnInit {
             this.currentRouteData = this.directionsService.getShortestRoute();
           })
           .catch((error) => console.error('Error calculating route:', error));
-      });
+      }); */
+      .pipe(filter(([start, destination]) => !!start && !!destination))
+      .subscribe(async ([start, destination]) => {
+        try {
+          /* @TODO: Move to extension of Location Interface here */
+          const startLocation: Location = {
+            type: 'outdoor',
+            address: start!.address,
+            coordinates: start!.coordinates
+          };
+          const destinationLocation: Location = {
+            type: 'outdoor',
+            address: destination!.address,
+            coordinates: destination!.coordinates
+          };
+
+          // Delegate route calculation to the coordinator (Facade)
+          this.currentRouteData = await this.coordinator.getCompleteRoute(startLocation, destinationLocation);
+        } catch (error) {
+          console.error('Error calculating complete route:', error);
+        }
+      }
+    );
   }
 
   toggleSearch() {

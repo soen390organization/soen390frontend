@@ -134,11 +134,11 @@
       <!-- ETA and Start Button -->
       <div class="mt-2 flex items-center justify-between z-0">
         <div class="text-lg font-bold text-[#912338]">
-          {{ currentRouteData?.eta || '' }}
+          {{ currentRouteData?.segments[0]?.instructions?.eta || '' }}
           <span class="text-gray-500 font-bold">
             {{
-              currentRouteData?.distance !== null
-                ? '(' + currentRouteData.distance + ' m' + ')'
+              currentRouteData?.segments[0]?.instructions?.distance !== null
+                ? '(' + currentRouteData?.segments[0]?.instructions?.distance + ' m' + ')'
                 : ''
             }}
           </span>
