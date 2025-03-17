@@ -49,11 +49,7 @@ export class InteractionBarComponent implements AfterViewInit {
   ngOnInit() {
     this.store.select(selectCurrentMap).subscribe((map) => {
       console.log(map);
-      if (map === MapType.Indoor) {
-        this.showIndoorSelects = true;
-      } else {
-        this.showIndoorSelects = false;
-      }
+      this.showIndoorSelects = map === MapType.Indoor;
     });
     this.placesService
       .isInitialized()
