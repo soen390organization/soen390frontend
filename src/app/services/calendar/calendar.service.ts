@@ -132,12 +132,15 @@ export class CalendarService {
   }
 
   convertClassToAddress(classCode: string) {
-    var classBuilding: string = "";
-    var numReached: boolean = false;
-    var classCodeStrIndex: number = 0;
-    var classCodeStrChars = classCode.split('');
+    let classBuilding: string = '';
+    let numReached: boolean = false;
+    let classCodeStrIndex: number = 0;
+    let classCodeStrChars = classCode.split('');
     while (!numReached) {
-      if (parseInt(classCodeStrChars[classCodeStrIndex]) >= 0 && parseInt(classCodeStrChars[classCodeStrIndex]) <= 9) {
+      if (
+        parseInt(classCodeStrChars[classCodeStrIndex]) >= 0 &&
+        parseInt(classCodeStrChars[classCodeStrIndex]) <= 9
+      ) {
         numReached = true;
       } else {
         classBuilding += classCodeStrChars[classCodeStrIndex];
@@ -145,7 +148,7 @@ export class CalendarService {
       }
     }
     console.log(classBuilding);
-    var returnAddress = "No Address";
+    let returnAddress = 'No Address';
     data.sgw.buildings.forEach(function (building) {
       if (building.abreviation == classBuilding) {
         returnAddress = building.address;
@@ -190,7 +193,7 @@ export class CalendarService {
 
   async setSelectedCalendar(calendarId: string) {
     this.selectedCalendarSubject.next(calendarId);
-    await this.fetchEvents(calendarId).then(events => this.currentCalendarEvents = events);
+    await this.fetchEvents(calendarId).then((events) => (this.currentCalendarEvents = events));
   }
 
   getSelectedCalendar(): string | null {
