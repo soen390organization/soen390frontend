@@ -330,13 +330,29 @@ export class DirectionsService {
   public async calculateDistanceETA(
     start: string | google.maps.LatLng,
     destination: string | google.maps.LatLng,
-    mode: string): Promise<{
-      eta: string | null;
-      distance: string | null
-    }>
-    {
-      const { steps, eta } = await this.calculateRoute(start, destination, this.getTravelMode(mode), false);
+    mode: string
+  ): Promise<{ eta: string | null; totalDistance: number }> {
+    try {
+      let steps: Step[] | undefined;
+      let eta: string | null = null;
+
+      if (mode === "SHUTTLE") {
+        ({ steps, eta } = await this.shuttleService.calculateShuttleBusRoute(start, destination, false));
+      } else {
+        ({ steps, eta } = await this.calculateRoute(start, destination, this.getTravelMode(mode), false));
+      }
+
+      let { totalDistance } = this.getTotalDistanceAndDuration(steps);
+      if (mode == "SHUTTLE") {
+        totalDistance += 8091
+      }
+      return { eta: eta ?? null, totalDistance };
+    } catch (error) {
+      console.error("Error calculating distance and ETA:", error);
+      return { eta: null, totalDistance: 0 }; // Fallback values
     }
+  }
+
 
   clearStartPoint(): void {
     if (this.startPoint$.value?.marker) {

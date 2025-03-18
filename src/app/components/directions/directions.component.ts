@@ -159,6 +159,7 @@ export class DirectionsComponent implements OnInit, OnDestroy {
     this.hasArrived = false; // Reset arrival status when loading new directions
     const start = await firstValueFrom(this.directionsService.getStartPoint());
     const destination = await firstValueFrom(this.directionsService.getDestinationPoint());
+    console.log(await this.directionsService.calculateDistanceETA(start.address, destination.address, mode))
 
     try {
       // Use the coordinator to get the complete route.
