@@ -283,6 +283,19 @@ export class DirectionsService {
     return polylineOptions;
   }
 
+  // Extracted method to calculate total distance and duration
+  private getTotalDistanceAndDuration(
+    steps: Step[] | undefined
+  ): { totalDistance: number; totalDuration: number } {
+    return (steps ?? []).reduce(
+      (acc, step) => ({
+        totalDistance: acc.totalDistance + (step.distance?.value ?? 0),
+        totalDuration: acc.totalDuration + (step.duration?.value ?? 0)
+      }),
+      { totalDistance: 0, totalDuration: 0 }
+    );
+  }
+
   public async calculateShortestRoute(
     start: string | google.maps.LatLng,
     destination: string | google.maps.LatLng
@@ -297,13 +310,7 @@ export class DirectionsService {
     const results = await Promise.all(
       modes.map(async (mode) => {
         const { steps, eta } = await this.calculateRoute(start, destination, mode, false);
-        const { totalDistance, totalDuration } = (steps ?? []).reduce(
-          (acc, step) => ({
-            totalDistance: acc.totalDistance + (step.distance?.value ?? 0),
-            totalDuration: acc.totalDuration + (step.duration?.value ?? 0)
-          }),
-          { totalDistance: 0, totalDuration: 0 }
-        );
+        const { totalDistance, totalDuration } = this.getTotalDistanceAndDuration(steps);
 
         return { mode, eta, distance: totalDistance, duration: totalDuration };
       })
@@ -319,6 +326,17 @@ export class DirectionsService {
 
     await this.calculateRoute(start, destination, this.shortestRoute.mode, false);
   }
+
+  public async calculateDistanceETA(
+    start: string | google.maps.LatLng,
+    destination: string | google.maps.LatLng,
+    mode: string): Promise<{
+      eta: string | null;
+      distance: string | null
+    }>
+    {
+      const { steps, eta } = await this.calculateRoute(start, destination, this.getTravelMode(mode), false);
+    }
 
   clearStartPoint(): void {
     if (this.startPoint$.value?.marker) {
