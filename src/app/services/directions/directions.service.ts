@@ -319,8 +319,10 @@ export class DirectionsService {
         else {
           ({ steps, eta } = await this.calculateRoute(start, destination, this.getTravelMode(mode), false));
         }
-        const { totalDistance, totalDuration } = this.getTotalDistanceAndDuration(steps);
-
+        let { totalDistance, totalDuration } = this.getTotalDistanceAndDuration(steps);
+        if (mode == "SHUTTLE"){
+          totalDistance += 8091
+        }
         return { mode, eta, distance: totalDistance, duration: totalDuration };
       })
     );
