@@ -238,7 +238,7 @@ export class DirectionsService {
   ) {
     this.shuttleService.clearMapDirections();
     if (travelMode === 'SHUTTLE') {
-      return this.shuttleService.calculateShuttleBusRoute(startAddress, destinationAddress);
+      return this.shuttleService.calculateShuttleBusRoute(startAddress, destinationAddress, true);
     } else {
       return await this.calculateRoute(
         startAddress,

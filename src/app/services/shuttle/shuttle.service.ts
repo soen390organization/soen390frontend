@@ -44,7 +44,8 @@ export class ShuttleService {
    */
   public async calculateShuttleBusRoute(
     startAddress: string | google.maps.LatLng,
-    destinationAddress: string | google.maps.LatLng
+    destinationAddress: string | google.maps.LatLng,
+    render
   ) {
     const { startCampus, destinationCampus } = await this.fetchCoordinates(
       startAddress,
@@ -66,7 +67,8 @@ export class ShuttleService {
           destinationAddress,
           startCampus,
           destinationCampus,
-          nextBus
+          nextBus,
+          render
         );
 
     return { steps: steps.steps, eta: steps.eta };
@@ -133,7 +135,8 @@ export class ShuttleService {
     destinationAddress: string | google.maps.LatLng,
     startCampus: string,
     destinationCampus: string,
-    nextBus: string
+    nextBus: string,
+    render: boolean
   ) {
     const terminalCodes = this.getTerminalCodes();
     const shuttleSteps: any[] = [];
@@ -142,7 +145,7 @@ export class ShuttleService {
       startAddress,
       terminalCodes[startCampus],
       google.maps.TravelMode.WALKING,
-      true,
+      render,
       this.renderers[0]
     );
     shuttleSteps.push(...initialWalk.steps);
@@ -151,7 +154,7 @@ export class ShuttleService {
       terminalCodes[startCampus],
       terminalCodes[destinationCampus],
       google.maps.TravelMode.DRIVING,
-      true,
+      render,
       this.renderers[1]
     );
     shuttleSteps.push({
@@ -163,7 +166,7 @@ export class ShuttleService {
       terminalCodes[destinationCampus],
       destinationAddress,
       google.maps.TravelMode.WALKING,
-      true,
+      render,
       this.renderers[2]
     );
     shuttleSteps.push(...finalWalk.steps);
