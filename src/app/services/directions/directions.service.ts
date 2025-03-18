@@ -15,14 +15,14 @@ export class DirectionsService {
   private destinationPoint$ = new BehaviorSubject<Location | null>(null);
 
   private allRoutesData: {
-    mode: google.maps.TravelMode;
+    mode: string;
     eta: string | null;
     distance: number;
     duration: number;
   }[] = [];
 
   private shortestRoute: {
-    mode: google.maps.TravelMode;
+    mode: string;
     eta: string | null;
     distance: number;
     duration: number;
@@ -74,11 +74,12 @@ export class DirectionsService {
     this.updateMapView();
   }
 
-  getShortestRoute(): { eta: string | null; distance: number } | null {
+  getShortestRoute(): { eta: string | null; distance: number; mode: string } | null {
     if (!this.shortestRoute) return null;
     return {
       eta: this.shortestRoute.eta,
-      distance: this.shortestRoute.distance
+      distance: this.shortestRoute.distance,
+      mode: this.shortestRoute.mode
     };
   }
 
@@ -299,17 +300,25 @@ export class DirectionsService {
   public async calculateShortestRoute(
     start: string | google.maps.LatLng,
     destination: string | google.maps.LatLng
-  ): Promise<void> {
+  ): Promise<{ eta: string | null; distance: number; mode: string }> {
     const modes = [
-      google.maps.TravelMode.DRIVING,
-      google.maps.TravelMode.WALKING,
-      google.maps.TravelMode.TRANSIT
+      "DRIVING",
+      "WALKING",
+      "TRANSIT",
+      "SHUTTLE"
     ];
 
     // Calculate routes for each mode in parallel.
     const results = await Promise.all(
       modes.map(async (mode) => {
-        const { steps, eta } = await this.calculateRoute(start, destination, mode, false);
+        let steps: Step[] | undefined;
+        let eta: string | null = null;
+        if (mode == "SHUTTLE"){
+          ({steps, eta} = await this.shuttleService.calculateShuttleBusRoute(start, destination, false));
+        }
+        else {
+          ({ steps, eta } = await this.calculateRoute(start, destination, this.getTravelMode(mode), false));
+        }
         const { totalDistance, totalDuration } = this.getTotalDistanceAndDuration(steps);
 
         return { mode, eta, distance: totalDistance, duration: totalDuration };
@@ -322,9 +331,11 @@ export class DirectionsService {
       results[0] // Initial value: the first route in the array
     );
 
-    this.allRoutesData = results;
-
-    await this.calculateRoute(start, destination, this.shortestRoute.mode, false);
+    return {
+      eta: this.shortestRoute.eta,
+      distance: this.shortestRoute.distance,
+      mode: this.shortestRoute.mode
+    };
   }
 
   public async calculateDistanceETA(
