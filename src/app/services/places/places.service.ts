@@ -157,7 +157,7 @@ export class PlacesService {
     const campusKey = await firstValueFrom(this.store.select(selectSelectedCampus));
 
     return this.campusData[campusKey].buildings.map((building: any) => ({
-      title: building.title,
+      title: building.name,
       coordinates: new google.maps.LatLng(building.coordinates),
       address: building.address,
       image: building.image
@@ -181,7 +181,7 @@ export class PlacesService {
 
     console.log(places);
     return places.map((place) => ({
-      title: place.title ?? 'No name available',
+      title: place.name ?? 'No name available',
       coordinates: place.geometry?.location as google.maps.LatLng,
       address: place.vicinity ?? 'No address available',
       image: place.photos[0]?.getUrl()

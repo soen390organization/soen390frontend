@@ -23,7 +23,6 @@ export class LocationCardsComponent {
   }
 
   setDestination(location: any) {
-    console.log(location);
     this.directionsService.setDestinationPoint({
       title: location.title,
       coordinates: location.coordinates,

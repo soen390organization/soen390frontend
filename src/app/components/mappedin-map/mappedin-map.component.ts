@@ -30,7 +30,7 @@ export class MappedinMapComponent implements AfterViewInit {
   ngAfterViewInit(): void {
     if (this.mappedinContainer) {
       this.mappedinService
-        .initializeMap(this.mappedinContainer.nativeElement)
+        .initialize(this.mappedinContainer.nativeElement)
         .then(() => {
           console.log('Mappedin Map initialized.');
           this.initialized.emit();

@@ -5,6 +5,7 @@ import { getMapData, show3dMap, MapData, MapView, DOORS } from '@mappedin/mapped
 import { ConcordiaDataService } from 'src/app/services/concordia-data.service';
 import { environment } from 'src/environments/environment';
 import { map } from 'cypress/types/bluebird';
+import { MapViewBuilder } from 'src/app/builders/map-view.builder';
 
 export interface BuildingData{
   name: string;
@@ -56,7 +57,7 @@ export class MappedinService {
     this.mapView.setFloor(floorId);
   }
 
-  async initializeMap(container: HTMLElement): Promise<void> {
+  async initialize(container: HTMLElement): Promise<void> {
     this.mappedInContainer = container;
 
     // Create buildings array for both campuses, filter for only MappedIn buildings
@@ -66,118 +67,20 @@ export class MappedinService {
     ].filter((building) => building.indoorMapId);
 
     // Iterate over each building, grab mapData from MappedIn, index the building data
-    buildings.forEach(async item => {
+    await Promise.all(buildings.map(async (item) => {
       let mapId = item.indoorMapId;
       const mapData = await this.fetchMapData(mapId);
-
+  
       this.campusMapData[mapId] = {
         name: item.name,
         abbreviation: item.abbreviation,
         address: item.address,
         mapData
-      }
-    })
+      };
+    }));
 
     this.setMapData('67b674be13a4e9000b46cf2e');
   }
-
-  private initializeConnections(mapData: MapData) {
-    mapData.getByType('connection').forEach((connection) => {
-      let label;
-      let labelColor;
-      // Find the coordinates for the current floor.
-      const coords = connection.coordinates.find(
-        (coord) => coord.floorId === this.mapView.currentFloor.id
-      );
-      // Label the connection.
-      if (connection.type == 'stairs') {
-        label = 'Stairs';
-        labelColor = '#228C22';
-      } else if (connection.type === 'elevator') {
-        label = 'Elevator';
-        labelColor = '#a000c8';
-      }
-
-      if (coords) {
-        this.mapView.Labels.add(coords, label, {
-          interactive: true,
-          appearance: {
-            marker: {
-              foregroundColor: {
-                active: labelColor
-                // inactive: color,
-              }
-            },
-            text: {
-              foregroundColor: labelColor
-            }
-          }
-        });
-      }
-    });
-  }
-
-  private initializePointsOfInterests(mapData: MapData) {
-    mapData.getByType('point-of-interest').forEach((poi) => {
-      if (poi.name) {
-        this.mapView.Labels.add(poi, poi.name, {
-          interactive: true,
-          appearance: {
-            marker: {
-              foregroundColor: {
-                active: ['Bathrooms', 'Water Fountain'].includes(poi.name) ? '#1d63dc' : '#000000'
-                // inactive: color,
-              }
-            },
-            text: {
-              foregroundColor: ['Bathrooms', 'Water Fountain'].includes(poi.name)
-                ? '#1d63dc'
-                : '#000000'
-            }
-          }
-        });
-      }
-    });
-  }
-
-  private initializeSpaces(mapData: MapData) {
-    const spaces = mapData.getByType('space');
-
-    spaces.forEach((space) => {
-      if (space.name) {
-        /* I'm using this for now to find the room names */
-        /* console.log('Adding label for room:', space.name); */
-        this.mapView.Labels.add(space, space.name, { interactive: true });
-      }
-    });
-
-    this.mapView.updateState(DOORS.Exterior, {
-      visible: true,
-      color: 'black',
-      opacity: 0.6
-    });
-    this.mapView.updateState(DOORS.Interior, {
-      visible: true,
-      color: 'lightgrey',
-      opacity: 0.3
-    });
-  }
-
-  /**
-   * Protected method that wraps the external getMapData API call.
-   * Tests can override or spy on this method.
-   */
-  // protected async getMapData(): Promise<Observable<MapData>>  {
-  //   // Use firstValueFrom to get the first emitted value
-  //   const mapId = await firstValueFrom(this.selectedMap$);  // Convert to promise and await the value
-
-  //   // Now pass the mapId as a string value
-  //   return getMapData({
-  //     mapId: mapId,
-  //     key: environment.mappedin.key,
-  //     secret: environment.mappedin.secret,
-  //   });
-  // }
 
   public fetchMapData(mapId: string): Promise<MapData> {
     return getMapData({
@@ -193,14 +96,13 @@ export class MappedinService {
 
   public async setMapData(mapId: string) {
     this.mapId = mapId;
-    const mapData = await this.fetchMapData(mapId);
+    const mapData = this.campusMapData[mapId].mapData;
     this.mapData$.next(mapData);
 
-    this.mapView = await this.show3dMap(this.mappedInContainer, mapData);
-
-    this.initializeSpaces(mapData);
-    this.initializePointsOfInterests(mapData);
-    this.initializeConnections(mapData);
+    this.mapView = await new MapViewBuilder()
+      .setContainer(this.mappedInContainer)
+      .setMapData(mapData)
+      .build();
   }
 
   public getMapData(): Observable<MapData | null> {
@@ -211,16 +113,7 @@ export class MappedinService {
     return this.mapView$.asObservable();
   }
 
-
   public getMapId(): string {
     return this.mapId;
-  }
-
-  /**
-   * Protected method that wraps the external show3dMap API call.
-   * Tests can override or spy on this method.
-   */
-  protected show3dMap(container: HTMLElement, mapData: MapData): Promise<MapView> {
-    return show3dMap(container, mapData);
   }
 }
