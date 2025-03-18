@@ -21,6 +21,6 @@ export interface Location {
   }
   
   export interface RoutingStrategy {
-    getRoute(start: Location, destination: Location): Promise<RouteSegment>;
+    getRoute(start: Location, destination: Location, mode: string): Promise<RouteSegment>;
   }
   

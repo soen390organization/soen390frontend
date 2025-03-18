@@ -8,14 +8,15 @@ import { DirectionsService } from '../services/directions/directions.service';
 export class OutdoorRoutingStrategy implements RoutingStrategy {
   constructor(private directionsService: DirectionsService) {}
 
-  async getRoute(start: Location, destination: Location): Promise<RouteSegment> {
+  async getRoute(start: Location, destination: Location, mode: string): Promise<RouteSegment> {
     if (!start.address || !destination.address) {
-      throw new Error("Outdoor routing requires addresses for both start and destination.");
+      throw new Error('Outdoor routing requires addresses for both start and destination.');
     }
     // Delegate to the existing DirectionsService method
-    const instructions = await this.directionsService.calculateShortestRoute(
+    const instructions = await this.directionsService.generateRoute(
       start.address,
-      destination.address
+      destination.address,
+      mode
     );
     console.log('Shortest Outdoor route calculated:', instructions);
     return { type: 'outdoor', instructions };

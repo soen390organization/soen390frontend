@@ -7,6 +7,8 @@ import { IconMapping } from 'src/app/interfaces/Icon-mapping';
 import rawIconMapping from 'src/assets/icon-mapping.json';
 import { firstValueFrom, take } from 'rxjs';
 import { VisibilityService } from 'src/app/services/visibility.service';
+import { NavigationCoordinatorService } from 'src/app/services/navigation-coordinator.service';
+import { Location, CompleteRoute } from 'src/app/interfaces/routing-strategy.interface';
 const iconMapping = rawIconMapping as IconMapping;
 
 /// <reference types="google.maps" />
@@ -44,7 +46,8 @@ export class DirectionsComponent implements OnInit, OnDestroy {
   constructor(
     private readonly directionsService: DirectionsService,
     private currentLocationService: CurrentLocationService,
-    private visibilityService: VisibilityService
+    private visibilityService: VisibilityService,
+    private navigationCoordinator: NavigationCoordinatorService
   ) {}
 
   ngOnInit(): void {
@@ -151,9 +154,6 @@ export class DirectionsComponent implements OnInit, OnDestroy {
     return R * c;
   }
 
-  /**
-   * Fetches directions using the DirectionsService with hardcoded Montreal locations.
-   */
   async loadDirections(mode: string) {
     this.isLoading = true;
     this.hasArrived = false; // Reset arrival status when loading new directions
@@ -161,15 +161,20 @@ export class DirectionsComponent implements OnInit, OnDestroy {
     const destination = await firstValueFrom(this.directionsService.getDestinationPoint());
 
     try {
-      const { steps, eta } = await this.directionsService.generateRoute(
-        start.address,
-        destination.address,
-        this.selectedMode
+      // Use the coordinator to get the complete route.
+      // We assume that for now both locations are outdoor.
+      const completeRoute: CompleteRoute = await this.navigationCoordinator.getCompleteRoute(
+        { type: 'outdoor', address: start.address, coordinates: start.coordinates },
+        { type: 'outdoor', address: destination.address, coordinates: destination.coordinates },
+        mode
       );
+      console.log('Complete route:', completeRoute);
+      // Extract steps and eta from the first segment's instructions.
+      const { steps, eta } = completeRoute.segments[0].instructions;
       this.steps = steps;
-      console.log(this.steps);
       this.eta = eta;
-      console.log('eta: ', this.eta);
+      console.log('Steps:', this.steps);
+      console.log('ETA:', this.eta);
     } catch (error) {
       console.error('Failed to fetch directions:', error);
     } finally {
