@@ -1,7 +1,9 @@
+/// <reference types="google.maps" />
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, of, switchMap } from 'rxjs';
 import { getAuth, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { Location } from 'src/app/interfaces/location.interface';
+import data from 'src/assets/concordia-data.json';
 
 @Injectable({
   providedIn: 'root'
@@ -13,6 +15,7 @@ export class CalendarService {
   private previouslyFetchedEvents: {
     [calendarId: string]: any[];
   } = {};
+  currentCalendarEvents: any[];
 
   private readonly calendarsSubject = new BehaviorSubject<any[]>([]);
   calendars$ = this.calendarsSubject.asObservable();
@@ -109,7 +112,7 @@ export class CalendarService {
 
       const locationItems = data.items.map((event) => this.transformEventToLocation(event));
       this.previouslyFetchedEvents[calendarId] = locationItems;
-
+      console.log(locationItems);
       return locationItems || [];
     } catch (error) {
       console.error('Error fetching Google Calendar events:', error);
@@ -121,11 +124,39 @@ export class CalendarService {
     return {
       title: event.summary,
       name: `${event.summary} - ${this.formatEventTime(event.start.dateTime, event.end.dateTime)}`,
-      address: event.location || 'Unknown Location',
+      address: this.convertClassToAddress(event.location) || 'Unknown Location',
       coordinates: new google.maps.LatLng(0, 0), // Placeholder
       image: '',
       marker: undefined
     };
+  }
+
+  convertClassToAddress(classCode: string) {
+    var classBuilding: string = "";
+    var numReached: boolean = false;
+    var classCodeStrIndex: number = 0;
+    var classCodeStrChars = classCode.split('');
+    while (!numReached) {
+      if (parseInt(classCodeStrChars[classCodeStrIndex]) >= 0 && parseInt(classCodeStrChars[classCodeStrIndex]) <= 9) {
+        numReached = true;
+      } else {
+        classBuilding += classCodeStrChars[classCodeStrIndex];
+        classCodeStrIndex++;
+      }
+    }
+    console.log(classBuilding);
+    var returnAddress = "No Address";
+    data.sgw.buildings.forEach(function (building) {
+      if (building.abreviation == classBuilding) {
+        returnAddress = building.address;
+      }
+    });
+    data.loy.buildings.forEach(function (building) {
+      if (building.abreviation == classBuilding) {
+        returnAddress = building.address;
+      }
+    });
+    return returnAddress;
   }
 
   formatEventTime(startDateTime: string, endDateTime: string): string {
@@ -157,8 +188,9 @@ export class CalendarService {
     return `${dayAbbr} ${startTime}-${endTime}`;
   }
 
-  setSelectedCalendar(calendarId: string) {
+  async setSelectedCalendar(calendarId: string) {
     this.selectedCalendarSubject.next(calendarId);
+    await this.fetchEvents(calendarId).then(events => this.currentCalendarEvents = events);
   }
 
   getSelectedCalendar(): string | null {
