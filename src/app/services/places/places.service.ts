@@ -5,6 +5,7 @@ import { selectSelectedCampus, AppState } from '../../store/app';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { MappedinService, BuildingData } from '../mappedin/mappedin.service';
+import { GoogleMapLocation } from 'src/app/interfaces/google-map-location.interface';
 
 @Injectable({
   providedIn: 'root'
@@ -38,7 +39,7 @@ export class PlacesService {
 
   public async getPlaceSuggestions(
     input: string
-  ): Promise<any[]> {
+  ): Promise<Location[]> {
     const campusKey = await firstValueFrom(this.store.select(selectSelectedCampus));
     const campusCoordinates = this.campusData[campusKey]?.coordinates;
     if (!campusCoordinates) {
@@ -152,11 +153,11 @@ export class PlacesService {
    * Retrieves the buildings on the selected campus from the store.
    * @returns A promise resolving to an array of LocationCard objects representing campus buildings.
    */
-  public async getCampusBuildings(): Promise<Location[]> {
+  public async getCampusBuildings(): Promise<GoogleMapLocation[]> {
     const campusKey = await firstValueFrom(this.store.select(selectSelectedCampus));
 
-    return this.campusData[campusKey].buildings.map((building: Location) => ({
-      name: building.name,
+    return this.campusData[campusKey].buildings.map((building: any) => ({
+      title: building.title,
       coordinates: new google.maps.LatLng(building.coordinates),
       address: building.address,
       image: building.image
@@ -180,7 +181,7 @@ export class PlacesService {
 
     console.log(places);
     return places.map((place) => ({
-      name: place.name ?? 'No name available',
+      title: place.title ?? 'No name available',
       coordinates: place.geometry?.location as google.maps.LatLng,
       address: place.vicinity ?? 'No address available',
       image: place.photos[0]?.getUrl()
