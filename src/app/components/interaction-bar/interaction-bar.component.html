@@ -31,6 +31,13 @@
         [locations]="pointsOfInterest.locations"
         [loading]="pointsOfInterest.loading"
       ></app-location-cards>
+      <div *ngIf="events.locations.length > 0">
+        <h2 class="flex text-2xl font-bold text-gray-900 my-4">Your Classes</h2>
+        <app-location-cards
+          [locations]="events.locations"
+          [loading]="events.loading"
+        ></app-location-cards>
+      </div>
     </div>
   </div>
 </div>

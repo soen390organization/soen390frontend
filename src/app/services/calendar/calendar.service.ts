@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, of, switchMap } from 'rxjs';
 import { getAuth, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+import { Location } from 'src/app/interfaces/location.interface';
 
 @Injectable({
   providedIn: 'root'
@@ -19,7 +20,7 @@ export class CalendarService {
   public selectedCalendarSubject = new BehaviorSubject<string | null>(null);
   selectedCalendar$ = this.selectedCalendarSubject.asObservable();
 
-  events$: Observable<any[]> = this.selectedCalendar$.pipe(
+  events$: Observable<Location[]> = this.selectedCalendar$.pipe(
     switchMap((calendarId) => {
       if (!calendarId) return of([]);
       return this.fetchEvents(calendarId);
@@ -84,8 +85,13 @@ export class CalendarService {
         return this.previouslyFetchedEvents[calendarId];
       }
       const now = new Date().toISOString();
+      const endOfWeek = new Date();
+      endOfWeek.setDate(endOfWeek.getDate() + (7 - endOfWeek.getDay()));
+      endOfWeek.setHours(23, 59, 59, 999);
+      const timeMax = endOfWeek.toISOString();
+
       const response = await fetch(
-        `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events?timeMin=${now}&singleEvents=true&orderBy=startTime`,
+        `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events?timeMin=${now}&timeMax=${timeMax}&singleEvents=true&orderBy=startTime`,
         {
           method: 'GET',
           headers: {
@@ -101,12 +107,54 @@ export class CalendarService {
 
       const data = await response.json();
 
-      this.previouslyFetchedEvents[calendarId] = data.items;
-      return data.items || [];
+      const locationItems = data.items.map((event) => this.transformEventToLocation(event));
+      this.previouslyFetchedEvents[calendarId] = locationItems;
+
+      return locationItems || [];
     } catch (error) {
       console.error('Error fetching Google Calendar events:', error);
       return [];
     }
+  }
+
+  transformEventToLocation(event): Location {
+    return {
+      title: event.summary,
+      name: `${event.summary} - ${this.formatEventTime(event.start.dateTime, event.end.dateTime)}`,
+      address: event.location || 'Unknown Location',
+      coordinates: new google.maps.LatLng(0, 0), // Placeholder
+      image: '',
+      marker: undefined
+    };
+  }
+
+  formatEventTime(startDateTime: string, endDateTime: string): string {
+    const daysMap: { [key: string]: string } = {
+      Monday: 'Mo',
+      Tuesday: 'Tu',
+      Wednesday: 'We',
+      Thursday: 'Th',
+      Friday: 'Fr',
+      Saturday: 'Sa',
+      Sunday: 'Su'
+    };
+
+    const startDate = new Date(startDateTime);
+    const endDate = new Date(endDateTime);
+
+    const dayAbbr = daysMap[startDate.toLocaleDateString('en-US', { weekday: 'long' })];
+    const startTime = startDate.toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false
+    });
+    const endTime = endDate.toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false
+    });
+
+    return `${dayAbbr} ${startTime}-${endTime}`;
   }
 
   setSelectedCalendar(calendarId: string) {

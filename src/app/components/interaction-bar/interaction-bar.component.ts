@@ -11,6 +11,7 @@ import { VisibilityService } from 'src/app/services/visibility.service';
 import { CommonModule } from '@angular/common';
 import { SwitchMapButtonComponent } from 'src/app/components/switch-map-button/switch-map-button.component';
 import { IndoorSelectsComponent } from '../indoor-selects/indoor-selects.component';
+import { CalendarService } from 'src/app/services/calendar/calendar.service';
 
 @Component({
   selector: 'app-interaction-bar',
@@ -37,13 +38,15 @@ export class InteractionBarComponent implements AfterViewInit {
   showIndoorSelects = false;
   campusBuildings = { locations: [] as Location[], loading: true };
   pointsOfInterest = { locations: [] as Location[], loading: true };
+  events = { locations: [] as Location[], loading: true };
   showDirections$!: Observable<boolean>;
   showPOIs$!: Observable<boolean>;
 
   constructor(
     private readonly store: Store,
     private readonly placesService: PlacesService,
-    private readonly visibilityService: VisibilityService
+    private readonly visibilityService: VisibilityService,
+    private readonly calendarService: CalendarService
   ) {}
 
   ngOnInit() {
@@ -51,6 +54,7 @@ export class InteractionBarComponent implements AfterViewInit {
       console.log(map);
       this.showIndoorSelects = map === MapType.Indoor;
     });
+
     this.placesService
       .isInitialized()
       .pipe(
@@ -70,6 +74,10 @@ export class InteractionBarComponent implements AfterViewInit {
 
     this.showDirections$ = this.visibilityService.showDirections;
     this.showPOIs$ = this.visibilityService.showPOIs;
+
+    this.calendarService.events$.subscribe((events) => {
+      this.events = { locations: events, loading: false };
+    });
   }
 
   ngAfterViewInit(): void {
