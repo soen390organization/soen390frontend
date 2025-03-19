@@ -54,7 +54,7 @@ jobs:
         shell: bash
 
       - name: Start the Application
-        run: ionic serve --no-open &
+        run: ionic serve --configuration=production --no-open
 
       - name: Wait for App to be Ready
         run: npx wait-on http://localhost:8100
