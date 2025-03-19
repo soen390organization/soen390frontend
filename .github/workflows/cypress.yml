@@ -31,7 +31,7 @@ jobs:
 
       - name: Handle environment (Generate environment.ts)
         run: |
-          cat cat <<EOF > src/environments/environment.ts
+          cat <<EOF > src/environments/environment.ts
           EOF
           cat <<EOF > src/environments/environment.prod.ts
           export const environment = {
