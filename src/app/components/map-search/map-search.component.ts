@@ -51,10 +51,17 @@ export class MapSearchComponent implements OnInit {
   isSearchVisible = false;
   places: any[] = []; // Array to store the search suggestions
   isSearchingFromStart: boolean = false; // Flag to determine if the search is for the start or destination location
-  currentRouteData: { eta: string | null; distance: number } | null = null;
+  currentRouteData: { eta: string | null; distance: number ; mode: string } | null = null;
   /* currentRouteData!: CompleteRoute | null; */
   enableStart$!: Observable<boolean>;
 
+  public transportModes = [
+    { mode: 'WALKING', icon: 'directions_walk' },
+    { mode: 'TRANSIT', icon: 'directions_bus' },
+    { mode: 'SHUTTLE', icon: 'directions_transit' },
+    { mode: 'DRIVING', icon: 'directions_car' }
+  ];
+  
   constructor(
     public readonly directionsService: DirectionsService,
     private readonly placesService: PlacesService,
@@ -172,4 +179,13 @@ export class MapSearchComponent implements OnInit {
     this.directionsService.clearDestinationPoint();
     this.currentRouteData = null;
   }
+
+  public getTransportIcon(): string {
+  if (!this.currentRouteData || !this.currentRouteData.mode) {
+    return '';
+  }
+  const mapping = this.transportModes.find(item => item.mode === this.currentRouteData.mode);
+  return mapping ? mapping.icon : '';
+}
+
 }
