@@ -35,7 +35,7 @@ jobs:
           EOF
           cat <<EOF > src/environments/environment.prod.ts
           export const environment = {
-            production: false,
+            production: true,
             googleApiKey: '${{ secrets.GOOGLE_API_KEY }}',
             firebaseConfig: {
               apiKey: '${{ secrets.FIREBASE_API_KEY }}',
@@ -56,7 +56,7 @@ jobs:
         shell: bash
 
       - name: Start the Application
-        run: ionic serve --configuration=production --no-open
+        run: ionic serve --configuration=production --no-open &
 
       - name: Wait for App to be Ready
         run: npx wait-on http://localhost:8100
