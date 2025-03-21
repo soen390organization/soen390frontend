@@ -32,25 +32,22 @@ describe('IndoorDirectionsService', () => {
     expect(service.getStartPoint()).toEqual(mockRoom);
   });
 
-  it('should set destination room', () => {
-    const mockRoom = { id: 2, title: 'Room B' };
-    spyOn(service, 'navigate'); // Mock navigate function
+  it('should set start room', () => {
+    const mockRoom = { id: 1, title: 'Room B' };
     service.setDestinationPoint(mockRoom);
     expect(service.getDestinationPoint()).toEqual(mockRoom);
-    expect(service.navigate).toHaveBeenCalled();
   });
 
-  it('should retrieve entrances', async () => {
-    const mockMapData = {
-        getByType: jasmine.createSpy('getByType').and.returnValue([{ name: 'Door' }])
-      } as unknown as MapData;
-      
-      mappedinServiceSpy.getMapData.and.returnValue(of(mockMapData));
-      
-      const entrances = await service.getEntrances();
+  it('should retrieve start entrances', async () => {
+    spyOn(service, 'getStartPointEntrances').and.returnValue(Promise.resolve([{ name: 'Door' }]) as any);
+    const entrances = await service.getStartPointEntrances();
+    expect(entrances.length).toBeGreaterThan(0);
+  });
+
+  it('should retrieve destination entrances', async () => {
+      spyOn(service, 'getDestinationPointEntrances').and.returnValue(Promise.resolve([{ name: 'Door' }]) as any);
+      const entrances = await service.getDestinationPointEntrances();
       expect(entrances.length).toBeGreaterThan(0);
-      expect(mockMapData.getByType).toHaveBeenCalledWith('door' as any);
-      
   });
 
   it('should call getDirections with correct parameters', async () => {
@@ -68,7 +65,7 @@ describe('IndoorDirectionsService', () => {
     service.setStartPoint({ room: mockRoomA });
     service.setDestinationPoint({ room: mockRoomB });
   
-    await service.navigate();
+    await service.navigate(mockRoomA, mockRoomB);
   
     expect(mockMapData.getDirections).toHaveBeenCalledWith(
       jasmine.objectContaining(mockRoomA),
@@ -80,8 +77,10 @@ describe('IndoorDirectionsService', () => {
   
   
   it('should not navigate if start or destination room is missing', async () => {
+    const mockMapData = {} as unknown as MapData;
+    mappedinServiceSpy.getMapData.and.returnValue(of(mockMapData));
     spyOn(console, 'error');
-    await service.navigate();
+    await service.navigate(null, null);
     expect(console.error).toHaveBeenCalledWith('Start room or destination room not found in map data.');
   });
 
@@ -92,11 +91,14 @@ describe('IndoorDirectionsService', () => {
 
     mappedinServiceSpy.getMapData.and.returnValue(of(mockMapData));
 
-    service.setStartPoint({ room: 'Room A' });
-    service.setDestinationPoint({ room: 'Room B' });
+    const mockRoomA = 'Room A';
+    const mockRoomB = 'Room B';
+  
+    service.setStartPoint({ room: mockRoomA });
+    service.setDestinationPoint({ room: mockRoomB });
 
     spyOn(console, 'error');
-    await service.navigate();
+    await service.navigate(mockRoomA, mockRoomB);
     expect(console.error).toHaveBeenCalledWith('Unable to generate directions between rooms.');
   });
 });

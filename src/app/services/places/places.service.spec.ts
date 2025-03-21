@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { PlacesService } from './places.service';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, of } from 'rxjs';
+import { GoogleMapLocation } from 'src/app/interfaces/google-map-location.interface';
 
 describe('PlacesService', () => {
   let service: PlacesService;
@@ -119,7 +120,7 @@ describe('PlacesService', () => {
 
       service['placesServiceReady'].next(true);
 
-      const places = await service.getPointsOfInterest();
+      const places = await service.getPointsOfInterest() as GoogleMapLocation[];
 
       // Assertions for mapping the places to LocationCard objects
       expect(places.length).toBe(1);
@@ -352,7 +353,7 @@ describe('PlacesService', () => {
             );
           });
 
-        const suggestions = await service.getPlaceSuggestions('test');
+        const suggestions = await service.getPlaceSuggestions('test') as GoogleMapLocation[];
         expect(suggestions.length).toBe(1);
         expect(suggestions[0].title).toBe('Test Place');
         expect(suggestions[0].address).toBe('123 Test St');

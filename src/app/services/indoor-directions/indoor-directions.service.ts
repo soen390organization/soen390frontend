@@ -51,13 +51,10 @@ export class IndoorDirectionsService {
    * Ensure that your map has been fully initialized before calling this method.
    */
   public async navigate(start: any, destination: any): Promise<void> {
-    const mapData: MapData = await firstValueFrom(
-      this.mappedinService.getMapData().pipe(filter((data) => data !== null))
-    );
-
+    const mapData: MapData = await firstValueFrom(this.mappedinService.getMapData());
     const mapView: MapView = this.mappedinService.mapView;
 
-    if (start && destination) {
+    if (mapData && start && destination) {
       const directions = mapData.getDirections(start, await destination);
       if (directions) {
         mapView.Navigation.draw(directions);
