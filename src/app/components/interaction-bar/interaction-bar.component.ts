@@ -11,6 +11,7 @@ import { VisibilityService } from 'src/app/services/visibility.service';
 import { CommonModule } from '@angular/common';
 import { SwitchMapButtonComponent } from 'src/app/components/switch-map-button/switch-map-button.component';
 import { IndoorSelectsComponent } from '../indoor-selects/indoor-selects.component';
+import { GoogleMapLocation } from 'src/app/interfaces/google-map-location.interface';
 
 @Component({
   selector: 'app-interaction-bar',
@@ -35,7 +36,7 @@ export class InteractionBarComponent implements AfterViewInit {
   public swipeProgress: number = 0;
   isExpanded = false; // Track the footer's state
   showIndoorSelects = false;
-  campusBuildings = { locations: [] as Location[], loading: true };
+  campusBuildings = { locations: [] as GoogleMapLocation[], loading: true };
   pointsOfInterest = { locations: [] as Location[], loading: true };
   showDirections$!: Observable<boolean>;
   showPOIs$!: Observable<boolean>;
