@@ -68,7 +68,8 @@ export class PlacesService {
     // const campusBuildings:BuildingData[]= Object.values(this.mappedInService.getCampusMapData()) || [];
     // console.log(campusBuildings);
     // campusBuildings.forEach((building: BuildingData) => {
-    for (const [key, building] of Object.entries(this.mappedInService.getCampusMapData()) as [string, BuildingData ][]) {
+    const campusData = this.mappedInService.getCampusMapData() || {}
+    for (const [key, building] of Object.entries(campusData) as [string, BuildingData ][]) {
       rooms = [
         ...rooms,
         ...building.mapData?.getByType('space').filter(space => space.name)
