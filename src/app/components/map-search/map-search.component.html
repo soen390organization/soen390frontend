@@ -62,6 +62,7 @@
         >
           <ul class="rounded-xl border border-gray-300 bg-white">
             <li
+              id="start-item"
               *ngFor="let place of places"
               (click)="setStart(place); clearList()"
               (keydown.enter)="setStart(place); clearList()"
@@ -109,6 +110,7 @@
         >
           <ul class="rounded-xl border border-gray-300 bg-white">
             <li
+              id="destination-item"
               *ngFor="let place of places"
               (click)="setDestination(place); clearList()"
               (keydown.enter)="setDestination(place); clearList()"
