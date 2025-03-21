@@ -7,6 +7,7 @@ import { environment } from 'src/environments/environment';
 import { map } from 'cypress/types/bluebird';
 import { MapViewBuilder } from 'src/app/builders/map-view.builder';
 
+
 export interface BuildingData{
   name: string;
   abbreviation: string;
