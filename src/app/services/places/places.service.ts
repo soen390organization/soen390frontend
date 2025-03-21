@@ -72,7 +72,7 @@ export class PlacesService {
     for (const [key, building] of Object.entries(campusData) as [string, BuildingData ][]) {
       rooms = [
         ...rooms,
-        ...building.mapData?.getByType('space').filter(space => space.name)
+        ...building.mapData.getByType('space').filter(space => space.name)
         .map(space => ({ 
           title: building.abbreviation + ' ' + space.name,
           address: building.address,
@@ -81,7 +81,7 @@ export class PlacesService {
           indoorMapId: key,
           room: space
         })),
-        ...building.mapData?.getByType('point-of-interest').filter(poi => poi.name)
+        ...building.mapData.getByType('point-of-interest').filter(poi => poi.name)
         .map(poi => ({ 
           title: building.abbreviation + ' ' + poi.name,
           address: building.address,
