@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { filter } from 'rxjs/operators';
-import { MappedinService } from './mappedin/mappedin.service';
+import { MappedinService } from '../mappedin/mappedin.service';
 import { Door, MapData, MapView } from '@mappedin/mappedin-js';
 import { data } from 'cypress/types/jquery';
 

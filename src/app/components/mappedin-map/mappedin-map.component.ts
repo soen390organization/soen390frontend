@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MappedinService } from 'src/app/services/mappedin/mappedin.service';
-import { IndoorDirectionsService } from 'src/app/services/indoor-directions.service';
+import { IndoorDirectionsService } from 'src/app/services/indoor-directions/indoor-directions.service';
 
 @Component({
   selector: 'app-mappedin-map',

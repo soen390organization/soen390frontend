@@ -11,7 +11,7 @@ import { HomePage } from 'src/app/home/home.page';
 import { VisibilityService } from 'src/app/services/visibility.service';
 import { combineLatest, Observable } from 'rxjs';
 import { filter } from 'rxjs/operators';
-import { IndoorDirectionsService } from 'src/app/services/indoor-directions.service';
+import { IndoorDirectionsService } from 'src/app/services/indoor-directions/indoor-directions.service';
 
 export const MapSearchAnimation = [
   trigger('slideInOut', [

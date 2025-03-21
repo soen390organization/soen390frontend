@@ -78,7 +78,7 @@ describe('PlacesService', () => {
       const buildings = await service.getCampusBuildings();
 
       expect(buildings.length).toBe(1);
-      expect(buildings[0].name).toBe('Building 1');
+      expect(buildings[0].title).toBe('Building 1');
     });
 
     it('should fetch points of interest correctly from getPointsOfInterest', async () => {
@@ -123,7 +123,7 @@ describe('PlacesService', () => {
 
       // Assertions for mapping the places to LocationCard objects
       expect(places.length).toBe(1);
-      expect(places[0].name).toBe('Restaurant 1');
+      expect(places[0].title).toBe('Restaurant 1');
       expect(places[0].coordinates instanceof google.maps.LatLng).toBeTrue();
       expect(places[0].address).toBe('Address 1');
       expect(places[0].image).toBe('image-url');
@@ -204,7 +204,7 @@ describe('PlacesService', () => {
       const places = await service.getPointsOfInterest();
 
       expect(places.length).toBe(1);
-      expect(places[0].name).toBe('Restaurant 1');
+      expect(places[0].title).toBe('Restaurant 1');
     });
 
     // Test coverage for failed getPlaces (rejects with error)
@@ -239,7 +239,7 @@ describe('PlacesService', () => {
       const buildings = await service.getCampusBuildings();
 
       expect(buildings.length).toBe(1);
-      expect(buildings[0].name).toBe('Building 1');
+      expect(buildings[0].title).toBe('Building 1');
     });
   });
 
