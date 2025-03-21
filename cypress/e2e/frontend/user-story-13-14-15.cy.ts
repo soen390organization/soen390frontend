@@ -26,13 +26,13 @@ describe('Map - Directions and Route Generation for Multi-Transportation Modes',
     // Enter start location (JMSB) then press Enter.
     cy.get('input[placeholder="Choose starting point..."]').clear().type('John Molson Guy');
     cy.wait(3000);
-    cy.get('input[placeholder="Choose starting point..."]').type('{enter}');
+    cy.contains('li#start-item', 'John Molson').click();
     cy.wait(2000);
 
     // Enter destination (Vanier Library) then press Enter.
     cy.get('input[placeholder="Choose destination point..."]').clear().type('Vanier Library Loyola');
-    cy.wait(4000);
-    cy.get('input[placeholder="Choose destination point..."]').type('{enter}');
+    cy.wait(3000);
+    cy.contains('li#destination-item', 'Vanier Library').click();
     cy.wait(2000);
 
     // Verify that two markers are displayed (assuming markers contain "Icone_Verde.svg").
