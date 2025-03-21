@@ -394,7 +394,26 @@ describe('PlacesService', () => {
       });
 
       it('should return suggestions for buildings with spaces and points of interest', () => {
-        const buildings = mappedinService.getCampusMapData() || {};
+        mappedinService.getCampusMapData.and.returnValue({
+          'building1': {
+            abbreviation: 'ABC',
+            name: 'Main Building',
+            address: '123 Main St',
+            mapData: {
+              getByType: (type: string) => {
+                if (type === 'space') {
+                  return [{ name: 'Room 101' }, { name: 'Room 102' }];
+                }
+                if (type === 'point-of-interest') {
+                  return [{ name: 'Cafe' }, { name: 'Library' }];
+                }
+                return [];
+              }
+            } as any // Add `as any` if TypeScript complains
+          }
+        } as Record<string, BuildingData>);
+
+        const buildings = mappedinService.getCampusMapData();
         let rooms = [];
     
         Object.entries(buildings as BuildingData).forEach(([key, building]) => {
@@ -421,42 +440,9 @@ describe('PlacesService', () => {
           ];
         });
 
+        console.log('Rooms: ', rooms)
+
         expect(rooms.length).toBe(4);
-    
-      //   expect(rooms).toEqual([
-      //     {
-      //       title: 'ABC Room 101',
-      //       address: '123 Main St',
-      //       fullName: 'Main Building Room 101',
-      //       abbreviation: 'ABC',
-      //       indoorMapId: 'building1',
-      //       room: { name: 'Room 101' }
-      //     },
-      //     {
-      //       title: 'ABC Room 102',
-      //       address: '123 Main St',
-      //       fullName: 'Main Building Room 102',
-      //       abbreviation: 'ABC',
-      //       indoorMapId: 'building1',
-      //       room: { name: 'Room 102' }
-      //     },
-      //     {
-      //       title: 'ABC Cafe',
-      //       address: '123 Main St',
-      //       fullName: 'Main Building Cafe',
-      //       abbreviation: 'ABC',
-      //       indoorMapId: 'building1',
-      //       room: { name: 'Cafe' }
-      //     },
-      //     {
-      //       title: 'ABC Library',
-      //       address: '123 Main St',
-      //       fullName: 'Main Building Library',
-      //       abbreviation: 'ABC',
-      //       indoorMapId: 'building1',
-      //       room: { name: 'Library' }
-      //     }
-      //   ]);
       });
     
       it('should return an empty array when no buildings are available', () => {
