@@ -151,21 +151,20 @@ export class MapSearchComponent implements OnInit {
   }
 
   setStart(place: any){
-    this.startLocationInput = place.title
-    if (place.indoorMapId){
-      this.indoorDirectionService.setStartPoint(place)
+    this.startLocationInput = place.title;
+    if (place.indoorMapId) {
+      this.indoorDirectionService.setStartPoint(place);
       return;
     }
-    this.directionsService.setStartPoint(place)
-
+    this.directionsService.setStartPoint(place);
   }
 
   setDestination(place: any){
-    this.destinationLocationInput = place.title
-    if (place.indoorMapId){
-      this.indoorDirectionService.setDestinationPoint(place)
+    this.destinationLocationInput = place.title;
+    if (place.indoorMapId) {
+      this.indoorDirectionService.setDestinationPoint(place);
       return;
     }
-    this.directionsService.setDestinationPoint(place)
+    this.directionsService.setDestinationPoint(place);
   }
 }
