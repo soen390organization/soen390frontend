@@ -11,7 +11,7 @@ import { HomePage } from 'src/app/home/home.page';
 import { VisibilityService } from 'src/app/services/visibility.service';
 import { combineLatest, Observable } from 'rxjs';
 import { filter } from 'rxjs/operators';
-import { IndoorDirectionsService } from 'src/app/services/indoor-directions.service';
+import { IndoorDirectionsService } from 'src/app/services/indoor-directions/indoor-directions.service';
 
 export const MapSearchAnimation = [
   trigger('slideInOut', [
@@ -151,21 +151,20 @@ export class MapSearchComponent implements OnInit {
   }
 
   setStart(place: any){
-    this.startLocationInput = place.title
-    if (place.indoorMapId){
-      this.indoorDirectionService.setStartPoint(place)
+    this.startLocationInput = place.title;
+    if (place.indoorMapId) {
+      this.indoorDirectionService.setStartPoint(place);
       return;
     }
-    this.directionsService.setStartPoint(place)
-
+    this.directionsService.setStartPoint(place);
   }
 
   setDestination(place: any){
-    this.destinationLocationInput = place.title
-    if (place.indoorMapId){
-      this.indoorDirectionService.setDestinationPoint(place)
+    this.destinationLocationInput = place.title;
+    if (place.indoorMapId) {
+      this.indoorDirectionService.setDestinationPoint(place);
       return;
     }
-    this.directionsService.setDestinationPoint(place)
+    this.directionsService.setDestinationPoint(place);
   }
 }

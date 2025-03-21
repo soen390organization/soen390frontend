@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { filter } from 'rxjs/operators';
-import { MappedinService } from './mappedin/mappedin.service';
+import { MappedinService } from '../mappedin/mappedin.service';
 import { Door, MapData, MapView } from '@mappedin/mappedin-js';
 import { data } from 'cypress/types/jquery';
 
@@ -15,48 +15,47 @@ export class IndoorDirectionsService {
   private destinationRoom: any | null = null;
   
 
-  public  setStartPoint(room: any){
+  public setStartPoint(room: any){
     this.startRoom = room;
-    
-  }
-
-  public  setDestinationPoint(room: any){
-    this.destinationRoom = room;
-    this.navigate()
-  }   
-
-  public getDestinationPoint(): any{
-    return this.destinationRoom;
   }
 
   public getStartPoint(): any{
     return this.startRoom;
   }
 
-  public async getEntrances() {
-    
-    const mapData: MapData = await firstValueFrom(
-      this.mappedinService.getMapData().pipe(filter((data) => data !== null))
-    );
-    const entrances = mapData.getByType("door").filter((door) => door.name === "Door");
-    return entrances
+  public async getStartPointEntrances() {
+    if (this.startRoom) {
+      const mapData: MapData = this.mappedinService.getCampusMapData()[this.startRoom.indoorMapId].mapData;
+      return mapData.getByType("door").filter((door) => door.name === "Door");
+    }
+    return null;
   }
 
+  public setDestinationPoint(room: any){
+    this.destinationRoom = room;
+  }   
 
+  public getDestinationPoint(): any{
+    return this.destinationRoom;
+  }
+
+  public async getDestinationPointEntrances() {
+    if (this.destinationRoom) {
+      const mapData: MapData = this.mappedinService.getCampusMapData()[this.destinationRoom.indoorMapId].mapData;
+      return mapData.getByType("door").filter((door) => door.name === "Door");
+    }
+    return null;
+  }
 
   /**
    * Ensure that your map has been fully initialized before calling this method.
    */
-  public async navigate(): Promise<void> {
-    const mapData: MapData = await firstValueFrom(
-      this.mappedinService.getMapData().pipe(filter((data) => data !== null))
-    );
-
+  public async navigate(start: any, destination: any): Promise<void> {
+    const mapData: MapData = await firstValueFrom(this.mappedinService.getMapData());
     const mapView: MapView = this.mappedinService.mapView;
 
-    if (this.startRoom && this.destinationRoom) {
-      console.log(mapData);
-      const directions = mapData.getDirections(this.startRoom.room, this.destinationRoom.room);
+    if (mapData && start && destination) {
+      const directions = mapData.getDirections(start, await destination);
       if (directions) {
         mapView.Navigation.draw(directions);
         console.log('Navigation route drawn');

@@ -1,8 +1,13 @@
-import { show3dMap, MapData, MapView, DOORS } from '@mappedin/mappedin-js';
+import { show3dMap as defaultShow3dMap, MapData, MapView, DOORS } from '@mappedin/mappedin-js';
 
 export class MapViewBuilder {
   container: HTMLElement;
   mapData: MapData;
+  private _show3dMap: (container: HTMLElement, mapData: MapData) => Promise<MapView>;
+
+  constructor(show3dMap: (container: HTMLElement, mapData: MapData) => Promise<MapView> = defaultShow3dMap) {
+    this._show3dMap = show3dMap;
+  }
 
   public setContainer(container: HTMLElement) {
     this.container = container;
@@ -72,7 +77,7 @@ export class MapViewBuilder {
   }
 
   async build(): Promise<MapView> {
-    const mapView = await show3dMap(this.container, this.mapData);
+    const mapView = await this._show3dMap(this.container, this.mapData);
 
     // Initializations
     this.initializeSpaces(mapView);
