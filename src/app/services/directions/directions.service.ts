@@ -328,8 +328,16 @@ export class DirectionsService {
       })
     );
 
+      // Filter out routes with a zero duration.
+      const validRoutes = results.filter(route => route.duration > 0);
+
+      if (validRoutes.length === 0) {
+        // If all routes have a zero duration, handle this scenario as needed.
+        return { eta: null, distance: 0, mode: "No valid route" };
+      }
+
     // Find the route with the smallest duration.
-    this.shortestRoute = results.reduce(
+    this.shortestRoute = validRoutes.reduce(
       (fastest, route) => (route.duration < fastest.duration ? route : fastest),
       results[0] // Initial value: the first route in the array
     );
