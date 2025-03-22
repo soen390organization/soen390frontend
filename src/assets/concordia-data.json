@@ -304,7 +304,7 @@
         "abbreviation": "CL",
         "address": "1665 Rue Sainte-Catherine 3e étage, Montréal, QC H3H 1L9",
         "coordinates": { "lat": 45.49420442796185, "lng": -73.579062279541164 },
-        "image": "assets/images/ev-building.jpg",
+        "image": "assets/images/cl_building.png",
         "boundaries": [
           {
             "lat": 45.494262448579946,

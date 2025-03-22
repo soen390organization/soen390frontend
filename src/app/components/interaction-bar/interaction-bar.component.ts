@@ -13,6 +13,8 @@ import { SwitchMapButtonComponent } from 'src/app/components/switch-map-button/s
 import { IndoorSelectsComponent } from '../indoor-selects/indoor-selects.component';
 import { CalendarService } from 'src/app/services/calendar/calendar.service';
 import { GoogleMapLocation } from 'src/app/interfaces/google-map-location.interface';
+import { EventInfo } from 'src/app/interfaces/event-info.interface';
+import { EventCardComponent } from '../event-card/event-card.component';
 
 @Component({
   selector: 'app-interaction-bar',
@@ -21,6 +23,7 @@ import { GoogleMapLocation } from 'src/app/interfaces/google-map-location.interf
     SwitchMapButtonComponent,
     LocationCardsComponent,
     DirectionsComponent,
+    EventCardComponent,
     CommonModule
   ],
   templateUrl: './interaction-bar.component.html',
@@ -39,7 +42,7 @@ export class InteractionBarComponent implements AfterViewInit {
   showIndoorSelects = false;
   campusBuildings = { locations: [] as GoogleMapLocation[], loading: true };
   pointsOfInterest = { locations: [] as Location[], loading: true };
-  events = { locations: [] as Location[], loading: true };
+  events = { events: [] as EventInfo[], loading: true };
   showDirections$!: Observable<boolean>;
   showPOIs$!: Observable<boolean>;
 
@@ -77,7 +80,7 @@ export class InteractionBarComponent implements AfterViewInit {
     this.showPOIs$ = this.visibilityService.showPOIs;
 
     this.calendarService.events$.subscribe((events) => {
-      this.events = { locations: events, loading: false };
+      this.events = { events: events, loading: false };
     });
   }
 

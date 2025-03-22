@@ -25,7 +25,7 @@ export class CalendarService {
   public selectedCalendarSubject = new BehaviorSubject<string | null>(null);
   selectedCalendar$ = this.selectedCalendarSubject.asObservable();
 
-  events$: Observable<Location[]> = this.selectedCalendar$.pipe(
+  events$: Observable<EventInfo[]> = this.selectedCalendar$.pipe(
     switchMap((calendarId) => {
       if (!calendarId) return of([]);
       return this.fetchEvents(calendarId);
@@ -114,7 +114,6 @@ export class CalendarService {
 
       const locationItems = data.items.map((event) => this.transformEvent(event));
       this.previouslyFetchedEvents[calendarId] = locationItems;
-      console.log(locationItems);
       return locationItems || [];
     } catch (error) {
       console.error('Error fetching Google Calendar events:', error);
@@ -149,47 +148,34 @@ export class CalendarService {
       if (building.abbreviation === buildingcode) {
         googleMapLocation['address'] = building.address;
         googleMapLocation['coordinates'] = building.coordinates;
+        googleMapLocation['image'] = building.image;
       }
     });
     data.loy.buildings.forEach((building) => {
       if (building.abbreviation === buildingcode) {
         googleMapLocation['address'] = building.address;
         googleMapLocation['coordinates'] = building.coordinates;
+        googleMapLocation['image'] = building.image;
       }
     });
 
     return googleMapLocation;
   }
 
-  formatEventTime(startDateTime: string, endDateTime: string): string {
-    const daysMap: { [key: string]: string } = {
-      Monday: 'Mo',
-      Tuesday: 'Tu',
-      Wednesday: 'We',
-      Thursday: 'Th',
-      Friday: 'Fr',
-      Saturday: 'Sa',
-      Sunday: 'Su'
-    };
-
-    const startDate = new Date(startDateTime);
-    const endDate = new Date(endDateTime);
-
-    const dayAbbr = daysMap[startDate.toLocaleDateString('en-US', { weekday: 'long' })];
-    const startTime = startDate.toLocaleTimeString('en-US', {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false
-    });
-    const endTime = endDate.toLocaleTimeString('en-US', {
+  formatEventTime(start: Date, end: Date): string {
+    const weekdayFormatter = new Intl.DateTimeFormat('en-CA', { weekday: 'short' });
+    const timeFormatter = new Intl.DateTimeFormat('en-CA', {
       hour: '2-digit',
       minute: '2-digit',
       hour12: false
     });
 
-    return `${dayAbbr} ${startTime}-${endTime}`;
+    const day = weekdayFormatter.format(start).slice(0, 2); // "Mo"
+    const startTime = timeFormatter.format(start);
+    const endTime = timeFormatter.format(end);
+
+    return `${day}, ${startTime} - ${endTime}`;
   }
-
   async setSelectedCalendar(calendarId: string) {
     this.selectedCalendarSubject.next(calendarId);
     await this.fetchEvents(calendarId).then((events) => (this.currentCalendarEvents = events));
