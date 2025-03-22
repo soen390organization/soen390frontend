@@ -12,9 +12,9 @@ import { VisibilityService } from 'src/app/services/visibility.service';
 import { combineLatest, Observable } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { NavigationCoordinatorService } from 'src/app/services/navigation-coordinator.service';
-import { Location, CompleteRoute } from 'src/app/interfaces/routing-strategy.interface';
+import { IndoorDirectionsService } from 'src/app/services/indoor-directions/indoor-directions.service';
 
-export const MapSeachAnimation = [
+export const MapSearchAnimation = [
   trigger('slideInOut', [
     state(
       'in',
@@ -42,7 +42,7 @@ export const MapSeachAnimation = [
   imports: [IonicModule, CommonModule, FormsModule],
   templateUrl: './map-search.component.html',
   styleUrls: ['./map-search.component.scss'],
-  animations: MapSeachAnimation
+  animations: MapSearchAnimation
 })
 export class MapSearchComponent implements OnInit {
   @ViewChild(GoogleMapComponent) googleMap!: GoogleMapComponent;
@@ -51,7 +51,7 @@ export class MapSearchComponent implements OnInit {
   isSearchVisible = false;
   places: any[] = []; // Array to store the search suggestions
   isSearchingFromStart: boolean = false; // Flag to determine if the search is for the start or destination location
-  currentRouteData: { eta: string | null; distance: number ; mode: string } | null = null;
+  currentRouteData: { eta: string | null; distance: number; mode: string } | null = null;
   /* currentRouteData!: CompleteRoute | null; */
   enableStart$!: Observable<boolean>;
 
@@ -61,9 +61,10 @@ export class MapSearchComponent implements OnInit {
     { mode: 'SHUTTLE', icon: 'directions_transit' },
     { mode: 'DRIVING', icon: 'directions_car' }
   ];
-  
+
   constructor(
     public readonly directionsService: DirectionsService,
+    public readonly indoorDirectionService: IndoorDirectionsService,
     private readonly placesService: PlacesService,
     private readonly currentLocationService: CurrentLocationService,
     private readonly visibilityService: VisibilityService,
@@ -101,7 +102,7 @@ export class MapSearchComponent implements OnInit {
           })
           .catch((error) => console.error('Error calculating route:', error));
       });
-/*       .pipe(filter(([start, destination]) => !!start && !!destination))
+    /*       .pipe(filter(([start, destination]) => !!start && !!destination))
       .subscribe(async ([start, destination]) => {
         try {
           const startLocation: Location = {
@@ -181,11 +182,28 @@ export class MapSearchComponent implements OnInit {
   }
 
   public getTransportIcon(): string {
-  if (!this.currentRouteData || !this.currentRouteData.mode) {
-    return '';
+    if (!this.currentRouteData || !this.currentRouteData.mode) {
+      return '';
+    }
+    const mapping = this.transportModes.find((item) => item.mode === this.currentRouteData.mode);
+    return mapping ? mapping.icon : '';
   }
-  const mapping = this.transportModes.find(item => item.mode === this.currentRouteData.mode);
-  return mapping ? mapping.icon : '';
-}
 
+  setStart(place: any) {
+    this.startLocationInput = place.title;
+    if (place.indoorMapId) {
+      this.indoorDirectionService.setStartPoint(place);
+      return;
+    }
+    this.directionsService.setStartPoint(place);
+  }
+
+  setDestination(place: any) {
+    this.destinationLocationInput = place.title;
+    if (place.indoorMapId) {
+      this.indoorDirectionService.setDestinationPoint(place);
+      return;
+    }
+    this.directionsService.setDestinationPoint(place);
+  }
 }

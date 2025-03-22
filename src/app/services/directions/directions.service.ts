@@ -3,6 +3,7 @@ import { BehaviorSubject, combineLatest, map, Observable } from 'rxjs';
 import { Step } from '../../interfaces/step.interface';
 import { ShuttleService } from '../shuttle/shuttle.service';
 import { Location } from 'src/app/interfaces/location.interface';
+import { GoogleMapLocation } from 'src/app/interfaces/google-map-location.interface';
 
 @Injectable({
   providedIn: 'root'
@@ -11,8 +12,8 @@ export class DirectionsService {
   private directionsService!: google.maps.DirectionsService;
   private directionsRenderer!: google.maps.DirectionsRenderer;
 
-  private startPoint$ = new BehaviorSubject<Location | null>(null);
-  private destinationPoint$ = new BehaviorSubject<Location | null>(null);
+  private startPoint$ = new BehaviorSubject<GoogleMapLocation | null>(null);
+  private destinationPoint$ = new BehaviorSubject<GoogleMapLocation | null>(null);
 
   private allRoutesData: {
     mode: string;
@@ -48,15 +49,15 @@ export class DirectionsService {
     return this.directionsRenderer;
   }
 
-  getStartPoint(): Observable<Location | null> {
+  getStartPoint(): Observable<GoogleMapLocation | null> {
     return this.startPoint$.asObservable();
   }
 
-  getDestinationPoint(): Observable<Location | null> {
+  getDestinationPoint(): Observable<GoogleMapLocation | null> {
     return this.destinationPoint$.asObservable();
   }
 
-  setStartPoint(location: Location): void {
+  setStartPoint(location: GoogleMapLocation): void {
     const marker =
       this.startPoint$.value?.marker ??
       new google.maps.Marker({
@@ -83,7 +84,7 @@ export class DirectionsService {
     };
   }
 
-  setDestinationPoint(location: Location): void {
+  setDestinationPoint(location: GoogleMapLocation): void {
     const marker =
       this.destinationPoint$.value?.marker ??
       new google.maps.Marker({

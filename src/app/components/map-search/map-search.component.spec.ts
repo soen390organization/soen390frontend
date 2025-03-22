@@ -5,6 +5,7 @@ import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DirectionsService } from 'src/app/services/directions/directions.service';
+import { IndoorDirectionsService } from 'src/app/services/indoor-directions/indoor-directions.service';
 import { PlacesService } from 'src/app/services/places/places.service';
 import { CurrentLocationService } from 'src/app/services/current-location/current-location.service';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -15,6 +16,7 @@ describe('MapSearchComponent', () => {
 
   // Spies for the injected services
   let directionsServiceSpy: jasmine.SpyObj<DirectionsService>;
+  let indoorDirectionsServiceSpy: jasmine.SpyObj<IndoorDirectionsService>;
   let placesServiceSpy: jasmine.SpyObj<PlacesService>;
   let currentLocationServiceSpy: jasmine.SpyObj<CurrentLocationService>;
 
@@ -33,6 +35,11 @@ describe('MapSearchComponent', () => {
     directionsServiceSpy.getDestinationPoint.and.returnValue(
       of({ title: 'Default Destination', address: '', coordinates: null })
     );
+    indoorDirectionsServiceSpy = jasmine.createSpyObj('DirectionsService', [
+      'setStartPoint',
+      'setDestinationPoint',
+      
+    ]);
     placesServiceSpy = jasmine.createSpyObj('PlacesService', ['getPlaceSuggestions']);
     currentLocationServiceSpy = jasmine.createSpyObj('CurrentLocationService', [
       'getCurrentLocation'
@@ -49,6 +56,7 @@ describe('MapSearchComponent', () => {
       providers: [
         { provide: DirectionsService, useValue: directionsServiceSpy },
         { provide: PlacesService, useValue: placesServiceSpy },
+        { provide: IndoorDirectionsService, useValue: indoorDirectionsServiceSpy},
         {
           provide: CurrentLocationService,
           useValue: currentLocationServiceSpy
@@ -372,4 +380,23 @@ describe('MapSearchComponent', () => {
       expect(component.isSearchVisible).toBeTrue();
     });
   });
+
+  it('should update startLocationInput and call indoorDirectionService.setStartPoint when indoorMapId is provided', () => {
+    const place = { title: 'Office', indoorMapId: 'indoor123' };
+    component.setStart(place);
+
+    expect(component.startLocationInput).toBe('Office');
+    expect(indoorDirectionsServiceSpy.setStartPoint).toHaveBeenCalledWith(place);
+    expect(directionsServiceSpy.setStartPoint).not.toHaveBeenCalled();
+  });
+
+  it('should update destinationLocationInput and call indoorDirectionService.setDestinationPoint when indoorMapId is provided', () => {
+    const place = { title: 'Mall', indoorMapId: 'indoor567' };
+    component.setDestination(place);
+
+    expect(component.destinationLocationInput).toBe('Mall');
+    expect(indoorDirectionsServiceSpy.setDestinationPoint).toHaveBeenCalledWith(place);
+    expect(directionsServiceSpy.setDestinationPoint).not.toHaveBeenCalled();
+  });
+
 });

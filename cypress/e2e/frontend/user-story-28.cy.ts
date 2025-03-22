@@ -17,7 +17,7 @@ describe('Map - Directions and Route Generation', () => {
     cy.wait(2000);
 
     // Enter destination and then press Enter.
-    cy.get('input[placeholder="Choose destination point..."]').clear().type('JMSB');
+    cy.get('input[placeholder="Choose destination point..."]').clear().type('John Molson Guy');
     cy.wait(3000);
     cy.get('input[placeholder="Choose destination point..."]').type('{enter}');
     cy.wait(2000);
@@ -26,7 +26,7 @@ describe('Map - Directions and Route Generation', () => {
     cy.get('.gm-style img[src*="Icone_Verde.svg"]', { timeout: 10000 }).should('have.length', 2);
 
     // Check that the ETA "1 min (212 m)" is visible.
-    cy.contains('1 min (212 m)').should('be.visible');
+    cy.contains('1 min (219 m)').should('be.visible');
 
     // Click the "Start" button to generate the route.
     cy.contains('button', 'Start').click();

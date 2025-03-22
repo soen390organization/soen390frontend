@@ -32,7 +32,7 @@
         <input
           [(ngModel)]="startLocationInput"
           (input)="onSearchChange($event, 'start')"
-          (keyup.enter)="directionsService.setStartPoint(places[0]); clearList()"
+          (keyup.enter)="setStart(places[0]); clearList()"
           type="text"
           placeholder="Choose starting point..."
           debounce="1000"
@@ -62,9 +62,10 @@
         >
           <ul class="rounded-xl border border-gray-300 bg-white">
             <li
+              id="start-item"
               *ngFor="let place of places"
-              (click)="directionsService.setStartPoint(place); clearList()"
-              (keydown.enter)="directionsService.setStartPoint(place); clearList()"
+              (click)="setStart(place); clearList()"
+              (keydown.enter)="setStart(place); clearList()"
               class="flex items-center hover:bg-gray-100 p-3 cursor-pointer"
             >
               <span class="material-symbols-outlined mr-3 p-2 border border-gray-300 rounded-full">
@@ -88,7 +89,7 @@
         <input
           [(ngModel)]="destinationLocationInput"
           (input)="onSearchChange($event, 'destination')"
-          (keyup.enter)="directionsService.setDestinationPoint(places[0]); clearList()"
+          (keyup.enter)="setDestination(places[0]); clearList()"
           type="text"
           placeholder="Choose destination point..."
           class="w-full bg-white px-4 py-3 pr-10 rounded-full border border-gray-300 focus:outline-none"
@@ -109,9 +110,10 @@
         >
           <ul class="rounded-xl border border-gray-300 bg-white">
             <li
+              id="destination-item"
               *ngFor="let place of places"
-              (click)="directionsService.setDestinationPoint(place); clearList()"
-              (keydown.enter)="directionsService.setDestinationPoint(place); clearList()"
+              (click)="setDestination(place); clearList()"
+              (keydown.enter)="setDestination(place); clearList()"
               class="flex items-center hover:bg-gray-100 p-3 cursor-pointer"
             >
               <span class="material-symbols-outlined mr-3 p-2 border border-gray-300 rounded-full">
