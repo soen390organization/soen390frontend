@@ -2,23 +2,31 @@ import { TestBed } from '@angular/core/testing';
 import { PlacesService } from './places.service';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, of } from 'rxjs';
+import { GoogleMapLocation } from 'src/app/interfaces/google-map-location.interface';
+import { MappedinService } from '../mappedin/mappedin.service';
+import {BuildingData} from '../mappedin/mappedin.service';
 
 describe('PlacesService', () => {
   let service: PlacesService;
   let storeMock: any;
   let mapMock: google.maps.Map;
   let placesServiceMock: any;
+  let mappedinService: jasmine.SpyObj<MappedinService>;
 
   beforeEach(() => {
+    mappedinService = jasmine.createSpyObj('MappedinService', ['getCampusMapData']);
     // Mock the Store
     storeMock = {
       select: jasmine.createSpy().and.returnValue(of('campusKey'))
     };
 
     TestBed.configureTestingModule({
-      providers: [PlacesService, { provide: Store, useValue: storeMock }]
+      providers: [PlacesService, { provide: Store, useValue: storeMock },
+                                  {provide: MappedinService, useValue: mappedinService }
+      ]
     });
     service = TestBed.inject(PlacesService);
+    mappedinService = TestBed.inject(MappedinService) as jasmine.SpyObj<MappedinService>;
 
     // Mock for the google map and placesService
     service['placesServiceReady'] = new BehaviorSubject<boolean>(false);
@@ -78,8 +86,33 @@ describe('PlacesService', () => {
       const buildings = await service.getCampusBuildings();
 
       expect(buildings.length).toBe(1);
-      expect(buildings[0].name).toBe('Building 1');
+      expect(buildings[0].title).toBe('Building 1');
     });
+
+    it('should return mock campus map data', () => {
+      mappedinService.getCampusMapData.and.returnValue({
+        'building1': {
+          abbreviation: 'ABC',
+          name: 'Main Building',
+          address: '123 Main St',
+          mapData: {
+            getByType: (type: string) => {
+              if (type === 'space') {
+                return [{ name: 'Room 101' }, { name: 'Room 102' }];
+              }
+              if (type === 'point-of-interest') {
+                return [{ name: 'Cafe' }, { name: 'Library' }];
+              }
+              return [];
+            }
+          } as any // Add `as any` if TypeScript complains
+        }
+      } as Record<string, BuildingData>);
+  
+      const data = mappedinService.getCampusMapData();
+      expect(data['building1'].abbreviation).toBe('ABC');
+      expect(data['building1'].mapData.getByType('space')).toEqual([{ name: 'Room 101' }, { name: 'Room 102' }]);
+    }); 
 
     it('should fetch points of interest correctly from getPointsOfInterest', async () => {
       // Mock the campus data and store behavior
@@ -119,11 +152,11 @@ describe('PlacesService', () => {
 
       service['placesServiceReady'].next(true);
 
-      const places = await service.getPointsOfInterest();
+      const places = await service.getPointsOfInterest() as GoogleMapLocation[];
 
       // Assertions for mapping the places to LocationCard objects
       expect(places.length).toBe(1);
-      expect(places[0].name).toBe('Restaurant 1');
+      expect(places[0].title).toBe('Restaurant 1');
       expect(places[0].coordinates instanceof google.maps.LatLng).toBeTrue();
       expect(places[0].address).toBe('Address 1');
       expect(places[0].image).toBe('image-url');
@@ -204,7 +237,7 @@ describe('PlacesService', () => {
       const places = await service.getPointsOfInterest();
 
       expect(places.length).toBe(1);
-      expect(places[0].name).toBe('Restaurant 1');
+      expect(places[0].title).toBe('Restaurant 1');
     });
 
     // Test coverage for failed getPlaces (rejects with error)
@@ -239,7 +272,7 @@ describe('PlacesService', () => {
       const buildings = await service.getCampusBuildings();
 
       expect(buildings.length).toBe(1);
-      expect(buildings[0].name).toBe('Building 1');
+      expect(buildings[0].title).toBe('Building 1');
     });
   });
 
@@ -352,12 +385,178 @@ describe('PlacesService', () => {
             );
           });
 
-        const suggestions = await service.getPlaceSuggestions('test');
+        const suggestions = await service.getPlaceSuggestions('test') as GoogleMapLocation[];
         expect(suggestions.length).toBe(1);
         expect(suggestions[0].title).toBe('Test Place');
         expect(suggestions[0].address).toBe('123 Test St');
         expect(suggestions[0].coordinates.lat()).toBe(1);
         expect(suggestions[0].coordinates.lng()).toBe(2);
+      });
+
+      it('should return suggestions for buildings with spaces and points of interest', () => {
+        mappedinService.getCampusMapData.and.returnValue({
+          'building1': {
+            abbreviation: 'ABC',
+            name: 'Main Building',
+            address: '123 Main St',
+            mapData: {
+              getByType: (type: string) => {
+                if (type === 'space') {
+                  return [{ name: 'Room 101' }, { name: 'Room 102' }];
+                }
+                if (type === 'point-of-interest') {
+                  return [{ name: 'Cafe' }, { name: 'Library' }];
+                }
+                return [];
+              }
+            } as any // Add `as any` if TypeScript complains
+          }
+        } as Record<string, BuildingData>);
+
+        const buildings = mappedinService.getCampusMapData();
+        let rooms = [];
+    
+        Object.entries(buildings as BuildingData).forEach(([key, building]) => {
+          rooms = [
+            ...rooms,
+            ...building.mapData?.getByType('space').filter(space => space.name)
+              .map(space => ({ 
+                title: `${building.abbreviation} ${space.name}`,
+                address: building.address,
+                fullName: `${building.name} ${space.name}`,
+                abbreviation: building.abbreviation,
+                indoorMapId: key,
+                room: space
+              })),
+            ...building.mapData?.getByType('point-of-interest').filter(poi => poi.name)
+              .map(poi => ({ 
+                title: `${building.abbreviation} ${poi.name}`,
+                address: building.address,
+                fullName: `${building.name} ${poi.name}`,
+                abbreviation: building.abbreviation, 
+                indoorMapId: key,
+                room: poi
+              })),
+          ];
+        });
+
+        console.log('Rooms: ', rooms)
+
+        expect(rooms.length).toBe(4);
+      });
+    
+      it('should return an empty array when no buildings are available', () => {
+        mappedinService.getCampusMapData.and.returnValue({});
+        const buildings = mappedinService.getCampusMapData();
+        let rooms = [];
+    
+        Object.entries(buildings as BuildingData).forEach(([key, building]) => {
+          rooms = [
+            ...rooms,
+            ...building.mapData?.getByType('space').filter(space => space.name)
+              .map(space => ({
+                title: `${building.abbreviation} ${space.name}`,
+                address: building.address,
+                fullName: `${building.name} ${space.name}`,
+                abbreviation: building.abbreviation,
+                indoorMapId: key,
+                room: space
+              })),
+            ...building.mapData?.getByType('point-of-interest').filter(poi => poi.name)
+              .map(poi => ({
+                title: `${building.abbreviation} ${poi.name}`,
+                address: building.address,
+                fullName: `${building.title} ${poi.name}`,
+                abbreviation: building.abbreviation,
+                indoorMapId: key,
+                room: poi
+              })),
+          ];
+        });
+    
+        expect(rooms).toEqual([]);
+      });
+    
+      it('should handle buildings with no spaces or points of interest', () => {
+        mappedinService.getCampusMapData.and.returnValue({
+          'building2': {
+            abbreviation: 'XYZ',
+            name: 'Empty Building',
+            address: '456 Side St',
+            mapData: {
+              getByType: () => []
+            }
+          }
+        });
+    
+        const buildings = mappedinService.getCampusMapData();
+        let rooms = [];
+    
+        Object.entries(buildings as BuildingData).forEach(([key, building]) => {
+          rooms = [
+            ...rooms,
+            ...building.mapData?.getByType('space').filter(space => space.name)
+              .map(space => ({
+                title: `${building.abbreviation} ${space.name}`,
+                address: building.address,
+                fullName: `${building.name} ${space.name}`,
+                abbreviation: building.abbreviation,
+                indoorMapId: key,
+                room: space
+              })),
+            ...building.mapData?.getByType('point-of-interest').filter(poi => poi.name)
+              .map(poi => ({
+                title: `${building.abbreviation} ${poi.name}`,
+                address: building.address,
+                fullName: `${building.name} ${poi.name}`,
+                abbreviation: building.abbreviation,
+                indoorMapId: key,
+                room: poi
+              })),
+          ];
+        });
+    
+        expect(rooms).toEqual([]);
+      });
+    
+      it('should handle missing mapData gracefully', () => {
+        mappedinService.getCampusMapData.and.returnValue({
+          'building3': {
+            abbreviation: 'LMN',
+            name: 'No Map Data Building',
+            address: '789 Another St'
+          }
+        });
+    
+        const buildings = mappedinService.getCampusMapData();
+        let rooms = [];
+    
+        Object.entries(buildings as BuildingData).forEach(([key, building]) => {
+          if (!building.mapData) return;
+          rooms = [
+            ...rooms,
+            ...building.mapData?.getByType('space').filter(space => space.name)
+              .map(space => ({
+                title: `${building.abbreviation} ${space.name}`,
+                address: building.address,
+                fullName: `${building.name} ${space.name}`,
+                abbreviation: building.abbreviation,
+                indoorMapId: key,
+                room: space
+              })),
+            ...building.mapData?.getByType('point-of-interest').filter(poi => poi.name)
+              .map(poi => ({
+                title: `${building.abbreviation} ${poi.name}`,
+                address: building.address,
+                fullName: `${building.name} ${poi.name}`,
+                abbreviation: building.abbreviation,
+                indoorMapId: key,
+                room: poi
+              })),
+          ];
+        });
+    
+        expect(rooms).toEqual([]);
       });
     });
 
