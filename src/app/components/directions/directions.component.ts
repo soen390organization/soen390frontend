@@ -29,6 +29,7 @@ export class DirectionsComponent implements OnInit, OnDestroy {
   currentWatchId: string | null = null;
   hasArrived: boolean = false; // New boolean to track arrival
   showAllSteps: boolean = true;
+  currentRouteData: { eta: string | null; distance: number} | null = null;
 
   private readonly stepCompletionThreshold = 30;
 
@@ -59,6 +60,7 @@ export class DirectionsComponent implements OnInit, OnDestroy {
     this.directionsService.hasBothPoints$.subscribe((hasBoth) => {
       if (hasBoth) {
         this.loadDirections('WALKING');
+        this.setCurrentRouteData('WALKING')
         this.startWatchingLocation();
       }
     });
@@ -183,13 +185,21 @@ export class DirectionsComponent implements OnInit, OnDestroy {
     }
   }
 
+  async setCurrentRouteData(mode: string){
+    const start = await firstValueFrom(this.directionsService.getStartPoint());
+    const destination = await firstValueFrom(this.directionsService.getDestinationPoint());
+    const result = await this.directionsService.calculateDistanceETA(start.address, destination.address, mode);
+    this.currentRouteData = { eta: result.eta, distance: result.totalDistance };
+  }
   /**
    * Updates the travel mode and loads new hardcoded directions.
    */
-  setMode(mode: string, event?: Event) {
+  async setMode(mode: string, event?: Event) {
     if (event) event.stopPropagation();
     this.selectedMode = mode;
     this.loadDirections(mode);
+    this.setCurrentRouteData(mode)
+
   }
 
   getDirectionIcon(instructions: string): string {
