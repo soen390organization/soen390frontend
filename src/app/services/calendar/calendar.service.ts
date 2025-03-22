@@ -4,6 +4,8 @@ import { BehaviorSubject, Observable, of, switchMap } from 'rxjs';
 import { getAuth, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { Location } from 'src/app/interfaces/location.interface';
 import data from 'src/assets/concordia-data.json';
+import { EventInfo } from 'src/app/interfaces/event-info.interface';
+import { EventType } from 'src/app/enums/event-type.enum';
 
 @Injectable({
   providedIn: 'root'
@@ -89,7 +91,7 @@ export class CalendarService {
       }
       const now = new Date().toISOString();
       const endOfWeek = new Date();
-      endOfWeek.setDate(endOfWeek.getDate() + (7 - endOfWeek.getDay()));
+      endOfWeek.setDate(endOfWeek.getDate() + 7);
       endOfWeek.setHours(23, 59, 59, 999);
       const timeMax = endOfWeek.toISOString();
 
@@ -110,7 +112,7 @@ export class CalendarService {
 
       const data = await response.json();
 
-      const locationItems = data.items.map((event) => this.transformEventToLocation(event));
+      const locationItems = data.items.map((event) => this.transformEvent(event));
       this.previouslyFetchedEvents[calendarId] = locationItems;
       console.log(locationItems);
       return locationItems || [];
@@ -120,46 +122,43 @@ export class CalendarService {
     }
   }
 
-  transformEventToLocation(event): Location {
+  transformEvent(event: any): EventInfo {
+    const eventType = event.summary.split(' ')[1] || 'LEC';
     return {
       title: event.summary,
-      name: `${event.summary} - ${this.formatEventTime(event.start.dateTime, event.end.dateTime)}`,
-      address: this.convertClassToAddress(event.location) || 'Unknown Location',
-      coordinates: new google.maps.LatLng(0, 0), // Placeholder
-      image: '',
-      marker: undefined
+      type: EventType[eventType.toUpperCase()],
+      startTime: event.start.dateTime,
+      endTime: event.end.dateTime,
+      location: {
+        title: event.summary,
+        ...this.convertClassToAddress(event.location)
+      },
+      room: event.location
     };
   }
 
-  convertClassToAddress(classCode: string) {
-    let classBuilding: string = '';
-    let numReached: boolean = false;
-    let classCodeStrIndex: number = 0;
-    let classCodeStrChars = classCode.split('');
-    while (!numReached) {
-      if (
-        parseInt(classCodeStrChars[classCodeStrIndex]) >= 0 &&
-        parseInt(classCodeStrChars[classCodeStrIndex]) <= 9
-      ) {
-        numReached = true;
-      } else {
-        classBuilding += classCodeStrChars[classCodeStrIndex];
-        classCodeStrIndex++;
-      }
-    }
-    console.log(classBuilding);
-    let returnAddress = 'No Address';
-    data.sgw.buildings.forEach(function (building) {
-      if (building.abreviation == classBuilding) {
-        returnAddress = building.address;
+  convertClassToAddress(classCode: string): { address: string; coordinates: google.maps.LatLng } {
+    const buildingcode = classCode.split(' ')[0];
+
+    let googleMapLocation = {
+      address: 'No Address',
+      coordinates: null
+    };
+
+    data.sgw.buildings.forEach((building) => {
+      if (building.abbreviation === buildingcode) {
+        googleMapLocation['address'] = building.address;
+        googleMapLocation['coordinates'] = building.coordinates;
       }
     });
-    data.loy.buildings.forEach(function (building) {
-      if (building.abreviation == classBuilding) {
-        returnAddress = building.address;
+    data.loy.buildings.forEach((building) => {
+      if (building.abbreviation === buildingcode) {
+        googleMapLocation['address'] = building.address;
+        googleMapLocation['coordinates'] = building.coordinates;
       }
     });
-    return returnAddress;
+
+    return googleMapLocation;
   }
 
   formatEventTime(startDateTime: string, endDateTime: string): string {
