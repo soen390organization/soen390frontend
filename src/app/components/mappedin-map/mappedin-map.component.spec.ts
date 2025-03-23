@@ -3,7 +3,7 @@ import { MappedinMapComponent } from './mappedin-map.component';
 import { MappedinService } from 'src/app/services/mappedin/mappedin.service';
 
 class MockMappedinService {
-  initializeMap = jasmine.createSpy('initializeMap').and.returnValue(Promise.resolve());
+  initialize = jasmine.createSpy('initialize').and.returnValue(Promise.resolve());
 }
 
 describe('MappedinMapComponent', () => {
@@ -29,13 +29,13 @@ describe('MappedinMapComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should call initializeMap with the mappedinContainer element', fakeAsync(() => {
-    // Let initializeMap's promise resolve.
+  it('should call initialize with the mappedinContainer element', fakeAsync(() => {
+    // Let initialize's promise resolve.
     tick();
 
-    expect(mappedinService.initializeMap).toHaveBeenCalled();
+    expect(mappedinService.initialize).toHaveBeenCalled();
 
     const containerElement = fixture.nativeElement.querySelector('div');
-    expect(mappedinService.initializeMap).toHaveBeenCalledWith(containerElement);
+    expect(mappedinService.initialize).toHaveBeenCalledWith(containerElement);
   }));
 });

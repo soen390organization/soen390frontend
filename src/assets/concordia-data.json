@@ -1,7 +1,7 @@
 {
   "sgw": {
     "name": "Sir George William",
-    "abreviation": "SGW",
+    "abbreviation": "SGW",
     "coordinates": {
       "lat": 45.49508674774648,
       "lng": -73.57795691041848
@@ -16,7 +16,7 @@
     "buildings": [
       {
         "name": "Engineering and Visual Arts",
-        "abreviation": "EV",
+        "abbreviation": "EV",
         "address": "1515 Saint-Catherine St W #1428, Montreal, Quebec H3G 1S6",
         "coordinates": {
           "lat": 45.49541909930391,
@@ -84,7 +84,7 @@
       },
       {
         "name": "ER Building",
-        "abreviation": "ER",
+        "abbreviation": "ER",
         "address": "2155 Guy St, Montreal, Quebec H3H 2L9",
         "coordinates": {
           "lat": 45.49619913491374,
@@ -114,7 +114,7 @@
       },
       {
         "name": "Webster Library",
-        "abreviation": "LB",
+        "abbreviation": "LB",
         "address": "1400 Blvd. De Maisonneuve Ouest, Montreal, Quebec H3G 2V8",
         "coordinates": {
           "lat": 45.496856674256634,
@@ -259,7 +259,7 @@
       },
       {
         "name": "Hall",
-        "abreviation": "H",
+        "abbreviation": "H",
         "indoorMapId": "67b674be13a4e9000b46cf2e",
         "address": "1455 Blvd. De Maisonneuve Ouest, Montreal, Quebec H3G 1M8",
         "coordinates": {
@@ -296,7 +296,7 @@
       },
       {
         "name": "John Molson School of Business",
-        "abreviation": "JMSB",
+        "abbreviation": "JMSB",
         "indoorMapId": "67b39ca55b54d7000b151bdb",
         "address": "1450 Guy St, Montreal, Quebec H3H 0A1",
         "coordinates": {
@@ -348,7 +348,7 @@
   },
   "loy": {
     "name": "Loyola",
-    "abreviation": "LOY",
+    "abbreviation": "LOY",
     "coordinates": {
       "lat": 45.45812810976341,
       "lng": -73.6393513063634
@@ -363,7 +363,7 @@
     "buildings": [
       {
         "name": "Central Building",
-        "abreviation": "CC",
+        "abbreviation": "CC",
         "indoorMapId": "67b544ea13a4e9000b46cf04",
         "address": "7141 Sherbrooke St W, Montreal, Quebec H4B 1R6",
         "coordinates": {
@@ -449,7 +449,7 @@
       },
       {
         "name": "Richard J. Renaud Science Complex",
-        "abreviation": "SP",
+        "abbreviation": "SP",
         "address": "3475 Rue West Broadway, Montr\u00e9al, QC H4B 2A7",
         "coordinates": {
           "lat": 45.45784653344979,
@@ -535,7 +535,7 @@
       },
       {
         "name": "Vanier Library",
-        "abreviation": "VL",
+        "abbreviation": "VL",
         "indoorMapId": "67c74fae8e15de000bed1a9a",
         "address": "7141 Sherbrooke St. W. Montreal, Quebec, Canada H4B 1R6",
         "coordinates": {
@@ -610,7 +610,7 @@
       },
       {
         "name": "Vanier Extension",
-        "abreviation": "VE",
+        "abbreviation": "VE",
         "indoorMapId": "67c74fae8e15de000bed1a9a",
         "address": "7141 Sherbrooke St. W. Montreal, Quebec, Canada H4B 1R6",
         "coordinates": {

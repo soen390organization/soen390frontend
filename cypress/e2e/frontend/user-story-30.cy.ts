@@ -15,16 +15,16 @@ describe('Map Search - Select Start and Destination Buildings', () => {
     cy.get('.material-symbols-outlined').contains('search').click();
 
     // Enter "Hall" in the start location input and press Enter
-    cy.get('input[placeholder="Choose starting point..."]').type('Hall{enter}');
 
-    // Wait for the first marker to be added (you might adjust this timing)
+    cy.get('input[placeholder="Choose starting point..."]').clear().type('Hall Building');
     cy.wait(3000);
+    cy.contains('li#start-item', 'Hall Building').click();
+    cy.wait(2000);
 
-    // Enter "JMSB" in the destination input and press Enter
-    cy.get('input[placeholder="Choose destination point..."]').type('JMSB{enter}', { force: true });
-
-    // Wait for the second marker to be added
+    cy.get('input[placeholder="Choose destination point..."]').clear().type('John Molson');
     cy.wait(3000);
+    cy.contains('li#destination-item', 'John Molson').click();
+    cy.wait(2000);
 
     // Verify that the start marker exists (adjust the selector if needed)
     cy.get('.gm-style img[src*="Icone_Verde.svg"]', { timeout: 10000 }).should('exist');
