@@ -137,28 +137,72 @@ export class CalendarService {
   }
 
   convertClassToAddress(classCode: string): { address: string; coordinates: google.maps.LatLng } {
-    const buildingcode = classCode.split(' ')[0];
+    var buildingCodeChars = classCode.split('').filter(char => char !== ' ');
+    buildingCodeChars = buildingCodeChars.filter(char => /[a-z0-9]/i.test(char));
+    var currentStringPos = 0;
+    var buildingCodeStr = '';
+    var isNumReached = false;
+    var handleables = [];
+    while (!isNumReached && currentStringPos < 2) {
+      if (
+        parseInt(buildingCodeChars[currentStringPos]) >= 1 &&
+        parseInt(buildingCodeChars[currentStringPos]) <= 9
+      ) {
+        isNumReached = true;
+      } else {
+        if (currentStringPos < buildingCodeChars.length - 1) {
+          if (
+            ((buildingCodeChars[currentStringPos] === 'S' ||
+              buildingCodeChars[currentStringPos] === 's') &&
+              buildingCodeChars[currentStringPos + 1] >= '1' &&
+              buildingCodeChars[currentStringPos + 1] <= '9') === true
+          ) {
+            if (currentStringPos === 0) {
+              handleables.push(
+                buildingCodeChars[currentStringPos].toString().toUpperCase()
+              );
+            } else {
+              handleables.push(
+                buildingCodeChars[currentStringPos - 1].toString().toUpperCase() +
+                buildingCodeChars[currentStringPos].toString().toUpperCase()
+              );
+            }
+            currentStringPos++;
+          } else {
+            buildingCodeStr = buildingCodeStr.concat(
+              buildingCodeChars[currentStringPos].toString().toUpperCase()
+            );
+            currentStringPos++;
+          }
+        }
+      }
+    }
+    if (buildingCodeStr !== '') {
+      handleables.push(buildingCodeStr.toString().toUpperCase());
+    }
 
     let googleMapLocation = {
       address: 'No Address',
       coordinates: null
     };
-
-    data.sgw.buildings.forEach((building) => {
-      if (building.abbreviation === buildingcode) {
-        googleMapLocation['address'] = building.address;
-        googleMapLocation['coordinates'] = building.coordinates;
-        googleMapLocation['image'] = building.image;
+    for (let buildingCodeStr of handleables) {
+      for (let building of data.sgw.buildings) {
+        if (building.abbreviation === buildingCodeStr) {
+          googleMapLocation['address'] = building.address;
+          googleMapLocation['coordinates'] = building.coordinates;
+          googleMapLocation['image'] = building.image;
+          return googleMapLocation;
+        }
       }
-    });
-    data.loy.buildings.forEach((building) => {
-      if (building.abbreviation === buildingcode) {
-        googleMapLocation['address'] = building.address;
-        googleMapLocation['coordinates'] = building.coordinates;
-        googleMapLocation['image'] = building.image;
+      for (let building of data.loy.buildings) {
+        if (building.abbreviation === buildingCodeStr) {
+          googleMapLocation['address'] = building.address;
+          googleMapLocation['coordinates'] = building.coordinates;
+          googleMapLocation['image'] = building.image;
+          return googleMapLocation;
+        }
       }
-    });
-
+    }
     return googleMapLocation;
   }
 
