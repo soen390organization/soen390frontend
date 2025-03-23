@@ -45,7 +45,7 @@ export class ShuttleService {
   public async calculateShuttleBusRoute(
     startAddress: string | google.maps.LatLng,
     destinationAddress: string | google.maps.LatLng,
-    render
+    render: boolean = false
   ) {
     const { startCampus, destinationCampus } = await this.fetchCoordinates(
       startAddress,

@@ -5,6 +5,7 @@ import { Step } from 'src/app/interfaces/step.interface';
 import Joi from 'joi';
 import { BehaviorSubject } from 'rxjs';
 import { ShuttleService } from '../shuttle/shuttle.service';
+import { GoogleMapLocation } from 'src/app/interfaces/google-map-location.interface';
 
 class MockPlacesService {
   constructor(public map: any) {}
@@ -46,14 +47,6 @@ describe('Directions Service', () => {
   let origin = 'Hall Building Concordia';
   let destination = 'John Molson School of Business';
   let mockRenderer: any;
-
-  interface Location {
-    title: string;
-    address: string;
-    coordinates: google.maps.LatLng;
-    image?: string;
-    marker?: google.maps.Marker;
-  }
 
   beforeEach(() => {
     // Global google mock for this suite (including places)
@@ -220,10 +213,11 @@ describe('Directions Service', () => {
 
   describe('getStartPoint()', () => {
     it('should return the correct start point as an observable', (done) => {
-      const mockLocation: Location = {
+      const mockLocation: GoogleMapLocation = {
         title: 'Start',
         address: '123 Street',
-        coordinates: new google.maps.LatLng(45.5017, -73.5673)
+        coordinates: new google.maps.LatLng(45.5017, -73.5673),
+        type: 'outdoor'
       };
 
       (service as any).startPoint$ = new BehaviorSubject<Location | null>(mockLocation);
@@ -237,10 +231,11 @@ describe('Directions Service', () => {
 
   describe('getDestinationPoint()', () => {
     it('should return the correct destination point as an observable', (done) => {
-      const mockLocation: Location = {
+      const mockLocation: GoogleMapLocation = {
         title: 'Destination',
         address: '456 Avenue',
-        coordinates: new google.maps.LatLng(45.505, -73.561)
+        coordinates: new google.maps.LatLng(45.505, -73.561),
+        type: 'outdoor'
       };
 
       (service as any).destinationPoint$ = new BehaviorSubject<Location | null>(mockLocation);
@@ -265,7 +260,11 @@ describe('Directions Service', () => {
 
       const result = await service.generateRoute(origin, destination, 'SHUTTLE');
 
-      expect(shuttleService.calculateShuttleBusRoute).toHaveBeenCalledWith(origin, destination);
+      expect(shuttleService.calculateShuttleBusRoute).toHaveBeenCalledWith(
+        origin,
+        destination,
+        false
+      );
       expect(result).toEqual(expectedResponse);
     });
   });
@@ -287,12 +286,14 @@ describe('Directions Service', () => {
         title: 'Test Start',
         address: 'Test Address',
         coordinates: {} as google.maps.LatLng,
+        type: 'outdoor',
         marker: mockMarker
       });
       (service as any).destinationPoint$.next({
         title: 'Test Dest',
         address: 'Test Address 2',
         coordinates: {} as google.maps.LatLng,
+        type: 'outdoor',
         marker: {
           setMap: jasmine.createSpy('setMap'),
           getPosition: () => ({ lat: () => 0, lng: () => 0 })
@@ -317,12 +318,14 @@ describe('Directions Service', () => {
         title: 'Test Dest',
         address: 'Test Address',
         coordinates: {} as google.maps.LatLng,
+        type: 'outdoor',
         marker: destMarker
       });
       (service as any).startPoint$.next({
         title: 'Test Start',
         address: 'Test Address 2',
         coordinates: {} as google.maps.LatLng,
+        type: 'outdoor',
         marker: {
           setMap: jasmine.createSpy('setMap'),
           getPosition: () => ({ lat: () => 0, lng: () => 0 })
@@ -433,10 +436,11 @@ describe('DirectionsService - Start/Destination Points and Observables', () => {
   });
 
   it('should return shortest route if it exists', () => {
-    (service as any).shortestRoute = { eta: '10 mins', distance: 5000 };
+    (service as any).shortestRoute = { eta: '10 mins', distance: 5000, mode: 'WALKING' };
     expect(service.getShortestRoute()).toEqual({
       eta: '10 mins',
-      distance: 5000
+      distance: 5000,
+      mode: 'WALKING'
     });
   });
 
@@ -451,12 +455,14 @@ describe('DirectionsService - Start/Destination Points and Observables', () => {
     (service as any).startPoint$.next({
       title: 'Start',
       address: 'Start Address',
-      coordinates: {} as google.maps.LatLng
+      coordinates: {} as google.maps.LatLng,
+      type: 'outdoor'
     });
     (service as any).destinationPoint$.next({
       title: 'Destination',
       address: 'Destination Address',
-      coordinates: {} as google.maps.LatLng
+      coordinates: {} as google.maps.LatLng,
+      type: 'outdoor'
     });
 
     service.hasBothPoints$.subscribe((hasBoth) => {

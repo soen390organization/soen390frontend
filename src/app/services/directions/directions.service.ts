@@ -174,7 +174,7 @@ export class DirectionsService {
     startAddress: string | google.maps.LatLng,
     destinationAddress: string | google.maps.LatLng,
     travelMode: google.maps.TravelMode = google.maps.TravelMode.WALKING,
-    render: boolean = true,
+    render: boolean = false,
     renderer: google.maps.DirectionsRenderer = this.directionsRenderer
   ): Promise<{
     steps: Step[];

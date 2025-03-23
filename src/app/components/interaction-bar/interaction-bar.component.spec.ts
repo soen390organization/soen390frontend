@@ -7,6 +7,7 @@ import { MapType, selectCurrentMap, selectSelectedCampus } from 'src/app/store/a
 import { PlacesService } from 'src/app/services/places/places.service';
 import { DirectionsService } from 'src/app/services/directions/directions.service';
 import { VisibilityService } from 'src/app/services/visibility.service';
+import { NavigationCoordinatorService } from 'src/app/services/navigation-coordinator.service';
 
 describe('InteractionBarComponent', () => {
   let component: InteractionBarComponent;
@@ -51,7 +52,8 @@ describe('InteractionBarComponent', () => {
         { provide: Store, useValue: mockStore },
         { provide: PlacesService, useValue: mockPlacesService },
         { provide: DirectionsService, useValue: mockDirectionsService },
-        { provide: VisibilityService, useValue: mockVisibilityService }
+        { provide: VisibilityService, useValue: mockVisibilityService },
+        { provide: NavigationCoordinatorService, useValue: { globalRoute$: of({ segments: [] }) } }
       ]
     }).compileComponents();
   });

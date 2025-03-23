@@ -9,10 +9,13 @@ import { IndoorDirectionsService } from 'src/app/services/indoor-directions/indo
 import { PlacesService } from 'src/app/services/places/places.service';
 import { CurrentLocationService } from 'src/app/services/current-location/current-location.service';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { GoogleMapLocation } from 'src/app/interfaces/google-map-location.interface';
+import { Store } from '@ngrx/store';
 
 describe('MapSearchComponent', () => {
   let component: MapSearchComponent;
   let fixture: ComponentFixture<MapSearchComponent>;
+  let store: jasmine.SpyObj<Store>;
 
   // Spies for the injected services
   let directionsServiceSpy: jasmine.SpyObj<DirectionsService>;
@@ -33,12 +36,11 @@ describe('MapSearchComponent', () => {
     // Ensure getDestinationPoint() returns an observable
     directionsServiceSpy.getStartPoint.and.returnValue(of(null));
     directionsServiceSpy.getDestinationPoint.and.returnValue(
-      of({ title: 'Default Destination', address: '', coordinates: null })
+      of({ title: 'Default Destination', address: '', coordinates: null, type: 'outdoor' })
     );
     indoorDirectionsServiceSpy = jasmine.createSpyObj('DirectionsService', [
       'setStartPoint',
-      'setDestinationPoint',
-      
+      'setDestinationPoint'
     ]);
     placesServiceSpy = jasmine.createSpyObj('PlacesService', ['getPlaceSuggestions']);
     currentLocationServiceSpy = jasmine.createSpyObj('CurrentLocationService', [
@@ -54,21 +56,26 @@ describe('MapSearchComponent', () => {
         MapSearchComponent
       ],
       providers: [
+        { provide: Store, useValue: store },
         { provide: DirectionsService, useValue: directionsServiceSpy },
         { provide: PlacesService, useValue: placesServiceSpy },
-        { provide: IndoorDirectionsService, useValue: indoorDirectionsServiceSpy},
+        { provide: IndoorDirectionsService, useValue: indoorDirectionsServiceSpy },
         {
           provide: CurrentLocationService,
           useValue: currentLocationServiceSpy
         }
       ]
     }).compileComponents();
+
+    store = jasmine.createSpyObj<Store>('Store', ['select', 'dispatch']);
+    store.select.and.returnValue(of(null)); // default selector return
   });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(MapSearchComponent);
     component = fixture.componentInstance;
     directionsServiceSpy.getDestinationPoint.and.returnValue(of(null)); // to solve setting auto-true value
+    store = TestBed.inject(Store) as jasmine.SpyObj<Store>;
     fixture.detectChanges();
   });
 
@@ -105,16 +112,18 @@ describe('MapSearchComponent', () => {
 
     it('should call placesService and set places when search query is not empty (start location)', async () => {
       const event = { target: { value: 'pizza' } };
-      const mockPlaces = [
+      const mockPlaces: GoogleMapLocation[] = [
         {
           title: 'Pizza Palace',
           address: '123 Main St',
-          coordinates: new google.maps.LatLng(10, 20)
+          coordinates: new google.maps.LatLng(10, 20),
+          type: 'outdoor'
         },
         {
           title: 'Pizza Haven',
           address: '456 Side St',
-          coordinates: new google.maps.LatLng(30, 40)
+          coordinates: new google.maps.LatLng(30, 40),
+          type: 'outdoor'
         }
       ];
 
@@ -129,11 +138,12 @@ describe('MapSearchComponent', () => {
 
     it('should call placesService and set places when search query is not empty (destination)', async () => {
       const event = { target: { value: 'museum' } };
-      const mockPlaces = [
+      const mockPlaces: GoogleMapLocation[] = [
         {
           title: 'Art Museum',
           address: '789 Park Ave',
-          coordinates: new google.maps.LatLng(10, 20)
+          coordinates: new google.maps.LatLng(10, 20),
+          type: 'outdoor'
         }
       ];
       placesServiceSpy.getPlaceSuggestions.and.returnValue(Promise.resolve(mockPlaces));
@@ -194,7 +204,8 @@ describe('MapSearchComponent', () => {
       expect(directionsServiceSpy.setStartPoint).toHaveBeenCalledWith({
         title: 'Your Location',
         address: '10, 20',
-        coordinates: jasmine.any(Object)
+        coordinates: jasmine.any(Object),
+        type: 'outdoor'
       });
     }));
 
@@ -217,7 +228,8 @@ describe('MapSearchComponent', () => {
       const selectedPlace = {
         title: 'Start Place',
         address: 'Somewhere',
-        coordinates: new google.maps.LatLng(10, 20)
+        coordinates: new google.maps.LatLng(10, 20),
+        type: 'outdoor' as 'outdoor'
       };
       component.places = [selectedPlace];
       directionsServiceSpy.setStartPoint.calls.reset();
@@ -234,7 +246,8 @@ describe('MapSearchComponent', () => {
       const selectedPlace = {
         title: 'Destination Place',
         address: 'Somewhere',
-        coordinates: new google.maps.LatLng(30, 40)
+        coordinates: new google.maps.LatLng(30, 40),
+        type: 'outdoor' as 'outdoor'
       };
       component.places = [selectedPlace];
       directionsServiceSpy.setDestinationPoint.calls.reset();
@@ -267,14 +280,16 @@ describe('MapSearchComponent', () => {
         of({
           title: 'Start Place',
           address: 'start address',
-          coordinates: dummyLatLng
+          coordinates: dummyLatLng,
+          type: 'outdoor'
         })
       );
       directionsServiceSpy.getDestinationPoint.and.returnValue(
         of({
           title: 'Destination Place',
           address: 'destination address',
-          coordinates: dummyLatLng
+          coordinates: dummyLatLng,
+          type: 'outdoor'
         })
       );
       // Set the spy for calculateShortestRoute to return a resolved promise.
@@ -283,7 +298,7 @@ describe('MapSearchComponent', () => {
         .and.returnValue(Promise.resolve());
       directionsServiceSpy.getShortestRoute = jasmine
         .createSpy('getShortestRoute')
-        .and.returnValue({ eta: '10 mins', distance: 5 });
+        .and.returnValue({ eta: '10 mins', distance: 5, mode: 'WALKING' });
 
       fixtureWithRoute = TestBed.createComponent(MapSearchComponent);
       componentWithRoute = fixtureWithRoute.componentInstance;
@@ -303,7 +318,8 @@ describe('MapSearchComponent', () => {
       );
       expect(componentWithRoute.currentRouteData).toEqual({
         eta: '10 mins',
-        distance: 5
+        distance: 5,
+        mode: 'WALKING'
       });
     });
 
@@ -332,7 +348,8 @@ describe('MapSearchComponent', () => {
         of({
           title: 'Destination Only',
           address: 'destination only address',
-          coordinates: dummyLatLng
+          coordinates: dummyLatLng,
+          type: 'outdoor'
         })
       );
       // Create a new component instance for this scenario.
@@ -398,5 +415,4 @@ describe('MapSearchComponent', () => {
     expect(indoorDirectionsServiceSpy.setDestinationPoint).toHaveBeenCalledWith(place);
     expect(directionsServiceSpy.setDestinationPoint).not.toHaveBeenCalled();
   });
-
 });
