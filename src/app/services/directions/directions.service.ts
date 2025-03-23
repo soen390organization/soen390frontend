@@ -282,10 +282,6 @@ export class DirectionsService {
     totalDistance: number;
     totalDuration: number;
   } {
-  private getTotalDistanceAndDuration(steps: Step[] | undefined): {
-    totalDistance: number;
-    totalDuration: number;
-  } {
     return (steps ?? []).reduce(
       (acc, step) => ({
         totalDistance: acc.totalDistance + (step.distance?.value ?? 0),
@@ -330,8 +326,6 @@ export class DirectionsService {
 
     // Filter out routes with a zero duration.
     const validRoutes = results.filter((route) => route.duration > 0);
-    // Filter out routes with a zero duration.
-    const validRoutes = results.filter((route) => route.duration > 0);
 
     if (validRoutes.length === 0) {
       // If all routes have a zero duration, handle this scenario as needed.
@@ -361,8 +355,9 @@ export class DirectionsService {
     mode: string
   ): Promise<{ eta: string | null; totalDistance: number }> {
     try {
-      let steps: Step[] | undefined;
+      let steps;
       let eta: string | null = null;
+      let totalDistance = 0;
 
       if (mode === 'SHUTTLE') {
         ({ steps, eta } = await this.shuttleService.calculateShuttleBusRoute(
@@ -370,12 +365,7 @@ export class DirectionsService {
           destination,
           false
         ));
-      if (mode === 'SHUTTLE') {
-        ({ steps, eta } = await this.shuttleService.calculateShuttleBusRoute(
-          start,
-          destination,
-          false
-        ));
+        totalDistance = this.getTotalDistanceAndDuration(steps).totalDistance + 8091;
       } else {
         ({ steps, eta } = await this.calculateRoute(
           start,
@@ -383,26 +373,14 @@ export class DirectionsService {
           this.getTravelMode(mode),
           false
         ));
-        ({ steps, eta } = await this.calculateRoute(
-          start,
-          destination,
-          this.getTravelMode(mode),
-          false
-        ));
+        totalDistance = this.getTotalDistanceAndDuration(steps).totalDistance;
       }
 
-      let { totalDistance } = this.getTotalDistanceAndDuration(steps);
-      if (eta === 'N/A') {
-        eta = null;
-      }
-      if (mode === 'SHUTTLE' && eta !== null) {
-        totalDistance += 8091;
-      }
-      return { eta: eta ?? null, totalDistance };
+      if (eta === 'N/A') eta = null;
+      return { eta, totalDistance };
     } catch (error) {
       console.error('Error calculating distance and ETA:', error);
-      console.error('Error calculating distance and ETA:', error);
-      return { eta: null, totalDistance: 0 }; // Fallback values
+      return { eta: null, totalDistance: 0 };
     }
   }
 
