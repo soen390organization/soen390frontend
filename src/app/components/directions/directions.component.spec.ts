@@ -114,9 +114,12 @@ describe('DirectionsComponent', () => {
         transit_details: undefined
       }
     ];
-    // Override calculateRoute to return our mockSteps and ETA.
-    mockDirectionsService.calculateRoute.and.returnValue(
-      Promise.resolve({ steps: mockSteps, eta: '6 mins' })
+
+    // Override the NavigationCoordinatorService's getCompleteRoute to return our expected instructions.
+    mockNavigationCoordinatorService.getCompleteRoute.and.returnValue(
+      Promise.resolve({
+        segments: [{ type: 'indoor', instructions: { steps: mockSteps, eta: '6 mins' } }]
+      })
     );
 
     await component.loadDirections('WALKING');
@@ -245,6 +248,9 @@ describe('DirectionsComponent', () => {
   });
 
   it('should handle empty response from calculateRoute', async () => {
+    mockNavigationCoordinatorService.getCompleteRoute.and.returnValue(
+      Promise.resolve({ segments: [{ type: 'indoor', instructions: { steps: [], eta: null } }] })
+    );
     mockDirectionsService.calculateRoute.and.returnValue(Promise.resolve({ steps: [], eta: null }));
     await component.loadDirections('WALKING');
     expect(component.steps).toEqual([]);
