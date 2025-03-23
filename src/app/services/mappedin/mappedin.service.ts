@@ -7,8 +7,7 @@ import { environment } from 'src/environments/environment';
 import { map } from 'cypress/types/bluebird';
 import { MapViewBuilder } from 'src/app/builders/map-view.builder';
 
-
-export interface BuildingData{
+export interface BuildingData {
   name: string;
   abbreviation: string;
   address: string;
@@ -59,6 +58,7 @@ export class MappedinService {
   }
 
   async initialize(container: HTMLElement): Promise<void> {
+    if (this.mapView) return; // Prevent re-initialization
     this.mappedInContainer = container;
 
     // Create buildings array for both campuses, filter for only MappedIn buildings
@@ -68,17 +68,19 @@ export class MappedinService {
     ].filter((building) => building.indoorMapId);
 
     // Iterate over each building, grab mapData from MappedIn, index the building data
-    await Promise.all(buildings.map(async (item) => {
-      let mapId = item.indoorMapId;
-      const mapData = await this.fetchMapData(mapId);
-  
-      this.campusMapData[mapId] = {
-        name: item.name,
-        abbreviation: item.abbreviation,
-        address: item.address,
-        mapData
-      };
-    }));
+    await Promise.all(
+      buildings.map(async (item) => {
+        let mapId = item.indoorMapId;
+        const mapData = await this.fetchMapData(mapId);
+
+        this.campusMapData[mapId] = {
+          name: item.name,
+          abbreviation: item.abbreviation,
+          address: item.address,
+          mapData
+        };
+      })
+    );
 
     this.setMapData('67b674be13a4e9000b46cf2e');
   }
@@ -96,14 +98,18 @@ export class MappedinService {
   }
 
   public async setMapData(mapId: string) {
+    if (mapId === this.mapId) return; // ← skip if it’s already active
+
     this.mapId = mapId;
     const mapData = this.campusMapData[mapId].mapData;
     this.mapData$.next(mapData);
 
     this.mapView = await new MapViewBuilder()
-      .setContainer(this.mappedInContainer)
+      .setContainer(this.mappedInContainer!)
       .setMapData(mapData)
       .build();
+
+    this.mapView$.next(this.mapView);
   }
 
   public getMapData(): Observable<MapData | null> {
@@ -116,5 +122,20 @@ export class MappedinService {
 
   public getMapId(): string {
     return this.mapId;
+  }
+
+  public clearNavigation(): void {
+    if (
+      this.mapView &&
+      this.mapView.Navigation &&
+      typeof this.mapView.Navigation.clear === 'function'
+    ) {
+      try {
+        this.mapView.Navigation.clear();
+        console.log('Indoor navigation cleared.');
+      } catch (error) {
+        console.error('Error clearing indoor navigation:', error);
+      }
+    }
   }
 }

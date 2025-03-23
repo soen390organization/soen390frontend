@@ -8,7 +8,9 @@ import rawIconMapping from 'src/assets/icon-mapping.json';
 import { firstValueFrom, take } from 'rxjs';
 import { VisibilityService } from 'src/app/services/visibility.service';
 import { NavigationCoordinatorService } from 'src/app/services/navigation-coordinator.service';
-import { Location, CompleteRoute } from 'src/app/interfaces/routing-strategy.interface';
+import { CompleteRoute } from 'src/app/interfaces/routing-strategy.interface';
+import { Location } from 'src/app/interfaces/location.interface';
+
 const iconMapping = rawIconMapping as IconMapping;
 
 /// <reference types="google.maps" />
@@ -29,6 +31,7 @@ export class DirectionsComponent implements OnInit, OnDestroy {
   currentWatchId: string | null = null;
   hasArrived: boolean = false; // New boolean to track arrival
   showAllSteps: boolean = true;
+  private endNavigationSubscription: any;
 
   private readonly stepCompletionThreshold = 30;
 
@@ -51,16 +54,15 @@ export class DirectionsComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    // this.waitForGoogleMaps().then(() => {
-    //   console.log("Google Maps is ready! Initializing directions...");
-    //   this.setMode('WALKING'); // Load directions only after Google Maps is ready
-    //   this.startWatchingLocation();
-    // });
     this.directionsService.hasBothPoints$.subscribe((hasBoth) => {
       if (hasBoth) {
         this.loadDirections('WALKING');
         this.startWatchingLocation();
       }
+    });
+
+    this.endNavigationSubscription = this.visibilityService.endNavigation.subscribe(() => {
+      this.onEndClick();
     });
   }
 
@@ -95,6 +97,9 @@ export class DirectionsComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     if (this.currentWatchId) {
       this.currentLocationService.clearWatch(this.currentWatchId);
+    }
+    if (this.endNavigationSubscription) {
+      this.endNavigationSubscription.unsubscribe();
     }
   }
 
@@ -156,21 +161,26 @@ export class DirectionsComponent implements OnInit, OnDestroy {
 
   async loadDirections(mode: string) {
     this.isLoading = true;
-    this.hasArrived = false; // Reset arrival status when loading new directions
+    this.hasArrived = false;
     const start = await firstValueFrom(this.directionsService.getStartPoint());
     const destination = await firstValueFrom(this.directionsService.getDestinationPoint());
-    console.log(await this.directionsService.calculateDistanceETA(start.address, destination.address, mode))
+    if (!start || !destination) {
+      console.error('Missing start or destination.');
+      this.isLoading = false;
+      return;
+    }
+    console.log(
+      await this.directionsService.calculateDistanceETA(start.address, destination.address, mode)
+    );
 
     try {
-      // Use the coordinator to get the complete route.
-      // We assume that for now both locations are outdoor.
+      // Directly use the objects obtained from the getters.
       const completeRoute: CompleteRoute = await this.navigationCoordinator.getCompleteRoute(
-        { type: 'outdoor', address: start.address, coordinates: start.coordinates },
-        { type: 'outdoor', address: destination.address, coordinates: destination.coordinates },
+        start,
+        destination,
         mode
       );
       console.log('Complete route:', completeRoute);
-      // Extract steps and eta from the first segment's instructions.
       const { steps, eta } = completeRoute.segments[0].instructions;
       this.steps = steps;
       this.eta = eta;

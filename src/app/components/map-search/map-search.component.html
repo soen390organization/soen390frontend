@@ -143,26 +143,13 @@
             {{ currentRouteData?.eta || '' }}
           </span>
           <span class="text-gray-500 font-bold ml-2">
-            {{
-              currentRouteData?.distance !== null
-                ? '(' + currentRouteData.distance + ' m)'
-                : ''
-            }}
+            {{ currentRouteData?.distance !== null ? '(' + currentRouteData.distance + ' m)' : '' }}
           </span>
         </div>
         <button
           class="bg-[#912338] text-white py-3 px-8 rounded-full text-lg font-semibold"
-          [ngClass]="{
-            'opacity-50 cursor-not-allowed':
-              (this.directionsService.getStartPoint() | async) === null ||
-              (this.directionsService.getDestinationPoint() | async) === null ||
-              (enableStart$ | async) === false
-          }"
-          [disabled]="
-            (this.directionsService.getStartPoint() | async) === null ||
-            (this.directionsService.getDestinationPoint() | async) === null ||
-            (enableStart$ | async) === false
-          "
+          [ngClass]="{ 'opacity-50 cursor-not-allowed': !(isStartAndDestinationValid$ | async) }"
+          [disabled]="!(isStartAndDestinationValid$ | async)"
           (click)="onStartClick()"
         >
           Start
