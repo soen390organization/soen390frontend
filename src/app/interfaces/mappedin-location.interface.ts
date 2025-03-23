@@ -1,6 +1,6 @@
-import { Location } from "src/app/interfaces/location.interface";
+import { Location } from 'src/app/interfaces/location.interface';
 
 export interface MappedInLocation extends Location {
-    indoorMapId: string;
-    room: any;
+  indoorMapId: string;
+  room: any;
 }
