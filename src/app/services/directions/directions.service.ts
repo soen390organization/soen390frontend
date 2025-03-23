@@ -282,6 +282,10 @@ export class DirectionsService {
     totalDistance: number;
     totalDuration: number;
   } {
+  private getTotalDistanceAndDuration(steps: Step[] | undefined): {
+    totalDistance: number;
+    totalDuration: number;
+  } {
     return (steps ?? []).reduce(
       (acc, step) => ({
         totalDistance: acc.totalDistance + (step.distance?.value ?? 0),
@@ -326,7 +330,13 @@ export class DirectionsService {
 
     // Filter out routes with a zero duration.
     const validRoutes = results.filter((route) => route.duration > 0);
+    // Filter out routes with a zero duration.
+    const validRoutes = results.filter((route) => route.duration > 0);
 
+    if (validRoutes.length === 0) {
+      // If all routes have a zero duration, handle this scenario as needed.
+      return { eta: null, distance: 0, mode: 'No valid route' };
+    }
     if (validRoutes.length === 0) {
       // If all routes have a zero duration, handle this scenario as needed.
       return { eta: null, distance: 0, mode: 'No valid route' };
@@ -360,7 +370,19 @@ export class DirectionsService {
           destination,
           false
         ));
+      if (mode === 'SHUTTLE') {
+        ({ steps, eta } = await this.shuttleService.calculateShuttleBusRoute(
+          start,
+          destination,
+          false
+        ));
       } else {
+        ({ steps, eta } = await this.calculateRoute(
+          start,
+          destination,
+          this.getTravelMode(mode),
+          false
+        ));
         ({ steps, eta } = await this.calculateRoute(
           start,
           destination,
@@ -370,11 +392,15 @@ export class DirectionsService {
       }
 
       let { totalDistance } = this.getTotalDistanceAndDuration(steps);
-      if (mode == 'SHUTTLE') {
+      if (eta === 'N/A') {
+        eta = null;
+      }
+      if (mode === 'SHUTTLE' && eta !== null) {
         totalDistance += 8091;
       }
       return { eta: eta ?? null, totalDistance };
     } catch (error) {
+      console.error('Error calculating distance and ETA:', error);
       console.error('Error calculating distance and ETA:', error);
       return { eta: null, totalDistance: 0 }; // Fallback values
     }
