@@ -4,28 +4,60 @@ import { MapSearchComponent } from './map-search.component';
 import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+
+/* Services */
 import { DirectionsService } from 'src/app/services/directions/directions.service';
 import { IndoorDirectionsService } from 'src/app/services/indoor-directions/indoor-directions.service';
 import { PlacesService } from 'src/app/services/places/places.service';
 import { CurrentLocationService } from 'src/app/services/current-location/current-location.service';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { MappedinService } from 'src/app/services/mappedin/mappedin.service';
+import { NavigationCoordinatorService } from 'src/app/services/navigation-coordinator.service';
+import { VisibilityService } from 'src/app/services/visibility.service';
+
+/* Interfaces */
 import { GoogleMapLocation } from 'src/app/interfaces/google-map-location.interface';
+
+/* Store utils */
 import { Store } from '@ngrx/store';
+import { setMapType, MapType } from 'src/app/store/app';
+
+/* Other */
+import { HomePage } from 'src/app/home/home.page';
 
 describe('MapSearchComponent', () => {
   let component: MapSearchComponent;
   let fixture: ComponentFixture<MapSearchComponent>;
-  let store: jasmine.SpyObj<Store>;
+  let store: jasmine.SpyObj<Store<any>>;
 
   // Spies for the injected services
   let directionsServiceSpy: jasmine.SpyObj<DirectionsService>;
   let indoorDirectionsServiceSpy: jasmine.SpyObj<IndoorDirectionsService>;
   let placesServiceSpy: jasmine.SpyObj<PlacesService>;
   let currentLocationServiceSpy: jasmine.SpyObj<CurrentLocationService>;
+  let mappedInServiceSpy: jasmine.SpyObj<MappedinService>;
+  let coordinatorSpy: jasmine.SpyObj<NavigationCoordinatorService>;
+  let visibilityServiceFake: any; // custom fake with enableStart property
 
   beforeEach(async () => {
-    // Create spies
+    // Create spies for DirectionsService with required methods.
     directionsServiceSpy = jasmine.createSpyObj('DirectionsService', [
+      'setStartPoint',
+      'setDestinationPoint',
+      'getStartPoint',
+      'getDestinationPoint',
+      'clearStartPoint',
+      'clearDestinationPoint',
+      'calculateShortestRoute',
+      'getShortestRoute'
+    ]);
+    directionsServiceSpy.getStartPoint.and.returnValue(of(null));
+    directionsServiceSpy.getDestinationPoint.and.returnValue(
+      of({ title: 'Default Destination', address: '', coordinates: null, type: 'outdoor' })
+    );
+
+    // Create spy for IndoorDirectionsService.
+    indoorDirectionsServiceSpy = jasmine.createSpyObj('IndoorDirectionsService', [
       'setStartPoint',
       'setDestinationPoint',
       'getStartPoint',
@@ -33,26 +65,42 @@ describe('MapSearchComponent', () => {
       'clearStartPoint',
       'clearDestinationPoint'
     ]);
-    // Ensure getDestinationPoint() returns an observable
-    directionsServiceSpy.getStartPoint.and.returnValue(of(null));
-    directionsServiceSpy.getDestinationPoint.and.returnValue(
-      of({ title: 'Default Destination', address: '', coordinates: null, type: 'outdoor' })
-    );
-    indoorDirectionsServiceSpy = jasmine.createSpyObj('DirectionsService', [
-      'setStartPoint',
-      'setDestinationPoint'
-    ]);
+    indoorDirectionsServiceSpy.getStartPoint.and.returnValue(of(null));
+    indoorDirectionsServiceSpy.getDestinationPoint.and.returnValue(of(null));
+
     placesServiceSpy = jasmine.createSpyObj('PlacesService', ['getPlaceSuggestions']);
     currentLocationServiceSpy = jasmine.createSpyObj('CurrentLocationService', [
       'getCurrentLocation'
     ]);
+
+    mappedInServiceSpy = jasmine.createSpyObj('MappedinService', ['getMapId', 'setMapData']);
+    // For testing, assume the default map id is 'defaultMap'
+    mappedInServiceSpy.getMapId.and.returnValue('defaultMap');
+
+    coordinatorSpy = jasmine.createSpyObj('NavigationCoordinatorService', ['getCompleteRoute']);
+    // Return a valid CompleteRoute (with segments array) for the coordinator.
+    coordinatorSpy.getCompleteRoute.and.returnValue(
+      Promise.resolve({ segments: [{ type: 'indoor', instructions: 'dummy instructions' }] })
+    );
+
+    // Create a custom fake for VisibilityService with an enableStart property.
+    visibilityServiceFake = {
+      toggleDirectionsComponent: jasmine.createSpy('toggleDirectionsComponent'),
+      togglePOIsComponent: jasmine.createSpy('togglePOIsComponent'),
+      toggleStartButton: jasmine.createSpy('toggleStartButton'),
+      triggerEndNavigation: jasmine.createSpy('triggerEndNavigation'),
+      enableStart: of(true)
+    };
+
+    store = jasmine.createSpyObj('Store', ['select', 'dispatch']);
+    store.select.and.returnValue(of(null));
 
     await TestBed.configureTestingModule({
       imports: [
         IonicModule,
         CommonModule,
         FormsModule,
-        BrowserAnimationsModule, // Needed if testing animations
+        BrowserAnimationsModule,
         MapSearchComponent
       ],
       providers: [
@@ -60,22 +108,19 @@ describe('MapSearchComponent', () => {
         { provide: DirectionsService, useValue: directionsServiceSpy },
         { provide: PlacesService, useValue: placesServiceSpy },
         { provide: IndoorDirectionsService, useValue: indoorDirectionsServiceSpy },
-        {
-          provide: CurrentLocationService,
-          useValue: currentLocationServiceSpy
-        }
+        { provide: CurrentLocationService, useValue: currentLocationServiceSpy },
+        { provide: MappedinService, useValue: mappedInServiceSpy },
+        { provide: NavigationCoordinatorService, useValue: coordinatorSpy },
+        { provide: VisibilityService, useValue: visibilityServiceFake }
       ]
     }).compileComponents();
-
-    store = jasmine.createSpyObj<Store>('Store', ['select', 'dispatch']);
-    store.select.and.returnValue(of(null)); // default selector return
   });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(MapSearchComponent);
     component = fixture.componentInstance;
-    directionsServiceSpy.getDestinationPoint.and.returnValue(of(null)); // to solve setting auto-true value
-    store = TestBed.inject(Store) as jasmine.SpyObj<Store>;
+    // Reset destination to null by default.
+    directionsServiceSpy.getDestinationPoint.and.returnValue(of(null));
     fixture.detectChanges();
   });
 
@@ -89,14 +134,19 @@ describe('MapSearchComponent', () => {
     });
 
     it('should toggle search visibility', () => {
-      // Initially false
+      // Stub HomePage prototype methods to avoid side effects.
+      spyOn(HomePage.prototype, 'showSearch');
+      spyOn(HomePage.prototype, 'hideSearch');
+
       expect(component.isSearchVisible).toBeFalse();
 
       component.toggleSearch();
       expect(component.isSearchVisible).toBeTrue();
+      expect(HomePage.prototype.showSearch).toHaveBeenCalled();
 
       component.toggleSearch();
       expect(component.isSearchVisible).toBeFalse();
+      expect(HomePage.prototype.hideSearch).toHaveBeenCalled();
     });
   });
 
@@ -175,6 +225,7 @@ describe('MapSearchComponent', () => {
       expect(component.startLocationInput).toBe('');
       expect(component.clearList).toHaveBeenCalled();
       expect(directionsServiceSpy.clearStartPoint).toHaveBeenCalled();
+      expect(indoorDirectionsServiceSpy.clearStartPoint).toHaveBeenCalled();
     });
 
     it('should clear the destination input when clearDestinationInput() is called', () => {
@@ -187,18 +238,18 @@ describe('MapSearchComponent', () => {
       expect(component.destinationLocationInput).toBe('');
       expect(component.clearList).toHaveBeenCalled();
       expect(directionsServiceSpy.clearDestinationPoint).toHaveBeenCalled();
+      expect(indoorDirectionsServiceSpy.clearDestinationPoint).toHaveBeenCalled();
     });
   });
 
   describe('onSetUsersLocationAsStart()', () => {
     it('should retrieve current location and set start point via DirectionsService', fakeAsync(() => {
-      // Mock the service to resolve a location
       currentLocationServiceSpy.getCurrentLocation.and.returnValue(
         Promise.resolve({ lat: 10, lng: 20 })
       );
 
       component.onSetUsersLocationAsStart();
-      tick(); // Resolve the Promise
+      tick();
 
       expect(currentLocationServiceSpy.getCurrentLocation).toHaveBeenCalled();
       expect(directionsServiceSpy.setStartPoint).toHaveBeenCalledWith({
@@ -207,12 +258,12 @@ describe('MapSearchComponent', () => {
         coordinates: jasmine.any(Object),
         type: 'outdoor'
       });
+      expect(store.dispatch).toHaveBeenCalled();
     }));
 
     it('should throw an error if current location is null', async () => {
-      // Mock the service to return null
       currentLocationServiceSpy.getCurrentLocation.and.returnValue(Promise.resolve(null));
-      spyOn(console, 'error'); // to suppress or check error logs
+      spyOn(console, 'error');
 
       await expectAsync(component.onSetUsersLocationAsStart()).toBeRejectedWithError(
         'Current location is null.'
@@ -221,9 +272,6 @@ describe('MapSearchComponent', () => {
   });
 
   describe('Keyboard "enter" handling', () => {
-    // These tests simulate pressing enter in the input fields to set start/destination
-    // e.g., (keyup.enter)="directionsService.setStartPoint(places[0]); clearList()"
-
     it('should set start point on enter if places is not empty', () => {
       const selectedPlace = {
         title: 'Start Place',
@@ -234,7 +282,7 @@ describe('MapSearchComponent', () => {
       component.places = [selectedPlace];
       directionsServiceSpy.setStartPoint.calls.reset();
 
-      // Simulate the (keyup.enter) logic
+      // Simulate keyup.enter logic.
       directionsServiceSpy.setStartPoint(component.places[0]);
       component.clearList();
 
@@ -252,7 +300,7 @@ describe('MapSearchComponent', () => {
       component.places = [selectedPlace];
       directionsServiceSpy.setDestinationPoint.calls.reset();
 
-      // Simulate the (keyup.enter) logic
+      // Simulate keyup.enter logic.
       directionsServiceSpy.setDestinationPoint(component.places[0]);
       component.clearList();
 
@@ -265,7 +313,7 @@ describe('MapSearchComponent', () => {
     let componentWithRoute: MapSearchComponent;
     let fixtureWithRoute: ComponentFixture<MapSearchComponent>;
 
-    // Define a dummy google.maps.LatLng object for testing purposes.
+    // Dummy google.maps.LatLng for testing.
     const dummyLatLng = {
       equals: (other: any) => true,
       lat: () => 10,
@@ -275,7 +323,6 @@ describe('MapSearchComponent', () => {
     } as google.maps.LatLng;
 
     beforeEach(() => {
-      // Set up the spies to return valid start and destination points.
       directionsServiceSpy.getStartPoint.and.returnValue(
         of({
           title: 'Start Place',
@@ -292,13 +339,16 @@ describe('MapSearchComponent', () => {
           type: 'outdoor'
         })
       );
-      // Set the spy for calculateShortestRoute to return a resolved promise.
-      directionsServiceSpy.calculateShortestRoute = jasmine
-        .createSpy('calculateShortestRoute')
-        .and.returnValue(Promise.resolve());
-      directionsServiceSpy.getShortestRoute = jasmine
-        .createSpy('getShortestRoute')
-        .and.returnValue({ eta: '10 mins', distance: 5, mode: 'WALKING' });
+
+      // Return a promise that resolves to a route object.
+      directionsServiceSpy.calculateShortestRoute.and.returnValue(
+        Promise.resolve({ eta: '10 mins', distance: 5, mode: 'WALKING' })
+      );
+      directionsServiceSpy.getShortestRoute.and.returnValue({
+        eta: '10 mins',
+        distance: 5,
+        mode: 'WALKING'
+      });
 
       fixtureWithRoute = TestBed.createComponent(MapSearchComponent);
       componentWithRoute = fixtureWithRoute.componentInstance;
@@ -325,9 +375,7 @@ describe('MapSearchComponent', () => {
 
     it('should handle error in calculateShortestRoute gracefully', fakeAsync(() => {
       const error = new Error('Route calculation failed');
-      // Simulate a rejected promise in calculateShortestRoute.
       directionsServiceSpy.calculateShortestRoute.and.returnValue(Promise.reject(error));
-      // Create a new instance for this error case.
       const errorFixture = TestBed.createComponent(MapSearchComponent);
       const errorComponent = errorFixture.componentInstance;
       spyOn(console, 'error');
@@ -335,14 +383,11 @@ describe('MapSearchComponent', () => {
       tick();
       flushMicrotasks();
       expect(console.error).toHaveBeenCalledWith('Error calculating route:', error);
-      // currentRouteData should remain null if route calculation fails.
       expect(errorComponent.currentRouteData).toBeNull();
     }));
 
     it('should not call calculateShortestRoute if one of the points is null', fakeAsync(() => {
-      // Reset the spy calls so previous calls don't affect this test.
       directionsServiceSpy.calculateShortestRoute.calls.reset();
-      // Simulate scenario where the start point is null.
       directionsServiceSpy.getStartPoint.and.returnValue(of(null));
       directionsServiceSpy.getDestinationPoint.and.returnValue(
         of({
@@ -352,67 +397,58 @@ describe('MapSearchComponent', () => {
           type: 'outdoor'
         })
       );
-      // Create a new component instance for this scenario.
       const incompleteFixture = TestBed.createComponent(MapSearchComponent);
       const incompleteComponent = incompleteFixture.componentInstance;
       incompleteFixture.detectChanges();
       tick();
       flushMicrotasks();
       expect(directionsServiceSpy.calculateShortestRoute).not.toHaveBeenCalled();
-      // Even though the combineLatest branch doesn't run, the destination observable subscription should set its value.
       expect(incompleteComponent.destinationLocationInput).toBe('Destination Only');
     }));
   });
 
   describe('onStartClick()', () => {
-    it('should toggle components, show directions, and toggle search', () => {
-      // Access private members using type assertions
+    it('should toggle components, and toggle search', () => {
+      // Access private members via type assertions.
       const visibilityService = (component as any).visibilityService;
       const directionsService = (component as any).directionsService;
 
-      spyOn(visibilityService, 'toggleDirectionsComponent');
-      spyOn(visibilityService, 'togglePOIsComponent');
-
-      // Patch the directionsService with a dummy showDirections if it's not defined.
       if (!directionsService.showDirections) {
         directionsService.showDirections = () => {};
       }
-      spyOn(directionsService, 'showDirections');
 
       spyOn(component, 'toggleSearch').and.callThrough();
 
-      // Set initial flag value
       component.isSearchVisible = false;
-
-      // Call the method under test
       component.onStartClick();
 
-      // Verify that the methods were called
       expect(visibilityService.toggleDirectionsComponent).toHaveBeenCalled();
       expect(visibilityService.togglePOIsComponent).toHaveBeenCalled();
-      expect(directionsService.showDirections).toHaveBeenCalled();
       expect(component.toggleSearch).toHaveBeenCalled();
-
-      // Verify that toggleSearch toggled the flag as expected
       expect(component.isSearchVisible).toBeTrue();
     });
   });
 
-  it('should update startLocationInput and call indoorDirectionService.setStartPoint when indoorMapId is provided', () => {
-    const place = { title: 'Office', indoorMapId: 'indoor123' };
-    component.setStart(place);
+  it('should update startLocationInput and call indoorDirectionService.setStartPoint when indoorMapId is provided', async () => {
+    const place = { title: 'Office', indoorMapId: 'indoor123', type: 'indoor' };
+    // Simulate that the current map is different so that setMapData is called.
+    mappedInServiceSpy.getMapId.and.returnValue('differentMap');
+    await component.setStart(place);
 
     expect(component.startLocationInput).toBe('Office');
     expect(indoorDirectionsServiceSpy.setStartPoint).toHaveBeenCalledWith(place);
     expect(directionsServiceSpy.setStartPoint).not.toHaveBeenCalled();
+    expect(mappedInServiceSpy.setMapData).toHaveBeenCalledWith('indoor123');
   });
 
-  it('should update destinationLocationInput and call indoorDirectionService.setDestinationPoint when indoorMapId is provided', () => {
-    const place = { title: 'Mall', indoorMapId: 'indoor567' };
-    component.setDestination(place);
+  it('should update destinationLocationInput and call indoorDirectionService.setDestinationPoint when indoorMapId is provided', async () => {
+    const place = { title: 'Mall', indoorMapId: 'indoor567', type: 'indoor' };
+    mappedInServiceSpy.getMapId.and.returnValue('differentMap');
+    await component.setDestination(place);
 
     expect(component.destinationLocationInput).toBe('Mall');
     expect(indoorDirectionsServiceSpy.setDestinationPoint).toHaveBeenCalledWith(place);
     expect(directionsServiceSpy.setDestinationPoint).not.toHaveBeenCalled();
+    expect(mappedInServiceSpy.setMapData).toHaveBeenCalledWith('indoor567');
   });
 });
