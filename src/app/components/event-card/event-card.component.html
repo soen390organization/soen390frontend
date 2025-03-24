@@ -27,9 +27,8 @@
           alt="event"
         />
         <div class="mt-2">
-          <h3 class="text-left text-lg font-bold text-gray-800">
+          <h3 class="truncate text-left text-lg font-bold text-gray-800">
             {{ event.title.split(' ')[0] }} {{ event.type }}
-            {{ event.title?.length > 22 ? '...' : '' }}
           </h3>
           <p class="text-left truncate w-full text-sm text-gray-600">
             {{ event.mappedInLoc.room }} - {{ event.googleLoc.address }}
