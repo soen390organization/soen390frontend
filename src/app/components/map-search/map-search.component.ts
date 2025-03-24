@@ -12,7 +12,7 @@ import { VisibilityService } from 'src/app/services/visibility.service';
 import { combineLatest, firstValueFrom, Observable } from 'rxjs';
 import { filter, take } from 'rxjs/operators';
 import { Store } from '@ngrx/store';
-import { setMapType, MapType } from 'src/app/store/app';
+import { setMapType, MapType, setShowRoute } from 'src/app/store/app';
 import { MappedinService } from 'src/app/services/mappedin/mappedin.service';
 import { NavigationCoordinatorService } from 'src/app/services/navigation-coordinator.service';
 import { IndoorDirectionsService } from 'src/app/services/indoor-directions/indoor-directions.service';
@@ -163,39 +163,60 @@ export class MapSearchComponent implements OnInit {
   }
 
   async onStartClick(): Promise<void> {
+    this.store.dispatch(setShowRoute({ show: true }));
     this.visibilityService.toggleDirectionsComponent();
     this.visibilityService.togglePOIsComponent();
     this.visibilityService.toggleStartButton();
     this.toggleSearch();
 
     // Get indoor selections as observables.
-    const indoorStart$ = this.indoorDirectionService.getStartPoint();
-    const indoorDestination$ = this.indoorDirectionService.getDestinationPoint();
+    // const indoorStart$ = this.indoorDirectionService.getStartPoint();
+    // const indoorDestination$ = this.indoorDirectionService.getDestinationPoint();
 
-    combineLatest([indoorStart$, indoorDestination$])
-      .pipe(
-        map(([s, d]) => ({ s, d })),
-        take(1)
-      )
-      .subscribe(({ s, d }) => {
-        if (s && d && s.indoorMapId && d.indoorMapId) {
-          // Delegate indoor routing to the coordinator.
-          console.log('Indoor navigation requested:', s, d);
-          this.coordinator
-            .getCompleteRoute(s, d, 'WALKING')
-            .then((completeRoute) => {
-              console.log('Indoor navigation complete route:', completeRoute);
-              // The indoor strategy is expected to handle route drawing.
-            })
-            .catch((error) => console.error('Error rendering indoor navigation:', error));
-        } else {
-          // Fallback: use outdoor directions.
-          console.error('Indoor routing not available. Fallback to outdoor routing.');
-        }
-      });
+    // PROPOSED CHANGES
+    combineLatest([
+      this.indoorDirectionService.getStartPoint(),
+      this.indoorDirectionService.getDestinationPoint(),
+      this.directionsService.getStartPoint(),
+      this.directionsService.getDestinationPoint()
+    ])
+    .subscribe(async ([indoorStart, indoorDestination, outdoorStart, outdoorDestination]) => {
+      if (outdoorStart && outdoorDestination) {
+        this.directionsService.generateRoute(outdoorStart.address, outdoorDestination.address);
+      } else if (outdoorStart && indoorDestination) {
+        this.directionsService.generateRoute(outdoorStart.address, indoorDestination.address);
+      } else if (indoorStart && outdoorDestination) {
+        this.directionsService.generateRoute(indoorStart.address, outdoorDestination.address);
+      } else if (indoorStart && indoorDestination && indoorStart.address !== indoorDestination.address) {
+        this.directionsService.generateRoute(indoorStart.address, indoorDestination.address);
+      }
+    });
+
+    // combineLatest([indoorStart$, indoorDestination$])
+    //   .pipe(
+    //     map(([s, d]) => ({ s, d })),
+    //     take(1)
+    //   )
+    //   .subscribe(({ s, d }) => {
+    //     if (s && d && s.indoorMapId && d.indoorMapId) {
+    //       // Delegate indoor routing to the coordinator.
+    //       console.log('Indoor navigation requested:', s, d);
+    //       this.coordinator
+    //         .getCompleteRoute(s, d, 'WALKING')
+    //         .then((completeRoute) => {
+    //           console.log('Indoor navigation complete route:', completeRoute);
+    //           // The indoor strategy is expected to handle route drawing.
+    //         })
+    //         .catch((error) => console.error('Error rendering indoor navigation:', error));
+    //     } else {
+    //       // Fallback: use outdoor directions.
+    //       console.error('Indoor routing not available. Fallback to outdoor routing.');
+    //     }
+    //   });
   }
 
   clearStartInput() {
+    // this.store.dispatch(setShowRoute({ show: false }));
     this.startLocationInput = '';
     this.clearList();
     this.directionsService.clearStartPoint();
@@ -205,6 +226,7 @@ export class MapSearchComponent implements OnInit {
   }
 
   clearDestinationInput() {
+    // this.store.dispatch(setShowRoute({ show: false }));
     this.destinationLocationInput = '';
     this.clearList();
     this.directionsService.clearDestinationPoint();
@@ -228,9 +250,9 @@ export class MapSearchComponent implements OnInit {
       console.log('Setting start point for indoor:', place);
       this.indoorDirectionService.setStartPoint(place);
       this.store.dispatch(setMapType({ mapType: MapType.Indoor }));
-      if (place.indoorMapId !== this.mappedInService.getMapId()) {
-        await this.mappedInService.setMapData(place.indoorMapId);
-      }
+      // if (place.indoorMapId !== this.mappedInService.getMapId()) {
+      //   await this.mappedInService.setMapData(place.indoorMapId);
+      // }
     } else {
       this.directionsService.setStartPoint(place);
       this.store.dispatch(setMapType({ mapType: MapType.Outdoor }));
@@ -243,9 +265,9 @@ export class MapSearchComponent implements OnInit {
     if (place.type === 'indoor') {
       this.indoorDirectionService.setDestinationPoint(place);
       this.store.dispatch(setMapType({ mapType: MapType.Indoor }));
-      if (place.indoorMapId !== this.mappedInService.getMapId()) {
-        await this.mappedInService.setMapData(place.indoorMapId);
-      }
+      // if (place.indoorMapId !== this.mappedInService.getMapId()) {
+      //   await this.mappedInService.setMapData(place.indoorMapId);
+      // }
     } else {
       this.directionsService.setDestinationPoint(place);
       this.store.dispatch(setMapType({ mapType: MapType.Outdoor }));

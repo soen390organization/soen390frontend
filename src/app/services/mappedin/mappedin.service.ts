@@ -100,9 +100,9 @@ export class MappedinService {
   public async setMapData(mapId: string) {
     if (mapId === this.mapId) return; // ← skip if it’s already active
 
-    this.mapId = mapId;
     const mapData = this.campusMapData[mapId].mapData;
     this.mapData$.next(mapData);
+    this.mapId = mapId;
 
     this.mapView = await new MapViewBuilder()
       .setContainer(this.mappedInContainer!)
