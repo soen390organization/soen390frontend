@@ -2,10 +2,11 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, of, switchMap } from 'rxjs';
 import { getAuth, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
-import { Location } from 'src/app/interfaces/location.interface';
-import data from 'src/assets/concordia-data.json';
+import { ConcordiaDataService } from "src/app/services/concordia-data.service"
 import { EventInfo } from 'src/app/interfaces/event-info.interface';
 import { EventType } from 'src/app/enums/event-type.enum';
+import { GoogleMapLocation } from 'src/app/interfaces/google-map-location.interface';
+import { MappedinService } from '../mappedin/mappedin.service';
 
 @Injectable({
   providedIn: 'root'
@@ -32,7 +33,7 @@ export class CalendarService {
     })
   );
 
-  constructor() {
+  constructor(private dataService: ConcordiaDataService, private mappedInService: MappedinService ) {
     this.googleProvider.addScope('https://www.googleapis.com/auth/calendar.readonly');
   }
 
@@ -128,15 +129,21 @@ export class CalendarService {
       type: EventType[eventType.toUpperCase()],
       startTime: event.start.dateTime,
       endTime: event.end.dateTime,
-      location: {
+      googleLoc: {
         title: event.summary,
-        ...this.convertClassToAddress(event.location)
+        ...this.convertClassToAddress(event.location).coordinates
       },
-      room: event.location
+      mappedInLoc: {
+        title: event.summary,
+        address: this.convertClassToAddress(event.location).address,
+        image: this.convertClassToAddress(event.location).image,
+        indoorMapId: this.mappedInService.getMapId(),
+        room: event.location
+      }
     };
   }
 
-  convertClassToAddress(classCode: string): { address: string; coordinates: google.maps.LatLng } {
+  convertClassToAddress(classCode: string): { address: string, coordinates: GoogleMapLocation, image: string } {
     var buildingCodeChars = classCode.split('').filter(char => char !== ' ');
     buildingCodeChars = buildingCodeChars.filter(char => /[a-z0-9]/i.test(char));
     var currentStringPos = 0;
@@ -183,26 +190,18 @@ export class CalendarService {
 
     let googleMapLocation = {
       address: 'No Address',
-      coordinates: null
+      coordinates: null,
+      image: 'No Image'
     };
-    for (let buildingCodeStr of handleables) {
-      for (let building of data.sgw.buildings) {
-        if (building.abbreviation === buildingCodeStr) {
-          googleMapLocation['address'] = building.address;
-          googleMapLocation['coordinates'] = building.coordinates;
-          googleMapLocation['image'] = building.image;
-          return googleMapLocation;
-        }
+    var keys = this.dataService.addressMap.keys; //All maps have the same keys.
+    const keyIterator = keys[Symbol.iterator]()
+    for (let key of keyIterator) {
+      if (buildingCodeStr == key) {
+        googleMapLocation['address'] = this.dataService.addressMap[buildingCodeStr];
+        googleMapLocation['coordinates'] = this.dataService.coordinatesMap[buildingCodeStr];
+        googleMapLocation['image'] = this.dataService.imageMap[buildingCodeStr];
       }
-      for (let building of data.loy.buildings) {
-        if (building.abbreviation === buildingCodeStr) {
-          googleMapLocation['address'] = building.address;
-          googleMapLocation['coordinates'] = building.coordinates;
-          googleMapLocation['image'] = building.image;
-          return googleMapLocation;
-        }
-      }
-    }
+    };
     return googleMapLocation;
   }
 

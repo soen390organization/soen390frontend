@@ -13,7 +13,6 @@ import { DirectionsService } from 'src/app/services/directions/directions.servic
 export class EventCardComponent {
   @Input() events: EventInfo[] = [];
   @Input() loading: boolean = false;
-  time: string = 'hello';
 
   constructor(private readonly directionsService: DirectionsService) {}
 
