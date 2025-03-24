@@ -2,7 +2,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, of, switchMap } from 'rxjs';
 import { getAuth, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
-import { ConcordiaDataService } from "src/app/services/concordia-data.service"
+import { ConcordiaDataService } from 'src/app/services/concordia-data.service';
 import { EventInfo } from 'src/app/interfaces/event-info.interface';
 import { EventType } from 'src/app/enums/event-type.enum';
 import { GoogleMapLocation } from 'src/app/interfaces/google-map-location.interface';
@@ -33,7 +33,10 @@ export class CalendarService {
     })
   );
 
-  constructor(private dataService: ConcordiaDataService, private mappedInService: MappedinService ) {
+  constructor(
+    private dataService: ConcordiaDataService,
+    private mappedInService: MappedinService
+  ) {
     this.googleProvider.addScope('https://www.googleapis.com/auth/calendar.readonly');
   }
 
@@ -138,14 +141,19 @@ export class CalendarService {
         address: this.convertClassToAddress(event.location).address,
         image: this.convertClassToAddress(event.location).image,
         indoorMapId: this.mappedInService.getMapId(),
-        room: event.location
+        room: event.location,
+        type: 'outdoor'
       }
     };
   }
 
-  convertClassToAddress(classCode: string): { address: string, coordinates: GoogleMapLocation, image: string } {
-    var buildingCodeChars = classCode.split('').filter(char => char !== ' ');
-    buildingCodeChars = buildingCodeChars.filter(char => /[a-z0-9]/i.test(char));
+  convertClassToAddress(classCode: string): {
+    address: string;
+    coordinates: GoogleMapLocation;
+    image: string;
+  } {
+    var buildingCodeChars = classCode.split('').filter((char) => char !== ' ');
+    buildingCodeChars = buildingCodeChars.filter((char) => /[a-z0-9]/i.test(char));
     var currentStringPos = 0;
     var buildingCodeStr = '';
     var isNumReached = false;
@@ -165,13 +173,11 @@ export class CalendarService {
               buildingCodeChars[currentStringPos + 1] <= '9') === true
           ) {
             if (currentStringPos === 0) {
-              handleables.push(
-                buildingCodeChars[currentStringPos].toString().toUpperCase()
-              );
+              handleables.push(buildingCodeChars[currentStringPos].toString().toUpperCase());
             } else {
               handleables.push(
                 buildingCodeChars[currentStringPos - 1].toString().toUpperCase() +
-                buildingCodeChars[currentStringPos].toString().toUpperCase()
+                  buildingCodeChars[currentStringPos].toString().toUpperCase()
               );
             }
             currentStringPos++;
@@ -194,14 +200,14 @@ export class CalendarService {
       image: 'No Image'
     };
     var keys = this.dataService.addressMap.keys; //All maps have the same keys.
-    const keyIterator = keys[Symbol.iterator]()
+    const keyIterator = keys[Symbol.iterator]();
     for (let key of keyIterator) {
       if (buildingCodeStr == key) {
         googleMapLocation['address'] = this.dataService.addressMap[buildingCodeStr];
         googleMapLocation['coordinates'] = this.dataService.coordinatesMap[buildingCodeStr];
         googleMapLocation['image'] = this.dataService.imageMap[buildingCodeStr];
       }
-    };
+    }
     return googleMapLocation;
   }
 

@@ -2,7 +2,6 @@ import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
 import { Location } from 'src/app/interfaces/location.interface';
 import { DirectionsService } from 'src/app/services/directions/directions.service';
-import { GoogleMapLocation } from 'src/app/interfaces/google-map-location.interface';
 
 @Component({
   selector: 'app-location-cards',
@@ -26,7 +25,8 @@ export class LocationCardsComponent {
     this.directionsService.setDestinationPoint({
       title: location.title,
       coordinates: location.coordinates,
-      address: location.address
+      address: location.address,
+      type: 'outdoor'
     });
   }
 }

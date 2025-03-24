@@ -55,15 +55,16 @@ export class InteractionBarComponent implements AfterViewInit {
 
   ngOnInit() {
     this.store.select(selectCurrentMap).subscribe((map) => {
-      console.log(map);
       this.showIndoorSelects = map === MapType.Indoor;
     });
+
+    this.store.select(selectSelectedCampus).subscribe();
 
     this.placesService
       .isInitialized()
       .pipe(
-        filter((ready) => ready), // Only proceed when `ready` is true
-        switchMap(() => this.store.select(selectSelectedCampus)), // Wait for campus selection
+        filter((ready) => ready),
+        switchMap(() => this.store.select(selectSelectedCampus)),
         switchMap(() =>
           forkJoin({
             campusBuildings: this.placesService.getCampusBuildings(),

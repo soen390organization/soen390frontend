@@ -31,7 +31,6 @@ export class HomePage implements OnInit {
     searchStateChange.subscribe((state: boolean) => {
       this.isSearchVisible = state;
       isSearchVisible_Global = state;
-      console.log('Search state changed:', state);
     });
   }
 
