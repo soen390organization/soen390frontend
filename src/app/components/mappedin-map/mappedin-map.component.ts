@@ -31,8 +31,7 @@ export class MappedinMapComponent implements AfterViewInit {
   constructor(
     private readonly store: Store,
     private readonly mappedinService: MappedinService,
-    private readonly indoorDirectionsService: IndoorDirectionsService,
-    private readonly navigationCoordinator: NavigationCoordinatorService
+    private readonly indoorDirectionsService: IndoorDirectionsService
   ) {}
 
   async ngAfterViewInit(): Promise<void> {
@@ -62,16 +61,14 @@ export class MappedinMapComponent implements AfterViewInit {
       }
 
       combineLatest([
-        this.indoorDirectionsService.getStartPoint(),
-        this.indoorDirectionsService.getDestinationPoint(),
+        this.indoorDirectionsService.getStartPoint$(),
+        this.indoorDirectionsService.getDestinationPoint$(),
         this.mappedinService.getMapView(),
         this.store.select(selectShowRoute)
       ])
         .pipe(filter(([start, destination, mapView, showRoute]) => !!mapView && showRoute))
         .subscribe(async ([start, destination, mapView, showRoute]) => {
-          if (showRoute) {
-            await this.indoorDirectionsService.renderDirections();
-          }
+          await this.indoorDirectionsService.renderDirections();
         });
     }
   }

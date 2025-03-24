@@ -43,7 +43,7 @@ export class IndoorSelectsComponent implements OnInit {
     });
 
     // Sync dropdown values whenever mapData changes
-    this.mappedInService.getMapData().subscribe(async (map) => {
+    this.mappedInService.getMapData$().subscribe(async (map) => {
       if (!map) {
         return;
       }

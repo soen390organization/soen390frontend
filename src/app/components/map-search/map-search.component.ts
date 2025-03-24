@@ -9,8 +9,8 @@ import { DirectionsService } from 'src/app/services/directions/directions.servic
 import { PlacesService } from 'src/app/services/places/places.service';
 import { HomePage } from 'src/app/home/home.page';
 import { VisibilityService } from 'src/app/services/visibility.service';
-import { combineLatest, firstValueFrom, Observable } from 'rxjs';
-import { filter, take } from 'rxjs/operators';
+import { combineLatest, Observable } from 'rxjs';
+import { filter } from 'rxjs/operators';
 import { Store } from '@ngrx/store';
 import { setMapType, MapType, setShowRoute } from 'src/app/store/app';
 import { MappedinService } from 'src/app/services/mappedin/mappedin.service';
@@ -114,8 +114,8 @@ export class MapSearchComponent implements OnInit {
     this.isStartAndDestinationValid$ = combineLatest([
       this.directionsService.getStartPoint(),
       this.directionsService.getDestinationPoint(),
-      this.indoorDirectionService.getStartPoint(),
-      this.indoorDirectionService.getDestinationPoint(),
+      this.indoorDirectionService.getStartPoint$(),
+      this.indoorDirectionService.getDestinationPoint$(),
       this.visibilityService.enableStart
     ]).pipe(
       map(
@@ -175,8 +175,8 @@ export class MapSearchComponent implements OnInit {
 
     // PROPOSED CHANGES
     combineLatest([
-      this.indoorDirectionService.getStartPoint(),
-      this.indoorDirectionService.getDestinationPoint(),
+      this.indoorDirectionService.getStartPoint$(),
+      this.indoorDirectionService.getDestinationPoint$(),
       this.directionsService.getStartPoint(),
       this.directionsService.getDestinationPoint()
     ])
@@ -186,8 +186,14 @@ export class MapSearchComponent implements OnInit {
       } else if (outdoorStart && indoorDestination) {
         this.directionsService.generateRoute(outdoorStart.address, indoorDestination.address);
       } else if (indoorStart && outdoorDestination) {
+        if (indoorStart.indoorMapId !== this.mappedInService.getMapId()) {
+          await this.mappedInService.setMapData(indoorStart.indoorMapId);
+        }
         this.directionsService.generateRoute(indoorStart.address, outdoorDestination.address);
       } else if (indoorStart && indoorDestination && indoorStart.address !== indoorDestination.address) {
+        if (indoorStart.indoorMapId !== this.mappedInService.getMapId()) {
+          await this.mappedInService.setMapData(indoorStart.indoorMapId);
+        }
         this.directionsService.generateRoute(indoorStart.address, indoorDestination.address);
       }
     });
@@ -220,6 +226,7 @@ export class MapSearchComponent implements OnInit {
     this.startLocationInput = '';
     this.clearList();
     this.directionsService.clearStartPoint();
+    this.mappedInService.clearNavigation();
     this.indoorDirectionService.clearStartPoint();
     this.currentRouteData = null;
     this.visibilityService.triggerEndNavigation();
@@ -230,6 +237,7 @@ export class MapSearchComponent implements OnInit {
     this.destinationLocationInput = '';
     this.clearList();
     this.directionsService.clearDestinationPoint();
+    this.mappedInService.clearNavigation();
     this.indoorDirectionService.clearDestinationPoint();
     this.currentRouteData = null;
     this.visibilityService.triggerEndNavigation();
@@ -250,9 +258,9 @@ export class MapSearchComponent implements OnInit {
       console.log('Setting start point for indoor:', place);
       this.indoorDirectionService.setStartPoint(place);
       this.store.dispatch(setMapType({ mapType: MapType.Indoor }));
-      // if (place.indoorMapId !== this.mappedInService.getMapId()) {
-      //   await this.mappedInService.setMapData(place.indoorMapId);
-      // }
+      if (place.indoorMapId !== this.mappedInService.getMapId()) {
+        await this.mappedInService.setMapData(place.indoorMapId);
+      }
     } else {
       this.directionsService.setStartPoint(place);
       this.store.dispatch(setMapType({ mapType: MapType.Outdoor }));
@@ -265,9 +273,9 @@ export class MapSearchComponent implements OnInit {
     if (place.type === 'indoor') {
       this.indoorDirectionService.setDestinationPoint(place);
       this.store.dispatch(setMapType({ mapType: MapType.Indoor }));
-      // if (place.indoorMapId !== this.mappedInService.getMapId()) {
-      //   await this.mappedInService.setMapData(place.indoorMapId);
-      // }
+      if (place.indoorMapId !== this.mappedInService.getMapId()) {
+        await this.mappedInService.setMapData(place.indoorMapId);
+      }
     } else {
       this.directionsService.setDestinationPoint(place);
       this.store.dispatch(setMapType({ mapType: MapType.Outdoor }));

@@ -112,8 +112,12 @@ export class MappedinService {
     this.mapView$.next(this.mapView);
   }
 
-  public getMapData(): Observable<MapData | null> {
+  public getMapData$(): Observable<MapData | null> {
     return this.mapData$.asObservable();
+  }
+
+  public async getMapData(): Promise<MapData | null> {
+    return await firstValueFrom(this.getMapData$());
   }
 
   public getMapView(): Observable<MapView | null> {
@@ -125,12 +129,9 @@ export class MappedinService {
   }
 
   public clearNavigation(): void {
-    if (
-      this.mapView &&
-      this.mapView.Navigation &&
-      typeof this.mapView.Navigation.clear === 'function'
-    ) {
+    if (this.mapView && this.mapView.Navigation) {
       try {
+        // Navigation cleared
         this.mapView.Navigation.clear();
       } catch (error) {
         console.error('Error clearing indoor navigation:', error);
