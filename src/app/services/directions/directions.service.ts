@@ -313,7 +313,7 @@ export class DirectionsService {
             start,
             destination,
             this.getTravelMode(mode),
-            true
+            false
           ));
         }
         let { totalDistance, totalDuration } = this.getTotalDistanceAndDuration(steps);
