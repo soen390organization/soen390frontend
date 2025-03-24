@@ -34,7 +34,7 @@ export class NavigationCoordinatorService {
     ]).pipe(
       // useful when wanting to make reactive changes (good for mixed routes later)
       filter(([outdoorStart, outdoorDest, indoorStart, indoorDest]) => {
-        return (outdoorStart && outdoorDest) || (indoorStart && indoorDest);
+        return (!!outdoorStart && !!outdoorDest) || (!!indoorStart && !!indoorDest);
       }),
       switchMap(([outdoorStart, outdoorDest, indoorStart, indoorDest]) => {
         if (outdoorStart && outdoorDest) {

@@ -15,19 +15,20 @@ import { Store } from '@ngrx/store';
 export class IndoorDirectionsService implements DirectionsService {
   constructor(private store: Store, private mappedinService: MappedinService) {}
 
-  private startRoom$ = new BehaviorSubject<MappedInLocation | null>(null);
-  private destinationRoom$ = new BehaviorSubject<MappedInLocation | null>(null);
+  startPointSubject$ = new BehaviorSubject<MappedInLocation | null>(null);
+  destinationPointSubject$ = new BehaviorSubject<MappedInLocation | null>(null);
 
-  public setStartPoint(room: any): void {
-    this.startRoom$.next(room);
+  public setStartPoint(startPoint: MappedInLocation): MappedInLocation {
+    this.startPointSubject$.next(startPoint);
+    return startPoint;
   }
 
-  public getStartPoint(): Observable<any | null> {
-    return this.startRoom$.asObservable();
+  public getStartPoint(): Observable<MappedInLocation | null> {
+    return this.startPointSubject$.asObservable();
   }
 
   public getStartPointEntrances(): Promise<Door[] | null> {
-    return firstValueFrom(this.startRoom$).then((room) => {
+    return firstValueFrom(this.startPointSubject$).then((room) => {
       if (room) {
         const mapData: MapData = this.mappedinService.getCampusMapData()[room.indoorMapId].mapData;
         return mapData.getByType('door').filter((door) => door.name === 'Door');
@@ -36,16 +37,17 @@ export class IndoorDirectionsService implements DirectionsService {
     });
   }
 
-  public setDestinationPoint(room: any): void {
-    this.destinationRoom$.next(room);
+  public setDestinationPoint(destinationPoint: MappedInLocation): MappedInLocation {
+    this.destinationPointSubject$.next(destinationPoint);
+    return destinationPoint;
   }
 
-  public getDestinationPoint(): Observable<any | null> {
-    return this.destinationRoom$.asObservable();
+  public getDestinationPoint(): Observable<MappedInLocation | null> {
+    return this.destinationPointSubject$.asObservable();
   }
 
   public async getDestinationPointEntrances(): Promise<Door[] | null> {
-    const room = await firstValueFrom(this.destinationRoom$);
+    const room = await firstValueFrom(this.destinationPointSubject$);
     if (room) {
       const mapData: MapData = this.mappedinService.getCampusMapData()[room.indoorMapId].mapData;
       return mapData.getByType('door').filter((door) => door.name === 'Door');
@@ -54,35 +56,35 @@ export class IndoorDirectionsService implements DirectionsService {
   }
 
   public clearStartPoint(): void {
-    this.startRoom$.next(null);
+    this.startPointSubject$.next(null);
     this.mappedinService.clearNavigation();
   }
 
   public clearDestinationPoint(): void {
-    this.destinationRoom$.next(null);
+    this.destinationPointSubject$.next(null);
     this.mappedinService.clearNavigation();
   }
 
   /**
    * Ensure that your map has been fully initialized before calling this method.
    */
-  public async navigate(startRoom: any, destinationRoom: any): Promise<void> {
+  public async navigate(startPoint: any, destinationPoint: any): Promise<void> {
     const mapData: MapData = await firstValueFrom(this.mappedinService.getMapData());
     const mapView: MapView = this.mappedinService.mapView;
 
-    if (!mapData || !startRoom || !destinationRoom) {
+    if (!mapData || !startPoint || !destinationPoint) {
       return console.error('Missing mapData/start/destination', {
         mapData,
-        startRoom,
-        destinationRoom
+        startPoint,
+        destinationPoint
       });
     }
 
-    const directions = mapData.getDirections(startRoom, destinationRoom);
+    const directions = mapData.getDirections(startPoint, destinationPoint);
     if (!directions) {
       return console.error('Unable to generate directions between rooms', {
-        startRoom,
-        destinationRoom
+        startPoint,
+        destinationPoint
       });
     }
 
