@@ -26,7 +26,6 @@ export class MappedinMapComponent implements AfterViewInit {
   @ViewChild('mappedinContainer', { static: false })
   mappedinContainer!: ElementRef;
   @Output() initialized = new EventEmitter<void>();
-  showRoute$: Observable<boolean>;
 
 
   constructor(
@@ -34,39 +33,29 @@ export class MappedinMapComponent implements AfterViewInit {
     private readonly mappedinService: MappedinService,
     private readonly indoorDirectionsService: IndoorDirectionsService,
     private readonly navigationCoordinator: NavigationCoordinatorService
-  ) {
-    this.showRoute$ = this.store.select(selectShowRoute);
-  }
+  ) {}
 
   async ngAfterViewInit(): Promise<void> {
     if (this.mappedinContainer) {
-      combineLatest([
-        this.indoorDirectionsService.getStartPoint(),
-        this.indoorDirectionsService.getDestinationPoint(),
-        this.mappedinService.getMapView(),
-        this.showRoute$
-      ])
-        .pipe(filter(([start, destination, mapView, showRoute]) => !!mapView && showRoute))
-        .subscribe(async ([start, destination, mapView, showRoute]) => {
-          if (showRoute) {
-            if (start && destination && start.indoorMapId === destination.indoorMapId) { // Directions for rooms in the same Building
-              await this.indoorDirectionsService.navigate(start.room, destination.room);
-            } else { // Directions for rooms in different Buildings
-              if (start && start.indoorMapId === this.mappedinService.getMapId()) { // Current map is start 
-                await this.indoorDirectionsService.navigate(start.room, await this.indoorDirectionsService.getStartPointEntrances());
-              } else if (destination && destination.indoorMapId === this.mappedinService.getMapId()) { // Current map is destination
-                await this.indoorDirectionsService.navigate(await this.indoorDirectionsService.getDestinationPointEntrances(), destination.room);
-              }
-            }
-          }
-        });
-
       try {
         await this.mappedinService.initialize(this.mappedinContainer.nativeElement);
         this.initialized.emit();
       } catch (error) {
         console.error('Error initializing mappedin map or computing route:', error);
       }
+
+      combineLatest([
+        this.indoorDirectionsService.getStartPoint(),
+        this.indoorDirectionsService.getDestinationPoint(),
+        this.mappedinService.getMapView(),
+        this.store.select(selectShowRoute)
+      ])
+        .pipe(filter(([start, destination, mapView, showRoute]) => !!mapView && showRoute))
+        .subscribe(async ([start, destination, mapView, showRoute]) => {
+          if (showRoute) {
+            await this.indoorDirectionsService.renderDirections();
+          }
+        });
     }
   }
 }

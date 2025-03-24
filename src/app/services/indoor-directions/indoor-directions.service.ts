@@ -5,12 +5,15 @@ import { MappedinService } from '../mappedin/mappedin.service';
 import { Door, MapData, MapView } from '@mappedin/mappedin-js';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { MappedInLocation } from 'src/app/interfaces/mappedin-location.interface';
+import { DirectionsService } from 'src/app/interfaces/directions-service.interface';
+import { selectShowRoute } from 'src/app/store/app';
+import { Store } from '@ngrx/store';
 
 @Injectable({
   providedIn: 'root'
 })
-export class IndoorDirectionsService {
-  constructor(private mappedinService: MappedinService) {}
+export class IndoorDirectionsService implements DirectionsService {
+  constructor(private store: Store, private mappedinService: MappedinService) {}
 
   private startRoom$ = new BehaviorSubject<MappedInLocation | null>(null);
   private destinationRoom$ = new BehaviorSubject<MappedInLocation | null>(null);
@@ -87,6 +90,21 @@ export class IndoorDirectionsService {
       mapView.Navigation.draw(directions);
     } catch (err) {
       console.error('Error drawing navigation route:', err);
+    }
+  }
+
+  async renderDirections(): Promise<void> {
+    const start = await firstValueFrom(this.getStartPoint());
+    const destination = await firstValueFrom(this.getDestinationPoint());
+
+    if (start && destination && start.indoorMapId === destination.indoorMapId) { // Directions for rooms in the same Building
+      await this.navigate(start.room, destination.room);
+    } else { // Directions for rooms in different Buildings
+      if (start && start.indoorMapId === this.mappedinService.getMapId()) { // Current map is start 
+        await this.navigate(start.room, await this.getStartPointEntrances());
+      } else if (destination && destination.indoorMapId === this.mappedinService.getMapId()) { // Current map is destination
+        await this.navigate(await this.getDestinationPointEntrances(), destination.room);
+      }
     }
   }
 }
