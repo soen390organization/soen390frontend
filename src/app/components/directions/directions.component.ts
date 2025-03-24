@@ -131,10 +131,7 @@ export class DirectionsComponent implements OnInit, OnDestroy {
     const stepLng = currentStep.end_location.lng;
     const distance = this.calculateDistance(position.lat, position.lng, stepLat(), stepLng());
 
-    console.log(`Current distance to next step: ${distance.toFixed(2)} meters`);
-
     if (distance < this.stepCompletionThreshold) {
-      console.log('Step completed. Moving to next step.');
       this.steps.shift();
 
       if (this.steps.length === 0) {
@@ -171,9 +168,6 @@ export class DirectionsComponent implements OnInit, OnDestroy {
       this.isLoading = false;
       return;
     }
-    console.log(
-      await this.directionsService.calculateDistanceETA(start.address, destination.address, mode)
-    );
 
     try {
       // Directly use the objects obtained from the getters.
@@ -182,12 +176,9 @@ export class DirectionsComponent implements OnInit, OnDestroy {
         destination,
         mode
       );
-      console.log('Complete route:', completeRoute);
       const { steps, eta } = completeRoute.segments[0].instructions;
       this.steps = steps;
       this.eta = eta;
-      console.log('Steps:', this.steps);
-      console.log('ETA:', this.eta);
     } catch (error) {
       console.error('Failed to fetch directions:', error);
     } finally {

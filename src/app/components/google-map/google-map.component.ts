@@ -68,7 +68,6 @@ export class GoogleMapComponent implements AfterViewInit {
     );
     await this.loadBuildings();
     this.initialized.emit();
-    console.log('Google Map initialized: ', this.initialized);
   }
 
   async loadBuildings() {

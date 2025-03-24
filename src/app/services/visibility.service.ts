@@ -24,7 +24,6 @@ export class VisibilityService {
 
   toggleStartButton(): void {
     this.enableStart$.next(!this.enableStart$.getValue());
-    console.log('Switched enable start');
   }
 
   triggerEndNavigation(): void {

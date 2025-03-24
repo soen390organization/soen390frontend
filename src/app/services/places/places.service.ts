@@ -68,7 +68,6 @@ export class PlacesService {
 
     let rooms = [];
     // const campusBuildings:BuildingData[]= Object.values(this.mappedInService.getCampusMapData()) || [];
-    // console.log(campusBuildings);
     // campusBuildings.forEach((building: BuildingData) => {
     const campusData = this.mappedInService.getCampusMapData() || {};
     for (const [key, building] of Object.entries(campusData) as [string, BuildingData][]) {
@@ -113,7 +112,6 @@ export class PlacesService {
     let details = await Promise.all(detailsPromises);
     details = [...selectedBuildingRooms.slice(0, 3), ...details];
 
-    console.log(details);
     // Filter out any null values (failed details)
     return details.filter(
       (
@@ -186,7 +184,6 @@ export class PlacesService {
       'restaurant'
     ).catch(() => []); // Catch any error and return an empty array
 
-    console.log(places);
     return places.map((place) => ({
       title: place.name ?? 'No name available',
       coordinates: place.geometry?.location as google.maps.LatLng,

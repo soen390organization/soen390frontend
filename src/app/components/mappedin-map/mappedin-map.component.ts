@@ -35,8 +35,6 @@ export class MappedinMapComponent implements AfterViewInit {
     if (this.mappedinContainer) {
       try {
         await this.mappedinService.initialize(this.mappedinContainer.nativeElement);
-        console.log('Mappedin Map initialized.', this.mappedinService.getMapId());
-
         this.initialized.emit();
 
         // Retrieve indoor start and destination points from the indoor service.
@@ -52,8 +50,6 @@ export class MappedinMapComponent implements AfterViewInit {
             destinationRoom as MappedInLocation,
             'WALKING'
           );
-          console.log('Indoor navigation route computed:', completeRoute);
-          // Optionally, use the completeRoute data to render the directions.
         } else {
           console.error('Start or destination room not set.');
         }

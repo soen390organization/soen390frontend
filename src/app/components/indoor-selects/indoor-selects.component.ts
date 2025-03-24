@@ -58,7 +58,6 @@ export class IndoorSelectsComponent implements OnInit {
   onBuildingChange(selectedBuilding: string) {
     this.isLoadingFloors = true;
     this.mappedInService.setMapData(selectedBuilding);
-    console.log('Building changed to: ', selectedBuilding);
   }
 
   onFloorChange(selectedFloor: string) {
