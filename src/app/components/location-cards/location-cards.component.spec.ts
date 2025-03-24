@@ -51,7 +51,8 @@ describe('LocationCardsComponent', () => {
     expect(directionsServiceSpy.setDestinationPoint).toHaveBeenCalledWith({
       title: mockLocation.title,
       coordinates: mockLocation.coordinates,
-      address: mockLocation.address
+      address: mockLocation.address,
+      type: 'outdoor'
     });
   });
 });

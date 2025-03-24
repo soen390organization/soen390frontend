@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -8,6 +8,7 @@ export class VisibilityService {
   private showDirections$ = new BehaviorSubject<boolean>(false);
   private showPOIs$ = new BehaviorSubject<boolean>(true);
   private enableStart$ = new BehaviorSubject<boolean>(true);
+  private endNavigation$ = new Subject<void>();
 
   constructor() {}
 
@@ -23,7 +24,10 @@ export class VisibilityService {
 
   toggleStartButton(): void {
     this.enableStart$.next(!this.enableStart$.getValue());
-    console.log('Switched enable start');
+  }
+
+  triggerEndNavigation(): void {
+    this.endNavigation$.next();
   }
 
   // Observables for other components to subscribe
@@ -37,5 +41,9 @@ export class VisibilityService {
 
   get enableStart() {
     return this.enableStart$.asObservable();
+  }
+
+  get endNavigation() {
+    return this.endNavigation$.asObservable();
   }
 }
