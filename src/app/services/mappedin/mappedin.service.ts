@@ -132,7 +132,6 @@ export class MappedinService {
     ) {
       try {
         this.mapView.Navigation.clear();
-        console.log('Indoor navigation cleared.');
       } catch (error) {
         console.error('Error clearing indoor navigation:', error);
       }

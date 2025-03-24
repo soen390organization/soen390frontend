@@ -35,7 +35,6 @@ describe('Map Search - Use Current Location as Start', () => {
 
     // Click the "Use Current Location" button next to the start input field
     cy.get('.material-symbols-outlined').contains('my_location').click();
-    console.log('clicked');
     // Debugging log to verify the location input field updates
     cy.get('input[placeholder="Choose starting point..."]').then(($input) => {
       cy.log('Detected input value before assertion:', $input.val());

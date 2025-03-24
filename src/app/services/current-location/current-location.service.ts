@@ -19,7 +19,6 @@ export class CurrentLocationService {
         lng: coordinates.coords.longitude
       };
     } catch (error) {
-      console.log(error);
       console.error('Error getting location:', error);
       return null;
     }

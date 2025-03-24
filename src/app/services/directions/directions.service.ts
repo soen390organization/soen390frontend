@@ -191,7 +191,6 @@ export class DirectionsService {
       this.directionsService.route(request, (response, status) => {
         if (status === google.maps.DirectionsStatus.OK && response) {
           if (render) {
-            console.log(response);
             renderer.setDirections(response);
           }
           const steps: Step[] = [];
@@ -237,7 +236,8 @@ export class DirectionsService {
       return await this.calculateRoute(
         startAddress,
         destinationAddress,
-        this.getTravelMode(travelMode)
+        this.getTravelMode(travelMode),
+        true
       );
     }
   }
@@ -313,7 +313,7 @@ export class DirectionsService {
             start,
             destination,
             this.getTravelMode(mode),
-            false
+            true
           ));
         }
         let { totalDistance, totalDuration } = this.getTotalDistanceAndDuration(steps);

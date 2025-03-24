@@ -40,6 +40,23 @@ export class MappedinMapComponent implements AfterViewInit {
       try {
         await this.mappedinService.initialize(this.mappedinContainer.nativeElement);
         this.initialized.emit();
+
+        // // Retrieve indoor start and destination points from the indoor service.
+        // const startRoom = await firstValueFrom(this.indoorDirectionsService.getStartPoint());
+        // const destinationRoom = await firstValueFrom(
+        //   this.indoorDirectionsService.getDestinationPoint()
+        // );
+
+        // if (startRoom && destinationRoom) {
+        //   // Use the global coordinator to compute the complete route.
+        //   const completeRoute = await this.navigationCoordinator.getCompleteRoute(
+        //     startRoom as MappedInLocation,
+        //     destinationRoom as MappedInLocation,
+        //     'WALKING'
+        //   );
+        // } else {
+        //   console.error('Start or destination room not set.');
+        // }
       } catch (error) {
         console.error('Error initializing mappedin map or computing route:', error);
       }
