@@ -184,6 +184,8 @@ export class CalendarService {
       }
 
       if (char === 'S' && i + 1 < chars.length && /[1-9]/.test(chars[i + 1])) {
+        i++;
+        continue;
       } else {
         result += char;
       }
