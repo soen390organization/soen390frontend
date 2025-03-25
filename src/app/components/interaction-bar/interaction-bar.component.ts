@@ -108,6 +108,7 @@ export class InteractionBarComponent implements AfterViewInit {
     const footer = this.footerContainer.nativeElement;
     footer.style.transition = 'transform 0.3s ease-out';
     footer.style.transform = this.isExpanded ? 'translateY(0)' : 'translateY(80%)';
+    footer.style.overflowY = this.isExpanded ? 'auto' : '';
     this.swipeProgress = this.isExpanded ? 1 : 0;
   }
 
