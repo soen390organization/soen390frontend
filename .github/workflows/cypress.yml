@@ -21,11 +21,32 @@ jobs:
     needs: common-setup
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Download Environment File
+        uses: actions/download-artifact@v3
+        with:
+          name: env-file
+
+      - name: Copy Environment File
+        run: cp env-file/environment.maps.ts src/environments/environment.maps.ts
+
+      - name: Cache Node Modules
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Install Ionic CLI
+        run: npm install -g @ionic/cli
+
       - name: Start the Application
         run: ionic serve --configuration=maps --no-open &
-
       - name: Wait for App to be Ready
         run: npx wait-on http://localhost:8100
-
       - name: Run Cypress Tests
         run: npx cypress run

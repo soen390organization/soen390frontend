@@ -20,17 +20,9 @@ jobs:
         with:
           node-version: '20.11.1'
 
-      - name: Cache Node Modules
-        uses: actions/cache@v3
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-
-      - name: Install Dependencies
-        run: npm install
-
       - name: Generate Environment File
         run: |
+          mkdir -p src/environments
           cat <<EOF > src/environments/${{ inputs.envFile }}
           export const environment = {
             production: false,
@@ -52,3 +44,9 @@ jobs:
           };
           EOF
         shell: bash
+
+      - name: Upload Environment File
+        uses: actions/upload-artifact@v3
+        with:
+          name: env-file
+          path: src/environments/${{ inputs.envFile }}

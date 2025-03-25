@@ -20,6 +20,23 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
+      - name: Download Environment File
+        uses: actions/download-artifact@v3
+        with:
+          name: env-file
+
+      - name: Copy Environment File
+        run: cp env-file/environment.maps.ts src/environments/environment.maps.ts
+
+      - name: Cache Node Modules
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+
+      - name: Install Dependencies
+        run: npm ci
+
       - name: Run Tests & Generate Coverage Report
         run: npm test -- --no-watch --code-coverage
 
@@ -33,5 +50,4 @@ jobs:
             -Dsonar.organization=soen390organization
             -Dsonar.sources=src
             -Dsonar.tests=src
-            -Dsonar.test.inclusions=**/*.spec.ts
-            -Dsonar.typescript.lcov.reportPaths=coverage/lcov-report/lcov.info
+            -Dsonar.test.inclusions
