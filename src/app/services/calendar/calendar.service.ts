@@ -134,7 +134,8 @@ export class CalendarService {
       endTime: event.end.dateTime,
       googleLoc: {
         title: event.summary,
-        ...this.convertClassToAddress(event.location).coordinates
+        ...this.convertClassToAddress(event.location),
+        type: 'outdoor'
       },
       mappedInLoc: {
         title: event.summary,
@@ -149,7 +150,7 @@ export class CalendarService {
 
   convertClassToAddress(classCode: string): {
     address: string;
-    coordinates: GoogleMapLocation | null;
+    coordinates: google.maps.LatLng | null;
     image: string;
   } {
     const buildingCodeChars = this.cleanUpInput(classCode);
@@ -201,7 +202,7 @@ export class CalendarService {
    */
   private buildLocationObject(buildingCode: string): {
     address: string;
-    coordinates: GoogleMapLocation | null;
+    coordinates: google.maps.LatLng | null;
     image: string;
   } {
     return {
@@ -219,7 +220,7 @@ export class CalendarService {
       hour12: false
     });
 
-    const day = weekdayFormatter.format(start).slice(0, 2); // "Mo"
+    const day = weekdayFormatter.format(start).slice(0, 2);
     const startTime = timeFormatter.format(start);
     const endTime = timeFormatter.format(end);
 
