@@ -27,14 +27,16 @@ export class PolygonBuilder {
     this.outline = outline;
   }
 
-  build() {
-    return new google.maps.Polygon({
+  build(): google.maps.Polygon{
+    const polygon = new google.maps.Polygon({
       paths: this.latLngCoords,
       strokeColor: this.outline,
       strokeOpacity: 0.8,
       strokeWeight: 2,
       fillColor: this.fill,
       fillOpacity: 0.35
-    }).setMap(this.map);
+    });
+    polygon.setMap(this.map);
+    return polygon;
   }
 }
