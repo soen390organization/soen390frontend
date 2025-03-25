@@ -5,8 +5,8 @@ import { MappedInLocation } from './mappedin-location.interface';
 export interface EventInfo {
   title: string;
   type: EventType;
-  startTime: Date;
-  endTime: Date;
+  startTime: string;
+  endTime: string;
   googleLoc: GoogleMapLocation;
   mappedInLoc?: MappedInLocation;
 }
