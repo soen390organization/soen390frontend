@@ -296,7 +296,7 @@
       },
       {
         "name": "John Molson School of Business",
-        "abbreviation": "JMSB",
+        "abbreviation": "MB",
         "indoorMapId": "67b39ca55b54d7000b151bdb",
         "address": "1450 Guy St, Montreal, Quebec H3H 0A1",
         "coordinates": {
@@ -341,6 +341,31 @@
           {
             "lat": 45.49535932837224,
             "lng": -73.57936699957074
+          }
+        ]
+      },
+      {
+        "name": "3 Amigos Building",
+        "abbreviation": "CL",
+        "address": "1665 Rue Sainte-Catherine 3e étage, Montréal, QC H3H 1L9",
+        "coordinates": { "lat": 45.49420442796185, "lng": -73.579062279541164 },
+        "image": "assets/images/cl_building.png",
+        "boundaries": [
+          {
+            "lat": 45.494262448579946,
+            "lng": -73.57893824124531
+          },
+          {
+            "lat": 45.494472472453964,
+            "lng": -73.57928358325101
+          },
+          {
+            "lat": 45.494345214347504,
+            "lng": -73.5794391918955
+          },
+          {
+            "lat": 45.49415384822867,
+            "lng": -73.57907132758831
           }
         ]
       }
