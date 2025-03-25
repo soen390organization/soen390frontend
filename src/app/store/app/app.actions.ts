@@ -6,7 +6,4 @@ export const setSelectedCampus = createAction(
   props<{ campus: string }>()
 );
 
-export const setMapType = createAction(
-  '[App] Set Map Type',
-  props<{ mapType: MapType }>()
-);
+export const setMapType = createAction('[App] Set Map Type', props<{ mapType: MapType }>());

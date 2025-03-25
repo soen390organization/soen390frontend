@@ -3,8 +3,8 @@ import { IonicModule } from '@ionic/angular';
 import { Store } from '@ngrx/store';
 import { of } from 'rxjs';
 import { IndoorSelectsComponent } from './indoor-selects.component';
-import { ConcordiaDataService } from 'src/app/services/concordiaData.service';
-import { MappedinService } from 'src/app/services/mappedIn.service';
+import { ConcordiaDataService } from 'src/app/services/concordia-data.service';
+import { MappedinService } from 'src/app/services/mappedin/mappedin.service';
 
 describe('IndoorSelectsComponent', () => {
   let component: IndoorSelectsComponent;
@@ -14,17 +14,19 @@ describe('IndoorSelectsComponent', () => {
   const fakeCampus = { id: 'campus1', name: 'Campus One' };
 
   // Define a fake building list (must include a building with an indoorMapId).
-  const fakeBuildings = [
-    { indoorMapId: '67abe2bb8ea1bf000bb60d14', name: 'Building 1' },
-  ];
+  const fakeBuildings = [{ indoorMapId: '67abe2bb8ea1bf000bb60d14', name: 'Building 1' }];
 
   // Create a fake MappedinService with the minimal methods needed.
   const fakeMappedinService = {
     getMapId: jasmine.createSpy('getMapId').and.returnValue('67abe2bb8ea1bf000bb60d14'),
     setMapData: jasmine.createSpy('setMapData'),
     getMapData: jasmine.createSpy('getMapData').and.returnValue(of({})),
-    getFloors: jasmine.createSpy('getFloors').and.returnValue(Promise.resolve([{ id: 'floor1', name: 'Floor 1' }])),
-    getCurrentFloor: jasmine.createSpy('getCurrentFloor').and.returnValue({ id: 'floor1', name: 'Floor 1' }),
+    getFloors: jasmine
+      .createSpy('getFloors')
+      .and.returnValue(Promise.resolve([{ id: 'floor1', name: 'Floor 1' }])),
+    getCurrentFloor: jasmine
+      .createSpy('getCurrentFloor')
+      .and.returnValue({ id: 'floor1', name: 'Floor 1' }),
     setFloor: jasmine.createSpy('setFloor')
   };
 
@@ -36,7 +38,7 @@ describe('IndoorSelectsComponent', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       imports: [
-        IndoorSelectsComponent,  // Assuming this is a standalone component with 'imports' defined.
+        IndoorSelectsComponent, // Assuming this is a standalone component with 'imports' defined.
         IonicModule.forRoot()
       ],
       providers: [

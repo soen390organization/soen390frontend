@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { LocationCardsComponent } from './location-cards.component';
 import { DirectionsService } from 'src/app/services/directions/directions.service';
 import { Location } from 'src/app/interfaces/location.interface';
+import { GoogleMapLocation } from 'src/app/interfaces/google-map-location.interface';
 import { By } from '@angular/platform-browser';
 
 describe('LocationCardsComponent', () => {
@@ -38,19 +39,20 @@ describe('LocationCardsComponent', () => {
   });
 
   it('should set the destination when setDestination is called', () => {
-    const mockLocation: Location = {
-      name: 'Test Location',
+    const mockLocation: any = {
+      title: 'Test Location',
       address: '123 Test St',
       image: 'test-image.jpg',
-      coordinates: new google.maps.LatLng(12.345, 67.890)
+      coordinates: new google.maps.LatLng(12.345, 67.89)
     };
 
     component.setDestination(mockLocation);
 
     expect(directionsServiceSpy.setDestinationPoint).toHaveBeenCalledWith({
-      title: mockLocation.name,
+      title: mockLocation.title,
       coordinates: mockLocation.coordinates,
-      address: mockLocation.address
+      address: mockLocation.address,
+      type: 'outdoor'
     });
   });
 });

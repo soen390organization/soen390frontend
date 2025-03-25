@@ -9,11 +9,14 @@ export interface AppState {
 
 export const initialState: AppState = {
   selectedCampus: 'sgw',
-  currentMap: MapType.Outdoor,
+  currentMap: MapType.Outdoor
 };
 
 export const appReducer = createReducer(
   initialState,
-  on(setSelectedCampus, (state, { campus }) => ({ ...state, selectedCampus: campus })),
+  on(setSelectedCampus, (state, { campus }) => ({
+    ...state,
+    selectedCampus: campus
+  })),
   on(setMapType, (state, { mapType }) => ({ ...state, currentMap: mapType }))
 );

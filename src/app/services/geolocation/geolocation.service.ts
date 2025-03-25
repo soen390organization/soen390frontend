@@ -1,9 +1,9 @@
 /// <reference types="google.maps" />
 import { Injectable } from '@angular/core';
-import data from 'src/assets/ConcordiaData.json';
+import data from 'src/assets/concordia-data.json';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class GeolocationService {
   constructor() {}
@@ -12,15 +12,12 @@ export class GeolocationService {
     currentLocation: {
       lat: number;
       lng: number;
-    } | null,
+    } | null
   ): Promise<string | null> {
     if (currentLocation == null) {
       return null;
     }
-    const buildings = [
-      ...data.sgw.buildings,
-      ...data.loy.buildings
-    ];
+    const buildings = [...data.sgw.buildings, ...data.loy.buildings];
 
     const foundBuilding = buildings.find((building) => {
       const outline = new google.maps.Polygon({ paths: building.boundaries });

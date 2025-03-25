@@ -1,7 +1,7 @@
 import { AfterViewInit, Component, ElementRef, ViewChild } from '@angular/core';
 import { LocationCardsComponent } from '../location-cards/location-cards.component';
 import { Store } from '@ngrx/store';
-import { PlacesService } from 'src/app/services/places.service';
+import { PlacesService } from 'src/app/services/places/places.service';
 import { DirectionsService } from 'src/app/services/directions/directions.service';
 import { MapType, selectCurrentMap, selectSelectedCampus } from 'src/app/store/app';
 import { Location } from 'src/app/interfaces/location.interface';
@@ -11,12 +11,23 @@ import { VisibilityService } from 'src/app/services/visibility.service';
 import { CommonModule } from '@angular/common';
 import { SwitchMapButtonComponent } from 'src/app/components/switch-map-button/switch-map-button.component';
 import { IndoorSelectsComponent } from '../indoor-selects/indoor-selects.component';
+import { CalendarService } from 'src/app/services/calendar/calendar.service';
+import { GoogleMapLocation } from 'src/app/interfaces/google-map-location.interface';
+import { EventInfo } from 'src/app/interfaces/event-info.interface';
+import { EventCardComponent } from '../event-card/event-card.component';
 
 @Component({
   selector: 'app-interaction-bar',
-  imports: [IndoorSelectsComponent,  SwitchMapButtonComponent, LocationCardsComponent, DirectionsComponent, CommonModule],
+  imports: [
+    IndoorSelectsComponent,
+    SwitchMapButtonComponent,
+    LocationCardsComponent,
+    DirectionsComponent,
+    EventCardComponent,
+    CommonModule
+  ],
   templateUrl: './interaction-bar.component.html',
-  styleUrls: ['./interaction-bar.component.scss'],
+  styleUrls: ['./interaction-bar.component.scss']
 })
 export class InteractionBarComponent implements AfterViewInit {
   @ViewChild('footerContainer', { static: false }) footerContainer!: ElementRef;
@@ -29,34 +40,35 @@ export class InteractionBarComponent implements AfterViewInit {
   public swipeProgress: number = 0;
   isExpanded = false; // Track the footer's state
   showIndoorSelects = false;
-  campusBuildings = { locations: [] as Location[], loading: true }
-  pointsOfInterest = { locations: [] as Location[], loading: true }
+  campusBuildings = { locations: [] as GoogleMapLocation[], loading: true };
+  pointsOfInterest = { locations: [] as Location[], loading: true };
+  events = { events: [] as EventInfo[], loading: true };
   showDirections$!: Observable<boolean>;
   showPOIs$!: Observable<boolean>;
 
   constructor(
     private readonly store: Store,
     private readonly placesService: PlacesService,
-    private readonly visibilityService: VisibilityService) {}
+    private readonly visibilityService: VisibilityService,
+    private readonly calendarService: CalendarService
+  ) {}
 
   ngOnInit() {
-    this.store.select(selectCurrentMap).subscribe(map => {
-      console.log(map)
-      if (map === MapType.Indoor) {
-        this.showIndoorSelects = true;
-      } else {
-        this.showIndoorSelects = false;
-      }
+    this.store.select(selectCurrentMap).subscribe((map) => {
+      this.showIndoorSelects = map === MapType.Indoor;
     });
+
+    this.store.select(selectSelectedCampus).subscribe();
+
     this.placesService
       .isInitialized()
       .pipe(
-        filter((ready) => ready), // Only proceed when `ready` is true
-        switchMap(() => this.store.select(selectSelectedCampus)), // Wait for campus selection
+        filter((ready) => ready),
+        switchMap(() => this.store.select(selectSelectedCampus)),
         switchMap(() =>
           forkJoin({
             campusBuildings: this.placesService.getCampusBuildings(),
-            pointsOfInterest: this.placesService.getPointsOfInterest(),
+            pointsOfInterest: this.placesService.getPointsOfInterest()
           })
         )
       )
@@ -67,14 +79,22 @@ export class InteractionBarComponent implements AfterViewInit {
 
     this.showDirections$ = this.visibilityService.showDirections;
     this.showPOIs$ = this.visibilityService.showPOIs;
+
+    this.calendarService.events$.subscribe((events) => {
+      this.events = { events: events, loading: false };
+    });
   }
 
   ngAfterViewInit(): void {
     const handle = this.handleBar.nativeElement;
 
     // **Touch Events (Mobile)**
-    handle.addEventListener('touchstart', (event: TouchEvent) => this.onDragStart(event.touches[0].clientY));
-    handle.addEventListener('touchmove', (event: TouchEvent) => this.onDragMove(event.touches[0].clientY, event));
+    handle.addEventListener('touchstart', (event: TouchEvent) =>
+      this.onDragStart(event.touches[0].clientY)
+    );
+    handle.addEventListener('touchmove', (event: TouchEvent) =>
+      this.onDragMove(event.touches[0].clientY, event)
+    );
     handle.addEventListener('touchend', () => this.onDragEnd());
 
     // **Mouse Events (Trackpad & Desktop)**
@@ -87,9 +107,8 @@ export class InteractionBarComponent implements AfterViewInit {
     this.isExpanded = !this.isExpanded;
     const footer = this.footerContainer.nativeElement;
     footer.style.transition = 'transform 0.3s ease-out';
-    footer.style.transform = this.isExpanded
-      ? 'translateY(0)'
-      : 'translateY(80%)';
+    footer.style.transform = this.isExpanded ? 'translateY(0)' : 'translateY(80%)';
+    footer.style.overflowY = this.isExpanded ? 'auto' : '';
     this.swipeProgress = this.isExpanded ? 1 : 0;
   }
 
@@ -114,10 +133,7 @@ export class InteractionBarComponent implements AfterViewInit {
     const baseTranslate = this.isExpanded ? 0 : 80;
     const translateY = baseTranslate - diff;
     const clampedTranslate = Math.min(Math.max(translateY, 0), 80);
-    footer.style.transform = `translateY(${Math.min(
-      Math.max(translateY, 0),
-      80
-    )}%)`;
+    footer.style.transform = `translateY(${Math.min(Math.max(translateY, 0), 80)}%)`;
     this.swipeProgress = (80 - clampedTranslate) / 80;
   }
 
@@ -135,9 +151,7 @@ export class InteractionBarComponent implements AfterViewInit {
     // Reset position with smooth transition
     const footer = this.footerContainer.nativeElement;
     footer.style.transition = 'transform 0.3s ease-out';
-    footer.style.transform = this.isExpanded
-      ? 'translateY(0)'
-      : 'translateY(80%)';
+    footer.style.transform = this.isExpanded ? 'translateY(0)' : 'translateY(80%)';
     this.swipeProgress = this.isExpanded ? 1 : 0;
   }
 }

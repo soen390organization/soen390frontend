@@ -4,54 +4,89 @@ import { ElementRef } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { of } from 'rxjs';
 import { MapType, selectCurrentMap, selectSelectedCampus } from 'src/app/store/app';
-import { PlacesService } from 'src/app/services/places.service';
+import { PlacesService } from 'src/app/services/places/places.service';
 import { DirectionsService } from 'src/app/services/directions/directions.service';
 import { VisibilityService } from 'src/app/services/visibility.service';
+import { NavigationCoordinatorService } from 'src/app/services/navigation-coordinator.service';
+
+// Create a full spy for DirectionsService (as used in the DirectionsComponent tests) - Refactor Interface
+const mockDirectionsService = jasmine.createSpyObj('DirectionsService', [
+  'generateRoute',
+  'calculateRoute',
+  'getTravelMode',
+  'getDestinationPoint',
+  'getStartPoint',
+  'setStartPoint',
+  'setDestinationPoint',
+  'calculateDistanceETA'
+]);
+mockDirectionsService.generateRoute.and.callFake((start, destination, mode) =>
+  mockDirectionsService.calculateRoute(start, destination, mode)
+);
+mockDirectionsService.calculateRoute.and.returnValue(Promise.resolve({ steps: [], eta: null }));
+mockDirectionsService.getTravelMode.and.returnValue('WALKING');
+mockDirectionsService.hasBothPoints$ = of(true);
+mockDirectionsService.getDestinationPoint.and.returnValue(
+  of({ address: 'destination address', title: 'Destination', coordinates: {} })
+);
+mockDirectionsService.getStartPoint.and.returnValue(
+  of({ address: 'start address', title: 'Start', coordinates: {} })
+);
+mockDirectionsService.setStartPoint.and.stub();
+mockDirectionsService.setDestinationPoint.and.stub();
+mockDirectionsService.calculateDistanceETA.and.returnValue(
+  Promise.resolve({ eta: 'default ETA', totalDistance: 0 })
+);
+
+// Dummy implementation for PlacesService
+const mockPlacesService = {
+  isInitialized: () => of(true),
+  getCampusBuildings: () => of([]),
+  getPointsOfInterest: () => of([])
+};
+
+// Create a spy for Store
+const mockStore = jasmine.createSpyObj('Store', ['select', 'dispatch']);
+mockStore.select.and.callFake((selector: any) => {
+  if (selector === selectCurrentMap) {
+    return of(MapType.Outdoor);
+  }
+  if (selector === selectSelectedCampus) {
+    return of('someCampus');
+  }
+  return of();
+});
+
+// Provide a dummy for VisibilityService with the needed observables
+const mockVisibilityService = {
+  showDirections: of(true),
+  showPOIs: of(true),
+  endNavigation: of(null),
+  toggleDirectionsComponent: jasmine.createSpy('toggleDirectionsComponent'),
+  togglePOIsComponent: jasmine.createSpy('togglePOIsComponent'),
+  toggleStartButton: jasmine.createSpy('toggleStartButton')
+};
+
+// For NavigationCoordinatorService, we provide a dummy with globalRoute$
+const mockNavigationCoordinatorService = { globalRoute$: of({ segments: [] }) };
 
 describe('InteractionBarComponent', () => {
   let component: InteractionBarComponent;
   let fixture: ComponentFixture<InteractionBarComponent>;
-  let mockStore: jasmine.SpyObj<Store<any>>;
-  let mockPlacesService: any;
-  let mockDirectionsService: any;
-  let mockVisibilityService: any;
+  let mockStoreRef: jasmine.SpyObj<Store<any>>;
 
   beforeEach(async () => {
-    // Create a spy object for Store with 'select' and 'dispatch'
-    mockStore = jasmine.createSpyObj('Store', ['select', 'dispatch']);
-    // Setup the store.select method to return observables for expected selectors
-    mockStore.select.and.callFake((selector: any) => {
-      if (selector === selectCurrentMap) {
-        return of(MapType.Outdoor);
-      }
-      if (selector === selectSelectedCampus) {
-        return of('someCampus');
-      }
-      return of();
-    });
-
-    // Provide dummy implementations for the other services
-    mockPlacesService = {
-      isInitialized: () => of(true),
-      getCampusBuildings: () => of([]),
-      getPointsOfInterest: () => of([])
-    };
-
-    const mockDirectionsService = {
-      hasBothPoints$: of(true),
-    };
-    mockVisibilityService = {
-      showDirections: of(true),
-      showPOIs: of(true)
-    };
+    // Create a spy for Store if not already done (we already created mockStore above)
+    mockStoreRef = mockStore;
 
     await TestBed.configureTestingModule({
       imports: [InteractionBarComponent],
       providers: [
-        { provide: Store, useValue: mockStore },
+        { provide: Store, useValue: mockStoreRef },
         { provide: PlacesService, useValue: mockPlacesService },
         { provide: DirectionsService, useValue: mockDirectionsService },
-        { provide: VisibilityService, useValue: mockVisibilityService }
+        { provide: VisibilityService, useValue: mockVisibilityService },
+        { provide: NavigationCoordinatorService, useValue: mockNavigationCoordinatorService }
       ]
     }).compileComponents();
   });
@@ -76,7 +111,9 @@ describe('InteractionBarComponent', () => {
   it('should move footer on touchmove', () => {
     component.isDragging = true;
     component.startY = 300;
-    const fakeEvent = { preventDefault: jasmine.createSpy('preventDefault') } as any;
+    const fakeEvent = {
+      preventDefault: jasmine.createSpy('preventDefault')
+    } as any;
 
     component.onDragMove(250, fakeEvent);
 
@@ -88,7 +125,7 @@ describe('InteractionBarComponent', () => {
   it('should expand on swipe up', () => {
     component.isDragging = true;
     component.startY = 300;
-    component.currentY = 200; 
+    component.currentY = 200;
 
     component.onDragEnd();
     expect(component.isExpanded).toBe(true);
@@ -97,15 +134,17 @@ describe('InteractionBarComponent', () => {
   it('should collapse on swipe down', () => {
     component.isDragging = true;
     component.startY = 200;
-    component.currentY = 300; 
-    component.isExpanded = true; 
+    component.currentY = 300;
+    component.isExpanded = true;
 
     component.onDragEnd();
     expect(component.isExpanded).toBe(false);
   });
 
   it('should prevent scrolling while swiping', () => {
-    const fakeEvent = { preventDefault: jasmine.createSpy('preventDefault') } as any;
+    const fakeEvent = {
+      preventDefault: jasmine.createSpy('preventDefault')
+    } as any;
     component.isDragging = true;
     component.onDragMove(250, fakeEvent);
     expect(fakeEvent.preventDefault).toHaveBeenCalled();
@@ -122,6 +161,8 @@ describe('InteractionBarComponent', () => {
     component.footerContainer.nativeElement.style.transition = 'transform 0.3s ease-out';
     component.isExpanded = true;
     component.onDragEnd();
-    expect(component.footerContainer.nativeElement.style.transition).toContain('transform 0.3s ease-out');
+    expect(component.footerContainer.nativeElement.style.transition).toContain(
+      'transform 0.3s ease-out'
+    );
   });
 });

@@ -17,31 +17,31 @@ describe('Map - Directions and Route Generation', () => {
     cy.wait(2000);
 
     // Enter destination and then press Enter.
-    cy.get('input[placeholder="Choose destination point..."]')
-      .clear()
-      .type('JMSB');
-    cy.wait(3000)
+    cy.get('input[placeholder="Choose destination point..."]').clear().type('John Molson Guy');
+    cy.wait(3000);
     cy.get('input[placeholder="Choose destination point..."]').type('{enter}');
     cy.wait(2000);
 
     // Verify that two markers are displayed (assuming markers contain "Icone_Verde.svg").
-    cy.get('.gm-style img[src*="Icone_Verde.svg"]', { timeout: 10000 })
-      .should('have.length', 2);
+    cy.get('.gm-style img[src*="Icone_Verde.svg"]', { timeout: 10000 }).should('have.length', 2);
 
     // Check that the ETA "1 min (212 m)" is visible.
-    cy.contains('1 min (212 m)').should('be.visible');
+    cy.contains('1 min (219 m)').should('be.visible');
 
     // Click the "Start" button to generate the route.
     cy.contains('button', 'Start').click();
 
-    cy.wait(2000)
+    cy.wait(2000);
 
     // Click the handle bar using the provided class.
-    cy.get('.w-\\[100px\\].h-\\[10px\\].bg-\\[\\#d5d5d5\\].my-\\[10px\\].mx-auto.rounded-full.cursor-pointer', { timeout: 10000 })
+    cy.get(
+      '.w-\\[100px\\].h-\\[10px\\].bg-\\[\\#d5d5d5\\].my-\\[10px\\].mx-auto.rounded-full.cursor-pointer',
+      { timeout: 10000 }
+    )
       .should('be.visible')
       .click();
 
-    cy.wait(2000)
+    cy.wait(2000);
 
     // Verify that the directions component is displayed by checking for step instructions.
     // For example, we expect at least one element with the instruction text container.
@@ -56,15 +56,18 @@ describe('Map - Directions and Route Generation', () => {
     // Click the "End" button to end directions.
     cy.contains('button', 'End').click();
 
-    cy.wait(2000)
+    cy.wait(2000);
 
     // Verify that the directions component disappears.
     cy.get('app-directions').should('not.exist');
 
-    cy.get('.w-\\[100px\\].h-\\[10px\\].bg-\\[\\#d5d5d5\\].my-\\[10px\\].mx-auto.rounded-full.cursor-pointer', { timeout: 10000 })
+    cy.get(
+      '.w-\\[100px\\].h-\\[10px\\].bg-\\[\\#d5d5d5\\].my-\\[10px\\].mx-auto.rounded-full.cursor-pointer',
+      { timeout: 10000 }
+    )
       .should('be.visible')
       .click();
 
-    cy.wait(2000)
+    cy.wait(2000);
   });
 });

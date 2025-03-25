@@ -2,7 +2,9 @@
 # http://git-scm.com/docs/gitignore
 
 # environment files
-src/environments/**
+src/environments/environment.ts
+src/environments/environment.prod.ts
+
 
 *~
 *.sw[mnpcod]

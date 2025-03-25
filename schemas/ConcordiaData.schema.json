@@ -44,14 +44,7 @@
             }
           }
         },
-        "required": [
-          "name",
-          "abreviation",
-          "address",
-          "campus",
-          "entrances",
-          "boundaries"
-        ],
+        "required": ["name", "abreviation", "address", "campus", "entrances", "boundaries"],
         "additionalProperties": false
       }
     }

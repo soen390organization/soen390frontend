@@ -23,17 +23,19 @@ export class HomePage implements OnInit {
   // Search-related property
   isSearchVisible = false;
 
-  constructor(private readonly store: Store, private readonly router: Router) {
+  constructor(
+    private readonly store: Store,
+    private readonly router: Router
+  ) {
     // Subscribe to search state changes
     searchStateChange.subscribe((state: boolean) => {
       this.isSearchVisible = state;
       isSearchVisible_Global = state;
-      console.log('Search state changed:', state);
     });
   }
 
   ngOnInit(): void {
-    this.store.select(selectCurrentMap).subscribe(map => {
+    this.store.select(selectCurrentMap).subscribe((map) => {
       this.currentMap = map;
     });
   }

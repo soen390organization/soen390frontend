@@ -9,7 +9,8 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "lint": "ng lint"
+    "lint": "ng lint",
+    "format": "ng format"
   },
   "private": true,
   "dependencies": {
@@ -38,6 +39,7 @@
     "ionicons": "^7.0.0",
     "joi": "^17.13.3",
     "karma-sabarivka-reporter": "^3.3.1",
+    "logrocket": "^9.0.2",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.15.0"
@@ -73,6 +75,7 @@
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
     "postcss": "^8.5.1",
+    "prettier": "^3.5.3",
     "tailwindcss": "^3.4.17",
     "typescript": "~5.6.3"
   },

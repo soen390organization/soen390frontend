@@ -1,10 +1,31 @@
 import { ComponentFixture, TestBed, waitForAsync, fakeAsync, tick } from '@angular/core/testing';
 import { MappedinMapComponent } from './mappedin-map.component';
-import { MappedinService } from 'src/app/services/mappedIn.service';
+import { MappedinService } from 'src/app/services/mappedin/mappedin.service';
+import { IndoorDirectionsService } from 'src/app/services/indoor-directions/indoor-directions.service';
+import { NavigationCoordinatorService } from 'src/app/services/navigation-coordinator.service';
+import { Store } from '@ngrx/store';
+import { of } from 'rxjs';
+import { CommonModule } from '@angular/common';
 
 class MockMappedinService {
-  initializeMap = jasmine.createSpy('initializeMap').and.returnValue(Promise.resolve());
+  initialize = jasmine.createSpy('initialize').and.returnValue(Promise.resolve());
+  getMapId = jasmine.createSpy('getMapId').and.returnValue('mockMapId');
 }
+
+class MockIndoorDirectionsService {
+  getStartPoint = () => of(null);
+  getDestinationPoint = () => of(null);
+}
+
+class MockNavigationCoordinatorService {
+  getCompleteRoute = jasmine
+    .createSpy('getCompleteRoute')
+    .and.returnValue(Promise.resolve({ segments: [] }));
+}
+
+// Create a dummy Store spy so that NavigationCoordinatorService can be constructed.
+const mockStore = jasmine.createSpyObj('Store', ['select', 'dispatch']);
+mockStore.select.and.returnValue(of(null));
 
 describe('MappedinMapComponent', () => {
   let component: MappedinMapComponent;
@@ -13,10 +34,13 @@ describe('MappedinMapComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      imports: [MappedinMapComponent],
+      imports: [MappedinMapComponent, CommonModule],
       providers: [
         { provide: MappedinService, useClass: MockMappedinService },
-      ],
+        { provide: IndoorDirectionsService, useClass: MockIndoorDirectionsService },
+        { provide: NavigationCoordinatorService, useClass: MockNavigationCoordinatorService },
+        { provide: Store, useValue: mockStore }
+      ]
     }).compileComponents();
   }));
 
@@ -31,13 +55,12 @@ describe('MappedinMapComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should call initializeMap with the mappedinContainer element', fakeAsync(() => {
-    // Let initializeMap's promise resolve.
+  it('should call initialize with the mappedinContainer element', fakeAsync(() => {
+    // Allow the promise from initialize() to resolve.
     tick();
-
-    expect(mappedinService.initializeMap).toHaveBeenCalled();
+    expect(mappedinService.initialize).toHaveBeenCalled();
 
     const containerElement = fixture.nativeElement.querySelector('div');
-    expect(mappedinService.initializeMap).toHaveBeenCalledWith(containerElement);
+    expect(mappedinService.initialize).toHaveBeenCalledWith(containerElement);
   }));
 });

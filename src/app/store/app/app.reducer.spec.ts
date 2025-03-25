@@ -1,4 +1,4 @@
-import { appReducer, initialState} from './app.reducer';
+import { appReducer, initialState } from './app.reducer';
 import { setSelectedCampus, setMapType } from './app.actions';
 import { MapType } from 'src/app/enums/map-type.enum';
 
