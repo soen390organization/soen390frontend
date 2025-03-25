@@ -35,7 +35,7 @@ describe('Map - Directions and Route Generation for Multi-Transportation Modes',
       .type('Vanier Library Loyola');
     cy.wait(3000);
     cy.contains('li#destination-item', 'Vanier Library').click();
-    cy.wait(2000);
+    cy.wait(3000);
 
     // Verify that two markers are displayed (assuming markers contain "Icone_Verde.svg").
     cy.get('.gm-style img[src*="Icone_Verde.svg"]', { timeout: 10000 }).should('have.length', 2);
