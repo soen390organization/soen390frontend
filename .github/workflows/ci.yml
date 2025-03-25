@@ -56,6 +56,9 @@ jobs:
           EOF
         shell: bash
 
+      - name: Copy Generated Environment File to environment.ts
+        run: cp src/environments/environment.maps.ts src/environments/environment.ts
+
       - name: Apply Formatting
         run: npx prettier --write .
 

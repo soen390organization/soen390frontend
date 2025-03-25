@@ -51,6 +51,9 @@ jobs:
           EOF
         shell: bash
 
+      - name: Copy Generated Environment File to environment.ts
+        run: cp src/environments/environment.maps.ts src/environments/environment.ts
+
       - name: Build Ionic App
         run: npm run build -- --configuration=maps
 

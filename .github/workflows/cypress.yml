@@ -56,12 +56,17 @@ jobs:
           EOF
         shell: bash
 
+      - name: Copy Generated Environment File to environment.ts
+        run: cp src/environments/environment.maps.ts src/environments/environment.ts
+
       - name: Install Ionic CLI
         run: npm install -g @ionic/cli
 
       - name: Start the Application
         run: ionic serve --configuration=maps --no-open &
+
       - name: Wait for App to be Ready
         run: npx wait-on http://localhost:8100
+
       - name: Run Cypress Tests
         run: npx cypress run
