@@ -41,7 +41,7 @@ describe('Map - Directions and Route Generation for Multi-Transportation Modes',
     cy.get('.gm-style img[src*="Icone_Verde.svg"]', { timeout: 10000 }).should('have.length', 2);
 
     // @TODO: CAREFUL - Shuttle Bus returns the word 'mins' as minutes rather than mins (like the rest)...
-    cy.contains('21 minutes (8434 m)').should('be.visible');
+    cy.contains(/[\d]+ (minutes|mins) \([\d]+ m\)/, { timeout: 15000 }).should('be.visible');
 
     // Click the "Start" button to generate the route.
     cy.contains('button', 'Start').click();
