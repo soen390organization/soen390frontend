@@ -1,50 +1,40 @@
 import { TestBed } from '@angular/core/testing';
 import { MappedinService } from './mappedin.service';
-import { MapData, MapView } from '@mappedin/mappedin-js';
 import { ConcordiaDataService } from 'src/app/services/concordia-data.service';
+import { of } from 'rxjs';
+import { MapData, MapView } from '@mappedin/mappedin-js';
 
 describe('MappedinService', () => {
   let service: MappedinService;
   let mockConcordiaDataService: jasmine.SpyObj<ConcordiaDataService>;
   let container: HTMLElement;
 
-  // Create a fake MapData with minimal implementation for testing.
+  // Fake MapData with minimal implementation.
   const fakeMapData = {
     getByType: (type: string) => {
-      switch (type) {
-        case 'floor':
-          return [{ id: 'floor1', name: 'Floor 1' }];
-        case 'space':
-          return [{ id: 'space1', name: 'Room 1' }];
-        case 'connection':
-          return [];
-        case 'point-of-interest':
-          return [];
-        default:
-          return [];
+      if (type === 'floor') {
+        return [{ id: 'floor1', name: 'Floor 1' }];
       }
+      return [];
     }
   } as unknown as MapData;
 
-  // Create a fake MapView with minimal implementation for testing.
+  // Fake MapView with minimal implementation.
   const fakeMapView = {
     currentFloor: { id: 'floor1', name: 'Floor 1' },
-    Labels: {
-      add: jasmine.createSpy('add')
-    },
-    updateState: jasmine.createSpy('updateState'),
     setFloor: jasmine.createSpy('setFloor'),
     Navigation: {
-      draw: jasmine.createSpy('draw')
+      clear: jasmine.createSpy('clear')
     }
   } as unknown as MapView;
 
   beforeEach(() => {
     mockConcordiaDataService = jasmine.createSpyObj('ConcordiaDataService', ['getBuildings']);
     TestBed.configureTestingModule({
-      providers: [MappedinService,
-        {provide: ConcordiaDataService, useValue: mockConcordiaDataService }]
-
+      providers: [
+        MappedinService,
+        { provide: ConcordiaDataService, useValue: mockConcordiaDataService }
+      ]
     });
     service = TestBed.inject(MappedinService);
     container = document.createElement('div');
@@ -54,41 +44,8 @@ describe('MappedinService', () => {
     expect(service).toBeTruthy();
   });
 
-  /* This is a test that needs to be fixed, keep it as is */
-  /*   describe('initializeMap', () => {
-    let container: HTMLElement;
-
-    beforeEach(() => {
-      container = document.createElement('div');
-
-      // Instead of spying on the external getMapData,
-      // we spy on our encapsulated fetchMapData method.
-      spyOn(service as any, 'fetchMapData').and.returnValue(Promise.resolve(fakeMapData));
-
-      // Spy on the protected show3dMap method to return our fakeMapView.
-      spyOn(service as any, 'show3dMap').and.returnValue(Promise.resolve(fakeMapView));
-    });
-
-    it('should initialize the map and set the mapView property', async () => {
-      await service.initializeMap(container);
-
-      // Check that the hardcoded map id was set.
-      expect(service.getMapId()).toEqual('67b674be13a4e9000b46cf2e');
-
-      // Verify that the private mapView property is now set.
-      expect((service as any).mapView).toEqual(fakeMapView);
-
-      // Ensure that fetchMapData was called with the expected parameters.
-      expect((service as any).fetchMapData).toHaveBeenCalledWith('67b674be13a4e9000b46cf2e');
-
-      // Verify that show3dMap was called with the container and fake map data.
-      expect((service as any).show3dMap).toHaveBeenCalledWith(container, fakeMapData);
-    });
-  }); */
-
   describe('getFloors', () => {
     it('should return an array of floors when map data is available', async () => {
-      // Set the fake mapData in the BehaviorSubject.
       (service as any).mapData$.next(fakeMapData);
       const floors = await service.getFloors();
       expect(floors).toEqual([{ id: 'floor1', name: 'Floor 1' }]);
@@ -110,8 +67,7 @@ describe('MappedinService', () => {
 
     it('should return null if mapView or currentFloor is not available', () => {
       (service as any).mapView = undefined;
-      const currentFloor = service.getCurrentFloor();
-      expect(currentFloor).toBeNull();
+      expect(service.getCurrentFloor()).toBeNull();
     });
   });
 
@@ -125,12 +81,17 @@ describe('MappedinService', () => {
 
   describe('initialize', () => {
     beforeEach(() => {
+      // Simulate buildings for both campuses.
       mockConcordiaDataService.getBuildings.and.callFake((campus: string) => {
         if (campus === 'sgw') {
-          return [{ name: 'Building A', abbreviation: 'A', address: '123 St', indoorMapId: 'map1' }];
+          return [
+            { name: 'Building A', abbreviation: 'A', address: '123 St', indoorMapId: 'map1' }
+          ];
         }
         if (campus === 'loy') {
-          return [{ name: 'Building B', abbreviation: 'B', address: '456 St', indoorMapId: 'map2' }];
+          return [
+            { name: 'Building B', abbreviation: 'B', address: '456 St', indoorMapId: 'map2' }
+          ];
         }
         return [];
       });
@@ -156,14 +117,12 @@ describe('MappedinService', () => {
 
     it('should call fetchMapData for each building with an indoorMapId', async () => {
       await service.initialize(container);
-
       expect((service as any).fetchMapData).toHaveBeenCalledWith('map1');
       expect((service as any).fetchMapData).toHaveBeenCalledWith('map2');
     });
 
     it('should call setMapData with the default map ID after initialization', async () => {
       await service.initialize(container);
-
       expect(service.setMapData).toHaveBeenCalledWith('67b674be13a4e9000b46cf2e');
     });
   });
@@ -171,7 +130,6 @@ describe('MappedinService', () => {
   describe('getMapData', () => {
     it('should return an observable of mapData', (done) => {
       (service as any).mapData$.next(fakeMapData);
-
       service.getMapData().subscribe((data) => {
         expect(data).toBe(fakeMapData);
         done();
@@ -182,7 +140,6 @@ describe('MappedinService', () => {
   describe('getMapView', () => {
     it('should return an observable of mapView', (done) => {
       (service as any).mapView$.next(fakeMapView);
-
       service.getMapView().subscribe((data) => {
         expect(data).toBe(fakeMapView);
         done();
@@ -194,6 +151,30 @@ describe('MappedinService', () => {
     it('should return the current map ID', () => {
       (service as any).mapId = 'testMapId';
       expect(service.getMapId()).toBe('testMapId');
+    });
+  });
+
+  describe('clearNavigation', () => {
+    it('should call clear on Navigation if available', () => {
+      (service as any).mapView = {
+        Navigation: {
+          clear: jasmine.createSpy('clear')
+        }
+      };
+      service.clearNavigation();
+      expect((service as any).mapView.Navigation.clear).toHaveBeenCalled();
+    });
+
+    it('should log error if Navigation.clear throws', () => {
+      const error = new Error('clear error');
+      (service as any).mapView = {
+        Navigation: {
+          clear: jasmine.createSpy('clear').and.throwError(error)
+        }
+      };
+      spyOn(console, 'error');
+      service.clearNavigation();
+      expect(console.error).toHaveBeenCalledWith('Error clearing indoor navigation:', error);
     });
   });
 });

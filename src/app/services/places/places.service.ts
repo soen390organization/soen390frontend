@@ -14,8 +14,11 @@ export class PlacesService {
   private placesService!: google.maps.places.PlacesService;
   private placesServiceReady = new BehaviorSubject<boolean>(false);
   private campusData: any = data;
-  
-  constructor(private readonly store: Store<AppState>, private mappedInService: MappedinService) {}
+
+  constructor(
+    private readonly store: Store<AppState>,
+    private mappedInService: MappedinService
+  ) {}
 
   /**
    * Initializes the PlacesService with a given Google Map instance.
@@ -37,9 +40,7 @@ export class PlacesService {
     return this.placesServiceReady.asObservable();
   }
 
-  public async getPlaceSuggestions(
-    input: string
-  ): Promise<Location[]> {
+  public async getPlaceSuggestions(input: string): Promise<Location[]> {
     const campusKey = await firstValueFrom(this.store.select(selectSelectedCampus));
     const campusCoordinates = this.campusData[campusKey]?.coordinates;
     if (!campusCoordinates) {
@@ -58,57 +59,59 @@ export class PlacesService {
               radius: 500
             })
           },
-          (predictions, status) => {  
+          (predictions, status) => {
             resolve(predictions || []);
-        });
+          }
+        );
       }
     );
 
     let rooms = [];
     // const campusBuildings:BuildingData[]= Object.values(this.mappedInService.getCampusMapData()) || [];
-    // console.log(campusBuildings);
     // campusBuildings.forEach((building: BuildingData) => {
-    const campusData = this.mappedInService.getCampusMapData() || {}
-    for (const [key, building] of Object.entries(campusData) as [string, BuildingData ][]) {
+    const campusData = this.mappedInService.getCampusMapData() || {};
+    for (const [key, building] of Object.entries(campusData) as [string, BuildingData][]) {
       rooms = [
         ...rooms,
-        ...building.mapData.getByType('space').filter(space => space.name)
-        .map(space => ({ 
-          title: building.abbreviation + ' ' + space.name,
-          address: building.address,
-          fullName: building.name + ' '+ space.name,
-          abbreviation: building.abbreviation,
-          indoorMapId: key,
-          room: space
-        })),
-        ...building.mapData.getByType('point-of-interest').filter(poi => poi.name)
-        .map(poi => ({ 
-          title: building.abbreviation + ' ' + poi.name,
-          address: building.address,
-          fullName: building.name + ' '+ poi.name,
-          abbreviation: building.abbreviation, 
-          indoorMapId: key,
-          room: poi
-        })),
-      ]
-    } 
-    
-    const normalizeString = (str: string) => str.toLowerCase().replace(/[^a-zA-Z0-9]/g, '');
-    const searchTerm = normalizeString(input); 
+        ...building.mapData
+          .getByType('space')
+          .filter((space) => space.name)
+          .map((space) => ({
+            title: building.abbreviation + ' ' + space.name,
+            address: building.address,
+            fullName: building.name + ' ' + space.name,
+            abbreviation: building.abbreviation,
+            indoorMapId: key,
+            room: space,
+            type: 'indoor'
+          })),
+        ...building.mapData
+          .getByType('point-of-interest')
+          .filter((poi) => poi.name)
+          .map((poi) => ({
+            title: building.abbreviation + ' ' + poi.name,
+            address: building.address,
+            fullName: building.name + ' ' + poi.name,
+            abbreviation: building.abbreviation,
+            indoorMapId: key,
+            room: poi,
+            type: 'indoor'
+          }))
+      ];
+    }
 
-    const selectedBuildingRooms = rooms.filter(room => 
-      [room.title, room.fullName, room.abbreviation]  // Check abbreviation, full name, and short name
-        .some(field => field && normalizeString(field).includes(searchTerm))
+    const normalizeString = (str: string) => str.toLowerCase().replace(/[^a-zA-Z0-9]/g, '');
+    const searchTerm = normalizeString(input);
+
+    const selectedBuildingRooms = rooms.filter((room) =>
+      [room.title, room.fullName, room.abbreviation] // Check abbreviation, full name, and short name
+        .some((field) => field && normalizeString(field).includes(searchTerm))
     );
 
     const detailsPromises = predictions.map((prediction) => this.getPlaceDetail(prediction));
     let details = await Promise.all(detailsPromises);
-    details = [
-      ...selectedBuildingRooms.slice(0,3),
-      ...details
-    ]
+    details = [...selectedBuildingRooms.slice(0, 3), ...details];
 
-    console.log(details)
     // Filter out any null values (failed details)
     return details.filter(
       (
@@ -117,15 +120,14 @@ export class PlacesService {
         title: string;
         address: string;
         coordinates: google.maps.LatLng;
+        type: 'outdoor';
       } => detail !== null
     );
-  };
+  }
 
-  private getPlaceDetail(prediction: google.maps.places.AutocompletePrediction): Promise<{
-    title: string;
-    address: string;
-    coordinates: google.maps.LatLng;
-  } | null> {
+  private getPlaceDetail(
+    prediction: google.maps.places.AutocompletePrediction
+  ): Promise<GoogleMapLocation | null> {
     return new Promise((resolve) => {
       this.placesService.getDetails(
         {
@@ -140,7 +142,8 @@ export class PlacesService {
               coordinates: new google.maps.LatLng({
                 lat: place.geometry.location.lat(),
                 lng: place.geometry.location.lng()
-              })
+              }),
+              type: 'outdoor'
             });
           } else {
             resolve(null);
@@ -161,7 +164,8 @@ export class PlacesService {
       title: building.name,
       coordinates: new google.maps.LatLng(building.coordinates),
       address: building.address,
-      image: building.image
+      image: building.image,
+      type: 'outdoor'
     }));
   }
 
@@ -171,7 +175,7 @@ export class PlacesService {
    * @TODO - Modify to prioritize the user's location if they are on campus.
    * @returns A promise resolving to an array of LocationCard objects representing points of interest.
    */
-  public async getPointsOfInterest(): Promise<Location[]> {
+  public async getPointsOfInterest(): Promise<GoogleMapLocation[]> {
     const campusKey = await firstValueFrom(this.store.select(selectSelectedCampus));
 
     const places = await this.getPlaces(
@@ -180,12 +184,12 @@ export class PlacesService {
       'restaurant'
     ).catch(() => []); // Catch any error and return an empty array
 
-    console.log(places);
     return places.map((place) => ({
       title: place.name ?? 'No name available',
       coordinates: place.geometry?.location as google.maps.LatLng,
       address: place.vicinity ?? 'No address available',
-      image: place.photos[0]?.getUrl()
+      image: place.photos[0]?.getUrl(),
+      type: 'outdoor' as 'outdoor'
     }));
   }
 
