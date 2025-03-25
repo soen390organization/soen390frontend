@@ -52,9 +52,3 @@ jobs:
           };
           EOF
         shell: bash
-
-      - name: Upload Workspace Artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: workspace
-          path: .

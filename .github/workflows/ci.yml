@@ -21,10 +21,8 @@ jobs:
     needs: common-setup
     runs-on: ubuntu-latest
     steps:
-      - name: Download Workspace Artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: workspace
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
       - name: Apply Formatting
         run: npx prettier --write .
