@@ -64,6 +64,20 @@
               "sourceMap": true,
               "namedChunks": true
             },
+            "maps": {
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.maps.ts"
+                }
+              ],
+              "buildOptimizer": false,
+              "optimization": false,
+              "vendorChunk": true,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "namedChunks": true
+            },
             "ci": {
               "progress": false
             }
@@ -78,6 +92,9 @@
             },
             "development": {
               "buildTarget": "app:build:development"
+            },
+            "maps": {
+              "buildTarget": "app:build:maps"
             },
             "ci": {
               "progress": false
