@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { EventInfo } from 'src/app/interfaces/event-info.interface';
 import { GoogleMapLocation } from 'src/app/interfaces/google-map-location.interface';
 import { DirectionsService } from 'src/app/services/directions/directions.service';

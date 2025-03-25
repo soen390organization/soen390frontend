@@ -34,8 +34,8 @@ export class CalendarService {
   );
 
   constructor(
-    private dataService: ConcordiaDataService,
-    private mappedInService: MappedinService
+    private readonly dataService: ConcordiaDataService,
+    private readonly mappedInService: MappedinService
   ) {
     this.googleProvider.addScope('https://www.googleapis.com/auth/calendar.readonly');
   }
@@ -149,66 +149,64 @@ export class CalendarService {
 
   convertClassToAddress(classCode: string): {
     address: string;
-    coordinates: GoogleMapLocation;
+    coordinates: GoogleMapLocation | null;
     image: string;
   } {
-    var buildingCodeChars = classCode.split('').filter((char) => char !== ' ');
-    buildingCodeChars = buildingCodeChars.filter((char) => /[a-z0-9]/i.test(char));
-    var currentStringPos = 0;
-    var buildingCodeStr = '';
-    var isNumReached = false;
-    var handleables = [];
-    while (!isNumReached && currentStringPos < 2) {
-      if (
-        parseInt(buildingCodeChars[currentStringPos]) >= 1 &&
-        parseInt(buildingCodeChars[currentStringPos]) <= 9
-      ) {
-        isNumReached = true;
-      } else {
-        if (currentStringPos < buildingCodeChars.length - 1) {
-          if (
-            ((buildingCodeChars[currentStringPos] === 'S' ||
-              buildingCodeChars[currentStringPos] === 's') &&
-              buildingCodeChars[currentStringPos + 1] >= '1' &&
-              buildingCodeChars[currentStringPos + 1] <= '9') === true
-          ) {
-            if (currentStringPos === 0) {
-              handleables.push(buildingCodeChars[currentStringPos].toString().toUpperCase());
-            } else {
-              handleables.push(
-                buildingCodeChars[currentStringPos - 1].toString().toUpperCase() +
-                  buildingCodeChars[currentStringPos].toString().toUpperCase()
-              );
-            }
-            currentStringPos++;
-          } else {
-            buildingCodeStr = buildingCodeStr.concat(
-              buildingCodeChars[currentStringPos].toString().toUpperCase()
-            );
-            currentStringPos++;
-          }
-        }
+    const buildingCodeChars = this.cleanUpInput(classCode);
+
+    const buildingCodeStr = this.getBuildingCode(buildingCodeChars);
+
+    return this.buildLocationObject(buildingCodeStr);
+  }
+
+  /**
+   * removes spaces and filters out invalid characters.
+   */
+  private cleanUpInput(classCode: string): string[] {
+    return classCode
+      .split('')
+      .filter((char) => char.trim().length > 0)
+      .filter((char) => /[a-z0-9]/i.test(char));
+  }
+
+  /**
+   * clean array of characters.
+   */
+  private getBuildingCode(chars: string[]): string {
+    let result = '';
+
+    let i = 0;
+    while (i < chars.length) {
+      const char = chars[i].toUpperCase();
+
+      if (/[1-9]/.test(char)) {
+        break;
       }
-    }
-    if (buildingCodeStr !== '') {
-      handleables.push(buildingCodeStr.toString().toUpperCase());
+
+      if (char === 'S' && i + 1 < chars.length && /[1-9]/.test(chars[i + 1])) {
+      } else {
+        result += char;
+      }
+      i++;
     }
 
-    let googleMapLocation = {
-      address: 'No Address',
-      coordinates: null,
-      image: 'No Image'
+    return result;
+  }
+
+  /**
+   * use the extracted building code to look up the address,
+   * coordinates, and image in one place.
+   */
+  private buildLocationObject(buildingCode: string): {
+    address: string;
+    coordinates: GoogleMapLocation | null;
+    image: string;
+  } {
+    return {
+      address: this.dataService.addressMap[buildingCode] ?? 'No Address',
+      coordinates: this.dataService.coordinatesMap[buildingCode] ?? null,
+      image: this.dataService.imageMap[buildingCode] ?? 'No Image'
     };
-    var keys = this.dataService.addressMap.keys; //All maps have the same keys.
-    const keyIterator = keys[Symbol.iterator]();
-    for (let key of keyIterator) {
-      if (buildingCodeStr == key) {
-        googleMapLocation['address'] = this.dataService.addressMap[buildingCodeStr];
-        googleMapLocation['coordinates'] = this.dataService.coordinatesMap[buildingCodeStr];
-        googleMapLocation['image'] = this.dataService.imageMap[buildingCodeStr];
-      }
-    }
-    return googleMapLocation;
   }
 
   formatEventTime(start: Date, end: Date): string {
