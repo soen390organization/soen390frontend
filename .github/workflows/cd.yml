@@ -6,14 +6,8 @@ on:
       - main
 
 jobs:
-  build:
-    permissions:
-      contents: read
-      checks: write
-      pull-requests: write
-
+  deploy:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -21,37 +15,47 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 20.11.1
+          node-version: '20.11.1'
 
-      - name: Handle environment (Generate environment.ts)
+      - name: Cache Node Modules
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Generate Environment File
         run: |
-          cat <<EOF > src/environments/environment.ts
+          mkdir -p src/environments
+          cat <<EOF > src/environments/environment.maps.ts
           export const environment = {
             production: false,
-            googleApiKey: '${{ secrets.GOOGLE_API_KEY }}',
+            googleApiKey: "${{ secrets.GOOGLE_API_KEY }}",
             firebaseConfig: {
-              apiKey: '${{ secrets.FIREBASE_API_KEY }}',
-              authDomain: '${{ secrets.FIREBASE_AUTH_DOMAIN }}',
-              databaseURL: '${{ secrets.FIREBASE_DB_URL }}',
-              projectId: '${{ secrets.FIREBASE_PID }}',
-              storageBucket: '${{ secrets.FIREBASE_STORAGE_BUCKET }}',
-              messagingSenderId: '${{ secrets.FIREBASE_MESSENGER_SENDER_ID }}',
-              appId: '${{ secrets.FIREBASE_APP_ID }}',
+              apiKey: "${{ secrets.FIREBASE_API_KEY }}",
+              authDomain: "${{ secrets.FIREBASE_AUTH_DOMAIN }}",
+              databaseURL: "${{ secrets.FIREBASE_DB_URL }}",
+              projectId: "${{ secrets.FIREBASE_PID }}",
+              storageBucket: "${{ secrets.FIREBASE_STORAGE_BUCKET }}",
+              messagingSenderId: "${{ secrets.FIREBASE_MESSENGER_SENDER_ID }}",
+              appId: "${{ secrets.FIREBASE_APP_ID }}"
             },
             mappedin: {
-              mapId: '${{ secrets.MAPPEDIN_MAP_ID }}',
-              key: '${{ secrets.MAPPEDIN_KEY }}',
-              secret: '${{ secrets.MAPPEDIN_SECRET }}'
+              mapId: "${{ secrets.MAPPEDIN_MAP_ID }}",
+              key: "${{ secrets.MAPPEDIN_KEY }}",
+              secret: "${{ secrets.MAPPEDIN_SECRET }}"
             }
           };
           EOF
         shell: bash
 
-      - name: Install Dependencies
-        run: npm install
+      - name: Copy Generated Environment File to environment.ts
+        run: cp src/environments/environment.maps.ts src/environments/environment.ts
 
       - name: Build Ionic App
-        run: npm run build -- --configuration=development
+        run: npm run build -- --configuration=maps
 
       - name: Run Tests
         run: npm test -- --configuration=ci

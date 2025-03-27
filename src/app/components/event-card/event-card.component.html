@@ -1,0 +1,44 @@
+<div class="flex flex-col items-start">
+  <div class="flex gap-4 overflow-x-auto w-full touch-pan-x">
+    <ng-container *ngIf="loading; else showCards">
+      <div
+        class="w-[224px] h-[186px] overflow-hidden shrink-0"
+        *ngFor="let _ of [1, 2, 3, 4, 5, 6]"
+      >
+        <img
+          class="bg-gray-200 w-[224px] h-[130px] bg-gray-200 animate-pulse rounded-2xl"
+          alt="loading"
+        />
+        <div class="mt-2">
+          <p class="h-3 w-1/2 bg-gray-200 rounded mt-1"></p>
+        </div>
+      </div>
+    </ng-container>
+
+    <ng-template #showCards>
+      <div
+        *ngFor="let event of events"
+        (click)="setDestination(event.googleLoc)"
+        class="w-[224px] h-[230px] bg-white overflow-hidden shrink-0 hover:cursor-pointer"
+      >
+        <img
+          [src]="event.mappedInLoc.image"
+          class="bg-gray-200 w-[224px] h-[130px] object-cover rounded-2xl"
+          (error)="onImageError($event)"
+          alt="event"
+        />
+        <div class="mt-2">
+          <h3 class="truncate text-left text-lg font-bold text-gray-800">
+            {{ event.title.split(' ')[0] }} {{ event.type }}
+          </h3>
+          <p class="text-left truncate w-full text-sm text-gray-600">
+            {{ event.mappedInLoc.room }} - {{ event.mappedInLoc.address }}
+          </p>
+          <p class="mt-1 border-t text-left text-sm font-semibold text-green-800">
+            {{ formatEventTime(event.startTime, event.endTime) }}
+          </p>
+        </div>
+      </div>
+    </ng-template>
+  </div>
+</div>

@@ -10,7 +10,10 @@ import { VisibilityService } from 'src/app/services/visibility.service';
 import { CommonModule } from '@angular/common';
 import { SwitchMapButtonComponent } from 'src/app/components/switch-map-button/switch-map-button.component';
 import { IndoorSelectsComponent } from '../indoor-selects/indoor-selects.component';
+import { CalendarService } from 'src/app/services/calendar/calendar.service';
 import { GoogleMapLocation } from 'src/app/interfaces/google-map-location.interface';
+import { EventInfo } from 'src/app/interfaces/event-info.interface';
+import { EventCardComponent } from '../event-card/event-card.component';
 
 @Component({
   selector: 'app-interaction-bar',
@@ -19,6 +22,7 @@ import { GoogleMapLocation } from 'src/app/interfaces/google-map-location.interf
     SwitchMapButtonComponent,
     LocationCardsComponent,
     DirectionsComponent,
+    EventCardComponent,
     CommonModule
   ],
   templateUrl: './interaction-bar.component.html',
@@ -37,13 +41,15 @@ export class InteractionBarComponent implements AfterViewInit {
   showIndoorSelects = false;
   campusBuildings = { locations: [] as GoogleMapLocation[], loading: true };
   pointsOfInterest = { locations: [] as Location[], loading: true };
+  events = { events: [] as EventInfo[], loading: true };
   showDirections$!: Observable<boolean>;
   showPOIs$!: Observable<boolean>;
 
   constructor(
     private readonly store: Store,
     private readonly placesService: PlacesService,
-    private readonly visibilityService: VisibilityService
+    private readonly visibilityService: VisibilityService,
+    private readonly calendarService: CalendarService
   ) {}
 
   ngOnInit() {
@@ -72,6 +78,10 @@ export class InteractionBarComponent implements AfterViewInit {
 
     this.showDirections$ = this.visibilityService.showDirections;
     this.showPOIs$ = this.visibilityService.showPOIs;
+
+    this.calendarService.events$.subscribe((events) => {
+      this.events = { events: events, loading: false };
+    });
   }
 
   ngAfterViewInit(): void {
@@ -97,6 +107,7 @@ export class InteractionBarComponent implements AfterViewInit {
     const footer = this.footerContainer.nativeElement;
     footer.style.transition = 'transform 0.3s ease-out';
     footer.style.transform = this.isExpanded ? 'translateY(0)' : 'translateY(80%)';
+    footer.style.overflowY = this.isExpanded ? 'auto' : '';
     this.swipeProgress = this.isExpanded ? 1 : 0;
   }
 

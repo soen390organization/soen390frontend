@@ -1,10 +1,12 @@
 import { TestBed } from '@angular/core/testing';
 import { CalendarService } from './calendar.service';
 import { initializeApp } from 'firebase/app';
-import { getAuth, GoogleAuthProvider, OAuthCredential } from 'firebase/auth';
-import { BehaviorSubject, Subscription, of } from 'rxjs';
+import { getAuth } from 'firebase/auth';
+import { Subscription } from 'rxjs';
+import { ConcordiaDataService } from 'src/app/services/concordia-data.service';
 import * as firebaseAuth from 'firebase/auth';
 
+// Mock Firebase config
 const mockFirebaseConfig = {
   apiKey: 'mock-api-key',
   authDomain: 'mock-auth-domain',
@@ -17,6 +19,28 @@ const mockFirebaseConfig = {
 // Initialize Firebase before tests
 initializeApp(mockFirebaseConfig);
 
+// Provide a mock ConcordiaDataService that has an iterable `keys` array:
+const mockConcordiaDataService = {
+  addressMap: {
+    // An array of keys
+    keys: ['H-820'],
+    // A dictionary for the addresses themselves
+    'H-820': '1455 De Maisonneuve Blvd W'
+  },
+  coordinatesMap: {
+    'H-820': {
+      // For simplicity, just store a plain object
+      // (If needed, you can store new google.maps.LatLng(...) if you mock it properly)
+      address: 'Hall Building',
+      coordinates: { lat: 45.4973, lng: -73.5789 },
+      image: 'hall-building.png'
+    }
+  },
+  imageMap: {
+    'H-820': 'hall-image.png'
+  }
+};
+
 describe('CalendarService', () => {
   let service: CalendarService;
   let fetchSpy: jasmine.Spy;
@@ -24,7 +48,13 @@ describe('CalendarService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [CalendarService]
+      providers: [
+        CalendarService,
+        {
+          provide: ConcordiaDataService,
+          useValue: mockConcordiaDataService
+        }
+      ]
     });
     service = TestBed.inject(CalendarService);
     fetchSpy = spyOn(window, 'fetch');
@@ -141,5 +171,43 @@ describe('CalendarService', () => {
 
     const events = await service.fetchEvents('some-calendar-id');
     expect(events).toEqual([]);
+  });
+
+  describe('transformEvent()', () => {
+    it('should handle an event with a single-word summary (default type)', () => {
+      const mockEvent = {
+        summary: 'COMP248',
+        start: { dateTime: '2023-01-01T10:00:00' },
+        end: { dateTime: '2023-01-01T12:00:00' },
+        location: 'H-820'
+      };
+
+      // This will call convertClassToAddress internally
+      const result = service.transformEvent(mockEvent);
+
+      expect(result.title).toBe('COMP248');
+      expect(result.startTime).toBe('2023-01-01T10:00:00');
+      expect(result.endTime).toBe('2023-01-01T12:00:00');
+      // We rely on the mockConcordiaDataService for address/coords if found
+    });
+  });
+
+  describe('convertClassToAddress()', () => {
+    it('should return default values if not found in mock data', () => {
+      const info = service.convertClassToAddress('UNKNOWN123');
+      expect(info.address).toBe('No Address');
+      expect(info.coordinates).toBeNull();
+      expect(info.image).toBe('No Image');
+    });
+  });
+
+  describe('formatEventTime()', () => {
+    it('should format the time range correctly', () => {
+      const start = new Date('2023-01-01T10:00:00');
+      const end = new Date('2023-01-01T12:00:00');
+      const formatted = service.formatEventTime(start, end);
+      expect(formatted).toContain('10:00');
+      expect(formatted).toContain('12:00');
+    });
   });
 });

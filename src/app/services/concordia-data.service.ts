@@ -5,13 +5,20 @@ import data from 'src/assets/concordia-data.json';
   providedIn: 'root'
 })
 export class ConcordiaDataService {
-  constructor() {}
+  addressMap: Map<string, string>;
+  coordinatesMap: Map<string, { lat: string; lng: string }>;
+  imageMap: Map<string, string>;
+  constructor() {
+    this.addressMap = this.createAbbreviationToAddressMap();
+    this.coordinatesMap = this.createAbbreviationToCoordinatesMap();
+    this.imageMap = this.createAbbreviationToImageMap();
+  }
 
-  getCampus(campusKey: string) {
+  public getCampus(campusKey: string) {
     return data[campusKey];
   }
 
-  getBuildings(campusKey: string) {
+  public getBuildings(campusKey: string) {
     return data[campusKey].buildings;
   }
 
@@ -26,5 +33,36 @@ export class ConcordiaDataService {
     );
 
     return distanceToSGW < distanceToLOY ? data.sgw : data.loy;
+  }
+
+  createAbbreviationToAddressMap() {
+    let map = new Map<string, string>();
+    Object.values(data).forEach((campus) => {
+      campus.buildings.forEach((building) => {
+        map[building.abbreviation] = building.address;
+      });
+    });
+    return map;
+  }
+
+  createAbbreviationToCoordinatesMap() {
+    let map = new Map<string, { lat: string; lng: string }>();
+    Object.values(data).forEach((campus) => {
+      campus.buildings.forEach((building) => {
+        var coordsObj = { lat: building.coordinates.lat, lng: building.coordinates.lng };
+        map[building.abbreviation] = coordsObj;
+      });
+    });
+    return map;
+  }
+
+  createAbbreviationToImageMap() {
+    let map = new Map<string, string>();
+    Object.values(data).forEach((campus) => {
+      campus.buildings.forEach((building) => {
+        map[building.abbreviation] = building.image;
+      });
+    });
+    return map;
   }
 }

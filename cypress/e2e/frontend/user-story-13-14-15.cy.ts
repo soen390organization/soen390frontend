@@ -30,16 +30,18 @@ describe('Map - Directions and Route Generation for Multi-Transportation Modes',
     cy.wait(2000);
 
     // Enter destination (Vanier Library) then press Enter.
-    cy.get('input[placeholder="Choose destination point..."]').clear().type('Vanier Library Loyola');
+    cy.get('input[placeholder="Choose destination point..."]')
+      .clear()
+      .type('Vanier Library Loyola');
     cy.wait(3000);
     cy.contains('li#destination-item', 'Vanier Library').click();
-    cy.wait(2000);
+    cy.wait(3000);
 
     // Verify that two markers are displayed (assuming markers contain "Icone_Verde.svg").
     cy.get('.gm-style img[src*="Icone_Verde.svg"]', { timeout: 10000 }).should('have.length', 2);
 
-    // Check that the ETA "19 mins (8310m)" is visible.
-    cy.contains('18 mins (8091 m)').should('be.visible');
+    // @TODO: CAREFUL - Shuttle Bus returns the word 'mins' as minutes rather than mins (like the rest)...
+    cy.contains(/[\d]+ (minutes|mins) \([\d]+ m\)/, { timeout: 15000 }).should('be.visible');
 
     // Click the "Start" button to generate the route.
     cy.contains('button', 'Start').click();

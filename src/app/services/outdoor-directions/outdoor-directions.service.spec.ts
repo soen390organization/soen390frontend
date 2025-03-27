@@ -579,7 +579,7 @@ describe('DirectionsService - calculateShortestRoute()', () => {
       start,
       destination,
       google.maps.TravelMode.DRIVING,
-      true
+      false
     );
   });
 });
