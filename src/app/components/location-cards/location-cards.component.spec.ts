@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { LocationCardsComponent } from './location-cards.component';
-import { DirectionsService } from 'src/app/services/directions/directions.service';
+import { DirectionsService } from 'src/app/services/outdoor-directions/outdoor-directions.service';
 import { Location } from 'src/app/interfaces/location.interface';
 import { GoogleMapLocation } from 'src/app/interfaces/google-map-location.interface';
 import { By } from '@angular/platform-browser';

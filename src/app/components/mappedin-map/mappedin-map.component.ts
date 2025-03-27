@@ -68,7 +68,7 @@ export class MappedinMapComponent implements AfterViewInit {
       ])
         .pipe(filter(([start, destination, mapView, showRoute]) => !!mapView && showRoute))
         .subscribe(async ([start, destination, mapView, showRoute]) => {
-          await this.indoorDirectionsService.renderDirections();
+          await this.indoorDirectionsService.renderNavigation();
         });
     }
   }

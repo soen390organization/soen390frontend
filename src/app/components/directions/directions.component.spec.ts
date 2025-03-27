@@ -5,7 +5,7 @@ import { Step } from 'src/app/interfaces/step.interface';
 import { ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CurrentLocationService } from 'src/app/services/current-location/current-location.service';
-import { DirectionsService } from 'src/app/services/directions/directions.service';
+import { DirectionsService } from 'src/app/services/outdoor-directions/outdoor-directions.service';
 import { VisibilityService } from 'src/app/services/visibility.service';
 import { NavigationCoordinatorService } from 'src/app/services/navigation-coordinator.service';
 

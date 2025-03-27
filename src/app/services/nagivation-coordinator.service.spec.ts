@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { NavigationCoordinatorService } from './navigation-coordinator.service';
-import { DirectionsService } from '../services/directions/directions.service';
+import { DirectionsService } from './outdoor-directions/outdoor-directions.service';
 import { IndoorDirectionsService } from '../services/indoor-directions/indoor-directions.service';
 import { OutdoorRoutingStrategy } from '../strategies/outdoor-routing.strategy';
 import { IndoorRoutingStrategy } from '../strategies/indoor-routing.strategy';

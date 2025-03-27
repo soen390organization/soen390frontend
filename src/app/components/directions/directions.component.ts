@@ -2,14 +2,13 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
 import { Step } from 'src/app/interfaces/step.interface';
 import { CurrentLocationService } from 'src/app/services/current-location/current-location.service';
-import { DirectionsService } from 'src/app/services/directions/directions.service';
+import { OutdoorDirectionsService } from 'src/app/services/outdoor-directions/outdoor-directions.service';
 import { IconMapping } from 'src/app/interfaces/Icon-mapping';
 import rawIconMapping from 'src/assets/icon-mapping.json';
-import { firstValueFrom, take } from 'rxjs';
+import { combineLatest, firstValueFrom } from 'rxjs';
 import { VisibilityService } from 'src/app/services/visibility.service';
 import { NavigationCoordinatorService } from 'src/app/services/navigation-coordinator.service';
 import { CompleteRoute } from 'src/app/interfaces/routing-strategy.interface';
-import { Location } from 'src/app/interfaces/location.interface';
 
 const iconMapping = rawIconMapping as IconMapping;
 
@@ -48,20 +47,24 @@ export class DirectionsComponent implements OnInit, OnDestroy {
   ];
 
   constructor(
-    private readonly directionsService: DirectionsService,
+    private readonly outdoorDirectionsService: OutdoorDirectionsService,
     private currentLocationService: CurrentLocationService,
     private visibilityService: VisibilityService,
     private navigationCoordinator: NavigationCoordinatorService
   ) {}
 
   ngOnInit(): void {
-    this.directionsService.hasBothPoints$.subscribe((hasBoth) => {
-      if (hasBoth) {
-        this.loadDirections('WALKING');
-        this.setCurrentRouteData('WALKING');
-        this.startWatchingLocation();
-      }
-    });
+     combineLatest([
+          this.outdoorDirectionsService.getStartPoint(),
+          this.outdoorDirectionsService.getDestinationPoint()
+        ])
+        .subscribe(async ([outdoorStart, outdoorDestination]) => {
+          if (outdoorStart && outdoorDestination) {
+            this.loadDirections('WALKING');
+            this.setCurrentRouteData('WALKING');
+            this.startWatchingLocation();
+          }
+        });
 
     this.endNavigationSubscription = this.visibilityService.endNavigation.subscribe(() => {
       this.onEndClick();
@@ -161,8 +164,8 @@ export class DirectionsComponent implements OnInit, OnDestroy {
   async loadDirections(mode: string) {
     this.isLoading = true;
     this.hasArrived = false;
-    const start = await firstValueFrom(this.directionsService.getStartPoint());
-    const destination = await firstValueFrom(this.directionsService.getDestinationPoint());
+    const start = await this.outdoorDirectionsService.getStartPoint();
+    const destination = await this.outdoorDirectionsService.getDestinationPoint();
     if (!start || !destination) {
       console.error('Missing start or destination.');
       this.isLoading = false;
@@ -187,14 +190,14 @@ export class DirectionsComponent implements OnInit, OnDestroy {
   }
 
   async setCurrentRouteData(mode: string) {
-    const start = await firstValueFrom(this.directionsService.getStartPoint());
-    const destination = await firstValueFrom(this.directionsService.getDestinationPoint());
-    const result = await this.directionsService.calculateDistanceETA(
-      start.address,
-      destination.address,
-      mode
-    );
-    this.currentRouteData = { eta: result.eta, distance: result.totalDistance };
+    const start = await this.outdoorDirectionsService.getStartPoint();
+    const destination = await this.outdoorDirectionsService.getDestinationPoint();
+    // const result = await this.outdoorDirectionsService.calculateDistanceETA(
+    //   start.address,
+    //   destination.address,
+    //   mode
+    // );
+    this.currentRouteData = { eta: 'FIX', distance: 200 };
   }
   /**
    * Updates the travel mode and loads new hardcoded directions.

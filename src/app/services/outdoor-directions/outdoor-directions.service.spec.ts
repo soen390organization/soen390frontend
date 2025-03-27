@@ -1,4 +1,4 @@
-import { DirectionsService } from './directions.service';
+import { OutdoorDirectionsService } from './outdoor-directions.service';
 import { Location } from 'src/app/interfaces/location.interface';
 import { TestBed } from '@angular/core/testing';
 import { Step } from 'src/app/interfaces/step.interface';
@@ -42,7 +42,7 @@ class MockDirectionsRenderer {
 }
 
 describe('Directions Service', () => {
-  let service: DirectionsService;
+  let service: OutdoorDirectionsService;
   let shuttleService: ShuttleService;
   let origin = 'Hall Building Concordia';
   let destination = 'John Molson School of Business';
@@ -75,9 +75,9 @@ describe('Directions Service', () => {
     } as any;
 
     TestBed.configureTestingModule({
-      providers: [DirectionsService, ShuttleService]
+      providers: [OutdoorDirectionsService, ShuttleService]
     });
-    service = TestBed.inject(DirectionsService);
+    service = TestBed.inject(OutdoorDirectionsService);
     shuttleService = TestBed.inject(ShuttleService);
 
     // Initialize service with a dummy map
@@ -340,7 +340,7 @@ describe('Directions Service', () => {
 });
 
 describe('DirectionsService - Start/Destination Points and Observables', () => {
-  let service: DirectionsService;
+  let service: OutdoorDirectionsService;
   let mockMarker: any;
   let mockMap: any;
 
@@ -393,10 +393,10 @@ describe('DirectionsService - Start/Destination Points and Observables', () => {
     };
 
     TestBed.configureTestingModule({
-      providers: [DirectionsService]
+      providers: [OutdoorDirectionsService]
     });
 
-    service = TestBed.inject(DirectionsService);
+    service = TestBed.inject(OutdoorDirectionsService);
     service.initialize(mockMap);
     (service as any).directionsRenderer.getMap.and.returnValue(mockMap);
     spyOn(service as any, 'updateMapView').and.callFake(() => {});
@@ -472,7 +472,7 @@ describe('DirectionsService - Start/Destination Points and Observables', () => {
 });
 
 describe('DirectionsService - calculateShortestRoute()', () => {
-  let service: DirectionsService;
+  let service: OutdoorDirectionsService;
   let mockCalculateRoute: jasmine.Spy;
 
   beforeEach(() => {
@@ -501,10 +501,10 @@ describe('DirectionsService - calculateShortestRoute()', () => {
     };
 
     TestBed.configureTestingModule({
-      providers: [DirectionsService, ShuttleService]
+      providers: [OutdoorDirectionsService, ShuttleService]
     });
 
-    service = TestBed.inject(DirectionsService);
+    service = TestBed.inject(OutdoorDirectionsService);
 
     // Spy on calculateRoute to simulate responses for non-SHUTTLE modes.
     mockCalculateRoute = spyOn(service, 'calculateRoute').and.callFake(

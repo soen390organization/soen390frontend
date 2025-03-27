@@ -7,7 +7,7 @@ import { FormsModule } from '@angular/forms';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 /* Services */
-import { DirectionsService } from 'src/app/services/directions/directions.service';
+import { DirectionsService } from 'src/app/services/outdoor-directions/outdoor-directions.service';
 import { IndoorDirectionsService } from 'src/app/services/indoor-directions/indoor-directions.service';
 import { PlacesService } from 'src/app/services/places/places.service';
 import { CurrentLocationService } from 'src/app/services/current-location/current-location.service';

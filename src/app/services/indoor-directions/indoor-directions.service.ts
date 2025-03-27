@@ -101,7 +101,7 @@ export class IndoorDirectionsService extends DirectionsService<MappedInLocation>
    *
    * @returns A Promise that resolves when the directions have been rendered.
    */
-  async renderDirections(): Promise<void> {
+  async renderNavigation(): Promise<void> {
     const start = await this.getStartPoint();
     const destination = await this.getDestinationPoint();
 
@@ -114,5 +114,9 @@ export class IndoorDirectionsService extends DirectionsService<MappedInLocation>
         await this.navigate(await this.getDestinationPointEntrances(), destination.room);
       }
     }
+  }
+
+  async clearNavigation(): Promise<void> {
+    console.log('Clear Nav for indoor')
   }
 }

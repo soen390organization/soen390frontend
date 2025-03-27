@@ -5,7 +5,7 @@ import { Store } from '@ngrx/store';
 import { of } from 'rxjs';
 import { MapType, selectCurrentMap, selectSelectedCampus } from 'src/app/store/app';
 import { PlacesService } from 'src/app/services/places/places.service';
-import { DirectionsService } from 'src/app/services/directions/directions.service';
+import { DirectionsService } from 'src/app/services/outdoor-directions/outdoor-directions.service';
 import { VisibilityService } from 'src/app/services/visibility.service';
 import { NavigationCoordinatorService } from 'src/app/services/navigation-coordinator.service';
 

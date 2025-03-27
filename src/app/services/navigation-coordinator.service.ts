@@ -6,7 +6,7 @@ import { Location } from '../interfaces/location.interface';
 import { OutdoorRoutingStrategy, IndoorRoutingStrategy } from '../strategies';
 import { GoogleMapLocation } from '../interfaces/google-map-location.interface';
 import { MappedInLocation } from '../interfaces/mappedin-location.interface';
-import { DirectionsService } from '../services/directions/directions.service';
+import { OutdoorDirectionsService } from './outdoor-directions/outdoor-directions.service';
 import { IndoorDirectionsService } from '../services/indoor-directions/indoor-directions.service';
 import { Store } from '@ngrx/store';
 import { setMapType, MapType, selectCurrentMap } from 'src/app/store/app';
@@ -20,15 +20,15 @@ export class NavigationCoordinatorService {
 
   constructor(
     private store: Store,
-    private directionsService: DirectionsService,
+    private outdoorDirectionsService: OutdoorDirectionsService,
     private indoorDirectionsService: IndoorDirectionsService,
     private outdoorStrategy: OutdoorRoutingStrategy,
     private indoorStrategy: IndoorRoutingStrategy
   ) {
     // Combine the four observables (outdoor start/destination and indoor start/destination)
     this.globalRoute$ = combineLatest([
-      this.directionsService.getStartPoint(),
-      this.directionsService.getDestinationPoint(),
+      this.outdoorDirectionsService.getStartPoint(),
+      this.outdoorDirectionsService.getDestinationPoint(),
       this.indoorDirectionsService.getStartPoint(),
       this.indoorDirectionsService.getDestinationPoint()
     ]).pipe(

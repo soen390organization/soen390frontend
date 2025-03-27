@@ -9,5 +9,5 @@ export interface DirectionsService {
   getStartPoint(): Observable<Location | null>;
   setDestinationPoint(location: Location): Location;
   getDestinationPoint(): Observable<Location | null>;
-  renderDirections(): void;
+  renderNavigation(): void;
 }
