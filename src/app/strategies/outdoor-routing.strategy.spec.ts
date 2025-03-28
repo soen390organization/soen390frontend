@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { OutdoorRoutingStrategy } from './outdoor-routing.strategy';
-import { DirectionsService } from '../services/outdoor-directions/outdoor-directions.service';
+// import { DirectionsService } from '../services/outdoor-directions/outdoor-directions.service';
 import { GoogleMapLocation } from '../interfaces/google-map-location.interface';
 
 describe('OutdoorRoutingStrategy', () => {
@@ -14,7 +14,7 @@ describe('OutdoorRoutingStrategy', () => {
     TestBed.configureTestingModule({
       providers: [
         OutdoorRoutingStrategy,
-        { provide: DirectionsService, useValue: mockDirectionsService }
+        // { provide: DirectionsService, useValue: mockDirectionsService }
       ]
     });
     strategy = TestBed.inject(OutdoorRoutingStrategy);

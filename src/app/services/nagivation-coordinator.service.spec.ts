@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { NavigationCoordinatorService } from './navigation-coordinator.service';
-import { DirectionsService } from './outdoor-directions/outdoor-directions.service';
+// import { DirectionsService } from './outdoor-directions/outdoor-directions.service';
 import { IndoorDirectionsService } from '../services/indoor-directions/indoor-directions.service';
 import { OutdoorRoutingStrategy } from '../strategies/outdoor-routing.strategy';
 import { IndoorRoutingStrategy } from '../strategies/indoor-routing.strategy';
@@ -63,7 +63,7 @@ describe('NavigationCoordinatorService', () => {
       providers: [
         NavigationCoordinatorService,
         { provide: Store, useValue: mockStore },
-        { provide: DirectionsService, useValue: mockDirectionsService },
+        // { provide: DirectionsService, useValue: mockDirectionsService },
         { provide: IndoorDirectionsService, useValue: mockIndoorDirectionsService },
         { provide: OutdoorRoutingStrategy, useValue: mockOutdoorStrategy },
         { provide: IndoorRoutingStrategy, useValue: mockIndoorStrategy }
