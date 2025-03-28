@@ -48,7 +48,7 @@ export class OutdoorShuttleStrategy extends AbstractOutdoorStrategy {
       drivingRouteInfo.steps.forEach((step, index) => {
         if (!index) {
           // Replace first step with shuttle instruction
-          step.instructions = `Next shuttle at ${nextBus} on SGW terminal.`
+          step.instructions = `Next shuttle at ${nextBus} on ${startCampus.abbreviation.toUpperCase()} terminal.`
         } else {
           // Hide driving instructions
           step.hide = true;
