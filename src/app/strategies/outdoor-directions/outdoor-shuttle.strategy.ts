@@ -3,7 +3,7 @@ import { AbstractOutdoorStrategy } from './abstract-outdoor.strategy';
 import { OutdoorRouteBuilder } from 'src/app/builders/outdoor-route.builder';
 import { GoogleMapService } from 'src/app/services/google-map.service';
 import { ConcordiaDataService } from 'src/app/services/concordia-data.service';
-import { ShuttleDataService } from 'src/app/services/shuttle-data.service';
+import { ShuttleDataService } from 'src/app/services/shuttle-data/shuttle-data.service';
 
 @Injectable({
   providedIn: 'root'
