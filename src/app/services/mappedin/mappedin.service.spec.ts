@@ -130,7 +130,7 @@ describe('MappedinService', () => {
   describe('getMapData', () => {
     it('should return an observable of mapData', (done) => {
       (service as any).mapData$.next(fakeMapData);
-      service.getMapData().subscribe((data) => {
+      service.getMapData$().subscribe((data) => {
         expect(data).toBe(fakeMapData);
         done();
       });

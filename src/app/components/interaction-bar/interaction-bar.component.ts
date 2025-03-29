@@ -2,7 +2,6 @@ import { AfterViewInit, Component, ElementRef, ViewChild } from '@angular/core';
 import { LocationCardsComponent } from '../location-cards/location-cards.component';
 import { Store } from '@ngrx/store';
 import { PlacesService } from 'src/app/services/places/places.service';
-import { DirectionsService } from 'src/app/services/directions/directions.service';
 import { MapType, selectCurrentMap, selectSelectedCampus } from 'src/app/store/app';
 import { Location } from 'src/app/interfaces/location.interface';
 import { filter, forkJoin, Observable, switchMap } from 'rxjs';

@@ -1,6 +1,11 @@
 import { createAction, props } from '@ngrx/store';
 import { MapType } from 'src/app/enums/map-type.enum';
 
+export const setShowRoute = createAction(
+  '[App] Set Show Route',
+  props<{ show: boolean }>()
+);
+
 export const setSelectedCampus = createAction(
   '[App] Set Selected Campus',
   props<{ campus: string }>()
