@@ -44,8 +44,8 @@ export class OutdoorShuttleStrategy extends AbstractOutdoorStrategy {
       .addWalkingRoute(destinationCampus.address, destination);
 
     this.routes = await outdoorRouteBuilder.build().then(builtRoutes => {
-      const drivingRouteInfo = builtRoutes[1].response.routes[0].legs[0]
-      drivingRouteInfo.steps.forEach((step, index) => {
+      const drivingRouteInfo = builtRoutes[1].getResponse().routes[0].legs[0];
+      (drivingRouteInfo.steps as any[]).forEach((step, index) => {
         if (!index) {
           // Replace first step with shuttle instruction
           step.instructions = `Next shuttle at ${nextBus} on ${startCampus.abbreviation.toUpperCase()} terminal.`

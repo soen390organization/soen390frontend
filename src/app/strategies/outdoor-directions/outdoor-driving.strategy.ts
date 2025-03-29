@@ -18,7 +18,6 @@ export class OutdoorDrivingStrategy extends AbstractOutdoorStrategy {
       .addDrivingRoute(origin, destination);
 
     this.routes = await outdoorRouteBuilder.build();
-
     return this;
   }
 }

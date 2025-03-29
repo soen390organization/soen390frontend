@@ -1,6 +1,7 @@
 import { OutdoorDrivingStrategy } from './outdoor-driving.strategy';
 import { GoogleMapService } from 'src/app/services/google-map.service';
 import { OutdoorRouteBuilder } from 'src/app/builders/outdoor-route.builder';
+import { OutdoorRoute } from 'src/app/features/outdoor-route/outdoor-route.feature';
 
 describe('OutdoorDrivingStrategy', () => {
   let strategy: OutdoorDrivingStrategy;
@@ -20,24 +21,28 @@ describe('OutdoorDrivingStrategy', () => {
     const origin = 'A';
     const destination = 'B';
 
-    const mockRoutes = [{ mock: 'route' }];
+    // Create a valid OutdoorRoute mock
+    const mockRenderer = jasmine.createSpyObj('google.maps.DirectionsRenderer', ['setMap', 'setOptions', 'set']);
+    const mockOutdoorRoute = new OutdoorRoute(origin, destination, google.maps.TravelMode.DRIVING, mockRenderer);
+    spyOn(mockOutdoorRoute, 'getRouteFromGoogle').and.resolveTo(); // Avoid actual async logic
 
-    // Spy on prototype methods BEFORE calling getRoutes()
-    const setMapSpy = spyOn(OutdoorRouteBuilder.prototype, 'setMap').and.callFake(function () {
+    const mockRoutes: OutdoorRoute[] = [mockOutdoorRoute];
+
+    spyOn(OutdoorRouteBuilder.prototype, 'setMap').and.callFake(function () {
       return this;
     });
 
-    const addDrivingRouteSpy = spyOn(OutdoorRouteBuilder.prototype, 'addDrivingRoute').and.callFake(function () {
+    spyOn(OutdoorRouteBuilder.prototype, 'addDrivingRoute').and.callFake(function () {
       return this;
     });
 
-    const buildSpy = spyOn(OutdoorRouteBuilder.prototype, 'build').and.returnValue(Promise.resolve(mockRoutes));
+    spyOn(OutdoorRouteBuilder.prototype, 'build').and.returnValue(Promise.resolve(mockRoutes));
 
     const result = await strategy.getRoutes(origin, destination);
 
-    expect(setMapSpy).toHaveBeenCalledWith(mockMapInstance);
-    expect(addDrivingRouteSpy).toHaveBeenCalledWith(origin, destination);
-    expect(buildSpy).toHaveBeenCalled();
+    expect(OutdoorRouteBuilder.prototype.setMap).toHaveBeenCalledWith(mockMapInstance);
+    expect(OutdoorRouteBuilder.prototype.addDrivingRoute).toHaveBeenCalledWith(origin, destination);
+    expect(OutdoorRouteBuilder.prototype.build).toHaveBeenCalled();
     expect((strategy as any).routes).toEqual(mockRoutes);
     expect(result).toBe(strategy);
   });

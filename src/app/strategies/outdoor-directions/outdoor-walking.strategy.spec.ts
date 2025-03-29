@@ -1,6 +1,7 @@
 import { OutdoorWalkingStrategy } from './outdoor-walking.strategy';
 import { GoogleMapService } from 'src/app/services/google-map.service';
 import { OutdoorRouteBuilder } from 'src/app/builders/outdoor-route.builder';
+import { OutdoorRoute } from 'src/app/features/outdoor-route/outdoor-route.feature';
 
 describe('OutdoorWalkingStrategy', () => {
   let strategy: OutdoorWalkingStrategy;
@@ -23,7 +24,13 @@ describe('OutdoorWalkingStrategy', () => {
   it('should build and assign walking routes using the OutdoorRouteBuilder', async () => {
     const origin = 'Park Entrance';
     const destination = 'Trail End';
-    const mockRoutes = [{ mock: 'walkingRoute' }];
+
+    // Create a valid OutdoorRoute instance
+    const mockRenderer = jasmine.createSpyObj('google.maps.DirectionsRenderer', ['setMap', 'setOptions', 'set']);
+    const mockOutdoorRoute = new OutdoorRoute(origin, destination, google.maps.TravelMode.WALKING, mockRenderer);
+    spyOn(mockOutdoorRoute, 'getRouteFromGoogle').and.resolveTo(); // Stub async method
+
+    const mockRoutes: OutdoorRoute[] = [mockOutdoorRoute];
 
     const setMapSpy = spyOn(OutdoorRouteBuilder.prototype, 'setMap').and.callFake(function () {
       return this;

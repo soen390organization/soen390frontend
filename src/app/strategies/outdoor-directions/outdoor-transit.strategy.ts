@@ -18,7 +18,6 @@ export class OutdoorTransitStrategy extends AbstractOutdoorStrategy {
       .addTransitRoute(origin, destination);
 
     this.routes = await outdoorRouteBuilder.build();
-
     return this;
   }
 }

@@ -104,9 +104,10 @@ export class MapSearchComponent implements OnInit {
       .subscribe(async ([start, destination]) => {
         await this.outdoorDirectionsService
           .getShortestRoute()
-          // .then(() => {
-          //   this.currentRouteData = this.outdoorDirectionsService.getShortestRoute();
-          // })
+          .then(strategy => {
+            this.outdoorDirectionsService.setSelectedStrategy(strategy);
+            this.outdoorDirectionsService.renderNavigation();
+          })
           .catch((error) => console.error('Error calculating route:', error));
       });
 

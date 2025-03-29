@@ -18,7 +18,6 @@ export class OutdoorWalkingStrategy extends AbstractOutdoorStrategy {
       .addWalkingRoute(origin, destination);
 
     this.routes = await outdoorRouteBuilder.build();
-
     return this;
   }
 }
