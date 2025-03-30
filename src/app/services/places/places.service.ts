@@ -66,11 +66,11 @@ export class PlacesService {
       }
     );
 
-    let rooms = [];
-    // const campusBuildings:BuildingData[]= Object.values(this.mappedInService.getCampusMapData()) || [];
-    // campusBuildings.forEach((building: BuildingData) => {
     const campusData = this.mappedInService.getCampusMapData() || {};
+    let rooms = [];
+    
     for (const [key, building] of Object.entries(campusData) as [string, BuildingData][]) {
+      // Process 'space' types normally
       rooms = [
         ...rooms,
         ...building.mapData
@@ -82,24 +82,39 @@ export class PlacesService {
             fullName: building.name + ' ' + space.name,
             abbreviation: building.abbreviation,
             indoorMapId: key,
-            room: space,
-            type: 'indoor'
-          })),
-        ...building.mapData
-          .getByType('point-of-interest')
-          .filter((poi) => poi.name)
-          .map((poi) => ({
-            title: building.abbreviation + ' ' + poi.name,
-            address: building.address,
-            fullName: building.name + ' ' + poi.name,
-            abbreviation: building.abbreviation,
-            indoorMapId: key,
-            room: poi,
+            room: space, // Single room object
             type: 'indoor'
           }))
       ];
+    
+      // Group POIs by name
+      const poiGroups: Record<string, any[]> = {};
+    
+      for (const poi of building.mapData.getByType('point-of-interest')) {
+        if (poi.name) {
+          if (!poiGroups[poi.name]) {
+            poiGroups[poi.name] = [];
+          }
+          poiGroups[poi.name].push(poi);
+        }
+      }
+    
+      // Convert grouped POIs into final array format
+      for (const [poiName, pois] of Object.entries(poiGroups)) {
+        rooms.push({
+          title: building.abbreviation + ' ' + poiName,
+          address: building.address,
+          fullName: building.name + ' ' + poiName,
+          abbreviation: building.abbreviation,
+          indoorMapId: key,
+          room: pois, // Now an array of POIs with the same name
+          type: 'indoor'
+        });
+      }
     }
-
+    
+    console.log(rooms);
+    
     const normalizeString = (str: string) => str.toLowerCase().replace(/[^a-zA-Z0-9]/g, '');
     const searchTerm = normalizeString(input);
 
