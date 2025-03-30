@@ -23,6 +23,7 @@ export class IndoorDirectionsService extends DirectionsService<MappedInLocation>
    */
   constructor(private mappedinService: MappedinService) {
     super();
+    this.setTravelMode('Accessible');
   }
 
   /**
@@ -74,13 +75,16 @@ export class IndoorDirectionsService extends DirectionsService<MappedInLocation>
   public async navigate(startPoint: any, destinationPoint: any): Promise<void> {
     const mapData: MapData = await this.mappedinService.getMapData();
     const mapView: MapView = this.mappedinService.mapView;
-  
+ 
     if (!mapData || !startPoint || !destinationPoint) {
       console.error('Missing mapData, startPoint or destinationPoint', { mapData, startPoint, destinationPoint });
       return;
     }
   
-    const directions = mapData.getDirections(startPoint, destinationPoint);
+    //check for accessible travel mode
+    const isAccessible = (await this.getTravelMode()) === 'Accessible';
+    const directions = mapData.getDirections(startPoint, destinationPoint, isAccessible ? { accessible: true } : {});
+
     if (!directions) {
       console.error('Unable to generate directions between rooms', { startPoint, destinationPoint });
       return;
