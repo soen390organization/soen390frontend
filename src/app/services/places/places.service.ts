@@ -112,9 +112,7 @@ export class PlacesService {
         });
       }
     }
-    
-    console.log(rooms);
-    
+
     const normalizeString = (str: string) => str.toLowerCase().replace(/[^a-zA-Z0-9]/g, '');
     const searchTerm = normalizeString(input);
 
