@@ -1,98 +1,73 @@
 import { OutdoorRouteBuilder } from './outdoor-route.builder';
+import { OutdoorRoute } from 'src/app/features/outdoor-route/outdoor-route.feature';
 
 describe('OutdoorRouteBuilder', () => {
-  let service: OutdoorRouteBuilder;
-  let mockMap: any;
-
-  // Mocks
-  const mockSetMap = jasmine.createSpy('setMap');
-  const mockSetOptions = jasmine.createSpy('setOptions');
-  const mockDirectionsRenderer = jasmine.createSpyObj('DirectionsRenderer', ['setMap', 'setOptions']);
-  const mockRouteFn = jasmine.createSpy();
+  let builder: OutdoorRouteBuilder;
+  let mockMap: google.maps.Map;
 
   beforeEach(() => {
-    // Mock google.maps objects
-    (globalThis as any).google = {
-      maps: {
-        Map: class {},
-        DirectionsRenderer: function () {
-          return mockDirectionsRenderer;
-        },
-        DirectionsService: function () {
-          return { route: mockRouteFn };
-        },
-        DirectionsStatus: {
-          OK: 'OK'
-        },
-        TravelMode: {
-          WALKING: 'WALKING',
-          DRIVING: 'DRIVING',
-          TRANSIT: 'TRANSIT'
-        },
-        SymbolPath: {
-          CIRCLE: 'CIRCLE'
-        }
-      }
-    };
+    mockMap = {} as google.maps.Map;
+  
+    spyOn(OutdoorRoute.prototype, 'getRouteFromGoogle').and.returnValue(Promise.resolve());
+  
+    // Override the constructor with a real mock class
+    (google.maps as any).DirectionsRenderer = MockDirectionsRenderer;
+  
+    builder = new OutdoorRouteBuilder().setMap(mockMap);
+  });  
 
-    service = new OutdoorRouteBuilder();
-    mockMap = jasmine.createSpyObj('Map', ['setCenter']);
+  it('should add a walking route', () => {
+    const origin = 'A';
+    const destination = 'B';
+
+    builder.addWalkingRoute(origin, destination);
+
+    expect(builder.routes.length).toBe(1);
+    const route = builder.routes[0];
+    expect(route.origin).toBe(origin);
+    expect(route.destination).toBe(destination);
+    expect(route.mode).toBe(google.maps.TravelMode.WALKING);
+    expect(route.renderer.map).toBe(mockMap);
+    expect(route.renderer.polylineOptions.strokeColor).toBe('#0096FF');
   });
 
-  it('should set the map and return itself', () => {
-    const result = service.setMap(mockMap);
-    expect(result).toBe(service);
-    expect(service.map).toBe(mockMap);
+  it('should add a driving route', () => {
+    builder.addDrivingRoute('X', 'Y');
+
+    const route = builder.routes[0];
+    expect(route.mode).toBe(google.maps.TravelMode.DRIVING);
+    expect(route.renderer.polylineOptions.strokeColor).toBe('red');
   });
 
-  it('should add a walking route and return itself', () => {
-    service.setMap(mockMap);
-    const result = service.addWalkingRoute('A', 'B');
-    expect(result).toBe(service);
-    expect(service.routes.length).toBe(1);
-    expect(service.routes[0].mode).toBe(google.maps.TravelMode.WALKING);
+  it('should add a transit route', () => {
+    builder.addTransitRoute('L', 'M');
+
+    const route = builder.routes[0];
+    expect(route.mode).toBe(google.maps.TravelMode.TRANSIT);
+    expect(route.renderer.polylineOptions.strokeColor).toBe('green');
   });
 
-  it('should add a driving route and return itself', () => {
-    service.setMap(mockMap);
-    const result = service.addDrivingRoute('C', 'D');
-    expect(result).toBe(service);
-    expect(service.routes.length).toBe(1);
-    expect(service.routes[0].mode).toBe(google.maps.TravelMode.DRIVING);
-  });
+  it('should build and return OutdoorRoute instances with getRouteFromGoogle called', async () => {
+    builder
+      .addWalkingRoute('A', 'B')
+      .addDrivingRoute('C', 'D');
 
-  it('should add a transit route and return itself', () => {
-    service.setMap(mockMap);
-    const result = service.addTransitRoute('E', 'F');
-    expect(result).toBe(service);
-    expect(service.routes.length).toBe(1);
-    expect(service.routes[0].mode).toBe(google.maps.TravelMode.TRANSIT);
-  });
+    const routes = await builder.build();
 
-  it('should resolve with directions result in build()', async () => {
-    const mockResponse = { directions: 'mock' };
-    mockRouteFn.and.callFake((request, callback) => {
-      callback(mockResponse, 'OK');
-    });
-
-    service.setMap(mockMap);
-    service.addDrivingRoute('G', 'H');
-    const result = await service.build();
-
-    expect(result.length).toBe(1);
-    expect(result[0].origin).toBe('G');
-    expect(result[0].destination).toBe('H');
-    expect(result[0].response).toEqual(mockResponse);
-  });
-
-  it('should reject when directions status is not OK', async () => {
-    mockRouteFn.and.callFake((request, callback) => {
-      callback(null, 'ERROR');
-    });
-
-    service.setMap(mockMap);
-    service.addTransitRoute('X', 'Y');
-
-    await expectAsync(service.build()).toBeRejectedWithError('ERROR');
+    expect(routes.length).toBe(2);
+    expect(routes[0] instanceof OutdoorRoute).toBeTrue();
+    expect(routes[1] instanceof OutdoorRoute).toBeTrue();
+    expect(OutdoorRoute.prototype.getRouteFromGoogle).toHaveBeenCalledTimes(2);
   });
 });
+
+class MockDirectionsRenderer {
+  map: google.maps.Map;
+  polylineOptions: google.maps.PolylineOptions;
+
+  constructor(options: google.maps.DirectionsRendererOptions) {
+    this.map = options.map!;
+    this.polylineOptions = options.polylineOptions!;
+  }
+}
+

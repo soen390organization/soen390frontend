@@ -121,6 +121,6 @@ export class IndoorDirectionsService extends DirectionsService<MappedInLocation>
   }
 
   async clearNavigation(): Promise<void> {
-    console.log('Clear Nav for indoor')
+    this.mappedinService.mapView.clear();
   }
 }

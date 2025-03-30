@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import data from 'src/assets/concordia-data.json';
+export type Campus = typeof data[keyof typeof data];
 
 @Injectable({
   providedIn: 'root'
@@ -22,7 +23,7 @@ export class ConcordiaDataService {
     return data[campusKey].buildings;
   }
 
-  public getNearestCampus(coords: google.maps.LatLng) {
+  public getNearestCampus(coords: google.maps.LatLng): Campus {
     const distanceToSGW = Math.sqrt(
       Math.pow(coords.lat() - data.sgw.coordinates.lat, 2) +
         Math.pow(coords.lng() - data.sgw.coordinates.lng, 2)

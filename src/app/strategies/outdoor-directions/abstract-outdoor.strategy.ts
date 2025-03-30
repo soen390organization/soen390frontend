@@ -1,11 +1,21 @@
 import { Injectable } from '@angular/core';
+import { OutdoorRoute } from 'src/app/features/outdoor-route/outdoor-route.feature';
 import { OutdoorDirectionsStrategy } from 'src/app/interfaces/outdoor-directions-strategy.interface';
 
 @Injectable({
   providedIn: 'root'
 })
 export abstract class AbstractOutdoorStrategy implements OutdoorDirectionsStrategy {
-  routes: any[] = [];
+  routes: OutdoorRoute[] = [];
+  mode: string;
+
+  constructor(mode: string) {
+    this.mode = mode;
+  }
+
+  public getMode() {
+    return this.mode;
+  }
 
   public getTotalDuration() {
     let totalDuration = 0;
@@ -43,7 +53,7 @@ export abstract class AbstractOutdoorStrategy implements OutdoorDirectionsStrate
   }
   
   public getTotalLegs() {
-    const combinedRoutes = [].concat(...this.routes.map(route => route.response.routes));
+    const combinedRoutes = [].concat(...this.routes.map(route => route.getResponse().routes));
     const routeLegs = [].concat(...combinedRoutes.map(route => route.legs));
 
     return routeLegs;
@@ -57,13 +67,13 @@ export abstract class AbstractOutdoorStrategy implements OutdoorDirectionsStrate
 
   public renderRoutes() {
     this.routes.forEach(route => {
-      route.renderer.setDirections(route.response);
+      route.getRenderer().setDirections(route.getResponse());
     });
   }
 
   public clearRenderedRoutes() {
     this.routes.forEach(route => {
-      route.renderer.set('directions', null);
+      route.getRenderer().set('directions', null);
     });
   }
 

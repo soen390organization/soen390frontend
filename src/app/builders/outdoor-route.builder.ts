@@ -1,11 +1,9 @@
-import { Injectable } from '@angular/core';
+import { OutdoorRoute } from 'src/app/features/outdoor-route/outdoor-route.feature';
 
-@Injectable({
-  providedIn: 'root'
-})
 export class OutdoorRouteBuilder {
   map: google.maps.Map;
   routes: any[] = [];
+  test: google.maps.DirectionsRendererOptions;
 
   public setMap(map: google.maps.Map) {
     this.map = map;
@@ -13,9 +11,8 @@ export class OutdoorRouteBuilder {
   }
 
   public addWalkingRoute(origin: string, destination: string): OutdoorRouteBuilder {
-    const renderer = new google.maps.DirectionsRenderer();
-    renderer.setMap(this.map);
-    renderer.setOptions({
+    const renderer = new google.maps.DirectionsRenderer({
+      map: this.map,
       polylineOptions: {
         strokeColor: '#0096FF',
         strokeOpacity: 0,
@@ -38,9 +35,8 @@ export class OutdoorRouteBuilder {
   }
 
   public addDrivingRoute(origin: string, destination: string): OutdoorRouteBuilder {
-    const renderer = new google.maps.DirectionsRenderer();
-    renderer.setMap(this.map);
-    renderer.setOptions({
+    const renderer = new google.maps.DirectionsRenderer({
+      map: this.map,
       polylineOptions: {
         strokeColor: 'red'
       }
@@ -51,9 +47,8 @@ export class OutdoorRouteBuilder {
   }
 
   public addTransitRoute(origin: string, destination: string): OutdoorRouteBuilder {
-    const renderer = new google.maps.DirectionsRenderer();
-    renderer.setMap(this.map);
-    renderer.setOptions({
+    const renderer = new google.maps.DirectionsRenderer({
+      map: this.map,
       polylineOptions: {
         strokeColor: 'green'
       }
@@ -64,34 +59,13 @@ export class OutdoorRouteBuilder {
   }
 
   public async build() {
-    return await Promise.all(
+    return Promise.all(
       this.routes.map(async (route) => {
-        return {
-          ...route,
-          response: await this.getRoute(route.origin, route.destination, route.mode)
-        }
+        console.log(route);
+        const outdoorRoute = new OutdoorRoute(route.origin, route.destination, route.mode, route.renderer);
+        await outdoorRoute.getRouteFromGoogle();
+        return outdoorRoute;
       })
     );
-  }
-
-  private async getRoute(origin: string, destination: string, travelMode: google.maps.TravelMode): Promise<google.maps.DirectionsResult | null> {
-    const googleDirectionsService = new google.maps.DirectionsService();
-
-    return new Promise((resolve, reject) => {
-      googleDirectionsService.route(
-        {
-          origin,
-          destination,
-          travelMode
-        },
-        (response, status) => {
-          if (status === google.maps.DirectionsStatus.OK && response) {
-            resolve(response);
-          } else {
-            reject(Error(status));
-          }
-        }
-      );
-    });
   }
 }

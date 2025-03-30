@@ -3,21 +3,35 @@ import { GoogleMapLocation } from 'src/app/interfaces/google-map-location.interf
 import { DirectionsService } from '../abstract-directions.service';
 import { OutdoorWalkingStrategy, OutdoorDrivingStrategy, OutdoorTransitStrategy, OutdoorShuttleStrategy } from 'src/app/strategies/outdoor-directions';
 import { AbstractOutdoorStrategy } from 'src/app/strategies/outdoor-directions/abstract-outdoor.strategy';
+import { BehaviorSubject, firstValueFrom } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class OutdoorDirectionsService extends DirectionsService<GoogleMapLocation> {
-  public selectedStrategy: AbstractOutdoorStrategy
+  public selectedStrategySubject = new BehaviorSubject<AbstractOutdoorStrategy | null>(null);
 
   constructor(
-    private readonly outdoorWalkingStrategy: OutdoorWalkingStrategy,
-    private readonly outdoorDrivingStrategy: OutdoorDrivingStrategy,
-    private readonly outdoorTransitStrategy: OutdoorTransitStrategy,
-    private readonly outdoorShuttleStrategy: OutdoorShuttleStrategy
+    public readonly outdoorWalkingStrategy: OutdoorWalkingStrategy,
+    public readonly outdoorDrivingStrategy: OutdoorDrivingStrategy,
+    public readonly outdoorTransitStrategy: OutdoorTransitStrategy,
+    public readonly outdoorShuttleStrategy: OutdoorShuttleStrategy
   ) {
     super();
     this.setTravelMode('WALKING');
+  }
+
+  // Make observable
+  public getSelectedStrategy$() {
+    return this.selectedStrategySubject.asObservable();
+  }
+
+  public async getSelectedStrategy() {
+    return await firstValueFrom(this.getSelectedStrategy$());
+  }
+
+  public setSelectedStrategy(strategy: AbstractOutdoorStrategy) {
+    this.selectedStrategySubject.next(strategy);
   }
 
   public async getShortestRoute() {
@@ -33,22 +47,20 @@ export class OutdoorDirectionsService extends DirectionsService<GoogleMapLocatio
       await this.outdoorTransitStrategy.getRoutes(origin, destination),
       await this.outdoorShuttleStrategy.getRoutes(origin, destination)
     ]);
-    console.log(strategies[3])
-    // Find the strategy with the smallest duration
-    const strategyWithShortestRoute = strategies.reduce((prev, curr) => (prev.getTotalDuration().value < curr.getTotalDuration().value ? prev : curr));
-    console.log('Shortest Route Strategy: ', strategyWithShortestRoute)
 
-    this.selectedStrategy = strategyWithShortestRoute;
-    // this.selectedStrategy.renderRoutes();
-    strategies[3].renderRoutes();
-    console.log(strategies[3].getTotalSteps())
+    console.log('STRATS: ', strategies)
+
+    // Return the strategy with the smallest duration
+    return strategies
+      .filter(strategy => strategy)
+      .reduce((prev, curr) => (prev.getTotalDuration().value < curr.getTotalDuration().value ? prev : curr));
   }
 
   public async renderNavigation() {
-    this.selectedStrategy.renderRoutes();
+    (await this.getSelectedStrategy()).renderRoutes();
   }
 
   public async clearNavigation(): Promise<void> {
-    this.selectedStrategy.clearRenderedRoutes();
+    (await this.getSelectedStrategy()).clearRenderedRoutes();
   }
 }

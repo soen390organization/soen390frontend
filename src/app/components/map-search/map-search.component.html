@@ -136,22 +136,27 @@
       <!-- ETA and Start Button -->
       <div class="mt-2 flex items-center justify-between z-0">
         <div class="flex items-center text-lg font-bold text-[#912338]">
-          <span *ngIf="getTransportIcon()" class="material-symbols-outlined mr-1">
-            {{ getTransportIcon() }}
-          </span>
-          <span>
-            {{ currentRouteData?.eta || '' }}
-          </span>
-          <span class="text-gray-500 font-bold ml-2">
-            {{ currentRouteData?.distance !== null ? '(' + currentRouteData.distance + ' m)' : '' }}
-          </span>
+          <ng-container *ngIf="outdoorDirectionsService as svc">
+            <ng-container *ngIf="svc.getSelectedStrategy$() | async as strategy">
+              <ng-container [ngSwitch]="strategy.getMode()">
+                <span *ngSwitchCase="'WALKING'" class="material-symbols-outlined mr-1">directions_walk</span>
+                <span *ngSwitchCase="'DRIVING'" class="material-symbols-outlined mr-1">directions_car</span>
+                <span *ngSwitchCase="'TRANSIT'" class="material-symbols-outlined mr-1">directions_bus</span>
+                <span *ngSwitchCase="'SHUTTLE'" class="material-symbols-outlined mr-1">directions_transit</span>
+              </ng-container>
+              <span>{{ strategy.getTotalDuration().text || '' }}</span>
+              <span class="text-gray-500 font-bold ml-2">
+                {{ strategy.getTotalDistance().text || '' }}
+              </span>
+            </ng-container>
+          </ng-container>
         </div>
         <button
           class="bg-[#912338] text-white py-3 px-8 rounded-full text-lg font-semibold"
           [ngClass]="{
-            'opacity-50 cursor-not-allowed': (isStartAndDestinationValid$ | async) === false
+            'opacity-50 cursor-not-allowed': disableStart
           }"
-          [disabled]="(isStartAndDestinationValid$ | async) === false"
+          [disabled]="disableStart"
           (click)="onStartClick()"
         >
           Start

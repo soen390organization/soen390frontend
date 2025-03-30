@@ -40,22 +40,6 @@ export class MappedinMapComponent implements AfterViewInit {
         await this.mappedinService.initialize(this.mappedinContainer.nativeElement);
         this.initialized.emit();
 
-        // // Retrieve indoor start and destination points from the indoor service.
-        // const startRoom = await firstValueFrom(this.indoorDirectionsService.getStartPoint());
-        // const destinationRoom = await firstValueFrom(
-        //   this.indoorDirectionsService.getDestinationPoint()
-        // );
-
-        // if (startRoom && destinationRoom) {
-        //   // Use the global coordinator to compute the complete route.
-        //   const completeRoute = await this.navigationCoordinator.getCompleteRoute(
-        //     startRoom as MappedInLocation,
-        //     destinationRoom as MappedInLocation,
-        //     'WALKING'
-        //   );
-        // } else {
-        //   console.error('Start or destination room not set.');
-        // }
       } catch (error) {
         console.error('Error initializing mappedin map or computing route:', error);
       }
@@ -64,10 +48,9 @@ export class MappedinMapComponent implements AfterViewInit {
         this.indoorDirectionsService.getStartPoint$(),
         this.indoorDirectionsService.getDestinationPoint$(),
         this.mappedinService.getMapView(),
-        this.store.select(selectShowRoute)
       ])
-        .pipe(filter(([start, destination, mapView, showRoute]) => !!mapView && showRoute))
-        .subscribe(async ([start, destination, mapView, showRoute]) => {
+        .pipe(filter(([start, destination, mapView]) => !!mapView))
+        .subscribe(async ([start, destination, mapView]) => {
           await this.indoorDirectionsService.renderNavigation();
         });
     }
