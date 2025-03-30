@@ -51,13 +51,14 @@ describe('OutdoorShuttleStrategy', () => {
     expect(strategy).toBeTruthy();
   });
 
-  // it('should return null if campuses are the same', async () => {
-  //   googleMapServiceSpy.getCoordsFromAddress.and.resolveTo(fakeLatLng);
-  //   concordiaDataServiceSpy.getNearestCampus.and.resolveTo(mockCampus);
-
-  //   const result = await strategy.getRoutes('Origin', 'Destination');
-  //   expect(result).toBeNull();
-  // });
+  it('should return null if campuses are the same', async () => {
+    googleMapServiceSpy.getCoordsFromAddress.and.resolveTo(fakeLatLng);
+    concordiaDataServiceSpy.getNearestCampus.and.returnValue(await Promise.resolve(mockCampus));
+  
+    const result = await strategy.getRoutes('Origin', 'Destination');
+    expect(result).toBeNull();
+  });
+  
 
   it('should return null if no next shuttle bus is found', async () => {
     googleMapServiceSpy.getCoordsFromAddress.and.resolveTo(fakeLatLng);
