@@ -14,7 +14,7 @@ export class OutdoorShuttleStrategy extends AbstractOutdoorStrategy {
     private readonly concordiaDataService: ConcordiaDataService,
     private readonly googleMapService: GoogleMapService
   ) {
-    super();
+    super('SHUTTLE');
   }
 
   public async getRoutes(origin: string, destination: string) {

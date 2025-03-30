@@ -8,7 +8,7 @@ import { GoogleMapService } from 'src/app/services/google-map.service';
 })
 export class OutdoorWalkingStrategy extends AbstractOutdoorStrategy {
   constructor(private readonly googleMapService: GoogleMapService) {
-    super();
+    super('WALKING');
   }
 
   public async getRoutes(origin: string, destination: string) {

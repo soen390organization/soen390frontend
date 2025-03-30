@@ -7,6 +7,15 @@ import { OutdoorDirectionsStrategy } from 'src/app/interfaces/outdoor-directions
 })
 export abstract class AbstractOutdoorStrategy implements OutdoorDirectionsStrategy {
   routes: OutdoorRoute[] = [];
+  mode: string;
+
+  constructor(mode: string) {
+    this.mode = mode;
+  }
+
+  public getMode() {
+    return this.mode;
+  }
 
   public getTotalDuration() {
     let totalDuration = 0;
