@@ -84,25 +84,45 @@ export class InteractionBarComponent implements AfterViewInit {
       this.events = { events: events, loading: false };
     });
   }
-
   ngAfterViewInit(): void {
     const handle = this.handleBar.nativeElement;
-
-    // **Touch Events (Mobile)**
-    handle.addEventListener('touchstart', (event: TouchEvent) =>
-      this.onDragStart(event.touches[0].clientY)
-    );
-    handle.addEventListener('touchmove', (event: TouchEvent) =>
-      this.onDragMove(event.touches[0].clientY, event)
-    );
-    handle.addEventListener('touchend', () => this.onDragEnd());
-
-    // **Mouse Events (Trackpad & Desktop)**
-    // footer.addEventListener('mousedown', (event: MouseEvent) => this.onDragStart(event.clientY));
-    // document.addEventListener('mousemove', (event: MouseEvent) => this.onDragMove(event.clientY));
-    // document.addEventListener('mouseup', () => this.onDragEnd());
+  
+    // ✅ Touch Events (Mobile)
+    handle.addEventListener('touchstart', (event: TouchEvent) => {
+      if (event.touches.length === 1) {
+        this.onDragStart(event.touches[0].clientY);
+      }
+    });
+  
+    handle.addEventListener('touchmove', (event: TouchEvent) => {
+      this.onDragMove(event.touches[0].clientY, event);
+    }, { passive: false }); // 🟢 passive: false allows preventDefault()
+  
+    handle.addEventListener('touchend', () => {
+      this.onDragEnd();
+    });
+  
+    // ✅ Mouse Events (Desktop)
+    handle.addEventListener('mousedown', (event: MouseEvent) => {
+      this.onDragStart(event.clientY);
+  
+      // 💡 Attach mousemove and mouseup **on demand**
+      const onMouseMove = (moveEvent: MouseEvent) => {
+        this.onDragMove(moveEvent.clientY);
+      };
+  
+      const onMouseUp = () => {
+        this.onDragEnd();
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+      };
+  
+      document.addEventListener('mousemove', onMouseMove);
+      document.addEventListener('mouseup', onMouseUp);
+    });
   }
-
+  
+ 
   onShowMore() {
     this.isExpanded = !this.isExpanded;
     const footer = this.footerContainer.nativeElement;
@@ -154,4 +174,14 @@ export class InteractionBarComponent implements AfterViewInit {
     footer.style.transform = this.isExpanded ? 'translateY(0)' : 'translateY(80%)';
     this.swipeProgress = this.isExpanded ? 1 : 0;
   }
+
+  handleClick(): void {
+    if (this.isDragging) {
+      console.log('🚫 Click ignored — user was swiping');
+      return;
+    }
+  
+    this.onShowMore(); // ✅ Safe to toggle now
+  }
+  
 }

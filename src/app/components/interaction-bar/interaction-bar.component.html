@@ -9,11 +9,12 @@
   ></app-indoor-selects>
 
   <div
-    #handleBar
-    class="handle-bar"
-    (click)="onShowMore()"
-    class="w-[100px] h-[10px] bg-[#d5d5d5] my-[10px] mx-auto rounded-full cursor-pointer"
-  ></div>
+  #handleBar
+  class="handle-bar w-[120px] h-[20px] bg-[#d5d5d5] my-[16px] mx-auto rounded-full cursor-pointer"
+  (click)="handleClick()"
+></div>
+
+
   <div class="footer-content px-5">
     <div *ngIf="showDirections$ | async">
       <h2 class="flex text-2xl font-bold text-gray-900 my-4">Directions</h2>
