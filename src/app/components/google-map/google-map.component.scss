@@ -13,3 +13,11 @@
   transform: translateX(-50%);
   z-index: 1000;
 }
+
+::ng-deep .gm-style-iw button {
+  display: none !important;
+}
+
+::ng-deep .gm-style-iw.gm-style-iw-c {
+  border-radius: 24px;
+}
