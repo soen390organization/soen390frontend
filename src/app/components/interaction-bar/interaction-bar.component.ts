@@ -2,7 +2,7 @@ import { AfterViewInit, Component, ElementRef, ViewChild } from '@angular/core';
 import { LocationCardsComponent } from '../location-cards/location-cards.component';
 import { Store } from '@ngrx/store';
 import { PlacesService } from 'src/app/services/places/places.service';
-import { MapType, selectCurrentMap, selectSelectedCampus } from 'src/app/store/app';
+import { MapType, selectCurrentMap, selectSelectedCampus, selectShowRoute } from 'src/app/store/app';
 import { Location } from 'src/app/interfaces/location.interface';
 import { filter, forkJoin, Observable, switchMap } from 'rxjs';
 import { DirectionsComponent } from '../directions/directions.component';
@@ -53,6 +53,7 @@ export class InteractionBarComponent implements AfterViewInit {
   ) {}
 
   ngOnInit() {
+    this.showDirections$ = this.store.select(selectShowRoute);
     this.store.select(selectCurrentMap).subscribe((map) => {
       this.showIndoorSelects = map === MapType.Indoor;
     });
@@ -76,7 +77,6 @@ export class InteractionBarComponent implements AfterViewInit {
         this.pointsOfInterest = { locations: pointsOfInterest, loading: false };
       });
 
-    this.showDirections$ = this.visibilityService.showDirections;
     this.showPOIs$ = this.visibilityService.showPOIs;
 
     this.calendarService.events$.subscribe((events) => {

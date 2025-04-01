@@ -13,7 +13,7 @@ describe('AbstractOutdoorStrategy', () => {
   let mockRenderer: jasmine.SpyObj<google.maps.DirectionsRenderer>;
 
   beforeEach(() => {
-    strategy = new TestStrategy();
+    strategy = new TestStrategy('WALKING');
 
     const directionsResponse: any = {
       routes: [

@@ -31,6 +31,7 @@ export class OutdoorDirectionsService extends DirectionsService<GoogleMapLocatio
   }
 
   public setSelectedStrategy(strategy: AbstractOutdoorStrategy) {
+    console.log('SET STRAT')
     this.selectedStrategySubject.next(strategy);
   }
 

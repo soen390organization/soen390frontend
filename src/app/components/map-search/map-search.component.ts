@@ -7,10 +7,9 @@ import { CurrentLocationService } from 'src/app/services/current-location/curren
 import { animate, state, style, transition, trigger } from '@angular/animations';
 import { OutdoorDirectionsService } from 'src/app/services/outdoor-directions/outdoor-directions.service';
 import { PlacesService } from 'src/app/services/places/places.service';
-import { HomePage } from 'src/app/home/home.page';
-import { combineLatest, Observable } from 'rxjs';
+import { combineLatest } from 'rxjs';
 import { Store } from '@ngrx/store';
-import { setMapType, MapType, setShowRoute } from 'src/app/store/app';
+import { setMapType, MapType, setShowRoute, selectShowRoute } from 'src/app/store/app';
 import { MappedinService } from 'src/app/services/mappedin/mappedin.service';
 import { IndoorDirectionsService } from 'src/app/services/indoor-directions/indoor-directions.service';
 
@@ -63,26 +62,30 @@ export class MapSearchComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+
     combineLatest([
       this.outdoorDirectionsService.getStartPoint$(),
       this.outdoorDirectionsService.getDestinationPoint$(),
       this.indoorDirectionService.getStartPoint$(),
-      this.indoorDirectionService.getDestinationPoint$()
-    ]).subscribe(async ([outdoorStartPoint, outdoorDestinationPoint, indoorStartPoint, indoorDestinationPoint]) => {
+      this.indoorDirectionService.getDestinationPoint$(),
+      this.store.select(selectShowRoute)
+    ]).subscribe(async ([outdoorStartPoint, outdoorDestinationPoint, indoorStartPoint, indoorDestinationPoint, showRoute]) => {
+      if (showRoute) {
+        this.disableStart = true;
+        return
+      }
+
       // Render indoor
       if (outdoorStartPoint && outdoorDestinationPoint) {
         await this.outdoorDirectionsService
         .getShortestRoute()
         .then(strategy => {
-          console.log(strategy)
           this.outdoorDirectionsService.setSelectedStrategy(strategy);
           this.outdoorDirectionsService.renderNavigation();
           this.disableStart = false;
         })
       } else if (indoorStartPoint && indoorDestinationPoint) {
         this.disableStart = false;
-      } else {
-        this.disableStart = true;
       }
     })
   }
@@ -126,11 +129,13 @@ export class MapSearchComponent implements OnInit {
 
   clearStartInput() {
     this.clearLocation();
+    this.indoorDirectionService.clearStartPoint();
     this.startLocationInput = '';
   }
 
   clearDestinationInput() {
     this.clearLocation();
+    this.indoorDirectionService.clearDestinationPoint();
     this.destinationLocationInput = '';
   }
 
@@ -141,7 +146,7 @@ export class MapSearchComponent implements OnInit {
     this.outdoorDirectionsService.clearNavigation();
     this.outdoorDirectionsService.setSelectedStrategy(null);
     this.mappedInService.clearNavigation();
-    this.indoorDirectionService.clearDestinationPoint();
+    this.indoorDirectionService.clearNavigation();
   }
 
   /* @TODO: we need to setFloor here for a better experience */

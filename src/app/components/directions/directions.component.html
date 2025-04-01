@@ -3,23 +3,25 @@
   <!-- Left side: transport modes -->
   <div class="flex-grow overflow-hidden flex-shrink min-w-0">
     <div class="flex space-x-2 overflow-x-auto scrollbar-hide">
-      <button
-        *ngFor="let transport of transportModes"
-        class="px-3 py-1 rounded-md w-[64px] h-[32px] flex-shrink-0"
-        [ngClass]="selectedMode === transport.mode ? 'bg-black' : 'bg-gray-200'"
-        (click)="setMode(transport.mode, $event)"
-      >
-        <span
-          class="material-symbols-outlined"
-          [ngClass]="selectedMode === transport.mode ? 'text-white' : 'text-black'"
-          [style.color]="selectedMode === transport.mode ? 'white' : 'black'"
+      <ng-container *ngIf="outdoorDirectionsService.getSelectedStrategy$() | async as selectedStrategy">
+        <button
+          *ngFor="let transport of getTravelModes()"
+          class="px-3 py-1 rounded-md w-[64px] h-[32px]"
+          [ngClass]="transport.mode === selectedStrategy.getMode() ? 'bg-black' : 'bg-gray-200'"
+          (click)="outdoorDirectionsService.setSelectedStrategy(transport.strategy)"
         >
-          {{ transport.icon }}
-        </span>
-      </button>
+          <span
+            class="material-symbols-outlined"
+            [style.color]="transport.mode === selectedStrategy.getMode() ? 'white' : 'black'"
+          >
+            {{ transport.icon }}
+          </span>
+        </button>
+      </ng-container>
     </div>
   </div>
-
+  <!-- [ngClass]="selectedMode === transport.mode ? 'text-white' : 'text-black'"
+  [style.color]="selectedMode === transport.mode ? 'white' : 'black'" -->
   <!-- Right side: End button with ETA above it -->
   <div class="relative flex flex-col items-end ml-2">
     <!-- ETA Info -->
@@ -47,8 +49,20 @@
 
 <!-- Bind ViewChild reference -->
 <div #directionsContainer>
+  <ng-container *ngIf="outdoorDirectionsService as svc">
+    <ng-container *ngIf="svc.getSelectedStrategy$() | async as strategy">
+      <div *ngFor="let step of showAllSteps ? strategy.getTotalSteps() : [strategy.getTotalSteps()[0]]" class="flex items-center mb-2">
+        <span class="material-symbols-outlined">{{ getDirectionIcon(step.instructions) }}</span>
+        <div
+          class="ml-3 text-xl font-semibold text-black text-left"
+          [innerHTML]="step.instructions"
+        ></div>
+      </div>
+    </ng-container>
+  </ng-container>
+
   <!-- Show steps based on component's position -->
-  <div *ngIf="!isLoading && steps.length > 0">
+  <!-- <div *ngIf="!isLoading && steps.length > 0">
     <div *ngFor="let step of showAllSteps ? steps : [steps[0]]" class="flex items-center mb-2">
       <span class="material-symbols-outlined">{{ getDirectionIcon(step.instructions) }}</span>
       <div
@@ -56,18 +70,18 @@
         [innerHTML]="step.instructions"
       ></div>
     </div>
-  </div>
+  </div> -->
 
   <!-- Show arrival message when all steps are completed -->
-  <div *ngIf="!isLoading && hasArrived" class="text-center text-xl font-bold text-green-600">
+  <!-- <div *ngIf="!isLoading && hasArrived" class="text-center text-xl font-bold text-green-600">
     You have arrived at your destination!
-  </div>
+  </div> -->
 
   <!-- No Directions Available -->
-  <div
+  <!-- <div
     *ngIf="!isLoading && steps.length === 0 && !hasArrived"
     class="text-gray-500 text-center mt-3"
   >
     No directions available.
-  </div>
+  </div> -->
 </div>
