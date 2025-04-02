@@ -78,6 +78,16 @@ export class MapSearchComponent implements OnInit {
       this.indoorDirectionService.getStartPoint$(),
       this.indoorDirectionService.getDestinationPoint$()
     ]).subscribe(async ([outdoorStartPoint, outdoorDestinationPoint, indoorStartPoint, indoorDestinationPoint]) => {
+      if (outdoorStartPoint) {
+        this.outdoorDirectionsService.showStartMarker();
+        this.googleMapService.updateMapLocation(outdoorStartPoint.coordinates);
+      }
+
+      if (outdoorDestinationPoint) {
+        this.outdoorDirectionsService.showDestinationMarker();
+        this.googleMapService.updateMapLocation(outdoorDestinationPoint.coordinates);
+      }
+
       // Render indoor
       if (outdoorStartPoint && outdoorDestinationPoint) {
         await this.outdoorDirectionsService
@@ -174,16 +184,13 @@ export class MapSearchComponent implements OnInit {
         coordinates: place.coordinates,
         type: 'outdoor'
       });
-      this.outdoorDirectionsService.showStartMarker();
-      this.googleMapService.updateMapLocation(place.coordinates);
+
       if (place.indoorMapId !== this.mappedInService.getMapId()) {
         await this.mappedInService.setMapData(place.indoorMapId);
       }
       this.store.dispatch(setMapType({ mapType: MapType.Indoor }));
     } else {
       this.outdoorDirectionsService.setStartPoint(place);
-      this.outdoorDirectionsService.showStartMarker();
-      this.googleMapService.updateMapLocation(place.coordinates);
       this.store.dispatch(setMapType({ mapType: MapType.Outdoor }));
     }
     this.places = [];
@@ -199,8 +206,6 @@ export class MapSearchComponent implements OnInit {
         coordinates: place.coordinates,
         type: 'outdoor'
       });
-      this.outdoorDirectionsService.showDestinationMarker();
-      this.googleMapService.updateMapLocation(place.coordinates);
 
       if (place.indoorMapId !== this.mappedInService.getMapId()) {
         await this.mappedInService.setMapData(place.indoorMapId);
@@ -208,8 +213,6 @@ export class MapSearchComponent implements OnInit {
       this.store.dispatch(setMapType({ mapType: MapType.Indoor }));
     } else {
       this.outdoorDirectionsService.setDestinationPoint(place);
-      this.outdoorDirectionsService.showDestinationMarker();
-      this.googleMapService.updateMapLocation(place.coordinates);
       this.store.dispatch(setMapType({ mapType: MapType.Outdoor }));
     }
     this.places = [];
