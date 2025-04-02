@@ -31,7 +31,8 @@ import { EventCardComponent } from '../event-card/event-card.component';
 })
 export class InteractionBarComponent implements AfterViewInit {
   @ViewChild('footerContainer', { static: false }) footerContainer!: ElementRef;
-  @ViewChild('handleBar', { static: false }) handleBar!: ElementRef;
+  @ViewChild('swipeArea', { static: false }) swipeArea!: ElementRef;
+
 
   public startY = 0;
   public currentY = 0;
@@ -85,94 +86,42 @@ export class InteractionBarComponent implements AfterViewInit {
     });
   }
   ngAfterViewInit(): void {
-    const handle = this.handleBar.nativeElement;
-  
-    // ✅ Touch Events (Mobile)
-    handle.addEventListener('touchstart', (event: TouchEvent) => {
+    this.attachSwipeListeners(this.swipeArea.nativeElement);
+  }
+
+  private attachSwipeListeners(element: HTMLElement): void {
+    // ✅ Touch Events
+    element.addEventListener('touchstart', (event: TouchEvent) => {
       if (event.touches.length === 1) {
         this.onDragStart(event.touches[0].clientY);
       }
     });
-  
-    handle.addEventListener('touchmove', (event: TouchEvent) => {
+
+    element.addEventListener('touchmove', (event: TouchEvent) => {
       this.onDragMove(event.touches[0].clientY, event);
-    }, { passive: false }); // 🟢 passive: false allows preventDefault()
-  
-    handle.addEventListener('touchend', () => {
+    }, { passive: false });
+
+    element.addEventListener('touchend', () => {
       this.onDragEnd();
     });
-  
-    // ✅ Mouse Events (Desktop)
-    handle.addEventListener('mousedown', (event: MouseEvent) => {
+
+    // ✅ Mouse Events
+    element.addEventListener('mousedown', (event: MouseEvent) => {
       this.onDragStart(event.clientY);
-  
-      // 💡 Attach mousemove and mouseup **on demand**
+
       const onMouseMove = (moveEvent: MouseEvent) => {
         this.onDragMove(moveEvent.clientY);
       };
-  
+
       const onMouseUp = () => {
         this.onDragEnd();
         document.removeEventListener('mousemove', onMouseMove);
         document.removeEventListener('mouseup', onMouseUp);
       };
-  
+
       document.addEventListener('mousemove', onMouseMove);
       document.addEventListener('mouseup', onMouseUp);
     });
-  }
-  
- 
-  onShowMore() {
-    this.isExpanded = !this.isExpanded;
-    const footer = this.footerContainer.nativeElement;
-    footer.style.transition = 'transform 0.3s ease-out';
-    footer.style.transform = this.isExpanded ? 'translateY(0)' : 'translateY(80%)';
-    footer.style.overflowY = this.isExpanded ? 'auto' : '';
-    this.swipeProgress = this.isExpanded ? 1 : 0;
-  }
-
-  /** Start dragging */
-  public onDragStart(startY: number): void {
-    this.startY = startY;
-    this.isDragging = true;
-  }
-
-  /** Move while dragging */
-  public onDragMove(currentY: number, event?: Event): void {
-    if (!this.isDragging) return;
-
-    this.currentY = currentY;
-    const diff = this.startY - this.currentY;
-
-    // Prevent scrolling while swiping
-    if (event) event.preventDefault();
-
-    // Adjust footer position dynamically
-    const footer = this.footerContainer.nativeElement;
-    const baseTranslate = this.isExpanded ? 0 : 80;
-    const translateY = baseTranslate - diff;
-    const clampedTranslate = Math.min(Math.max(translateY, 0), 80);
-    footer.style.transform = `translateY(${Math.min(Math.max(translateY, 0), 80)}%)`;
-    this.swipeProgress = (80 - clampedTranslate) / 80;
-  }
-
-  /** End dragging & determine if expansion should happen */
-  public onDragEnd(): void {
-    if (!this.isDragging) return;
-    this.isDragging = false;
-
-    const swipeDistance = this.startY - this.currentY;
-
-    if (Math.abs(swipeDistance) > this.threshold) {
-      this.isExpanded = swipeDistance > 0; // Expand if swiped up, collapse if swiped down
-    }
-
-    // Reset position with smooth transition
-    const footer = this.footerContainer.nativeElement;
-    footer.style.transition = 'transform 0.3s ease-out';
-    footer.style.transform = this.isExpanded ? 'translateY(0)' : 'translateY(80%)';
-    this.swipeProgress = this.isExpanded ? 1 : 0;
   }
 
   handleClick(): void {
@@ -180,8 +129,59 @@ export class InteractionBarComponent implements AfterViewInit {
       console.log('🚫 Click ignored — user was swiping');
       return;
     }
-  
-    this.onShowMore(); // ✅ Safe to toggle now
+
+    this.onShowMore();
   }
+
+  onShowMore(): void {
+    this.isExpanded = !this.isExpanded;
+    const footer = this.footerContainer.nativeElement;
+    footer.style.transition = 'transform 0.3s ease-out';
+    footer.style.transform = this.isExpanded ? 'translateY(0)' : 'translateY(90%)';
+    footer.style.overflowY = this.isExpanded ? 'auto' : '';
+    this.swipeProgress = this.isExpanded ? 1 : 0;
+  }
+
+  onDragStart(startY: number): void {
+    this.startY = startY;
+    this.isDragging = true;
+  }
+
+  onDragMove(currentY: number, event?: Event): void {
+    if (!this.isDragging) return;
+
+    this.currentY = currentY;
+    const diff = this.startY - this.currentY;
+
+    if (event) event.preventDefault();
+
+    const footer = this.footerContainer.nativeElement;
+    const baseTranslate = this.isExpanded ? 0 : 90;
+    const translateY = baseTranslate - diff;
+    const clampedTranslate = Math.min(Math.max(translateY, 0), 80);
+    footer.style.transform = `translateY(${clampedTranslate}%)`;
+    this.swipeProgress = (90 - clampedTranslate) / 90;
+  }
+
+  onDragEnd(): void {
+    if (!this.isDragging) return;
+    this.isDragging = false;
+  
+    const swipeDistance = this.startY - this.currentY;
+  
+    if (Math.abs(swipeDistance) > this.threshold) {
+      this.isExpanded = swipeDistance > 0;
+    }
+  
+    const footer = this.footerContainer.nativeElement;
+    footer.classList.toggle('expanded', this.isExpanded);
+  
+    footer.style.transition = 'transform 0.3s ease-out';
+    footer.style.transform = this.isExpanded ? 'translateY(0)' : 'translateY(90%)';
+    footer.style.overflowY = this.isExpanded ? 'auto' : 'hidden'; 
+  
+    this.swipeProgress = this.isExpanded ? 1 : 0;
+  }
+  
   
 }

@@ -6,11 +6,10 @@
   height: calc(100vh - 96px);
   background: white;
   transition: transform 0.3s ease-out;
-  transform: translateY(80%);
+  transform: translateY(90%);
   border-radius: 24px 24px 0 0;
   box-shadow: 0px -2px 10px rgba(0, 0, 0, 0.2);
   touch-action: pan-y;
-
 }
 
 .swipe-footer-container.expanded {

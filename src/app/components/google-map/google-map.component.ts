@@ -22,6 +22,27 @@ import { environment } from 'src/environments/environment';
   styleUrls: ['./google-map.component.scss']
 })
 export class GoogleMapComponent implements AfterViewInit {
+  handleClick() {
+    throw new Error('Method not implemented.');
+  }
+  onShowMore() {
+    throw new Error('Method not implemented.');
+  }
+  swipeProgress(swipeProgress: any) {
+    throw new Error('Method not implemented.');
+  }
+  onDragStart(arg0: number) {
+    throw new Error('Method not implemented.');
+  }
+  startY(startY: any) {
+    throw new Error('Method not implemented.');
+  }
+  onDragMove(arg0: number, mockEvent: Event) {
+    throw new Error('Method not implemented.');
+  }
+  onDragEnd() {
+    throw new Error('Method not implemented.');
+  }
   @ViewChild('mapContainer', { static: false }) mapContainer!: ElementRef;
   @Output() initialized = new EventEmitter<void>();
   currentLocationService: CurrentLocationService = new CurrentLocationService();
@@ -36,6 +57,10 @@ export class GoogleMapComponent implements AfterViewInit {
   };
 
   currentInfoWindow: google.maps.InfoWindow | null = null;
+  isDragging: boolean;
+  footerContainer: ElementRef<HTMLDivElement>;
+  handleBar: ElementRef<HTMLDivElement>;
+  isExpanded: boolean;
 
   constructor(private readonly googleMapService: GoogleMapService) {}
 

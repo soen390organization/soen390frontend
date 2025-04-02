@@ -32,6 +32,7 @@ export class CalendarService {
       return this.fetchEvents(calendarId);
     })
   );
+  calendar$: Observable<any[]>;
 
   constructor(
     private readonly dataService: ConcordiaDataService,

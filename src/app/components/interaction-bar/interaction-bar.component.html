@@ -9,10 +9,15 @@
   ></app-indoor-selects>
 
   <div
-  #handleBar
-  class="handle-bar w-[120px] h-[20px] bg-[#d5d5d5] my-[16px] mx-auto rounded-full cursor-pointer"
+  #swipeArea
+  class="w-full h-[60px] cursor-pointer flex flex-col items-center justify-start my-[16px] mx-auto"
   (click)="handleClick()"
-></div>
+>
+  <div class="w-[120px] h-[10px] bg-[#d5d5d5] rounded-full mt-2"></div>
+</div>
+
+
+
 
 
   <div class="footer-content px-5">
