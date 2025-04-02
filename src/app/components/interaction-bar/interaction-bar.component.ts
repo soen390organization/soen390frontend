@@ -14,6 +14,7 @@ import { CalendarService } from 'src/app/services/calendar/calendar.service';
 import { GoogleMapLocation } from 'src/app/interfaces/google-map-location.interface';
 import { EventInfo } from 'src/app/interfaces/event-info.interface';
 import { EventCardComponent } from '../event-card/event-card.component';
+import { AccessibilityButtonComponent } from '../accessibility-button/accessibility-button.component';
 
 @Component({
   selector: 'app-interaction-bar',
@@ -23,6 +24,7 @@ import { EventCardComponent } from '../event-card/event-card.component';
     LocationCardsComponent,
     DirectionsComponent,
     EventCardComponent,
+    AccessibilityButtonComponent,
     CommonModule
   ],
   templateUrl: './interaction-bar.component.html',
@@ -39,6 +41,7 @@ export class InteractionBarComponent implements AfterViewInit {
   public swipeProgress: number = 0;
   isExpanded = false; // Track the footer's state
   showIndoorSelects = false;
+  showAccessibility = false;
   campusBuildings = { locations: [] as GoogleMapLocation[], loading: true };
   pointsOfInterest = { locations: [] as Location[], loading: true };
   events = { events: [] as EventInfo[], loading: true };
@@ -55,6 +58,7 @@ export class InteractionBarComponent implements AfterViewInit {
   ngOnInit() {
     this.store.select(selectCurrentMap).subscribe((map) => {
       this.showIndoorSelects = map === MapType.Indoor;
+      this.showAccessibility = map ===  MapType.Indoor;
     });
 
     this.store.select(selectSelectedCampus).subscribe();

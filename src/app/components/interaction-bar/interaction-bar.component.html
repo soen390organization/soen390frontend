@@ -3,6 +3,10 @@
     class="switch-map-container"
     [style.opacity]="1 - swipeProgress"
   ></app-switch-map-button>
+  <app-accessibility-button
+  class="accessibility-container"
+  *ngIf="showIndoorSelects"
+  ></app-accessibility-button>
   <app-indoor-selects
     *ngIf="showIndoorSelects"
     [style.opacity]="1 - swipeProgress"
