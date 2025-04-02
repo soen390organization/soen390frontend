@@ -94,9 +94,7 @@ describe('InteractionBarComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(InteractionBarComponent);
     component = fixture.componentInstance;
-    // Manually assign footerContainer and handleBar so that their nativeElement is defined.
     component.footerContainer = new ElementRef(document.createElement('div'));
-    component.handleBar = new ElementRef(document.createElement('div'));
     fixture.detectChanges();
   });
 
@@ -165,4 +163,21 @@ describe('InteractionBarComponent', () => {
       'transform 0.3s ease-out'
     );
   });
+
+  it('should toggle footer when handleClick is called', () => {
+    component.footerContainer = new ElementRef(document.createElement('div'));
+  
+    // Start collapsed
+    expect(component.isExpanded).toBeFalse();
+  
+    // First click -> expand
+    component.handleClick();
+    expect(component.isExpanded).toBeTrue();
+  
+    // Second click -> collapse
+    component.handleClick();
+    expect(component.isExpanded).toBeFalse();
+  });
+  
+
 });
