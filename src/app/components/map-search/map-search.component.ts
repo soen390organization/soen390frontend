@@ -84,6 +84,8 @@ export class MapSearchComponent implements OnInit {
         .getShortestRoute()
         .then(strategy => {
           this.outdoorDirectionsService.setSelectedStrategy(strategy);
+          this.outdoorDirectionsService.clearStartMarker();
+          this.outdoorDirectionsService.clearDestinationMarker();
           this.outdoorDirectionsService.renderNavigation();
           this.disableStart = false;
         })
