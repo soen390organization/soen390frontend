@@ -1,193 +1,202 @@
-// import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
-// import { MapSearchComponent } from './map-search.component';
-// import { OutdoorDirectionsService } from 'src/app/services/outdoor-directions/outdoor-directions.service';
-// import { IndoorDirectionsService } from 'src/app/services/indoor-directions/indoor-directions.service';
-// import { MappedinService } from 'src/app/services/mappedin/mappedin.service';
-// import { PlacesService } from 'src/app/services/places/places.service';
-// import { CurrentLocationService } from 'src/app/services/current-location/current-location.service';
-// import { Store } from '@ngrx/store';
-// import { of } from 'rxjs';
-// import { FormsModule } from '@angular/forms';
-// import { IonicModule } from '@ionic/angular';
-// import { CommonModule } from '@angular/common';
-// import { MapType } from 'src/app/store/app';
+import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { MapSearchComponent } from './map-search.component';
+import { OutdoorDirectionsService } from 'src/app/services/outdoor-directions/outdoor-directions.service';
+import { IndoorDirectionsService } from 'src/app/services/indoor-directions/indoor-directions.service';
+import { GoogleMapService } from 'src/app/services/google-map.service';
+import { PlacesService } from 'src/app/services/places/places.service';
+import { MappedinService } from 'src/app/services/mappedin/mappedin.service';
+import { CurrentLocationService } from 'src/app/services/current-location/current-location.service';
+import { provideMockStore, MockStore } from '@ngrx/store/testing';
+import { IonicModule } from '@ionic/angular';
+import { of } from 'rxjs';
+import { MapType, setMapType, setShowRoute } from 'src/app/store/app';
+import { provideAnimations } from '@angular/platform-browser/animations';
 
-// describe('MapSearchComponent', () => {
-//   let component: MapSearchComponent;
-//   let fixture: ComponentFixture<MapSearchComponent>;
-//   let mockOutdoor: jasmine.SpyObj<OutdoorDirectionsService>;
-//   let mockIndoor: jasmine.SpyObj<IndoorDirectionsService>;
-//   let mockMappedin: jasmine.SpyObj<MappedinService>;
-//   let mockPlaces: jasmine.SpyObj<PlacesService>;
-//   let mockLocation: jasmine.SpyObj<CurrentLocationService>;
-//   let mockStore: jasmine.SpyObj<Store>;
+describe('MapSearchComponent', () => {
+  let component: MapSearchComponent;
+  let fixture: ComponentFixture<MapSearchComponent>;
+  let store: MockStore;
 
-//   beforeEach(async () => {
-//     mockOutdoor = jasmine.createSpyObj('OutdoorDirectionsService', [
-//       'getStartPoint$', 'getDestinationPoint$', 'getShortestRoute',
-//       'setSelectedStrategy', 'renderNavigation', 'setStartPoint',
-//       'clearDestinationPoint', 'clearNavigation', 'setDestinationPoint'
-//     ]);
-//     mockIndoor = jasmine.createSpyObj<IndoorDirectionsService>('IndoorDirectionsService', [], {
-//       getStartPoint$: () => of(null),
-//       getDestinationPoint$: () => of(null)
-//     });
-//     mockMappedin = jasmine.createSpyObj('MappedinService', ['getMapId', 'setMapData', 'clearNavigation']);
-//     mockPlaces = jasmine.createSpyObj('PlacesService', ['getPlaceSuggestions']);
-//     mockLocation = jasmine.createSpyObj('CurrentLocationService', ['getCurrentLocation']);
-//     mockStore = jasmine.createSpyObj('Store', ['dispatch']);
+  const mockOutdoorService = jasmine.createSpyObj('OutdoorDirectionsService', [
+    'getStartPoint$', 'getDestinationPoint$', 'showStartMarker', 'showDestinationMarker',
+    'getShortestRoute', 'setSelectedStrategy', 'clearStartMarker', 'clearDestinationMarker',
+    'renderNavigation', 'clearNavigation', 'clearStartPoint', 'clearDestinationPoint',
+    'setStartPoint', 'setDestinationPoint', 'getSelectedStrategy$'
+  ]);
 
-//     await TestBed.configureTestingModule({
-//       imports: [FormsModule, IonicModule, CommonModule],
-//       declarations: [MapSearchComponent],
-//       providers: [
-//         { provide: OutdoorDirectionsService, useValue: mockOutdoor },
-//         { provide: IndoorDirectionsService, useValue: mockIndoor },
-//         { provide: MappedinService, useValue: mockMappedin },
-//         { provide: PlacesService, useValue: mockPlaces },
-//         { provide: CurrentLocationService, useValue: mockLocation },
-//         { provide: Store, useValue: mockStore }
-//       ]
-//     }).compileComponents();
+  const mockIndoorService = jasmine.createSpyObj('IndoorDirectionsService', [
+    'getStartPoint$', 'getDestinationPoint$', 'clearStartPoint', 'clearDestinationPoint', 'clearNavigation',
+    'setStartPoint', 'setDestinationPoint'
+  ]);
 
-//     fixture = TestBed.createComponent(MapSearchComponent);
-//     component = fixture.componentInstance;
+  const mockMappedinService = jasmine.createSpyObj('MappedinService', ['getMapId', 'setMapData']);
+  const mockGoogleMapService = jasmine.createSpyObj('GoogleMapService', ['updateMapLocation', 'getMap']);
+  const mockPlacesService = jasmine.createSpyObj('PlacesService', ['getPlaceSuggestions']);
+  const mockLocationService = jasmine.createSpyObj('CurrentLocationService', ['getCurrentLocation']);
 
-//     mockOutdoor.getStartPoint$.and.returnValue(of(null));
-//     mockOutdoor.getDestinationPoint$.and.returnValue(of(null));
-//     mockIndoor.getStartPoint$.and.returnValue(of(null));
-//     mockIndoor.getDestinationPoint$.and.returnValue(of(null));
-//     fixture.detectChanges();
-//   });
+  const initialState = { app: { showRoute: false } };
 
-//   it('should create', () => {
-//     expect(component).toBeTruthy();
-//   });
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [MapSearchComponent, IonicModule],
+      providers: [
+        provideAnimations(),
+        provideMockStore({ initialState }),
+        { provide: OutdoorDirectionsService, useValue: mockOutdoorService },
+        { provide: IndoorDirectionsService, useValue: mockIndoorService },
+        { provide: MappedinService, useValue: mockMappedinService },
+        { provide: GoogleMapService, useValue: mockGoogleMapService },
+        { provide: PlacesService, useValue: mockPlacesService },
+        { provide: CurrentLocationService, useValue: mockLocationService }
+      ]
+    }).compileComponents();
 
-//   it('should toggle search visibility', () => {
-//     expect(component.isSearchVisible).toBe(false);
-//     component.toggleSearch();
-//     expect(component.isSearchVisible).toBe(true);
-//   });
+    store = TestBed.inject(MockStore);
+    fixture = TestBed.createComponent(MapSearchComponent);
+    component = fixture.componentInstance;
+  });
 
-//   it('should clear place list', () => {
-//     component.places = [{}];
-//     component.clearList();
-//     expect(component.places.length).toBe(0);
-//   });
+  it('should create', () => {
+    expect(component).toBeTruthy();
+  });
 
-//   it('should clear inputs and locations', () => {
-//     component.startLocationInput = 'test';
-//     component.destinationLocationInput = 'test';
+  it('should toggle search visibility', () => {
+    component.isSearchVisible = false;
+    component.toggleSearch();
+    expect(component.isSearchVisible).toBeTrue();
+  });
 
-//     component.clearStartInput();
-//     expect(component.startLocationInput).toBe('');
+  it('should clear place list', () => {
+    component.places = [{}, {}];
+    component.clearList();
+    expect(component.places).toEqual([]);
+  });
 
-//     component.clearDestinationInput();
-//     expect(component.destinationLocationInput).toBe('');
-//   });
+  it('should clear start input', () => {
+    component.startLocationInput = 'test';
+    component.clearStartInput();
+    expect(component.startLocationInput).toBe('');
+    expect(mockOutdoorService.clearStartMarker).toHaveBeenCalled();
+    expect(mockOutdoorService.clearStartPoint).toHaveBeenCalled();
+    expect(mockIndoorService.clearStartPoint).toHaveBeenCalled();
+  });
 
-//   it('should clear all locations', () => {
-//     component.places = [{}];
-//     component.clearLocation();
-//     expect(component.places).toEqual([]);
-//     expect(mockStore.dispatch).toHaveBeenCalled();
-//     expect(mockOutdoor.clearDestinationPoint).toHaveBeenCalled();
-//     expect(mockOutdoor.clearNavigation).toHaveBeenCalled();
-//     expect(mockOutdoor.setSelectedStrategy).toHaveBeenCalledWith(null);
-//     expect(mockMappedin.clearNavigation).toHaveBeenCalled();
-//     expect(mockIndoor.clearDestinationPoint).toHaveBeenCalled();
-//   });
+  it('should clear destination input', () => {
+    component.destinationLocationInput = 'test';
+    component.clearDestinationInput();
+    expect(component.destinationLocationInput).toBe('');
+    expect(mockOutdoorService.clearDestinationMarker).toHaveBeenCalled();
+    expect(mockOutdoorService.clearDestinationPoint).toHaveBeenCalled();
+    expect(mockIndoorService.clearDestinationPoint).toHaveBeenCalled();
+  });
 
-//   // it('should handle ngOnInit indoor points', fakeAsync(() => {
-//   //   mockOutdoor.getStartPoint$.and.returnValue(of(null));
-//   //   mockOutdoor.getDestinationPoint$.and.returnValue(of(null));
-//   //   mockIndoor.getStartPoint$.and.returnValue(of({}));
-//   //   mockIndoor.getDestinationPoint$.and.returnValue(of({}));
-//   //   component.ngOnInit();
-//   //   tick();
-//   //   expect(component.disableStart).toBe(false);
-//   // }));
+  it('should clear location', () => {
+    component.places = [{}, {}];
+    component.clearLocation();
+    expect(component.places).toEqual([]);
+    expect(mockOutdoorService.clearNavigation).toHaveBeenCalled();
+    expect(mockOutdoorService.setSelectedStrategy).toHaveBeenCalledWith(null);
+    expect(mockIndoorService.clearNavigation).toHaveBeenCalled();
+  });
 
-//   it('should handle ngOnInit outdoor points with route strategy', fakeAsync(() => {
-//     mockOutdoor.getStartPoint$.and.returnValue(of({}));
-//     mockOutdoor.getDestinationPoint$.and.returnValue(of({}));
-//     mockIndoor.getStartPoint$.and.returnValue(of(null));
-//     mockIndoor.getDestinationPoint$.and.returnValue(of(null));
-//     mockOutdoor.getShortestRoute.and.returnValue(Promise.resolve('strategy'));
+  it('should dispatch show route on start click', () => {
+    spyOn(store, 'dispatch');
+    component.isSearchVisible = true;
+    component.onStartClick();
+    expect(store.dispatch).toHaveBeenCalledWith(setShowRoute({ show: true }));
+    expect(component.isSearchVisible).toBeFalse();
+  });
 
-//     component.ngOnInit();
-//     tick();
-//     expect(mockOutdoor.setSelectedStrategy).toHaveBeenCalledWith('strategy');
-//     expect(mockOutdoor.renderNavigation).toHaveBeenCalled();
-//     expect(component.disableStart).toBe(false);
-//   }));
+  it('should handle search change with empty input', fakeAsync(() => {
+    component.onSearchChange({ target: { value: '' } }, 'start');
+    tick();
+    expect(component.places).toEqual([]);
+  }));
 
-//   it('should throw if location is null', async () => {
-//     mockLocation.getCurrentLocation.and.returnValue(Promise.resolve(null));
-//     await expectAsync(component.onSetUsersLocationAsStart()).toBeRejectedWithError('Current location is null.');
-//   });
+  it('should fetch place suggestions on search change', fakeAsync(() => {
+    mockPlacesService.getPlaceSuggestions.and.resolveTo([{ title: 'Place A' }]);
+    component.onSearchChange({ target: { value: 'Library' } }, 'destination');
+    tick();
+    expect(component.isSearchingFromStart).toBeFalse();
+    expect(component.places).toEqual([{ title: 'Place A' }]);
+  }));
 
-//   it('should set user location as start', async () => {
-//     const coords = { lat: 1, lng: 2 };
-//     mockLocation.getCurrentLocation.and.returnValue(Promise.resolve(coords));
-//     await component.onSetUsersLocationAsStart();
-//     expect(mockOutdoor.setStartPoint).toHaveBeenCalled();
-//     expect(mockStore.dispatch).toHaveBeenCalled();
-//   });
+  it('should set user location as start point', fakeAsync(async () => {
+    spyOn(store, 'dispatch');
+    const position = { lat: 45, lng: -73 };
+    mockLocationService.getCurrentLocation.and.resolveTo(position);
+    await component.onSetUsersLocationAsStart();
+    expect(mockLocationService.getCurrentLocation).toHaveBeenCalled();
+    expect(store.dispatch).toHaveBeenCalledWith(setMapType({ mapType: MapType.Outdoor }));
+  }));
 
-//   it('should search places', async () => {
-//     mockPlaces.getPlaceSuggestions.and.returnValue(Promise.resolve(['place1']));
-//     await component.onSearchChange({ target: { value: 'query' } }, 'start');
-//     expect(component.places).toEqual(['place1']);
-//     expect(component.isSearchingFromStart).toBeTrue();
-//   });
+  it('should throw error if user location is null', async () => {
+    mockLocationService.getCurrentLocation.and.resolveTo(null);
+    await expectAsync(component.onSetUsersLocationAsStart()).toBeRejectedWithError('Current location is null.');
+  });
 
-//   it('should clear places if search is empty', async () => {
-//     component.places = ['existing'];
-//     await component.onSearchChange({ target: { value: '  ' } }, 'destination');
-//     expect(component.places.length).toBe(0);
-//   });
+  it('should set indoor start location', fakeAsync(async () => {
+    spyOn(store, 'dispatch');
+    mockMappedinService.getMapId.and.returnValue('abc');
+    const place = {
+      title: 'Test',
+      fullName: 'Full Test',
+      address: '123',
+      coordinates: {},
+      type: 'indoor',
+      indoorMapId: 'def'
+    };
+    await component.setStart(place);
+    expect(mockIndoorService.setStartPoint).toHaveBeenCalledWith(place);
+    expect(mockOutdoorService.setStartPoint).toHaveBeenCalled();
+    expect(mockMappedinService.setMapData).toHaveBeenCalledWith('def');
+    expect(store.dispatch).toHaveBeenCalledWith(setMapType({ mapType: MapType.Indoor }));
+    expect(component.places.length).toBe(0);
+  }));
 
-//   it('should dispatch showRoute and hide search', async () => {
-//     component.isSearchVisible = true;
-//     await component.onStartClick();
-//     expect(mockStore.dispatch).toHaveBeenCalled();
-//     expect(component.isSearchVisible).toBe(false);
-//   });
+  it('should set outdoor start location', fakeAsync(async () => {
+    spyOn(store, 'dispatch');
+    const place = { title: 'Out', address: '123', coordinates: {}, type: 'outdoor' };
+    await component.setStart(place);
+    expect(mockOutdoorService.setStartPoint).toHaveBeenCalledWith(place);
+    expect(store.dispatch).toHaveBeenCalledWith(setMapType({ mapType: MapType.Outdoor }));
+  }));
 
-//   it('should set indoor start point', async () => {
-//     const place = { title: 'title', type: 'indoor', fullName: 'full', address: 'addr', indoorMapId: '1' };
-//     mockMappedin.getMapId.and.returnValue('2');
-//     mockMappedin.setMapData.and.returnValue(Promise.resolve());
+  it('should set indoor destination', fakeAsync(async () => {
+    spyOn(store, 'dispatch');
+    mockMappedinService.getMapId.and.returnValue('old');
+    const place = {
+      title: 'Dest',
+      fullName: 'Full Dest',
+      address: '321',
+      coordinates: {},
+      type: 'indoor',
+      indoorMapId: 'new'
+    };
+    await component.setDestination(place);
+    expect(mockIndoorService.setDestinationPoint).toHaveBeenCalledWith(place);
+    expect(mockOutdoorService.setDestinationPoint).toHaveBeenCalled();
+    expect(mockMappedinService.setMapData).toHaveBeenCalledWith('new');
+    expect(store.dispatch).toHaveBeenCalledWith(setMapType({ mapType: MapType.Indoor }));
+  }));
 
-//     await component.setStart(place);
-//     expect(mockIndoor.setStartPoint).toHaveBeenCalled();
-//     expect(mockStore.dispatch).toHaveBeenCalled();
-//     expect(mockMappedin.setMapData).toHaveBeenCalledWith('1');
-//   });
+  it('should set outdoor destination', fakeAsync(async () => {
+    spyOn(store, 'dispatch');
+    const place = { title: 'OutDest', address: '456', coordinates: {}, type: 'outdoor' };
+    await component.setDestination(place);
+    expect(mockOutdoorService.setDestinationPoint).toHaveBeenCalledWith(place);
+    expect(store.dispatch).toHaveBeenCalledWith(setMapType({ mapType: MapType.Outdoor }));
+  }));
 
-//   it('should set outdoor start point', async () => {
-//     const place = { title: 'title', type: 'outdoor' };
-//     await component.setStart(place);
-//     expect(mockOutdoor.setStartPoint).toHaveBeenCalledWith(place);
-//     expect(mockStore.dispatch).toHaveBeenCalled();
-//   });
+  it('should run ngOnInit logic', fakeAsync(() => {
+    mockOutdoorService.getStartPoint$.and.returnValue(of(null));
+    mockOutdoorService.getDestinationPoint$.and.returnValue(of(null));
+    mockIndoorService.getStartPoint$.and.returnValue(of(null));
+    mockIndoorService.getDestinationPoint$.and.returnValue(of(null));
+    store.setState({ app: { showRoute: true } });
 
-//   it('should set indoor destination point', async () => {
-//     const place = { title: 'title', type: 'indoor', fullName: 'full', address: 'addr', indoorMapId: '1' };
-//     mockMappedin.getMapId.and.returnValue('2');
-//     mockMappedin.setMapData.and.returnValue(Promise.resolve());
-
-//     await component.setDestination(place);
-//     expect(mockIndoor.setDestinationPoint).toHaveBeenCalled();
-//     expect(mockStore.dispatch).toHaveBeenCalled();
-//   });
-
-//   it('should set outdoor destination point', async () => {
-//     const place = { title: 'title', type: 'outdoor' };
-//     await component.setDestination(place);
-//     expect(mockOutdoor.setDestinationPoint).toHaveBeenCalledWith(place);
-//     expect(mockStore.dispatch).toHaveBeenCalled();
-//   });
-// });
+    fixture.detectChanges();
+    tick();
+    expect(component.disableStart).toBeTrue();
+  }));
+});
