@@ -38,8 +38,8 @@ export class OutdoorDirectionsService extends DirectionsService<GoogleMapLocatio
   public async getShortestRoute() {
     // Grab origin from StartPoint & destination from DestinationPoint
     const [origin, destination] = await Promise.all([
-      (await this.getStartPoint()).address,
-      (await this.getDestinationPoint()).address
+      (await this.getStartPoint()),
+      (await this.getDestinationPoint())
     ]);
     // Load all Strategies
      const strategies = await Promise.all([
@@ -48,8 +48,6 @@ export class OutdoorDirectionsService extends DirectionsService<GoogleMapLocatio
       await this.outdoorTransitStrategy.getRoutes(origin, destination),
       await this.outdoorShuttleStrategy.getRoutes(origin, destination)
     ]);
-
-    console.log('STRATS: ', strategies)
 
     // Return the strategy with the smallest duration
     return strategies

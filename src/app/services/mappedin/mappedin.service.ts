@@ -11,6 +11,7 @@ export interface BuildingData {
   name: string;
   abbreviation: string;
   address: string;
+  coordinates: google.maps.LatLng;
   mapData: MapData;
 }
 
@@ -77,6 +78,7 @@ export class MappedinService {
           name: item.name,
           abbreviation: item.abbreviation,
           address: item.address,
+          coordinates: new google.maps.LatLng(item.coordinates),
           mapData
         };
       })

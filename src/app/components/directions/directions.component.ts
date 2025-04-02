@@ -5,7 +5,6 @@ import { CurrentLocationService } from 'src/app/services/current-location/curren
 import { OutdoorDirectionsService } from 'src/app/services/outdoor-directions/outdoor-directions.service';
 import { IconMapping } from 'src/app/interfaces/Icon-mapping';
 import rawIconMapping from 'src/assets/icon-mapping.json';
-import { combineLatest } from 'rxjs';
 import { NavigationCoordinatorService } from 'src/app/services/navigation-coordinator.service';
 import { CompleteRoute } from 'src/app/interfaces/routing-strategy.interface';
 import { Store } from '@ngrx/store';
@@ -41,11 +40,11 @@ export class DirectionsComponent implements OnInit, OnDestroy {
 
   constructor(
     private store: Store,
+    public outdoorDirectionsService: OutdoorDirectionsService,
     public readonly outdoorWalkingStrategy: OutdoorWalkingStrategy,
     public readonly outdoorDrivingStrategy: OutdoorDrivingStrategy,
     public readonly outdoorTransitStrategy: OutdoorTransitStrategy,
     public readonly outdoorShuttleStrategy: OutdoorShuttleStrategy,
-    public readonly outdoorDirectionsService: OutdoorDirectionsService,
     private currentLocationService: CurrentLocationService,
     private navigationCoordinator: NavigationCoordinatorService
   ) {}

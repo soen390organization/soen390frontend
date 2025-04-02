@@ -62,19 +62,20 @@ export class MapSearchComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.store.select(selectShowRoute).subscribe(showRoute => {
+      if (showRoute) {
+        this.disableStart = true;
+      } else {
+        this.disableStart = false;
+      }
+    });
 
     combineLatest([
       this.outdoorDirectionsService.getStartPoint$(),
       this.outdoorDirectionsService.getDestinationPoint$(),
       this.indoorDirectionService.getStartPoint$(),
-      this.indoorDirectionService.getDestinationPoint$(),
-      this.store.select(selectShowRoute)
-    ]).subscribe(async ([outdoorStartPoint, outdoorDestinationPoint, indoorStartPoint, indoorDestinationPoint, showRoute]) => {
-      if (showRoute) {
-        this.disableStart = true;
-        return
-      }
-
+      this.indoorDirectionService.getDestinationPoint$()
+    ]).subscribe(async ([outdoorStartPoint, outdoorDestinationPoint, indoorStartPoint, indoorDestinationPoint]) => {
       // Render indoor
       if (outdoorStartPoint && outdoorDestinationPoint) {
         await this.outdoorDirectionsService
@@ -86,6 +87,8 @@ export class MapSearchComponent implements OnInit {
         })
       } else if (indoorStartPoint && indoorDestinationPoint) {
         this.disableStart = false;
+      } else {
+        this.disableStart = true;
       }
     })
   }
@@ -96,10 +99,11 @@ export class MapSearchComponent implements OnInit {
 
   async onSetUsersLocationAsStart(): Promise<void> {
     const position = await this.currentLocationService.getCurrentLocation();
+    console.log('Position: ', position)
     if (position == null) {
       throw new Error('Current location is null.');
     }
-    this.outdoorDirectionsService.setStartPoint({
+    this.setStart({
       title: 'Your Location',
       address: `${position.lat}, ${position.lng}`,
       coordinates: new google.maps.LatLng(position),
@@ -129,12 +133,14 @@ export class MapSearchComponent implements OnInit {
 
   clearStartInput() {
     this.clearLocation();
+    this.outdoorDirectionsService.clearStartPoint();
     this.indoorDirectionService.clearStartPoint();
     this.startLocationInput = '';
   }
 
   clearDestinationInput() {
     this.clearLocation();
+    this.outdoorDirectionsService.clearDestinationPoint();
     this.indoorDirectionService.clearDestinationPoint();
     this.destinationLocationInput = '';
   }
@@ -142,15 +148,14 @@ export class MapSearchComponent implements OnInit {
   clearLocation() {
     this.clearList();
     this.store.dispatch(setShowRoute({ show: false }));
-    this.outdoorDirectionsService.clearDestinationPoint();
     this.outdoorDirectionsService.clearNavigation();
     this.outdoorDirectionsService.setSelectedStrategy(null);
-    this.mappedInService.clearNavigation();
     this.indoorDirectionService.clearNavigation();
   }
 
   /* @TODO: we need to setFloor here for a better experience */
   async setStart(place: any) {
+    console.log(place);
     this.startLocationInput = place.title;
     if (place.type === 'indoor') {
       console.log('Setting start point for indoor:', place);
@@ -158,6 +163,7 @@ export class MapSearchComponent implements OnInit {
       this.outdoorDirectionsService.setStartPoint({
         title: place.fullName,
         address: place.address,
+        coordinates: place.coordinates,
         type: 'outdoor'
       });
       this.store.dispatch(setMapType({ mapType: MapType.Indoor }));
@@ -178,6 +184,7 @@ export class MapSearchComponent implements OnInit {
       this.outdoorDirectionsService.setDestinationPoint({
         title: place.fullName,
         address: place.address,
+        coordinates: place.coordinates,
         type: 'outdoor'
       });
       this.store.dispatch(setMapType({ mapType: MapType.Indoor }));
