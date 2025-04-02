@@ -1,14 +1,15 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnDestroy, ViewChild, ElementRef } from '@angular/core';
 import { Step } from 'src/app/interfaces/step.interface';
 import { CurrentLocationService } from 'src/app/services/current-location/current-location.service';
 import { OutdoorDirectionsService } from 'src/app/services/outdoor-directions/outdoor-directions.service';
 import { IconMapping } from 'src/app/interfaces/Icon-mapping';
 import rawIconMapping from 'src/assets/icon-mapping.json';
-import { combineLatest, firstValueFrom } from 'rxjs';
-import { VisibilityService } from 'src/app/services/visibility.service';
 import { NavigationCoordinatorService } from 'src/app/services/navigation-coordinator.service';
 import { CompleteRoute } from 'src/app/interfaces/routing-strategy.interface';
+import { Store } from '@ngrx/store';
+import { setShowRoute } from 'src/app/store/app';
+import { OutdoorDrivingStrategy, OutdoorShuttleStrategy, OutdoorTransitStrategy, OutdoorWalkingStrategy } from 'src/app/strategies/outdoor-directions';
 
 const iconMapping = rawIconMapping as IconMapping;
 
@@ -20,7 +21,7 @@ const iconMapping = rawIconMapping as IconMapping;
   styleUrls: ['./directions.component.scss'],
   imports: [CommonModule]
 })
-export class DirectionsComponent implements OnInit, OnDestroy {
+export class DirectionsComponent implements OnDestroy {
   @ViewChild('directionsContainer') directionsContainer!: ElementRef;
 
   steps: Step[] = [];
@@ -33,46 +34,32 @@ export class DirectionsComponent implements OnInit, OnDestroy {
   private endNavigationSubscription: any;
   currentRouteData: { eta: string | null; distance: number } | null = null;
 
+  travelModes: any[] = [];
+
   private readonly stepCompletionThreshold = 30;
 
-  startLocation: string = 'McGill University, Montreal, QC';
-  destinationLocation: string = 'Old Port of Montreal, QC';
-
-  // Used in a ngfor in the html to avoid duplication since the buttons are similar
-  transportModes = [
-    { mode: 'WALKING', icon: 'directions_walk' },
-    { mode: 'TRANSIT', icon: 'directions_bus' },
-    { mode: 'SHUTTLE', icon: 'directions_transit' },
-    { mode: 'DRIVING', icon: 'directions_car' }
-  ];
-
   constructor(
-    private readonly outdoorDirectionsService: OutdoorDirectionsService,
+    private store: Store,
+    public outdoorDirectionsService: OutdoorDirectionsService,
+    public readonly outdoorWalkingStrategy: OutdoorWalkingStrategy,
+    public readonly outdoorDrivingStrategy: OutdoorDrivingStrategy,
+    public readonly outdoorTransitStrategy: OutdoorTransitStrategy,
+    public readonly outdoorShuttleStrategy: OutdoorShuttleStrategy,
     private currentLocationService: CurrentLocationService,
-    private visibilityService: VisibilityService,
     private navigationCoordinator: NavigationCoordinatorService
   ) {}
+  // ngAfterViewInit(): void {
+    // this.observeComponentPosition();
+  // }
 
-  ngOnInit(): void {
-     combineLatest([
-          this.outdoorDirectionsService.getStartPoint(),
-          this.outdoorDirectionsService.getDestinationPoint()
-        ])
-        .subscribe(async ([outdoorStart, outdoorDestination]) => {
-          if (outdoorStart && outdoorDestination) {
-            this.loadDirections('WALKING');
-            this.setCurrentRouteData('WALKING');
-            this.startWatchingLocation();
-          }
-        });
-
-    this.endNavigationSubscription = this.visibilityService.endNavigation.subscribe(() => {
-      this.onEndClick();
-    });
-  }
-
-  ngAfterViewInit(): void {
-    this.observeComponentPosition();
+  public getTravelModes() {
+    const travelModes = [
+      { mode: 'WALKING', icon: 'directions_walk', strategy: this.outdoorWalkingStrategy },
+      { mode: 'DRIVING', icon: 'directions_car', strategy: this.outdoorDrivingStrategy },
+      { mode: 'TRANSIT', icon: 'directions_bus', strategy: this.outdoorTransitStrategy },
+      { mode: 'SHUTTLE', icon: 'directions_transit', strategy: this.outdoorShuttleStrategy }
+    ];
+    return travelModes.filter(item => item.strategy?.routes?.length);
   }
 
   /**
@@ -189,16 +176,6 @@ export class DirectionsComponent implements OnInit, OnDestroy {
     }
   }
 
-  async setCurrentRouteData(mode: string) {
-    const start = await this.outdoorDirectionsService.getStartPoint();
-    const destination = await this.outdoorDirectionsService.getDestinationPoint();
-    // const result = await this.outdoorDirectionsService.calculateDistanceETA(
-    //   start.address,
-    //   destination.address,
-    //   mode
-    // );
-    this.currentRouteData = { eta: 'FIX', distance: 200 };
-  }
   /**
    * Updates the travel mode and loads new hardcoded directions.
    */
@@ -206,7 +183,6 @@ export class DirectionsComponent implements OnInit, OnDestroy {
     if (event) event.stopPropagation();
     this.selectedMode = mode;
     this.loadDirections(mode);
-    this.setCurrentRouteData(mode);
   }
 
   getDirectionIcon(instructions: string): string {
@@ -238,8 +214,6 @@ export class DirectionsComponent implements OnInit, OnDestroy {
   }
 
   onEndClick(): void {
-    this.visibilityService.toggleDirectionsComponent();
-    this.visibilityService.togglePOIsComponent();
-    this.visibilityService.toggleStartButton();
+    this.store.dispatch(setShowRoute({ show: false }));
   }
 }

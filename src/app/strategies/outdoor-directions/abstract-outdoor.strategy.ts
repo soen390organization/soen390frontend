@@ -1,11 +1,12 @@
 import { Injectable } from '@angular/core';
 import { OutdoorRoute } from 'src/app/features/outdoor-route/outdoor-route.feature';
+import { GoogleMapLocation } from 'src/app/interfaces/google-map-location.interface';
 import { OutdoorDirectionsStrategy } from 'src/app/interfaces/outdoor-directions-strategy.interface';
 
 @Injectable({
   providedIn: 'root'
 })
-export abstract class AbstractOutdoorStrategy implements OutdoorDirectionsStrategy {
+export abstract class AbstractOutdoorStrategy implements OutdoorDirectionsStrategy<GoogleMapLocation> {
   routes: OutdoorRoute[] = [];
   mode: string;
 
@@ -77,5 +78,5 @@ export abstract class AbstractOutdoorStrategy implements OutdoorDirectionsStrate
     });
   }
 
-  abstract getRoutes(origin: string, destination: string): Promise<any>;
+  abstract getRoutes(origin: GoogleMapLocation, destination: GoogleMapLocation): Promise<any>;
 }

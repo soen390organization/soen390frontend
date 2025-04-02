@@ -1,99 +1,149 @@
 import { AbstractOutdoorStrategy } from './abstract-outdoor.strategy';
+import { GoogleMapLocation } from 'src/app/interfaces/google-map-location.interface';
 import { OutdoorRoute } from 'src/app/features/outdoor-route/outdoor-route.feature';
 
 describe('AbstractOutdoorStrategy', () => {
+  class MockRenderer {
+    setDirections = jasmine.createSpy('setDirections');
+    set = jasmine.createSpy('set');
+  }
+
+  const createMockRoute = (legs: any[]): OutdoorRoute & { _mockRenderer: MockRenderer } => {
+    const mockRenderer = new MockRenderer();
+  
+    return {
+      getResponse: () => ({
+        routes: [{ legs }]
+      }),
+      getRenderer: () => mockRenderer,
+      _mockRenderer: mockRenderer, // <-- expose it for testing
+  
+      // other required OutdoorRoute properties
+      origin: null,
+      destination: null,
+      travelMode: '',
+      renderer: null,
+      response: null,
+      distance: null,
+      duration: null,
+      path: [],
+      bounds: null,
+      steps: [],
+    } as unknown as OutdoorRoute & { _mockRenderer: MockRenderer };
+  };
+
   class TestStrategy extends AbstractOutdoorStrategy {
-    async getRoutes(origin: string, destination: string): Promise<any> {
-      return [];
+    constructor(mode: string) {
+      super(mode);
+    }
+
+    getRoutes(origin: GoogleMapLocation, destination: GoogleMapLocation): Promise<any> {
+      return Promise.resolve([]);
     }
   }
 
   let strategy: TestStrategy;
-  let mockRoute: jasmine.SpyObj<OutdoorRoute>;
-  let mockRenderer: jasmine.SpyObj<google.maps.DirectionsRenderer>;
 
   beforeEach(() => {
-    strategy = new TestStrategy();
-
-    const directionsResponse: any = {
-      routes: [
-        {
-          legs: [
-            {
-              duration: { value: 120 },
-              distance: { value: 500 },
-              steps: [
-                { instructions: 'Step 1', hide: false },
-                { instructions: 'Step 2', hide: true }
-              ]
-            },
-            {
-              duration: { value: 240 },
-              distance: { value: 1500 },
-              steps: [
-                { instructions: 'Step 3', hide: false }
-              ]
-            }
-          ],
-          overview_path: [],
-          bounds: {} as google.maps.LatLngBounds,
-          copyrights: '',
-          summary: '',
-          warnings: [],
-          waypoint_order: []
-        }
-      ]
-    };
-
-    mockRenderer = jasmine.createSpyObj('google.maps.DirectionsRenderer', ['setDirections', 'set']);
-    mockRoute = jasmine.createSpyObj<OutdoorRoute>('OutdoorRoute', ['getResponse', 'getRenderer']);
-    mockRoute.getResponse.and.returnValue(directionsResponse);
-    mockRoute.getRenderer.and.returnValue(mockRenderer);
-
-    strategy.routes = [mockRoute];
+    strategy = new TestStrategy('WALKING');
   });
 
-  it('should calculate total duration in seconds and text format', () => {
+  it('should return the correct mode', () => {
+    expect(strategy.getMode()).toBe('WALKING');
+  });
+
+  it('should calculate total duration', () => {
+    strategy.routes = [
+      createMockRoute([
+        { duration: { value: 60 }, distance: { value: 500 }, steps: [{ hide: false }] },
+        { duration: { value: 120 }, distance: { value: 800 }, steps: [{ hide: true }] }
+      ])
+    ];
     const result = strategy.getTotalDuration();
-    expect(result).toEqual({ value: 360, text: '6 mins' });
+    expect(result.value).toBe(180);
+    expect(result.text).toBe('3 mins');
   });
 
-  it('should calculate total distance below 1000m and return in meters', () => {
-    // Set both legs below 1000m
-    const response = mockRoute.getResponse();
-    response.routes[0].legs[0].distance.value = 500;
-    response.routes[0].legs[1].distance.value = 400;
-    mockRoute.getResponse.and.returnValue(response);
-
+  it('should calculate total distance under 1000m', () => {
+    strategy.routes = [
+      createMockRoute([
+        { duration: { value: 0 }, distance: { value: 200 }, steps: [] },
+        { duration: { value: 0 }, distance: { value: 300 }, steps: [] }
+      ])
+    ];
     const result = strategy.getTotalDistance();
-    expect(result).toEqual({ value: 900, text: '900m' });
+    expect(result.value).toBe(500);
+    expect(result.text).toBe('500m');
   });
 
-  it('should calculate total distance above 1000m and return in km', () => {
+  it('should calculate total distance above 1000m', () => {
+    strategy.routes = [
+      createMockRoute([
+        { duration: { value: 0 }, distance: { value: 1200 }, steps: [] }
+      ])
+    ];
     const result = strategy.getTotalDistance();
-    expect(result).toEqual({ value: 2000, text: '2.0km' });
+    expect(result.value).toBe(1200);
+    expect(result.text).toBe('1.2km');
   });
 
-  it('should return all legs from all routes', () => {
+  it('should return total legs from all routes', () => {
+    const leg1 = { duration: { value: 0 }, distance: { value: 0 }, steps: [] };
+    const leg2 = { duration: { value: 0 }, distance: { value: 0 }, steps: [] };
+    strategy.routes = [createMockRoute([leg1, leg2])];
     const legs = strategy.getTotalLegs();
     expect(legs.length).toBe(2);
-    expect(legs[0].duration.value).toBe(120);
   });
 
-  it('should return all non-hidden steps from all legs', () => {
+  it('should return total visible steps', () => {
+    strategy.routes = [
+      createMockRoute([
+        {
+          duration: { value: 0 },
+          distance: { value: 0 },
+          steps: [{ hide: false }, { hide: true }]
+        }
+      ])
+    ];
     const steps = strategy.getTotalSteps();
-    expect(steps.length).toBe(2);
-    expect(steps[0].instructions).toBe('Step 1');
-    expect(steps[1].instructions).toBe('Step 3');
+    expect(steps.length).toBe(1);
+    expect(steps[0].hide).toBeFalse();
   });
 
-  it('should render all routes with setDirections', () => {
+  it('should render all routes', () => {
+    const mockRoute = createMockRoute([
+      { duration: { value: 0 }, distance: { value: 0 }, steps: [] }
+    ]);
+    const renderer = mockRoute.getRenderer() as unknown as MockRenderer;
+    strategy.routes = [mockRoute];
     strategy.renderRoutes();
-    expect(mockRenderer.setDirections).toHaveBeenCalledWith(mockRoute.getResponse());
+    expect(renderer.setDirections).toHaveBeenCalledWith(mockRoute.getResponse());
   });
 
   it('should clear all rendered routes', () => {
+    const mockRoute = createMockRoute([
+      { duration: { value: 0 }, distance: { value: 0 }, steps: [] }
+    ]);
+    strategy.routes = [mockRoute];
     strategy.clearRenderedRoutes();
-    expect(mockRenderer.set).toHaveBeenCalledWith('directions', null);
+    expect(mockRoute._mockRenderer.set).toHaveBeenCalledWith('directions', null);
+  });
+
+  it('should call getRoutes abstract method from subclass', async () => {
+    const start: GoogleMapLocation = {
+      title: 'Test',
+      address: 'Boul. Test',
+      type: 'outdoor',
+      coordinates: new google.maps.LatLng(0, 0)
+    }
+
+    const dest: GoogleMapLocation = {
+      title: 'Test',
+      address: 'Boul. Test',
+      type: 'outdoor',
+      coordinates: new google.maps.LatLng(1, 1)
+    }
+    const result = await strategy.getRoutes(start, dest);
+    expect(result).toEqual([]);
   });
 });

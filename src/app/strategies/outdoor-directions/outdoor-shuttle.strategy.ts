@@ -4,6 +4,7 @@ import { OutdoorRouteBuilder } from 'src/app/builders/outdoor-route.builder';
 import { GoogleMapService } from 'src/app/services/google-map.service';
 import { ConcordiaDataService } from 'src/app/services/concordia-data.service';
 import { ShuttleDataService } from 'src/app/services/shuttle-data/shuttle-data.service';
+import { GoogleMapLocation } from 'src/app/interfaces/google-map-location.interface';
 
 @Injectable({
   providedIn: 'root'
@@ -17,15 +18,12 @@ export class OutdoorShuttleStrategy extends AbstractOutdoorStrategy {
     super('SHUTTLE');
   }
 
-  public async getRoutes(origin: string, destination: string) {
-    // Select bus stop based on which campus user is closest to
-    const [startCampus, destinationCampus] = await Promise.all([
-      await this.googleMapService.getCoordsFromAddress(origin)
-        .then(originCoorinates => this.concordiaDataService.getNearestCampus(originCoorinates)),
-      await this.googleMapService.getCoordsFromAddress(destination)
-        .then(destinationCoordinates => this.concordiaDataService.getNearestCampus(destinationCoordinates)),
-    ]);
-
+  public async getRoutes(origin: GoogleMapLocation, destination: GoogleMapLocation) {
+    const [startCampus, destinationCampus] = [
+      this.concordiaDataService.getNearestCampus(origin.coordinates),
+      this.concordiaDataService.getNearestCampus(destination.coordinates)
+    ]
+  
     // Fail if campuses are the same
     if (startCampus === destinationCampus)
       return null; // Fail
@@ -39,9 +37,9 @@ export class OutdoorShuttleStrategy extends AbstractOutdoorStrategy {
     const outdoorRouteBuilder = new OutdoorRouteBuilder();
     outdoorRouteBuilder
       .setMap(this.googleMapService.getMap())
-      .addWalkingRoute(origin, startCampus.address)
+      .addWalkingRoute(origin.address, startCampus.address)
       .addDrivingRoute(startCampus.address, destinationCampus.address)
-      .addWalkingRoute(destinationCampus.address, destination);
+      .addWalkingRoute(destinationCampus.address, destination.address);
 
     this.routes = await outdoorRouteBuilder.build().then(builtRoutes => {
       const drivingRouteInfo = builtRoutes[1].getResponse().routes[0].legs[0];

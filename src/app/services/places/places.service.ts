@@ -79,6 +79,7 @@ export class PlacesService {
           .map((space) => ({
             title: building.abbreviation + ' ' + space.name,
             address: building.address,
+            coordinates: building.coordinates,
             fullName: building.name + ' ' + space.name,
             abbreviation: building.abbreviation,
             indoorMapId: key,

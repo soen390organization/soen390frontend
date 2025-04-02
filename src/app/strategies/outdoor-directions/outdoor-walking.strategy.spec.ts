@@ -2,6 +2,7 @@ import { OutdoorWalkingStrategy } from './outdoor-walking.strategy';
 import { GoogleMapService } from 'src/app/services/google-map.service';
 import { OutdoorRouteBuilder } from 'src/app/builders/outdoor-route.builder';
 import { OutdoorRoute } from 'src/app/features/outdoor-route/outdoor-route.feature';
+import { GoogleMapLocation } from 'src/app/interfaces/google-map-location.interface';
 
 describe('OutdoorWalkingStrategy', () => {
   let strategy: OutdoorWalkingStrategy;
@@ -22,12 +23,22 @@ describe('OutdoorWalkingStrategy', () => {
   });
 
   it('should build and assign walking routes using the OutdoorRouteBuilder', async () => {
-    const origin = 'Park Entrance';
-    const destination = 'Trail End';
+    const origin: GoogleMapLocation = {
+      title: 'Test A',
+      address: 'Boul. Test',
+      type: 'outdoor',
+      coordinates: new google.maps.LatLng(0, 0)
+    };
+    const destination: GoogleMapLocation = {
+      title: 'Test B',
+      address: 'Test Ave',
+      type: 'outdoor',
+      coordinates: new google.maps.LatLng(1, 1)
+    };
 
     // Create a valid OutdoorRoute instance
     const mockRenderer = jasmine.createSpyObj('google.maps.DirectionsRenderer', ['setMap', 'setOptions', 'set']);
-    const mockOutdoorRoute = new OutdoorRoute(origin, destination, google.maps.TravelMode.WALKING, mockRenderer);
+    const mockOutdoorRoute = new OutdoorRoute(origin.address, destination.address, google.maps.TravelMode.WALKING, mockRenderer);
     spyOn(mockOutdoorRoute, 'getRouteFromGoogle').and.resolveTo(); // Stub async method
 
     const mockRoutes: OutdoorRoute[] = [mockOutdoorRoute];
@@ -45,7 +56,7 @@ describe('OutdoorWalkingStrategy', () => {
     const result = await strategy.getRoutes(origin, destination);
 
     expect(setMapSpy).toHaveBeenCalledWith(mockMapInstance);
-    expect(addWalkingRouteSpy).toHaveBeenCalledWith(origin, destination);
+    expect(addWalkingRouteSpy).toHaveBeenCalledWith(origin.address, destination.address);
     expect(buildSpy).toHaveBeenCalled();
     expect((strategy as any).routes).toEqual(mockRoutes);
     expect(result).toBe(strategy);

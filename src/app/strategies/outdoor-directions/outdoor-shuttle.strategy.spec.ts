@@ -6,6 +6,7 @@ import { OutdoorRouteBuilder } from 'src/app/builders/outdoor-route.builder';
 import { OutdoorRoute } from 'src/app/features/outdoor-route/outdoor-route.feature';
 import data from 'src/assets/concordia-data.json';
 import { Campus } from 'src/app/services/concordia-data.service';
+import { GoogleMapLocation } from 'src/app/interfaces/google-map-location.interface';
 
 describe('OutdoorShuttleStrategy', () => {
   let strategy: OutdoorShuttleStrategy;
@@ -31,6 +32,16 @@ describe('OutdoorShuttleStrategy', () => {
     address: '456 LOY Ave'
   };
 
+  const origin = {
+    address: '1455 De Maisonneuve Blvd. W',
+    coordinates: new google.maps.LatLng(45.4971, -73.5788),
+  } as GoogleMapLocation;
+  
+  const destination = {
+    address: '7141 Sherbrooke St. W',
+    coordinates: new google.maps.LatLng(45.4582, -73.6385),
+  } as GoogleMapLocation;  
+
   beforeEach(() => {
     mockMap = { mock: 'map' };
 
@@ -52,28 +63,26 @@ describe('OutdoorShuttleStrategy', () => {
   });
 
   it('should return null if campuses are the same', async () => {
-    googleMapServiceSpy.getCoordsFromAddress.and.resolveTo(fakeLatLng);
     concordiaDataServiceSpy.getNearestCampus.and.returnValue(await Promise.resolve(mockCampus));
   
-    const result = await strategy.getRoutes('Origin', 'Destination');
+    const result = await strategy.getRoutes(origin, destination);
     expect(result).toBeNull();
   });
   
 
   it('should return null if no next shuttle bus is found', async () => {
-    googleMapServiceSpy.getCoordsFromAddress.and.resolveTo(fakeLatLng);
-    concordiaDataServiceSpy.getNearestCampus.withArgs(fakeLatLng).and.returnValues(mockCampus, otherCampus);
+    // googleMapServiceSpy.getCoordsFromAddress.and.resolveTo(fakeLatLng);
+    concordiaDataServiceSpy.getNearestCampus.withArgs(origin.coordinates).and.returnValues(mockCampus, otherCampus);
     shuttleDataServiceSpy.getNextBus.and.returnValue(null);
 
-    const result = await strategy.getRoutes('Origin', 'Destination');
+    const result = await strategy.getRoutes(origin, destination);
     expect(result).toBeNull();
   });
 
   it('should build the route and modify the driving step instructions', async () => {
     const nextBusTime = '12:30 PM';
 
-    googleMapServiceSpy.getCoordsFromAddress.and.resolveTo(fakeLatLng);
-    concordiaDataServiceSpy.getNearestCampus.withArgs(fakeLatLng).and.returnValues(mockCampus, otherCampus);
+    concordiaDataServiceSpy.getNearestCampus.withArgs(origin.coordinates).and.returnValues(mockCampus, otherCampus);
     shuttleDataServiceSpy.getNextBus.and.returnValue(nextBusTime);
 
     // Create mock renderer
@@ -116,7 +125,7 @@ describe('OutdoorShuttleStrategy', () => {
     });
     spyOn(OutdoorRouteBuilder.prototype, 'build').and.returnValue(Promise.resolve(mockRoutes));
 
-    const result = await strategy.getRoutes('Origin', 'Destination');
+    const result = await strategy.getRoutes(origin, destination);
     const drivingSteps = drivingRoute.getResponse().routes[0].legs[0].steps;
 
     expect(drivingSteps[0].instructions).toContain(`Next shuttle at ${nextBusTime}`);
