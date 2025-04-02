@@ -19,7 +19,6 @@ export class GoogleMapService {
   }
 
   public getMap(): google.maps.Map {
-    console.log('Working');
     return this.map;
   }
 
@@ -39,7 +38,6 @@ export class GoogleMapService {
   }
 
   getCoordsFromAddress(query: string): Promise<google.maps.LatLng | null> {
-
     return new Promise((resolve, reject) => {
       this.googlePlacesService.findPlaceFromQuery(
         { query, fields: ['geometry', 'formatted_address'] },

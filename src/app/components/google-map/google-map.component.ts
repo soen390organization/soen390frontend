@@ -53,7 +53,7 @@ export class GoogleMapComponent implements AfterViewInit {
     return new Promise((resolve) => {
       (window as any).initMap = () => resolve(); // This is the callback from the script
       const script = document.createElement('script');
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${environment.googleApiKey}&callback=initMap&libraries=geometry,places&loading=async`;
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${environment.googleApiKey}&callback=initMap&libraries=marker,geometry,places&loading=async`;
       script.async = true;
       script.defer = true;
       document.body.appendChild(script);
@@ -65,7 +65,8 @@ export class GoogleMapComponent implements AfterViewInit {
     this.googleMapService.initialize(
       new google.maps.Map(this.mapContainer.nativeElement, {
         ...this.mapOptions,
-        center: data.sgw.coordinates
+        center: data.sgw.coordinates,
+        mapId: 'nwah'
       })
     );
     await this.loadBuildings();

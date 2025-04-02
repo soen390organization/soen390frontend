@@ -12,6 +12,7 @@ import { Store } from '@ngrx/store';
 import { setMapType, MapType, setShowRoute, selectShowRoute } from 'src/app/store/app';
 import { MappedinService } from 'src/app/services/mappedin/mappedin.service';
 import { IndoorDirectionsService } from 'src/app/services/indoor-directions/indoor-directions.service';
+import { GoogleMapService } from 'src/app/services/google-map.service';
 
 export const MapSearchAnimation = [
   trigger('slideInOut', [
@@ -54,6 +55,7 @@ export class MapSearchComponent implements OnInit {
 
   constructor(
     private store: Store,
+    private googleMapService: GoogleMapService,
     public readonly outdoorDirectionsService: OutdoorDirectionsService,
     public readonly indoorDirectionService: IndoorDirectionsService,
     private readonly mappedInService: MappedinService,
@@ -85,8 +87,10 @@ export class MapSearchComponent implements OnInit {
           this.outdoorDirectionsService.renderNavigation();
           this.disableStart = false;
         })
+        return;
       } else if (indoorStartPoint && indoorDestinationPoint) {
         this.disableStart = false;
+        return;
       } else {
         this.disableStart = true;
       }
@@ -133,6 +137,7 @@ export class MapSearchComponent implements OnInit {
 
   clearStartInput() {
     this.clearLocation();
+    this.outdoorDirectionsService.clearStartMarker();
     this.outdoorDirectionsService.clearStartPoint();
     this.indoorDirectionService.clearStartPoint();
     this.startLocationInput = '';
@@ -140,6 +145,7 @@ export class MapSearchComponent implements OnInit {
 
   clearDestinationInput() {
     this.clearLocation();
+    this.outdoorDirectionsService.clearDestinationMarker();
     this.outdoorDirectionsService.clearDestinationPoint();
     this.indoorDirectionService.clearDestinationPoint();
     this.destinationLocationInput = '';
@@ -166,12 +172,16 @@ export class MapSearchComponent implements OnInit {
         coordinates: place.coordinates,
         type: 'outdoor'
       });
-      this.store.dispatch(setMapType({ mapType: MapType.Indoor }));
+      this.outdoorDirectionsService.showStartMarker();
+      this.googleMapService.updateMapLocation(place.coordinates);
       if (place.indoorMapId !== this.mappedInService.getMapId()) {
         await this.mappedInService.setMapData(place.indoorMapId);
       }
+      this.store.dispatch(setMapType({ mapType: MapType.Indoor }));
     } else {
       this.outdoorDirectionsService.setStartPoint(place);
+      this.outdoorDirectionsService.showStartMarker();
+      this.googleMapService.updateMapLocation(place.coordinates);
       this.store.dispatch(setMapType({ mapType: MapType.Outdoor }));
     }
     this.places = [];
@@ -187,12 +197,17 @@ export class MapSearchComponent implements OnInit {
         coordinates: place.coordinates,
         type: 'outdoor'
       });
-      this.store.dispatch(setMapType({ mapType: MapType.Indoor }));
+      this.outdoorDirectionsService.showDestinationMarker();
+      this.googleMapService.updateMapLocation(place.coordinates);
+
       if (place.indoorMapId !== this.mappedInService.getMapId()) {
         await this.mappedInService.setMapData(place.indoorMapId);
       }
+      this.store.dispatch(setMapType({ mapType: MapType.Indoor }));
     } else {
       this.outdoorDirectionsService.setDestinationPoint(place);
+      this.outdoorDirectionsService.showDestinationMarker();
+      this.googleMapService.updateMapLocation(place.coordinates);
       this.store.dispatch(setMapType({ mapType: MapType.Outdoor }));
     }
     this.places = [];
