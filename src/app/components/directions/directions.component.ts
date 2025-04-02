@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnDestroy, ViewChild, ElementRef } from '@angular/core';
 import { Step } from 'src/app/interfaces/step.interface';
 import { CurrentLocationService } from 'src/app/services/current-location/current-location.service';
 import { OutdoorDirectionsService } from 'src/app/services/outdoor-directions/outdoor-directions.service';
@@ -21,7 +21,7 @@ const iconMapping = rawIconMapping as IconMapping;
   styleUrls: ['./directions.component.scss'],
   imports: [CommonModule]
 })
-export class DirectionsComponent implements OnInit, OnDestroy {
+export class DirectionsComponent implements OnDestroy {
   @ViewChild('directionsContainer') directionsContainer!: ElementRef;
 
   steps: Step[] = [];
@@ -48,13 +48,9 @@ export class DirectionsComponent implements OnInit, OnDestroy {
     private currentLocationService: CurrentLocationService,
     private navigationCoordinator: NavigationCoordinatorService
   ) {}
-
-  ngOnInit(): void {
-  }
-
-  ngAfterViewInit(): void {
+  // ngAfterViewInit(): void {
     // this.observeComponentPosition();
-  }
+  // }
 
   public getTravelModes() {
     const travelModes = [

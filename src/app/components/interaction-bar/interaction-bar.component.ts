@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { LocationCardsComponent } from '../location-cards/location-cards.component';
 import { Store } from '@ngrx/store';
 import { PlacesService } from 'src/app/services/places/places.service';
@@ -28,7 +28,7 @@ import { EventCardComponent } from '../event-card/event-card.component';
   templateUrl: './interaction-bar.component.html',
   styleUrls: ['./interaction-bar.component.scss']
 })
-export class InteractionBarComponent implements AfterViewInit {
+export class InteractionBarComponent implements OnInit, AfterViewInit {
   @ViewChild('footerContainer', { static: false }) footerContainer!: ElementRef;
   @ViewChild('handleBar', { static: false }) handleBar!: ElementRef;
 
