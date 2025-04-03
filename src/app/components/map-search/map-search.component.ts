@@ -56,7 +56,7 @@ export class MapSearchComponent implements OnInit {
 
   constructor(
     private store: Store,
-    private googleMapService: GoogleMapService,
+    private readonly googleMapService: GoogleMapService,
     public readonly outdoorDirectionsService: OutdoorDirectionsService,
     public readonly indoorDirectionService: IndoorDirectionsService,
     private readonly mappedInService: MappedinService,
@@ -67,9 +67,9 @@ export class MapSearchComponent implements OnInit {
   ngOnInit(): void {
     this.store.select(selectShowRoute).subscribe(showRoute => {
       if (showRoute) {
-        this.disableStart = true;
+        this.onShowRouteEnabled();
       } else {
-        this.disableStart = false;
+        this.onShowRouteDisabled();
       }
     });
 
@@ -110,6 +110,14 @@ export class MapSearchComponent implements OnInit {
         this.disableStart = true;
       }
     })
+  }
+
+  private onShowRouteEnabled(): void {
+    this.disableStart = true;
+  }
+  
+  private onShowRouteDisabled(): void {
+    this.disableStart = false;
   }
 
   toggleSearch() {

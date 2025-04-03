@@ -11,9 +11,9 @@ import { Location } from "../interfaces/location.interface";
  * @template T - A type extending Location, representing the type of location used for navigation.
  */
 export abstract class DirectionsService<T extends Location> {
-  private startPointSubject = new BehaviorSubject<T | null>(null);
-  private destinationPointSubject = new BehaviorSubject<T | null>(null);
-  private travelModeSubject = new BehaviorSubject<string | null>(null);
+  private readonly startPointSubject = new BehaviorSubject<T | null>(null);
+  private readonly destinationPointSubject = new BehaviorSubject<T | null>(null);
+  private readonly travelModeSubject = new BehaviorSubject<string | null>(null);
   
   /**
    * Sets the starting point for navigation.

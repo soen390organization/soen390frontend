@@ -9,9 +9,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { MappedinService } from 'src/app/services/mappedin/mappedin.service';
 import { IndoorDirectionsService } from 'src/app/services/indoor-directions/indoor-directions.service';
-// import { NavigationCoordinatorService } from 'src/app/services/navigation-coordinator.service';
-import { combineLatest, filter, firstValueFrom, Observable } from 'rxjs';
-import { Store } from '@ngrx/store';
+import { combineLatest, filter } from 'rxjs';
 
 @Component({
   selector: 'app-mappedin-map',
@@ -27,7 +25,6 @@ export class MappedinMapComponent implements AfterViewInit {
 
 
   constructor(
-    private readonly store: Store,
     private readonly mappedinService: MappedinService,
     private readonly indoorDirectionsService: IndoorDirectionsService
   ) {}

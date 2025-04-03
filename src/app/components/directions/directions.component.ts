@@ -1,32 +1,12 @@
-import {
-  CommonModule
-} from '@angular/common';
-import {
-  Component,
-  OnDestroy,
-  ViewChild,
-  ElementRef,
-  AfterViewInit
-} from '@angular/core';
-import {
-  Step
-} from 'src/app/interfaces/step.interface';
-import {
-  CurrentLocationService
-} from 'src/app/services/current-location/current-location.service';
-import {
-  OutdoorDirectionsService
-} from 'src/app/services/outdoor-directions/outdoor-directions.service';
-import {
-  IconMapping
-} from 'src/app/interfaces/Icon-mapping';
+import { CommonModule } from '@angular/common';
+import { Component, OnDestroy, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+import { Step } from 'src/app/interfaces/step.interface';
+import { CurrentLocationService } from 'src/app/services/current-location/current-location.service';
+import { OutdoorDirectionsService } from 'src/app/services/outdoor-directions/outdoor-directions.service';
+import { IconMapping } from 'src/app/interfaces/Icon-mapping';
 import rawIconMapping from 'src/assets/icon-mapping.json';
-import {
-  Store
-} from '@ngrx/store';
-import {
-  setShowRoute
-} from 'src/app/store/app';
+import { Store } from '@ngrx/store';
+import { setShowRoute } from 'src/app/store/app';
 import {
   OutdoorDrivingStrategy,
   OutdoorShuttleStrategy,
@@ -44,7 +24,7 @@ const iconMapping = rawIconMapping as IconMapping;
   templateUrl: './directions.component.html',
   styleUrls: ['./directions.component.scss'],
   imports: [CommonModule],
-  standalone: true,
+  standalone: true
 })
 export class DirectionsComponent implements AfterViewInit, OnDestroy {
   @ViewChild('directionsContainer') directionsContainer!: ElementRef;
@@ -56,20 +36,20 @@ export class DirectionsComponent implements AfterViewInit, OnDestroy {
   currentWatchId: string | null = null;
   hasArrived: boolean = false;
   showAllSteps: boolean = true;
-  private endNavigationSubscription: any;
+  private readonly endNavigationSubscription: any;
   currentRouteData: { eta: string | null; distance: number } | null = null;
 
   private readonly stepCompletionThreshold = 30;
   private observer!: IntersectionObserver;
 
   constructor(
-    private store: Store,
+    private readonly store: Store,
     public outdoorDirectionsService: OutdoorDirectionsService,
     public readonly outdoorWalkingStrategy: OutdoorWalkingStrategy,
     public readonly outdoorDrivingStrategy: OutdoorDrivingStrategy,
     public readonly outdoorTransitStrategy: OutdoorTransitStrategy,
     public readonly outdoorShuttleStrategy: OutdoorShuttleStrategy,
-    private currentLocationService: CurrentLocationService
+    private readonly currentLocationService: CurrentLocationService
   ) {}
 
   ngOnInit(): void {
@@ -92,12 +72,15 @@ export class DirectionsComponent implements AfterViewInit, OnDestroy {
   }
 
   private observeComponentPosition(): void {
-    this.observer = new IntersectionObserver(([entry]) => {
-      const triggerPoint = window.innerHeight / 2;
-      this.showAllSteps = entry.boundingClientRect.top < triggerPoint;
-    }, {
-      threshold: [0, 1.0],
-    });
+    this.observer = new IntersectionObserver(
+      ([entry]) => {
+        const triggerPoint = window.innerHeight / 2;
+        this.showAllSteps = entry.boundingClientRect.top < triggerPoint;
+      },
+      {
+        threshold: [0, 1.0]
+      }
+    );
 
     if (this.directionsContainer?.nativeElement) {
       this.observer.observe(this.directionsContainer.nativeElement);
@@ -200,6 +183,6 @@ export class DirectionsComponent implements AfterViewInit, OnDestroy {
       { mode: 'DRIVING', icon: 'directions_car', strategy: this.outdoorDrivingStrategy },
       { mode: 'TRANSIT', icon: 'directions_bus', strategy: this.outdoorTransitStrategy },
       { mode: 'SHUTTLE', icon: 'directions_transit', strategy: this.outdoorShuttleStrategy }
-    ].filter(item => item.strategy?.routes?.length);
+    ].filter((item) => item.strategy?.routes?.length);
   }
 }

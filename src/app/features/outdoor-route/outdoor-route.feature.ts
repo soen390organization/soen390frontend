@@ -1,8 +1,8 @@
 export class OutdoorRoute {
-  private origin: string;
-  private destination: string;
-  private travelMode: google.maps.TravelMode;
-  private renderer: google.maps.DirectionsRenderer;
+  private readonly origin: string;
+  private readonly destination: string;
+  private readonly travelMode: google.maps.TravelMode;
+  private readonly renderer: google.maps.DirectionsRenderer;
   private response: google.maps.DirectionsResult | null = null;
 
   constructor (origin: string, destination: string, travelMode: google.maps.TravelMode, renderer: google.maps.DirectionsRenderer) {

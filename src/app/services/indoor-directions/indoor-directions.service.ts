@@ -21,7 +21,7 @@ export class IndoorDirectionsService extends DirectionsService<MappedInLocation>
    *
    * @param mappedinService - An instance of MappedinService for accessing map data and view.
    */
-  constructor(private mappedinService: MappedinService) {
+  constructor(private readonly mappedinService: MappedinService) {
     super();
   }
 
@@ -101,7 +101,7 @@ export class IndoorDirectionsService extends DirectionsService<MappedInLocation>
    *
    * @returns A Promise that resolves when the directions have been rendered.
    */
-  async renderNavigation(): Promise<void> {
+  async renderNavigation() {
     const start = await this.getStartPoint();
     const destination = await this.getDestinationPoint();
 
@@ -110,13 +110,13 @@ export class IndoorDirectionsService extends DirectionsService<MappedInLocation>
     } else { // Directions for rooms in different Buildings
       if (start && start.indoorMapId === this.mappedinService.getMapId()) { // Current map is start 
         await this.navigate(start.room, await this.getStartPointEntrances());
-      } else if (destination && destination.indoorMapId === this.mappedinService.getMapId()) { // Current map is destination
-        await this.navigate(await this.getDestinationPointEntrances(), destination.room);
+        return;
       }
+      await this.navigate(await this.getDestinationPointEntrances(), destination.room);
     }
   }
 
-  async clearNavigation(): Promise<void> {
+  async clearNavigation() {
     this.mappedinService.mapView.clear();
   }
 }

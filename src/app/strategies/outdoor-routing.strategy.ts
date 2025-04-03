@@ -17,11 +17,6 @@ export class OutdoorRoutingStrategy implements RoutingStrategy {
     if (!start.address || !destination.address) {
       throw new Error('Outdoor routing requires addresses for both start and destination.');
     }
-    // const instructions = await this.outdoorDirectionsService.generateRoute(
-    //   start.address,
-    //   destination.address
-    //   // mode
-    // );
     return { type: 'outdoor', instructions: {} };
   }
 }
