@@ -5,9 +5,9 @@ import { Store } from '@ngrx/store';
 import { of } from 'rxjs';
 import { MapType, selectCurrentMap, selectSelectedCampus } from 'src/app/store/app';
 import { PlacesService } from 'src/app/services/places/places.service';
-import { DirectionsService } from 'src/app/services/directions/directions.service';
+// import { DirectionsService } from 'src/app/services/outdoor-directions/outdoor-directions.service';
 import { VisibilityService } from 'src/app/services/visibility.service';
-import { NavigationCoordinatorService } from 'src/app/services/navigation-coordinator.service';
+// import { NavigationCoordinatorService } from 'src/app/services/navigation-coordinator.service';
 
 // Create a full spy for DirectionsService (as used in the DirectionsComponent tests) - Refactor Interface
 const mockDirectionsService = jasmine.createSpyObj('DirectionsService', [
@@ -68,7 +68,7 @@ const mockVisibilityService = {
 };
 
 // For NavigationCoordinatorService, we provide a dummy with globalRoute$
-const mockNavigationCoordinatorService = { globalRoute$: of({ segments: [] }) };
+// const mockNavigationCoordinatorService = { globalRoute$: of({ segments: [] }) };
 
 describe('InteractionBarComponent', () => {
   let component: InteractionBarComponent;
@@ -84,9 +84,9 @@ describe('InteractionBarComponent', () => {
       providers: [
         { provide: Store, useValue: mockStoreRef },
         { provide: PlacesService, useValue: mockPlacesService },
-        { provide: DirectionsService, useValue: mockDirectionsService },
-        { provide: VisibilityService, useValue: mockVisibilityService },
-        { provide: NavigationCoordinatorService, useValue: mockNavigationCoordinatorService }
+        // { provide: DirectionsService, useValue: mockDirectionsService },
+        { provide: VisibilityService, useValue: mockVisibilityService }
+        // { provide: NavigationCoordinatorService, useValue: mockNavigationCoordinatorService }
       ]
     }).compileComponents();
   });

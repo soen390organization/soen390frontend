@@ -35,6 +35,6 @@ describe('Map - Highlight Current Building with Polygon', () => {
     cy.get('.material-symbols-outlined').contains('my_location').click();
 
     // Verify that a pin appears on the map (marker for the current location)
-    cy.get('.gm-style img[src*="Icone_Verde.svg"]').should('exist');
+    cy.get('[data-marker-id="start-marker"]').should('have.length', 1);
   });
 });

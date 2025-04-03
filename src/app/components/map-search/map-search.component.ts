@@ -5,18 +5,15 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CurrentLocationService } from 'src/app/services/current-location/current-location.service';
 import { animate, state, style, transition, trigger } from '@angular/animations';
-import { DirectionsService } from 'src/app/services/directions/directions.service';
+import { OutdoorDirectionsService } from 'src/app/services/outdoor-directions/outdoor-directions.service';
 import { PlacesService } from 'src/app/services/places/places.service';
-import { HomePage } from 'src/app/home/home.page';
-import { VisibilityService } from 'src/app/services/visibility.service';
-import { combineLatest, firstValueFrom, Observable } from 'rxjs';
-import { filter, take } from 'rxjs/operators';
+import { combineLatest } from 'rxjs';
 import { Store } from '@ngrx/store';
-import { setMapType, MapType } from 'src/app/store/app';
+import { setMapType, MapType, setShowRoute, selectShowRoute } from 'src/app/store/app';
 import { MappedinService } from 'src/app/services/mappedin/mappedin.service';
-import { NavigationCoordinatorService } from 'src/app/services/navigation-coordinator.service';
 import { IndoorDirectionsService } from 'src/app/services/indoor-directions/indoor-directions.service';
-import { map } from 'rxjs/operators';
+import { GoogleMapService } from 'src/app/services/google-map.service';
+import { HomePage } from 'src/app/home/home.page';
 
 export const MapSearchAnimation = [
   trigger('slideInOut', [
@@ -55,74 +52,67 @@ export class MapSearchComponent implements OnInit {
   isSearchVisible = false;
   places: any[] = []; // Array to store the search suggestions
   isSearchingFromStart: boolean = false; // Flag to determine if the search is for the start or destination location
-  currentRouteData: { eta: string | null; distance: number; mode: string } | null = null;
-  /* currentRouteData!: CompleteRoute | null; */
-  enableStart$!: Observable<boolean>;
-  isStartAndDestinationValid$: Observable<boolean>;
-
-  public transportModes = [
-    { mode: 'WALKING', icon: 'directions_walk' },
-    { mode: 'TRANSIT', icon: 'directions_bus' },
-    { mode: 'SHUTTLE', icon: 'directions_transit' },
-    { mode: 'DRIVING', icon: 'directions_car' }
-  ];
+  disableStart: boolean = true;
 
   constructor(
     private store: Store,
-    public readonly directionsService: DirectionsService,
+    private readonly googleMapService: GoogleMapService,
+    public readonly outdoorDirectionsService: OutdoorDirectionsService,
     public readonly indoorDirectionService: IndoorDirectionsService,
     private readonly mappedInService: MappedinService,
     private readonly placesService: PlacesService,
-    private readonly currentLocationService: CurrentLocationService,
-    private readonly visibilityService: VisibilityService,
-    private readonly coordinator: NavigationCoordinatorService
+    private readonly currentLocationService: CurrentLocationService
   ) {}
 
   ngOnInit(): void {
-    this.enableStart$ = this.visibilityService.enableStart;
-
-    // Combine outdoor start and destination to update input fields and show the search bar.
-    combineLatest([
-      this.directionsService.getStartPoint(),
-      this.directionsService.getDestinationPoint()
-    ]).subscribe(([start, destination]) => {
-      if (start) {
-        this.startLocationInput = start.title;
-      }
-      if (destination) {
-        this.destinationLocationInput = destination.title;
-        this.isSearchVisible = true;
-      }
+    this.store.select(selectShowRoute).subscribe((showRoute) => {
+      this.setDisableStart(showRoute);
     });
 
-    // When both outdoor start and destination are available, calculate the shortest route.
     combineLatest([
-      this.directionsService.getStartPoint(),
-      this.directionsService.getDestinationPoint()
-    ])
-      .pipe(filter(([start, destination]) => !!start && !!destination))
-      .subscribe(([start, destination]) => {
-        this.directionsService
-          .calculateShortestRoute(start!.address, destination!.address)
-          .then(() => {
-            this.currentRouteData = this.directionsService.getShortestRoute();
-          })
-          .catch((error) => console.error('Error calculating route:', error));
-      });
+      this.outdoorDirectionsService.getStartPoint$(),
+      this.outdoorDirectionsService.getDestinationPoint$(),
+      this.indoorDirectionService.getStartPoint$(),
+      this.indoorDirectionService.getDestinationPoint$()
+    ]).subscribe(
+      async ([
+        outdoorStartPoint,
+        outdoorDestinationPoint,
+        indoorStartPoint,
+        indoorDestinationPoint
+      ]) => {
+        if (outdoorStartPoint) {
+          this.startLocationInput = outdoorStartPoint.title;
+          this.outdoorDirectionsService.showStartMarker();
+          this.googleMapService.updateMapLocation(outdoorStartPoint.coordinates);
+        }
 
-    // Create an observable that is true when at least one start and one destination exists (outdoor or indoor) and start is enabled.
-    this.isStartAndDestinationValid$ = combineLatest([
-      this.directionsService.getStartPoint(),
-      this.directionsService.getDestinationPoint(),
-      this.indoorDirectionService.getStartPoint(),
-      this.indoorDirectionService.getDestinationPoint(),
-      this.visibilityService.enableStart
-    ]).pipe(
-      map(
-        ([outdoorStart, outdoorDest, indoorStart, indoorDest, enableStart]) =>
-          (!!outdoorStart || !!indoorStart) && (!!outdoorDest || !!indoorDest) && enableStart
-      )
+        if (outdoorDestinationPoint) {
+          this.destinationLocationInput = outdoorDestinationPoint.title;
+          this.outdoorDirectionsService.showDestinationMarker();
+          this.googleMapService.updateMapLocation(outdoorDestinationPoint.coordinates);
+        }
+
+        // Render indoor
+        if (outdoorStartPoint && outdoorDestinationPoint) {
+          await this.outdoorDirectionsService.getShortestRoute().then((strategy) => {
+            this.outdoorDirectionsService.setSelectedStrategy(strategy);
+            this.outdoorDirectionsService.clearStartMarker();
+            this.outdoorDirectionsService.clearDestinationMarker();
+            this.outdoorDirectionsService.renderNavigation();
+            this.disableStart = false;
+          });
+        } else if (indoorStartPoint && indoorDestinationPoint) {
+          this.disableStart = false;
+        } else {
+          this.disableStart = true;
+        }
+      }
     );
+  }
+
+  private setDisableStart(show) {
+    this.disableStart = show;
   }
 
   toggleSearch() {
@@ -136,10 +126,11 @@ export class MapSearchComponent implements OnInit {
 
   async onSetUsersLocationAsStart(): Promise<void> {
     const position = await this.currentLocationService.getCurrentLocation();
+    console.log('Position: ', position);
     if (position == null) {
       throw new Error('Current location is null.');
     }
-    this.directionsService.setStartPoint({
+    this.setStart({
       title: 'Your Location',
       address: `${position.lat}, ${position.lng}`,
       coordinates: new google.maps.LatLng(position),
@@ -163,76 +154,54 @@ export class MapSearchComponent implements OnInit {
   }
 
   async onStartClick(): Promise<void> {
-    this.visibilityService.toggleDirectionsComponent();
-    this.visibilityService.togglePOIsComponent();
-    this.visibilityService.toggleStartButton();
-    this.toggleSearch();
-
-    // Get indoor selections as observables.
-    const indoorStart$ = this.indoorDirectionService.getStartPoint();
-    const indoorDestination$ = this.indoorDirectionService.getDestinationPoint();
-
-    combineLatest([indoorStart$, indoorDestination$])
-      .pipe(
-        map(([s, d]) => ({ s, d })),
-        take(1)
-      )
-      .subscribe(({ s, d }) => {
-        if (s && d && s.indoorMapId && d.indoorMapId) {
-          // Delegate indoor routing to the coordinator.
-          console.log('Indoor navigation requested:', s, d);
-          this.coordinator
-            .getCompleteRoute(s, d, 'WALKING')
-            .then((completeRoute) => {
-              console.log('Indoor navigation complete route:', completeRoute);
-              // The indoor strategy is expected to handle route drawing.
-            })
-            .catch((error) => console.error('Error rendering indoor navigation:', error));
-        } else {
-          // Fallback: use outdoor directions.
-          console.error('Indoor routing not available. Fallback to outdoor routing.');
-        }
-      });
+    this.store.dispatch(setShowRoute({ show: true }));
+    this.isSearchVisible = false;
   }
 
   clearStartInput() {
-    this.startLocationInput = '';
-    this.clearList();
-    this.directionsService.clearStartPoint();
+    this.clearLocation();
+    this.outdoorDirectionsService.clearStartMarker();
+    this.outdoorDirectionsService.clearStartPoint();
     this.indoorDirectionService.clearStartPoint();
-    this.currentRouteData = null;
-    this.visibilityService.triggerEndNavigation();
+    this.startLocationInput = '';
   }
 
   clearDestinationInput() {
-    this.destinationLocationInput = '';
-    this.clearList();
-    this.directionsService.clearDestinationPoint();
+    this.clearLocation();
+    this.outdoorDirectionsService.clearDestinationMarker();
+    this.outdoorDirectionsService.clearDestinationPoint();
     this.indoorDirectionService.clearDestinationPoint();
-    this.currentRouteData = null;
-    this.visibilityService.triggerEndNavigation();
+    this.destinationLocationInput = '';
   }
 
-  public getTransportIcon(): string {
-    if (!this.currentRouteData || !this.currentRouteData.mode) {
-      return '';
-    }
-    const mapping = this.transportModes.find((item) => item.mode === this.currentRouteData.mode);
-    return mapping ? mapping.icon : '';
+  clearLocation() {
+    this.clearList();
+    this.store.dispatch(setShowRoute({ show: false }));
+    this.outdoorDirectionsService.clearNavigation();
+    this.outdoorDirectionsService.setSelectedStrategy(null);
+    this.indoorDirectionService.clearNavigation();
   }
 
   /* @TODO: we need to setFloor here for a better experience */
   async setStart(place: any) {
+    console.log(place);
     this.startLocationInput = place.title;
     if (place.type === 'indoor') {
       console.log('Setting start point for indoor:', place);
       this.indoorDirectionService.setStartPoint(place);
-      this.store.dispatch(setMapType({ mapType: MapType.Indoor }));
+      this.outdoorDirectionsService.setStartPoint({
+        title: place.fullName,
+        address: place.address,
+        coordinates: place.coordinates,
+        type: 'outdoor'
+      });
+
       if (place.indoorMapId !== this.mappedInService.getMapId()) {
         await this.mappedInService.setMapData(place.indoorMapId);
       }
+      this.store.dispatch(setMapType({ mapType: MapType.Indoor }));
     } else {
-      this.directionsService.setStartPoint(place);
+      this.outdoorDirectionsService.setStartPoint(place);
       this.store.dispatch(setMapType({ mapType: MapType.Outdoor }));
     }
     this.places = [];
@@ -242,12 +211,19 @@ export class MapSearchComponent implements OnInit {
     this.destinationLocationInput = place.title;
     if (place.type === 'indoor') {
       this.indoorDirectionService.setDestinationPoint(place);
-      this.store.dispatch(setMapType({ mapType: MapType.Indoor }));
+      this.outdoorDirectionsService.setDestinationPoint({
+        title: place.fullName,
+        address: place.address,
+        coordinates: place.coordinates,
+        type: 'outdoor'
+      });
+
       if (place.indoorMapId !== this.mappedInService.getMapId()) {
         await this.mappedInService.setMapData(place.indoorMapId);
       }
+      this.store.dispatch(setMapType({ mapType: MapType.Indoor }));
     } else {
-      this.directionsService.setDestinationPoint(place);
+      this.outdoorDirectionsService.setDestinationPoint(place);
       this.store.dispatch(setMapType({ mapType: MapType.Outdoor }));
     }
     this.places = [];
