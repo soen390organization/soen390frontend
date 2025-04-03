@@ -13,6 +13,7 @@ import { setMapType, MapType, setShowRoute, selectShowRoute } from 'src/app/stor
 import { MappedinService } from 'src/app/services/mappedin/mappedin.service';
 import { IndoorDirectionsService } from 'src/app/services/indoor-directions/indoor-directions.service';
 import { GoogleMapService } from 'src/app/services/google-map.service';
+import { HomePage } from 'src/app/home/home.page';
 
 export const MapSearchAnimation = [
   trigger('slideInOut', [
@@ -79,11 +80,13 @@ export class MapSearchComponent implements OnInit {
       this.indoorDirectionService.getDestinationPoint$()
     ]).subscribe(async ([outdoorStartPoint, outdoorDestinationPoint, indoorStartPoint, indoorDestinationPoint]) => {
       if (outdoorStartPoint) {
+        this.startLocationInput = outdoorStartPoint.title;
         this.outdoorDirectionsService.showStartMarker();
         this.googleMapService.updateMapLocation(outdoorStartPoint.coordinates);
       }
 
       if (outdoorDestinationPoint) {
+        this.destinationLocationInput = outdoorDestinationPoint.title;
         this.outdoorDirectionsService.showDestinationMarker();
         this.googleMapService.updateMapLocation(outdoorDestinationPoint.coordinates);
       }
@@ -111,6 +114,11 @@ export class MapSearchComponent implements OnInit {
 
   toggleSearch() {
     this.isSearchVisible = !this.isSearchVisible;
+    if (this.isSearchVisible) {
+      HomePage.prototype.showSearch();
+    } else {
+      HomePage.prototype.hideSearch();
+    }
   }
 
   async onSetUsersLocationAsStart(): Promise<void> {

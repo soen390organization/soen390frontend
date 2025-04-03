@@ -24,11 +24,13 @@
   <!-- Right side: End button with ETA above it -->
   <div class="relative flex flex-col items-end ml-2">
     <!-- ETA Info -->
-    <div
-      class="absolute top-[-30px] right-0 text-m font-bold text-[#912338] whitespace-nowrap mb-2"
-    >
-      {{ currentRouteData?.eta || '' }}
-    </div>
+    <ng-container *ngIf="outdoorDirectionsService.getSelectedStrategy$() | async as selectedStrategy">
+      <div
+        class="absolute top-[-30px] right-0 text-m font-bold text-[#912338] whitespace-nowrap mb-2"
+      >
+        {{ selectedStrategy.getTotalDuration().text || '' }}
+      </div>
+    </ng-container>
 
     <!-- End Button -->
     <button
