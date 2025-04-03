@@ -9,11 +9,9 @@ import {
 import { CommonModule } from '@angular/common';
 import { MappedinService } from 'src/app/services/mappedin/mappedin.service';
 import { IndoorDirectionsService } from 'src/app/services/indoor-directions/indoor-directions.service';
-import { NavigationCoordinatorService } from 'src/app/services/navigation-coordinator.service';
+// import { NavigationCoordinatorService } from 'src/app/services/navigation-coordinator.service';
 import { combineLatest, filter, firstValueFrom, Observable } from 'rxjs';
-import { MappedInLocation } from 'src/app/interfaces/mappedin-location.interface';
 import { Store } from '@ngrx/store';
-import { selectShowRoute } from 'src/app/store/app';
 
 @Component({
   selector: 'app-mappedin-map',
