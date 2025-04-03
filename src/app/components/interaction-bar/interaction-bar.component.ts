@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, ViewChild, NgZone } from '@angular/core';
 import { LocationCardsComponent } from '../location-cards/location-cards.component';
 import { Store } from '@ngrx/store';
 import { PlacesService } from 'src/app/services/places/places.service';
@@ -33,7 +33,6 @@ export class InteractionBarComponent implements AfterViewInit {
   @ViewChild('footerContainer', { static: false }) footerContainer!: ElementRef;
   @ViewChild('swipeArea', { static: false }) swipeArea!: ElementRef;
 
-
   public startY = 0;
   public currentY = 0;
   public isDragging = false;
@@ -51,7 +50,8 @@ export class InteractionBarComponent implements AfterViewInit {
     private readonly store: Store,
     private readonly placesService: PlacesService,
     private readonly visibilityService: VisibilityService,
-    private readonly calendarService: CalendarService
+    private readonly calendarService: CalendarService,
+    private ngZone: NgZone 
   ) {}
 
   ngOnInit() {
@@ -85,45 +85,54 @@ export class InteractionBarComponent implements AfterViewInit {
       this.events = { events: events, loading: false };
     });
   }
+
   ngAfterViewInit(): void {
     this.attachSwipeListeners(this.swipeArea.nativeElement);
-    this.updateFooterUI(false);
+    this.updateFooterUI(false); // Ensure the button is hidden when the footer is collapsed on load
   }
-  
+
   private attachSwipeListeners(element: HTMLElement): void {
-    const getClientY = (e: TouchEvent | MouseEvent): number => 
+    const getClientY = (e: TouchEvent | MouseEvent): number =>
       e instanceof TouchEvent ? e.touches[0].clientY : e.clientY;
-  
+
     const onStart = (e: TouchEvent | MouseEvent) => {
       if (e instanceof TouchEvent && e.touches.length > 1) return;
       this.onDragStart(getClientY(e));
     };
-  
+
     const onMove = (e: TouchEvent | MouseEvent) => {
       if (!this.isDragging) return;
       e.preventDefault();
       this.onDragMove(getClientY(e));
     };
-  
-    const onEnd = () => this.onDragEnd();
-  
+
+    const onEnd = () => {
+      this.ngZone.run(() => {
+        this.onDragEnd();
+      });
+    };
+    
     // Touch events
     element.addEventListener('touchstart', onStart, { passive: true });
     element.addEventListener('touchmove', onMove, { passive: false });
     element.addEventListener('touchend', onEnd);
-  
+
     // Mouse events
     element.addEventListener('mousedown', (e) => {
       onStart(e);
+    
       document.addEventListener('mousemove', onMove);
+    
       document.addEventListener('mouseup', () => {
-        onEnd();
-        document.removeEventListener('mousemove', onMove);
-        document.removeEventListener('mouseup', onEnd);
+        this.ngZone.run(() => {
+          onEnd(); // 👈 now runs inside Angular zone = DOM updates!
+          document.removeEventListener('mousemove', onMove);
+          document.removeEventListener('mouseup', onEnd);
+        });
       }, { once: true });
     });
-  }
-  
+  }    
+
   handleClick(): void {
     if (this.isDragging) {
       console.log('🚫 Click ignored — user was swiping');
@@ -131,44 +140,51 @@ export class InteractionBarComponent implements AfterViewInit {
     }
     this.onShowMore();
   }
-  
+
   onShowMore(): void {
     this.isExpanded = !this.isExpanded;
     this.updateFooterUI(this.isExpanded);
   }
-  
+
   onDragStart(startY: number): void {
     this.startY = startY;
     this.isDragging = true;
   }
-  
+
   onDragMove(currentY: number): void {
     this.currentY = currentY;
     const diff = this.startY - currentY;
-  
+
     const footer = this.footerContainer.nativeElement;
     const baseTranslate = this.isExpanded ? 0 : 80;
     const translateY = baseTranslate - diff;
     const clampedTranslate = Math.min(Math.max(translateY, 0), 80);
-  
+
     footer.style.transform = `translateY(${clampedTranslate}%)`;
     this.swipeProgress = (80 - clampedTranslate) / 80;
   }
-  
+
   onDragEnd(): void {
     if (!this.isDragging) return;
     this.isDragging = false;
-  
+
     const swipeDistance = this.startY - this.currentY;
-    const shouldExpand = Math.abs(swipeDistance) > this.threshold
-      ? swipeDistance > 0
-      : this.isExpanded;
-  
-    this.isExpanded = shouldExpand;
+    const shouldExpand = swipeDistance > this.threshold;
+    const shouldCollapse = swipeDistance < -this.threshold;
+
+    if (shouldExpand) {
+      this.isExpanded = true;
+    } else if (shouldCollapse) {
+      this.isExpanded = false;
+    }
+
     this.updateFooterUI(this.isExpanded);
+
+    // Reset swipe state for next swipe
+    this.startY = 0;
+    this.currentY = 0;
   }
-  
-  
+
   private updateFooterUI(expand: boolean): void {
     const footer = this.footerContainer.nativeElement;
     footer.style.transition = 'transform 0.3s ease-out';
@@ -177,4 +193,3 @@ export class InteractionBarComponent implements AfterViewInit {
     this.swipeProgress = expand ? 1 : 0;
   }
 }
-  
