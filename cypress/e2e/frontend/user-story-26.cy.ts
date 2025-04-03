@@ -47,7 +47,8 @@ describe('Map - Directions to Mango Bay', () => {
       .should('be.visible')
       .click();
     cy.wait(1000);
-
+    // Expand the search inputs.
+    cy.get('.material-symbols-outlined').contains('search').click();
     // Select user's current location as the start point by clicking the my_location icon.
     cy.get('input[placeholder="Choose starting point..."]').should('be.visible');
     cy.get('span.material-symbols-outlined').contains('my_location').click();
@@ -57,7 +58,7 @@ describe('Map - Directions to Mango Bay', () => {
     cy.contains('button', 'Start').click();
     cy.wait(1000);
 
-    // Click on the handle bar to reveal the locations section.
+    // // Click on the handle bar to reveal the locations section.
     cy.get(
       '.w-\\[100px\\].h-\\[10px\\].bg-\\[\\#d5d5d5\\].my-\\[10px\\].mx-auto.rounded-full.cursor-pointer'
     )

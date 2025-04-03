@@ -39,9 +39,9 @@ describe('Map Search - Use Current Location as Start', () => {
     cy.get('input[placeholder="Choose starting point..."]').then(($input) => {
       cy.log('Detected input value before assertion:', $input.val());
     });
-
+    cy.wait(3000);
     // Ensure the marker appears on the map (retry until it does)
-    cy.get('.gm-style img[src*="Icone_Verde.svg"]', { timeout: 15000 }).should('exist');
+    cy.get('[data-marker-id="start-marker"]').should('have.length', 1);
 
     // Log that the test successfully validated everything
     cy.log('✅ Test completed: Current location set successfully, marker found.');

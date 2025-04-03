@@ -52,7 +52,7 @@ export class OutdoorDirectionsService extends DirectionsService<GoogleMapLocatio
         borderColor: '#ffffff',
         scale: 1.2
       });
-
+      pin.element.setAttribute('data-marker-id', 'start-marker');
       this.startPointMarker = new google.maps.marker.AdvancedMarkerElement({
         content: pin.element
       });
@@ -78,7 +78,7 @@ export class OutdoorDirectionsService extends DirectionsService<GoogleMapLocatio
         borderColor: '#ffffff',
         scale: 1.2
       });
-
+      pin.element.setAttribute('data-marker-id', 'destination-marker');
       this.destinationPointMarker = new google.maps.marker.AdvancedMarkerElement({
         content: pin.element
       });
