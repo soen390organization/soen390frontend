@@ -7,7 +7,7 @@ import { OutdoorDirectionsService } from '../services/outdoor-directions/outdoor
   providedIn: 'root'
 })
 export class OutdoorRoutingStrategy implements RoutingStrategy {
-  constructor(private outdoorDirectionsService: OutdoorDirectionsService) {}
+  constructor(private readonly outdoorDirectionsService: OutdoorDirectionsService) {}
 
   async getRoute(
     start: GoogleMapLocation,

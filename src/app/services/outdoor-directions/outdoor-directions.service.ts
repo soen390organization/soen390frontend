@@ -20,7 +20,7 @@ export class OutdoorDirectionsService extends DirectionsService<GoogleMapLocatio
   public destinationPointMarker: google.maps.marker.AdvancedMarkerElement;
 
   constructor(
-    private googleMapService: GoogleMapService,
+    private readonly googleMapService: GoogleMapService,
     public readonly outdoorWalkingStrategy: OutdoorWalkingStrategy,
     public readonly outdoorDrivingStrategy: OutdoorDrivingStrategy,
     public readonly outdoorTransitStrategy: OutdoorTransitStrategy,

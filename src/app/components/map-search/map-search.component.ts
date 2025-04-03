@@ -66,7 +66,7 @@ export class MapSearchComponent implements OnInit {
 
   ngOnInit(): void {
     this.store.select(selectShowRoute).subscribe((showRoute) => {
-      showRoute ? (this.disableStart = true) : (this.disableStart = false);
+      this.setDisableStart(showRoute);
     });
 
     combineLatest([
@@ -102,15 +102,17 @@ export class MapSearchComponent implements OnInit {
             this.outdoorDirectionsService.renderNavigation();
             this.disableStart = false;
           });
-          return;
         } else if (indoorStartPoint && indoorDestinationPoint) {
           this.disableStart = false;
-          return;
         } else {
           this.disableStart = true;
         }
       }
     );
+  }
+
+  private setDisableStart(show) {
+    this.disableStart = show;
   }
 
   toggleSearch() {
