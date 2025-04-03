@@ -1,15 +1,12 @@
 import { Injectable } from '@angular/core';
-import { combineLatest, Observable, from } from 'rxjs';
-import { filter, switchMap, map } from 'rxjs/operators';
+import { Observable } from 'rxjs';
 import { CompleteRoute, RouteSegment } from '../interfaces/routing-strategy.interface';
 import { Location } from '../interfaces/location.interface';
 import { OutdoorRoutingStrategy, IndoorRoutingStrategy } from '../strategies';
 import { GoogleMapLocation } from '../interfaces/google-map-location.interface';
 import { MappedInLocation } from '../interfaces/mappedin-location.interface';
-import { OutdoorDirectionsService } from './outdoor-directions/outdoor-directions.service';
-import { IndoorDirectionsService } from '../services/indoor-directions/indoor-directions.service';
 import { Store } from '@ngrx/store';
-import { setMapType, MapType, selectCurrentMap } from 'src/app/store/app';
+import { setMapType, MapType } from 'src/app/store/app';
 
 @Injectable({
   providedIn: 'root'
@@ -19,45 +16,11 @@ export class NavigationCoordinatorService {
   public globalRoute$: Observable<CompleteRoute>;
 
   constructor(
-    private store: Store,
-    private outdoorDirectionsService: OutdoorDirectionsService,
-    private indoorDirectionsService: IndoorDirectionsService,
-    private outdoorStrategy: OutdoorRoutingStrategy,
-    private indoorStrategy: IndoorRoutingStrategy
+    private readonly store: Store,
+    private readonly outdoorStrategy: OutdoorRoutingStrategy,
+    private readonly indoorStrategy: IndoorRoutingStrategy
   ) {
     // Combine the four observables (outdoor start/destination and indoor start/destination)
-    this.globalRoute$ = combineLatest([
-      this.outdoorDirectionsService.getStartPoint(),
-      this.outdoorDirectionsService.getDestinationPoint(),
-      this.indoorDirectionsService.getStartPoint(),
-      this.indoorDirectionsService.getDestinationPoint()
-    ]).pipe(
-      // useful when wanting to make reactive changes (good for mixed routes later)
-      filter(([outdoorStart, outdoorDest, indoorStart, indoorDest]) => {
-        return (!!outdoorStart && !!outdoorDest) || (!!indoorStart && !!indoorDest);
-      }),
-      switchMap(([outdoorStart, outdoorDest, indoorStart, indoorDest]) => {
-        if (outdoorStart && outdoorDest) {
-          return from(
-            this.outdoorStrategy.getRoute(
-              outdoorStart as GoogleMapLocation,
-              outdoorDest as GoogleMapLocation,
-              'WALKING'
-            )
-          ).pipe(map((segment: RouteSegment) => ({ segments: [segment] }) as CompleteRoute));
-        } else if (indoorStart && indoorDest) {
-          return from(
-            this.indoorStrategy.getRoute(
-              indoorStart as MappedInLocation,
-              indoorDest as MappedInLocation,
-              'WALKING'
-            )
-          ).pipe(map((segment: RouteSegment) => ({ segments: [segment] }) as CompleteRoute));
-        } else {
-          throw new Error('Route not available');
-        }
-      })
-    );
   }
 
   /* used for on demand calculation */
