@@ -87,6 +87,7 @@ export class InteractionBarComponent implements AfterViewInit {
   }
   ngAfterViewInit(): void {
     this.attachSwipeListeners(this.swipeArea.nativeElement);
+    this.updateFooterUI(false);
   }
   
   private attachSwipeListeners(element: HTMLElement): void {
