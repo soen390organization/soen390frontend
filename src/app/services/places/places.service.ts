@@ -125,6 +125,11 @@ export class PlacesService {
     const normalizedSearchTerm = searchTerm.toLowerCase().trim();
     if (!normalizedSearchTerm) return [];
     
+    // Check if campus data and buildings exist
+    if (!this.campusData || !this.campusData[campusKey] || !this.campusData[campusKey].buildings) {
+      return [];
+    }
+    
     // For different match priorities
     const matchedBuildingNames = this.findMatchingBuildingNames(normalizedSearchTerm);
     if (matchedBuildingNames.length === 0) return [];
@@ -155,6 +160,11 @@ export class PlacesService {
     const startsWithMatches: string[] = [];
     const containsMatches: string[] = [];
     const isShortAbbreviation = searchTerm.length <= 3;
+    
+    // Check if buildingMappings is defined
+    if (!this.buildingMappings) {
+      return [];
+    }
     
     // Find matches in building mappings with different priorities
     Object.entries(this.buildingMappings).forEach(([key, buildingNames]) => {
@@ -245,6 +255,11 @@ export class PlacesService {
     const normalizedInput = input.toLowerCase().trim();
     if (!normalizedInput) return [];
     
+    // Check if campus data and buildings exist
+    if (!this.campusData || !this.campusData[campusKey] || !this.campusData[campusKey].buildings) {
+      return [];
+    }
+    
     const campusBuildings = this.campusData[campusKey].buildings;
     const results: GoogleMapLocation[] = [];
     
@@ -258,7 +273,7 @@ export class PlacesService {
     }
     
     // Check for direct alias matches in our mapping
-    if (this.buildingMappings[normalizedInput]) {
+    if (this.buildingMappings && this.buildingMappings[normalizedInput]) {
       const buildingNames = this.buildingMappings[normalizedInput];
       const addedNames = new Set<string>();
       
@@ -296,11 +311,18 @@ export class PlacesService {
    * @returns Building location for high-priority matches, or null if not a priority term
    */
   private getDirectBuildingMatch(input: string): GoogleMapLocation | null {
+    if (!input) return null;
+    
     const normalizedInput = input.toLowerCase().trim();
     const problematicTerms = (buildingMappingsData as any).problematicTerms || [];
     
     // Only process if this is identified as a problematic term
     if (!problematicTerms.includes(normalizedInput)) {
+      return null;
+    }
+    
+    // Check if priorityMatches is defined
+    if (!this.priorityMatches) {
       return null;
     }
     
@@ -425,6 +447,11 @@ export class PlacesService {
    * Combine building matches from exact and broader search
    */
   private combineBuildingMatches(input: string, campusKey: string): GoogleMapLocation[] {
+    // Check if campus data exists before proceeding
+    if (!this.campusData || !this.campusData[campusKey]) {
+      return [];
+    }
+    
     const exactMatches = this.getExactBuildingMatch(input, campusKey);
     const suggestions = this.getBuildingSuggestions(input, campusKey);
     
