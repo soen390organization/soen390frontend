@@ -637,4 +637,455 @@ describe('PlacesService', () => {
       });
     });
   });
+
+  describe('New indoor location functionality tests', () => {
+    describe('Room pattern detection and floor fallbacks', () => {
+      beforeEach(() => {
+        // Mock more complex building data with floors and connections
+        const mockMapData = {
+          getByType: (type: string) => {
+            if (type === 'space') {
+              return [
+                { name: '101', coordinates: { floorId: 'floor1' } },
+                { name: '201', coordinates: { floorId: 'floor2' } }
+              ];
+            } else if (type === 'point-of-interest') {
+              return [
+                { name: 'Cafe', coordinates: { floorId: 'floor1' } },
+                { name: 'Library', coordinates: { floorId: 'floor2' } }
+              ];
+            } else if (type === 'floor') {
+              return [
+                { id: 'floor1', name: 'Floor 1' },
+                { id: 'floor2', name: 'Floor 2' }
+              ];
+            } else if (type === 'connection') {
+              return [
+                {
+                  type: 'elevator',
+                  coordinates: [
+                    { floorId: 'floor1' },
+                    { floorId: 'floor2' }
+                  ]
+                }
+              ];
+            }
+            return [];
+          }
+        };
+
+        mappedinService.getCampusMapData.and.returnValue({
+          'building1': {
+            name: 'Hall Building',
+            abbreviation: 'H',
+            address: '123 Main St',
+            coordinates: new google.maps.LatLng(1, 1),
+            mapData: mockMapData
+          }
+        });
+
+        // Set up default campus data
+        service['campusData'] = {
+          sgw: {
+            coordinates: new google.maps.LatLng(1, 1),
+            buildings: [
+              {
+                name: 'Hall Building',
+                abbreviation: 'H',
+                address: '123 Main St',
+                coordinates: { lat: 1, lng: 1 }
+              }
+            ]
+          },
+          loy: {
+            coordinates: new google.maps.LatLng(2, 2),
+            buildings: [
+              {
+                name: 'Central Building',
+                abbreviation: 'CC',
+                address: '456 Other St',
+                coordinates: { lat: 2, lng: 2 }
+              }
+            ]
+          }
+        };
+
+        // Mock building mappings data
+        service['buildingMappings'] = {
+          'h': ['Hall Building'],
+          'hall': ['Hall Building'],
+          'cc': ['Central Building'],
+          'central': ['Central Building']
+        };
+
+        // Mock priority matches
+        service['priorityMatches'] = {
+          'cc': {
+            title: 'Central Building',
+            address: '456 Other St',
+            coordinates: { lat: 2, lng: 2 },
+            campusKey: 'loy'
+          }
+        };
+      });
+
+      it('should detect room pattern (e.g., H-100) correctly', async () => {
+        // Mock getDirectBuildingMatch to return null for this test
+        spyOn(service as any, 'getDirectBuildingMatch').and.returnValue(null);
+        
+        // Set the store to return sgw campus
+        storeMock.select.and.returnValue(of('sgw'));
+        
+        const suggestions = await service.getPlaceSuggestions('H-101');
+        
+        // We should have matching results with room matching logic
+        expect(suggestions.length).toBeGreaterThan(0);
+        
+        // Room pattern should be prioritized over building matches
+        const firstMatch = suggestions[0] as any;
+        expect(firstMatch.type).toBe('indoor');
+      });
+
+      it('should attempt to create floor fallbacks when an exact room is not found', async () => {
+        // Mock getDirectBuildingMatch to return null for this test
+        spyOn(service as any, 'getDirectBuildingMatch').and.returnValue(null);
+        
+        // Set the store to return sgw campus
+        storeMock.select.and.returnValue(of('sgw'));
+        
+        // Create a custom mock with floor data specific to this test
+        const mockMapData = {
+          getByType: (type: string) => {
+            if (type === 'floor') {
+              return [
+                { id: 'floor9', name: 'Floor 9' }
+              ];
+            } else if (type === 'space') {
+              return [];
+            } else if (type === 'connection') {
+              return [];
+            }
+            return [];
+          }
+        };
+
+        mappedinService.getCampusMapData.and.returnValue({
+          'building1': {
+            name: 'Hall Building',
+            abbreviation: 'H',
+            address: '123 Main St',
+            coordinates: new google.maps.LatLng(1, 1),
+            mapData: mockMapData
+          }
+        });
+        
+        // Spy on getRoomMatches to verify it's being called properly
+        const roomMatchesSpy = spyOn(service as any, 'getRoomMatches').and.callThrough();
+        
+        // Create a non-existent room number
+        await service.getPlaceSuggestions('H-999');
+        
+        // Verify that getRoomMatches was called with the right pattern
+        expect(roomMatchesSpy).toHaveBeenCalled();
+        expect(roomMatchesSpy.calls.mostRecent().args[0]).toContain('999');
+      });
+
+      it('should create correct room location object with floor ID', async () => {
+        // Access private method for testing
+        const space = { name: '101', coordinates: { floorId: 'floor1' } };
+        const building = {
+          name: 'Hall Building',
+          abbreviation: 'H',
+          address: '123 Main St',
+          coordinates: new google.maps.LatLng(1, 1)
+        };
+        
+        const result = (service as any).createRoomLocation(building, 'building1', space);
+        
+        expect(result.title).toBe('H 101');
+        expect(result.fullName).toBe('Hall Building 101');
+        expect(result.type).toBe('indoor');
+        expect(result.floorId).not.toBeNull();
+      });
+    });
+
+    describe('Building match and prioritization tests', () => {
+      beforeEach(() => {
+        // Set up mock data
+        service['campusData'] = {
+          sgw: {
+            coordinates: new google.maps.LatLng(1, 1),
+            buildings: [
+              {
+                name: 'Hall Building',
+                abbreviation: 'H',
+                address: '123 Main St',
+                coordinates: { lat: 1, lng: 1 }
+              },
+              {
+                name: 'Library Building',
+                abbreviation: 'LB',
+                address: '789 Library St',
+                coordinates: { lat: 1.1, lng: 1.1 }
+              }
+            ]
+          }
+        };
+
+        // Mock building mappings
+        service['buildingMappings'] = {
+          'h': ['Hall Building'],
+          'hall': ['Hall Building'],
+          'lb': ['Library Building'],
+          'library': ['Library Building']
+        };
+
+        // Mock priority matches
+        service['priorityMatches'] = {
+          'cc': {
+            title: 'Central Building',
+            address: '456 Other St',
+            coordinates: { lat: 2, lng: 2 },
+            campusKey: 'loy'
+          }
+        };
+      });
+
+      it('should handle building abbreviations correctly', async () => {
+        // Mock getDirectBuildingMatch to return null for this test
+        spyOn(service as any, 'getDirectBuildingMatch').and.returnValue(null);
+        
+        // Set the store to return sgw campus
+        storeMock.select.and.returnValue(of('sgw'));
+        
+        const suggestions = await service.getPlaceSuggestions('h');
+        
+        expect(suggestions.length).toBeGreaterThan(0);
+        expect(suggestions[0].title).toBe('Hall Building');
+      });
+
+      it('should prioritize direct building matches for problematic abbreviations', async () => {
+        // Create a mock for buildingMappingsData
+        // Since it's imported from a file, we need to create a new mock
+        const mockBuildingMappingsData = {
+          problematicTerms: ['cc'],
+          aliases: {},
+          priorityMatches: {}
+        };
+        // Set it directly in the service
+        (service as any).buildingMappingsData = mockBuildingMappingsData;
+        
+        // Set up the direct building match
+        const directMatch = {
+          title: 'Central Building',
+          address: '456 Other St',
+          coordinates: new google.maps.LatLng(2, 2),
+          type: 'outdoor'
+        };
+        
+        spyOn(service as any, 'getDirectBuildingMatch').and.returnValue(directMatch);
+        
+        // Set the store to return sgw campus
+        storeMock.select.and.returnValue(of('sgw'));
+        
+        const suggestions = await service.getPlaceSuggestions('cc');
+        
+        expect(suggestions.length).toBe(1);
+        expect(suggestions[0].title).toBe('Central Building');
+      });
+
+      it('should combine building matches from exact and broader search', async () => {
+        // Mock getDirectBuildingMatch to return null for this test
+        spyOn(service as any, 'getDirectBuildingMatch').and.returnValue(null);
+        
+        // Set the store to return sgw campus
+        storeMock.select.and.returnValue(of('sgw'));
+        
+        // Add spy to see the individual match methods called
+        const exactMatchSpy = spyOn(service as any, 'getExactBuildingMatch').and.callThrough();
+        const buildingSuggestionsSpy = spyOn(service as any, 'getBuildingSuggestions').and.callThrough();
+        
+        await service.getPlaceSuggestions('lib');
+        
+        expect(exactMatchSpy).toHaveBeenCalled();
+        expect(buildingSuggestionsSpy).toHaveBeenCalled();
+      });
+    });
+
+    describe('Result prioritization tests', () => {
+      beforeEach(() => {
+        // Set up mock MappedinService with rooms
+        const mockMapData = {
+          getByType: (type: string) => {
+            if (type === 'space') {
+              return [{ name: '101' }, { name: '201' }];
+            } else if (type === 'point-of-interest') {
+              return [{ name: 'Cafe' }, { name: 'Library' }];
+            } else if (type === 'floor') {
+              return [
+                { id: 'floor1', name: 'Floor 1' },
+                { id: 'floor2', name: 'Floor 2' }
+              ];
+            }
+            return [];
+          }
+        };
+
+        mappedinService.getCampusMapData.and.returnValue({
+          'building1': {
+            name: 'Hall Building',
+            abbreviation: 'H',
+            address: '123 Main St',
+            coordinates: new google.maps.LatLng(1, 1),
+            mapData: mockMapData
+          }
+        });
+
+        // Set up campus data
+        service['campusData'] = {
+          sgw: {
+            coordinates: new google.maps.LatLng(1, 1),
+            buildings: [
+              {
+                name: 'Hall Building',
+                abbreviation: 'H',
+                address: '123 Main St',
+                coordinates: { lat: 1, lng: 1 }
+              }
+            ]
+          }
+        };
+
+        // Mock building mappings
+        service['buildingMappings'] = {
+          'h': ['Hall Building'],
+          'hall': ['Hall Building']
+        };
+      });
+
+      it('should prioritize indoor locations for room-like inputs', async () => {
+        // Mock getDirectBuildingMatch to return null for this test
+        spyOn(service as any, 'getDirectBuildingMatch').and.returnValue(null);
+        
+        // Set the store to return sgw campus
+        storeMock.select.and.returnValue(of('sgw'));
+        
+        // Mock Google API to return a result
+        const fakePrediction = {
+          place_id: 'test123',
+          structured_formatting: { main_text: 'Hall Avenue' }
+        } as google.maps.places.AutocompletePrediction;
+
+        const fakeAutocompleteService = {
+          getPlacePredictions: jasmine
+            .createSpy('getPlacePredictions')
+            .and.callFake(
+              (
+                req: any,
+                callback: (
+                  predictions: google.maps.places.AutocompletePrediction[] | null,
+                  status: string
+                ) => void
+              ) => {
+                callback([fakePrediction], 'OK');
+              }
+            )
+        };
+        
+        spyOn(window.google.maps.places, 'AutocompleteService').and.returnValue(
+          fakeAutocompleteService as any
+        );
+
+        service['placesService'].getDetails = jasmine
+          .createSpy('getDetails')
+          .and.callFake((req: any, callback: any) => {
+            callback({
+              formatted_address: '123 Hall Ave',
+              geometry: {
+                location: {
+                  lat: () => 1,
+                  lng: () => 1
+                }
+              }
+            }, 'OK');
+          });
+        
+        // Test with a room-like input
+        const roomSuggestions = await service.getPlaceSuggestions('H-101');
+        
+        // Indoor locations should come first
+        expect(roomSuggestions.length).toBeGreaterThan(0);
+        expect(roomSuggestions[0].type).toBe('indoor');
+        
+        // Test with a non-room input
+        const generalSuggestions = await service.getPlaceSuggestions('Hall');
+        
+        // Building (outdoor) matches should come first
+        expect(generalSuggestions.length).toBeGreaterThan(0);
+        expect(generalSuggestions[0].type).toBe('outdoor');
+      });
+
+      it('should handle up to 5 room results', async () => {
+        // First, spy on getRoomMatches to modify its behavior
+        spyOn(service as any, 'getRoomMatches').and.returnValue([
+          { title: 'H 101', type: 'indoor' },
+          { title: 'H 102', type: 'indoor' },
+          { title: 'H 103', type: 'indoor' },
+          { title: 'H 104', type: 'indoor' },
+          { title: 'H 105', type: 'indoor' }
+        ]);
+
+        // Mock getDirectBuildingMatch to return null for this test
+        spyOn(service as any, 'getDirectBuildingMatch').and.returnValue(null);
+        
+        // Set the store to return sgw campus
+        storeMock.select.and.returnValue(of('sgw'));
+        
+        // Get suggestions
+        const suggestions = await service.getPlaceSuggestions('H10');
+        
+        // Should handle up to 5 results
+        expect(suggestions.length).toBe(5);
+      });
+    });
+
+    describe('Error handling tests', () => {
+      it('should handle missing campus data gracefully', async () => {
+        // Set up incomplete campus data
+        service['campusData'] = {};
+        
+        // Set the store to return a non-existent campus
+        storeMock.select.and.returnValue(of('nonexistent'));
+        
+        const suggestions = await service.getPlaceSuggestions('test');
+        
+        // Should handle gracefully and return empty array
+        expect(suggestions).toEqual([]);
+      });
+
+      it('should handle missing buildingMappings gracefully', async () => {
+        // Remove building mappings
+        service['buildingMappings'] = undefined;
+        
+        // Set the store to return sgw campus
+        storeMock.select.and.returnValue(of('sgw'));
+        
+        const suggestions = await service.getPlaceSuggestions('test');
+        
+        // Should handle gracefully and continue execution
+        expect(suggestions).toBeDefined();
+      });
+
+      it('should handle missing priorityMatches gracefully', async () => {
+        // Remove priority matches
+        service['priorityMatches'] = undefined;
+        
+        // Set the store to return sgw campus
+        storeMock.select.and.returnValue(of('sgw'));
+        
+        // Should not throw errors
+        await expectAsync(service.getPlaceSuggestions('cc')).toBeResolved();
+      });
+    });
+  });
 });
