@@ -229,7 +229,7 @@ export class MapSearchComponent implements OnInit {
     this.places = [];
   }
 
-  private highlightedPlaces = new Set<string>([
+  private readonly highlightedPlaces = new Set<string>([
     'H Building Concordia University', 
     'John Molson School of Business',
     'Concordia University, John Molson Building',
