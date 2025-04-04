@@ -23,6 +23,7 @@ import { EventCardComponent } from '../event-card/event-card.component';
     LocationCardsComponent,
     DirectionsComponent,
     EventCardComponent,
+    InteractionBarComponent,
     CommonModule
   ],
   templateUrl: './interaction-bar.component.html',
