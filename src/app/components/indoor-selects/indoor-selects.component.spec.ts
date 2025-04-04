@@ -20,7 +20,7 @@ describe('IndoorSelectsComponent', () => {
   const fakeMappedinService = {
     getMapId: jasmine.createSpy('getMapId').and.returnValue('67abe2bb8ea1bf000bb60d14'),
     setMapData: jasmine.createSpy('setMapData'),
-    getMapData: jasmine.createSpy('getMapData').and.returnValue(of({})),
+    getMapData$: jasmine.createSpy('getMapData$').and.returnValue(of({})), // Define getMapData$ here
     getFloors: jasmine
       .createSpy('getFloors')
       .and.returnValue(Promise.resolve([{ id: 'floor1', name: 'Floor 1' }])),
@@ -28,7 +28,7 @@ describe('IndoorSelectsComponent', () => {
       .createSpy('getCurrentFloor')
       .and.returnValue({ id: 'floor1', name: 'Floor 1' }),
     setFloor: jasmine.createSpy('setFloor')
-  };
+  };  
 
   // Create a fake ConcordiaDataService with the minimal method needed.
   const fakeConcordiaDataService = {

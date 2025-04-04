@@ -2,10 +2,8 @@
   "sgw": {
     "name": "Sir George William",
     "abbreviation": "SGW",
-    "coordinates": {
-      "lat": 45.49508674774648,
-      "lng": -73.57795691041848
-    },
+    "address": "45.497234, -73.578384",
+    "coordinates": { "lat": 45.49508674774648, "lng": -73.57795691041848 },
     "shuttleBus": {
       "terminal": {
         "lat": 45.49713286141489,
@@ -374,10 +372,8 @@
   "loy": {
     "name": "Loyola",
     "abbreviation": "LOY",
-    "coordinates": {
-      "lat": 45.45812810976341,
-      "lng": -73.6393513063634
-    },
+    "address": "45.45842154460105, -73.63828307084489",
+    "coordinates": { "lat": 45.45812810976341, "lng": -73.6393513063634 },
     "shuttleBus": {
       "terminal": {
         "lat": 45.45789692831165,

@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
 import { EventInfo } from 'src/app/interfaces/event-info.interface';
 import { GoogleMapLocation } from 'src/app/interfaces/google-map-location.interface';
-import { DirectionsService } from 'src/app/services/directions/directions.service';
+import { OutdoorDirectionsService } from 'src/app/services/outdoor-directions/outdoor-directions.service';
 
 @Component({
   selector: 'app-event-card',
@@ -14,7 +14,7 @@ export class EventCardComponent {
   @Input() events: EventInfo[] = [];
   @Input() loading: boolean = false;
 
-  constructor(private readonly directionsService: DirectionsService) {}
+  constructor(private readonly outdoorDirectionsService: OutdoorDirectionsService) {}
 
   onImageError(event: Event) {
     const imgElement = event.target as HTMLImageElement;
@@ -45,6 +45,6 @@ export class EventCardComponent {
   }
 
   setDestination(location: GoogleMapLocation) {
-    this.directionsService.setDestinationPoint(location);
+    this.outdoorDirectionsService.setDestinationPoint(location);
   }
 }

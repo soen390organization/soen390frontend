@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { EventCardComponent } from './event-card.component';
-import { DirectionsService } from 'src/app/services/directions/directions.service';
+import { OutdoorDirectionsService } from 'src/app/services/outdoor-directions/outdoor-directions.service';
 import { GoogleMapLocation } from 'src/app/interfaces/google-map-location.interface';
 
 class MockDirectionsService {
@@ -10,17 +10,17 @@ class MockDirectionsService {
 describe('EventCardComponent', () => {
   let component: EventCardComponent;
   let fixture: ComponentFixture<EventCardComponent>;
-  let directionsService: DirectionsService;
+  let outdoorDirectionsService: OutdoorDirectionsService;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [EventCardComponent],
-      providers: [{ provide: DirectionsService, useClass: MockDirectionsService }]
+      providers: [{ provide: OutdoorDirectionsService, useClass: MockDirectionsService }]
     }).compileComponents();
 
     fixture = TestBed.createComponent(EventCardComponent);
     component = fixture.componentInstance;
-    directionsService = TestBed.inject(DirectionsService);
+    outdoorDirectionsService = TestBed.inject(OutdoorDirectionsService);
   });
 
   it('should create', () => {
@@ -70,7 +70,7 @@ describe('EventCardComponent', () => {
         type: 'outdoor'
       };
       component.setDestination(mockLocation);
-      expect(directionsService.setDestinationPoint).toHaveBeenCalledWith(mockLocation);
+      expect(outdoorDirectionsService.setDestinationPoint).toHaveBeenCalledWith(mockLocation);
     });
   });
 });

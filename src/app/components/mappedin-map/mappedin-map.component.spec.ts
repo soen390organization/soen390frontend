@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed, waitForAsync, fakeAsync, tick } from '@angul
 import { MappedinMapComponent } from './mappedin-map.component';
 import { MappedinService } from 'src/app/services/mappedin/mappedin.service';
 import { IndoorDirectionsService } from 'src/app/services/indoor-directions/indoor-directions.service';
-import { NavigationCoordinatorService } from 'src/app/services/navigation-coordinator.service';
+// import { NavigationCoordinatorService } from 'src/app/services/navigation-coordinator.service';
 import { Store } from '@ngrx/store';
 import { of } from 'rxjs';
 import { CommonModule } from '@angular/common';
@@ -17,11 +17,11 @@ class MockIndoorDirectionsService {
   getDestinationPoint = () => of(null);
 }
 
-class MockNavigationCoordinatorService {
-  getCompleteRoute = jasmine
-    .createSpy('getCompleteRoute')
-    .and.returnValue(Promise.resolve({ segments: [] }));
-}
+// class MockNavigationCoordinatorService {
+//   getCompleteRoute = jasmine
+//     .createSpy('getCompleteRoute')
+//     .and.returnValue(Promise.resolve({ segments: [] }));
+// }
 
 // Create a dummy Store spy so that NavigationCoordinatorService can be constructed.
 const mockStore = jasmine.createSpyObj('Store', ['select', 'dispatch']);
@@ -38,7 +38,7 @@ describe('MappedinMapComponent', () => {
       providers: [
         { provide: MappedinService, useClass: MockMappedinService },
         { provide: IndoorDirectionsService, useClass: MockIndoorDirectionsService },
-        { provide: NavigationCoordinatorService, useClass: MockNavigationCoordinatorService },
+        // { provide: NavigationCoordinatorService, useClass: MockNavigationCoordinatorService },
         { provide: Store, useValue: mockStore }
       ]
     }).compileComponents();

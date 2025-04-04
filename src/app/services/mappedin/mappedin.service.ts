@@ -11,6 +11,7 @@ export interface BuildingData {
   name: string;
   abbreviation: string;
   address: string;
+  coordinates: google.maps.LatLng;
   mapData: MapData;
 }
 
@@ -77,6 +78,7 @@ export class MappedinService {
           name: item.name,
           abbreviation: item.abbreviation,
           address: item.address,
+          coordinates: new google.maps.LatLng(item.coordinates),
           mapData
         };
       })
@@ -100,9 +102,9 @@ export class MappedinService {
   public async setMapData(mapId: string) {
     if (mapId === this.mapId) return; // ← skip if it’s already active
 
-    this.mapId = mapId;
     const mapData = this.campusMapData[mapId].mapData;
     this.mapData$.next(mapData);
+    this.mapId = mapId;
 
     this.mapView = await new MapViewBuilder()
       .setContainer(this.mappedInContainer!)
@@ -112,8 +114,12 @@ export class MappedinService {
     this.mapView$.next(this.mapView);
   }
 
-  public getMapData(): Observable<MapData | null> {
+  public getMapData$(): Observable<MapData | null> {
     return this.mapData$.asObservable();
+  }
+
+  public async getMapData(): Promise<MapData | null> {
+    return await firstValueFrom(this.getMapData$());
   }
 
   public getMapView(): Observable<MapView | null> {
@@ -125,12 +131,9 @@ export class MappedinService {
   }
 
   public clearNavigation(): void {
-    if (
-      this.mapView &&
-      this.mapView.Navigation &&
-      typeof this.mapView.Navigation.clear === 'function'
-    ) {
+    if (this.mapView.Navigation) {
       try {
+        // Navigation cleared
         this.mapView.Navigation.clear();
       } catch (error) {
         console.error('Error clearing indoor navigation:', error);
