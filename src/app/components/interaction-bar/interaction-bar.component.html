@@ -10,11 +10,11 @@
 
   <div
     #handleBar
-    class="handle-bar"
+    class="handle-bar w-[100px] h-[10px] bg-[#d5d5d5] my-[10px] mx-auto rounded-full cursor-pointer"
     (click)="onShowMore()"
-    class="w-[100px] h-[10px] bg-[#d5d5d5] my-[10px] mx-auto rounded-full cursor-pointer"
   ></div>
-  <div class="footer-content px-5">
+
+  <div class="footer-content px-5 overflow-y-auto max-h-[80vh]">
     <div *ngIf="showDirections$ | async">
       <h2 class="flex text-2xl font-bold text-gray-900 my-4">Directions</h2>
       <app-directions></app-directions>

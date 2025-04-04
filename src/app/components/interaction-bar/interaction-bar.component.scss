@@ -25,3 +25,7 @@
   top: -64px;
   right: 8px;
 }
+
+.footer-content::-webkit-scrollbar {
+  display: none;
+}
