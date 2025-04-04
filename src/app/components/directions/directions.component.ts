@@ -5,7 +5,7 @@ import { CurrentLocationService } from 'src/app/services/current-location/curren
 import { OutdoorDirectionsService } from 'src/app/services/outdoor-directions/outdoor-directions.service';
 import { IconMapping } from 'src/app/interfaces/Icon-mapping';
 import rawIconMapping from 'src/assets/icon-mapping.json';
-import { NavigationCoordinatorService } from 'src/app/services/navigation-coordinator.service';
+// import { NavigationCoordinatorService } from 'src/app/services/navigation-coordinator.service';
 import { CompleteRoute } from 'src/app/interfaces/routing-strategy.interface';
 import { Store } from '@ngrx/store';
 import { setShowRoute } from 'src/app/store/app';
@@ -46,7 +46,7 @@ export class DirectionsComponent implements OnDestroy {
     public readonly outdoorTransitStrategy: OutdoorTransitStrategy,
     public readonly outdoorShuttleStrategy: OutdoorShuttleStrategy,
     private currentLocationService: CurrentLocationService,
-    private navigationCoordinator: NavigationCoordinatorService
+    // private navigationCoordinator: NavigationCoordinatorService
   ) {}
   // ngAfterViewInit(): void {
     // this.observeComponentPosition();
@@ -159,23 +159,22 @@ export class DirectionsComponent implements OnDestroy {
       return;
     }
 
-    try {
-      // Directly use the objects obtained from the getters.
-      const completeRoute: CompleteRoute = await this.navigationCoordinator.getCompleteRoute(
-        start,
-        destination,
-        mode
-      );
-      const { steps, eta } = completeRoute.segments[0].instructions;
-      this.steps = steps;
-      this.eta = eta;
-    } catch (error) {
-      console.error('Failed to fetch directions:', error);
-    } finally {
-      this.isLoading = false;
-    }
-  }
-
+  //   try {
+  //     // Directly use the objects obtained from the getters.
+  //     const completeRoute: CompleteRoute = await this.navigationCoordinator.getCompleteRoute(
+  //       start,
+  //       destination,
+  //       mode
+  //     );
+  //     const { steps, eta } = completeRoute.segments[0].instructions;
+  //     this.steps = steps;
+  //     this.eta = eta;
+  //   } catch (error) {
+  //     console.error('Failed to fetch directions:', error);
+  //   } finally {
+  //     this.isLoading = false;
+  //   }
+   }
   /**
    * Updates the travel mode and loads new hardcoded directions.
    */

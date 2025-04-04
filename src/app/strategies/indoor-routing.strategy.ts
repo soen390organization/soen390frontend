@@ -1,35 +1,35 @@
-import { Injectable } from '@angular/core';
-import { RoutingStrategy, RouteSegment } from '../interfaces/routing-strategy.interface';
-import { MappedInLocation } from '../interfaces/mappedin-location.interface';
-import { IndoorDirectionsService } from '../services/indoor-directions/indoor-directions.service';
-import { MappedinService } from '../services/mappedin/mappedin.service';
+// import { Injectable } from '@angular/core';
+// import { RoutingStrategy, RouteSegment } from '../interfaces/routing-strategy.interface';
+// import { MappedInLocation } from '../interfaces/mappedin-location.interface';
+// import { IndoorDirectionsService } from '../services/indoor-directions/indoor-directions.service';
+// import { MappedinService } from '../services/mappedin/mappedin.service';
 
-@Injectable({
-  providedIn: 'root'
-})
-export class IndoorRoutingStrategy implements RoutingStrategy {
-  constructor(
-    private indoorDirectionsService: IndoorDirectionsService,
-    private mappedInService: MappedinService
-  ) {}
+// @Injectable({
+//   providedIn: 'root'
+// })
+// export class IndoorRoutingStrategy implements RoutingStrategy {
+//   constructor(
+//     private indoorDirectionsService: IndoorDirectionsService,
+//     private mappedInService: MappedinService
+//   ) {}
 
-  async getRoute(
-    start: MappedInLocation,
-    destination: MappedInLocation,
-    mode: string
-  ): Promise<RouteSegment> {
-    if (start.type !== 'indoor' || destination.type !== 'indoor') {
-      throw new Error('Indoor routing requires both start and destination to be indoor.');
-    }
+//   async getRoute(
+//     start: MappedInLocation,
+//     destination: MappedInLocation,
+//     mode: string
+//   ): Promise<RouteSegment> {
+//     if (start.type !== 'indoor' || destination.type !== 'indoor') {
+//       throw new Error('Indoor routing requires both start and destination to be indoor.');
+//     }
 
-    // Ensure the map data is loaded for the indoor map.
-    if (start.indoorMapId && start.indoorMapId !== this.mappedInService.getMapId()) {
-      await this.mappedInService.setMapData(start.indoorMapId);
-    }
+//     // Ensure the map data is loaded for the indoor map.
+//     if (start.indoorMapId && start.indoorMapId !== this.mappedInService.getMapId()) {
+//       await this.mappedInService.setMapData(start.indoorMapId);
+//     }
 
-    await this.indoorDirectionsService.navigate(start.room, destination.room);
+//     await this.indoorDirectionsService.navigate(start.room, destination.room);
 
-    const instructions = {};
-    return { type: 'indoor', instructions };
-  }
-}
+//     const instructions = {};
+//     return { type: 'indoor', instructions };
+//   }
+// }

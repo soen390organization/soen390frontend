@@ -64,7 +64,7 @@ export class MapSearchComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.store.select(selectShowRoute).subscribe(showRoute => {
+    this.store.select(selectShowRoute).subscribe((showRoute) => {
       if (showRoute) {
         this.disableStart = true;
       } else {
@@ -77,36 +77,45 @@ export class MapSearchComponent implements OnInit {
       this.outdoorDirectionsService.getDestinationPoint$(),
       this.indoorDirectionService.getStartPoint$(),
       this.indoorDirectionService.getDestinationPoint$()
-    ]).subscribe(async ([outdoorStartPoint, outdoorDestinationPoint, indoorStartPoint, indoorDestinationPoint]) => {
-      if (outdoorStartPoint) {
-        this.outdoorDirectionsService.showStartMarker();
-        this.googleMapService.updateMapLocation(outdoorStartPoint.coordinates);
-      }
+    ]).subscribe(
+      async ([
+        outdoorStartPoint,
+        outdoorDestinationPoint,
+        indoorStartPoint,
+        indoorDestinationPoint
+      ]) => {
+        if (outdoorStartPoint) {
+          this.outdoorDirectionsService.showStartMarker();
+          this.googleMapService.updateMapLocation(outdoorStartPoint.coordinates);
+        }
 
-      if (outdoorDestinationPoint) {
-        this.outdoorDirectionsService.showDestinationMarker();
-        this.googleMapService.updateMapLocation(outdoorDestinationPoint.coordinates);
-      }
+        if (outdoorDestinationPoint) {
+          this.outdoorDirectionsService.showDestinationMarker();
+          this.googleMapService.updateMapLocation(outdoorDestinationPoint.coordinates);
+        }
 
-      // Render indoor
-      if (outdoorStartPoint && outdoorDestinationPoint) {
-        await this.outdoorDirectionsService
-        .getShortestRoute()
-        .then(strategy => {
-          this.outdoorDirectionsService.setSelectedStrategy(strategy);
-          this.outdoorDirectionsService.clearStartMarker();
-          this.outdoorDirectionsService.clearDestinationMarker();
-          this.outdoorDirectionsService.renderNavigation();
-          this.disableStart = false;
-        })
-        return;
-      } else if (indoorStartPoint && indoorDestinationPoint) {
-        this.disableStart = false;
-        return;
-      } else {
-        this.disableStart = true;
+        // Render indoor
+        if (outdoorStartPoint && outdoorDestinationPoint) {
+          await this.outdoorDirectionsService.getShortestRoute().then((strategy) => {
+            this.outdoorDirectionsService.setSelectedStrategy(strategy);
+            this.outdoorDirectionsService.clearStartMarker();
+            this.outdoorDirectionsService.clearDestinationMarker();
+            this.outdoorDirectionsService.renderNavigation();
+            this.disableStart = false;
+          });
+          return;
+        } else if (indoorStartPoint && indoorDestinationPoint) {
+          await this.indoorDirectionService.getInitializedRoutes().then(async (strategy) => {
+            console.log('Strategy: ', strategy);
+            this.indoorDirectionService.setSelectedStrategy(strategy);
+            this.disableStart = false;
+          });
+          return;
+        } else {
+          this.disableStart = true;
+        }
       }
-    })
+    );
   }
 
   toggleSearch() {
@@ -115,7 +124,7 @@ export class MapSearchComponent implements OnInit {
 
   async onSetUsersLocationAsStart(): Promise<void> {
     const position = await this.currentLocationService.getCurrentLocation();
-    console.log('Position: ', position)
+    console.log('Position: ', position);
     if (position == null) {
       throw new Error('Current location is null.');
     }

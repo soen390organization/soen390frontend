@@ -1,18 +1,23 @@
 import { Injectable } from '@angular/core';
 import { GoogleMapLocation } from 'src/app/interfaces/google-map-location.interface';
 import { DirectionsService } from '../abstract-directions.service';
-import { OutdoorWalkingStrategy, OutdoorDrivingStrategy, OutdoorTransitStrategy, OutdoorShuttleStrategy } from 'src/app/strategies/outdoor-directions';
-import { AbstractOutdoorStrategy } from 'src/app/strategies/outdoor-directions/abstract-outdoor.strategy';
-import { BehaviorSubject, firstValueFrom } from 'rxjs';
+import {
+  OutdoorWalkingStrategy,
+  OutdoorDrivingStrategy,
+  OutdoorTransitStrategy,
+  OutdoorShuttleStrategy
+} from 'src/app/strategies/outdoor-directions';
 import { GoogleMapService } from '../google-map.service';
+import { firstValueFrom, BehaviorSubject } from 'rxjs';
+import { AbstractOutdoorStrategy } from 'src/app/strategies/outdoor-directions/abstract-outdoor.strategy';
 
 @Injectable({
   providedIn: 'root'
 })
 export class OutdoorDirectionsService extends DirectionsService<GoogleMapLocation> {
-  public selectedStrategySubject = new BehaviorSubject<AbstractOutdoorStrategy | null>(null);
   public startPointMarker: google.maps.marker.AdvancedMarkerElement;
   public destinationPointMarker: google.maps.marker.AdvancedMarkerElement;
+  public selectedStrategySubject = new BehaviorSubject<AbstractOutdoorStrategy>(null);
 
   constructor(
     private googleMapService: GoogleMapService,
@@ -93,11 +98,11 @@ export class OutdoorDirectionsService extends DirectionsService<GoogleMapLocatio
   public async getShortestRoute() {
     // Grab origin from StartPoint & destination from DestinationPoint
     const [origin, destination] = await Promise.all([
-      (await this.getStartPoint()),
-      (await this.getDestinationPoint())
+      await this.getStartPoint(),
+      await this.getDestinationPoint()
     ]);
     // Load all Strategies
-     const strategies = await Promise.all([
+    const strategies = await Promise.all([
       await this.outdoorWalkingStrategy.getRoutes(origin, destination),
       await this.outdoorDrivingStrategy.getRoutes(origin, destination),
       await this.outdoorTransitStrategy.getRoutes(origin, destination),
@@ -106,8 +111,10 @@ export class OutdoorDirectionsService extends DirectionsService<GoogleMapLocatio
 
     // Return the strategy with the smallest duration
     return strategies
-      .filter(strategy => strategy)
-      .reduce((prev, curr) => (prev.getTotalDuration().value < curr.getTotalDuration().value ? prev : curr));
+      .filter((strategy) => strategy)
+      .reduce((prev, curr) =>
+        prev.getTotalDuration().value < curr.getTotalDuration().value ? prev : curr
+      );
   }
 
   public async renderNavigation() {

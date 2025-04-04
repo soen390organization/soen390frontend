@@ -1,7 +1,7 @@
-import { OutdoorRoutingStrategy } from './outdoor-routing.strategy';
-import { IndoorRoutingStrategy } from './indoor-routing.strategy';
+// import { OutdoorRoutingStrategy } from './outdoor-routing.strategy';
+// import { IndoorRoutingStrategy } from './indoor-routing.strategy';
 
-export {
-  OutdoorRoutingStrategy,
-  IndoorRoutingStrategy
-};
+// export {
+//   OutdoorRoutingStrategy,
+//   IndoorRoutingStrategy
+// };

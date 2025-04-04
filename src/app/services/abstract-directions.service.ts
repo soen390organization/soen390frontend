@@ -1,5 +1,7 @@
-import { BehaviorSubject, firstValueFrom, Observable } from "rxjs";
-import { Location } from "../interfaces/location.interface";
+import { BehaviorSubject, firstValueFrom, Observable } from 'rxjs';
+import { Location } from '../interfaces/location.interface';
+import { AbstractOutdoorStrategy } from '../strategies/outdoor-directions/abstract-outdoor.strategy';
+import { AbstractIndoorStrategy } from '../strategies/indoor-directions/abstract-indoor.strategy';
 
 /**
  * Abstract service for handling navigation directions.
@@ -14,7 +16,7 @@ export abstract class DirectionsService<T extends Location> {
   private startPointSubject = new BehaviorSubject<T | null>(null);
   private destinationPointSubject = new BehaviorSubject<T | null>(null);
   private travelModeSubject = new BehaviorSubject<string | null>(null);
-  
+
   /**
    * Sets the starting point for navigation.
    *
@@ -80,26 +82,26 @@ export abstract class DirectionsService<T extends Location> {
    *
    * @returns An Observable emitting the current travel mode or null.
    */
-  public getTravelMode$(): Observable<string | null>  {
+  public getTravelMode$(): Observable<string | null> {
     return this.travelModeSubject.asObservable();
   }
 
   /**
    * Retrieves the current travel mode as a Promise.
    *
-   * This method returns the travel mode, such as "driving", "walking", etc., 
+   * This method returns the travel mode, such as "driving", "walking", etc.,
    * or null if no mode has been set.
    *
    * @returns A Promise resolving to the current travel mode or null.
    */
-  public async getTravelMode(): Promise<string | null>  {
+  public async getTravelMode(): Promise<string | null> {
     return await firstValueFrom(this.getTravelMode$());
   }
 
   /**
    * Sets the current travel mode for navigation.
    *
-   * This method allows the user to specify the mode of transportation (e.g., 
+   * This method allows the user to specify the mode of transportation (e.g.,
    * "driving", "walking", "bicycling") for the navigation directions.
    *
    * @param mode - The mode of transportation to be set.
@@ -137,7 +139,7 @@ export abstract class DirectionsService<T extends Location> {
    *
    * This method is intended to reset any active navigation and remove any
    * rendered directions. It is abstract and must be implemented in subclasses
-   * to provide specific logic for clearing the navigation in the context of 
+   * to provide specific logic for clearing the navigation in the context of
    * the service being used (e.g., clearing directions on the map or in UI).
    */
   abstract clearNavigation(): void;
