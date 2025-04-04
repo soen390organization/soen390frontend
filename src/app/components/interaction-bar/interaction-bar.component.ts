@@ -45,13 +45,14 @@ export class InteractionBarComponent implements AfterViewInit {
   events = { events: [] as EventInfo[], loading: true };
   showDirections$!: Observable<boolean>;
   showPOIs$!: Observable<boolean>;
+  switchMapButton: any;
 
   constructor(
-    private readonly store: Store,
-    private readonly placesService: PlacesService,
-    private readonly visibilityService: VisibilityService,
-    private readonly calendarService: CalendarService,
-    private ngZone: NgZone 
+    public readonly store: Store,
+    public readonly placesService: PlacesService,
+    public readonly visibilityService: VisibilityService,
+    public readonly calendarService: CalendarService,
+    public ngZone: NgZone 
   ) {}
 
   ngOnInit() {
@@ -91,7 +92,7 @@ export class InteractionBarComponent implements AfterViewInit {
     this.updateFooterUI(false); // Ensure the button is hidden when the footer is collapsed on load
   }
 
-  private attachSwipeListeners(element: HTMLElement): void {
+  public attachSwipeListeners(element: HTMLElement): void {
     const getClientY = (e: TouchEvent | MouseEvent): number =>
       e instanceof TouchEvent ? e.touches[0].clientY : e.clientY;
 
@@ -185,7 +186,7 @@ export class InteractionBarComponent implements AfterViewInit {
     this.currentY = 0;
   }
 
-  private updateFooterUI(expand: boolean): void {
+  public updateFooterUI(expand: boolean): void {
     const footer = this.footerContainer.nativeElement;
     footer.style.transition = 'transform 0.3s ease-out';
     footer.style.transform = expand ? 'translateY(0)' : 'translateY(80%)';

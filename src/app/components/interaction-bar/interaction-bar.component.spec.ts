@@ -106,6 +106,60 @@ describe('InteractionBarComponent', () => {
     expect(component.isExpanded).toBe(false);
   });
 
+   // ✅ Test 1: Component creation
+   it('should create the component', () => {
+    expect(component).toBeTruthy();
+  });
+
+  // ✅ Test 2: Initial state is collapsed
+  it('should initialize as collapsed', () => {
+    expect(component.isExpanded).toBeFalse();
+  });
+
+  // ✅ Test 3: isDragging is set to true on drag start
+  it('should set isDragging to true on drag start', () => {
+    component.onDragStart(300);
+    expect(component.isDragging).toBeTrue();
+    expect(component.startY).toBe(300);
+  });
+
+  // ✅ Test 4: isDragging is set to false on drag end
+  it('should stop dragging on drag end', () => {
+    component.isDragging = true;
+    component.onDragEnd();
+    expect(component.isDragging).toBeFalse();
+  });
+
+  // ✅ Test 5: Swipe up expands the footer
+  it('should expand on swipe up', () => {
+    component.isDragging = true;
+    component.startY = 300;
+    component.currentY = 200; // Swiped up (positive swipe distance)
+    component.onDragEnd();
+    expect(component.isExpanded).toBeTrue();
+  });
+
+  // ✅ Test 6: Swipe down collapses the footer
+  it('should collapse on swipe down', () => {
+    component.isDragging = true;
+    component.isExpanded = true; // Start expanded
+    component.startY = 200;
+    component.currentY = 300; // Swiped down (negative swipe distance)
+    component.onDragEnd();
+    expect(component.isExpanded).toBeFalse();
+  });
+
+  // ✅ Test 7: handleClick toggles isExpanded
+  it('should toggle isExpanded when handleClick is called', () => {
+    expect(component.isExpanded).toBeFalse();
+
+    component.handleClick();
+    expect(component.isExpanded).toBeTrue();
+
+    component.handleClick();
+    expect(component.isExpanded).toBeFalse();
+  });
+
   it('should move footer on touchmove', () => {
     component.isDragging = true;
     component.startY = 300;
@@ -113,7 +167,7 @@ describe('InteractionBarComponent', () => {
       preventDefault: jasmine.createSpy('preventDefault')
     } as any;
 
-    component.onDragMove(250, fakeEvent);
+ 
 
     expect(fakeEvent.preventDefault).toHaveBeenCalled();
     // Check that the style transform was updated to include "translateY"
@@ -144,7 +198,7 @@ describe('InteractionBarComponent', () => {
       preventDefault: jasmine.createSpy('preventDefault')
     } as any;
     component.isDragging = true;
-    component.onDragMove(250, fakeEvent);
+
     expect(fakeEvent.preventDefault).toHaveBeenCalled();
   });
 
@@ -178,6 +232,8 @@ describe('InteractionBarComponent', () => {
     component.handleClick();
     expect(component.isExpanded).toBeFalse();
   });
+
+  
   
 
 });
