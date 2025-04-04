@@ -6,6 +6,9 @@ import { of } from 'rxjs';
 import { MapType, selectCurrentMap, selectSelectedCampus } from 'src/app/store/app';
 import { PlacesService } from 'src/app/services/places/places.service';
 import { VisibilityService } from 'src/app/services/visibility.service';
+import { SwitchMapButtonComponent } from '../switch-map-button/switch-map-button.component';
+import { provideMockStore } from '@ngrx/store/testing';
+import { CommonModule } from '@angular/common';
 
 // Dummy implementation for PlacesService
 const mockPlacesService = {
@@ -42,8 +45,10 @@ describe('InteractionBarComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [InteractionBarComponent],
+      imports: [InteractionBarComponent,SwitchMapButtonComponent,
+        CommonModule],
       providers: [
+        provideMockStore({ initialState: {} }),
         { provide: Store, useValue: mockStore },
         { provide: PlacesService, useValue: mockPlacesService },
         { provide: VisibilityService, useValue: mockVisibilityService }
@@ -145,9 +150,103 @@ describe('InteractionBarComponent', () => {
   
     expect(touchEvent.preventDefault).toHaveBeenCalled();
   });
+
+  it('should update transform and swipeProgress on touch drag move', () => {
+    // Create a dummy swipe area element
+    const swipeElement = document.createElement('div');
+    component.swipeArea = new ElementRef(swipeElement);
   
+    // Set initial state for dragging
+    component.isDragging = true;
+    component.startY = 300;
   
+    // Create a touch event using a custom event (since TouchEvent may not work in tests)
+    const touchEvent = new Event('touchmove', { bubbles: true, cancelable: true }) as TouchEvent;
+    // Define a touches property on the event
+    Object.defineProperty(touchEvent, 'touches', {
+      value: [{ clientY: 250 }], // dragged upward by 50
+      writable: false,
+    });
   
+    // Spy on preventDefault on the event
+    spyOn(touchEvent, 'preventDefault');
+  
+    // Dispatch the event
+    swipeElement.dispatchEvent(touchEvent);
+    fixture.detectChanges();
+  
+    // The component should update its footer transform style and swipeProgress accordingly.
+    const expectedTranslateY = 80 - (component.startY - 250);
+    const clampedTranslate = Math.min(Math.max(expectedTranslateY, 0), 80);
+    expect(swipeElement.style.transform).toContain(`translateY(${clampedTranslate}%)`);
+    expect(component.swipeProgress).toBeCloseTo((80 - clampedTranslate) / 80, 2);
+    expect(touchEvent.preventDefault).toHaveBeenCalled();
+  });
+
+  it('should update transform and swipeProgress on mouse drag move', () => {
+    const swipeElement = document.createElement('div');
+    component.swipeArea = new ElementRef(swipeElement);
+    
+    // Set initial state for dragging
+    component.isDragging = true;
+    component.startY = 300;
+  
+    // Create a synthetic MouseEvent for mousemove
+    const mouseEvent = new MouseEvent('mousemove', {
+      bubbles: true,
+      cancelable: true,
+      clientY: 250
+    });
+    
+    // Dispatch the event
+    swipeElement.dispatchEvent(mouseEvent);
+    fixture.detectChanges();
+    
+    // Calculate expected values
+    const expectedTranslateY = 80 - (300 - 250);
+    const clampedTranslate = Math.min(Math.max(expectedTranslateY, 0), 80);
+    expect(swipeElement.style.transform).toContain(`translateY(${clampedTranslate}%)`);
+    expect(component.swipeProgress).toBeCloseTo((80 - clampedTranslate) / 80, 2);
+  });
+  
+  it('should set isExpanded to true when swipe distance exceeds threshold', () => {
+    component.isDragging = true;
+    component.startY = 300;
+    component.currentY = 200; // swipe upward by 100 (threshold 50)
+    spyOn(component, 'updateFooterUI');
+  
+    component.onDragEnd();
+  
+    expect(component.isExpanded).toBeTrue();
+    expect(component.updateFooterUI).toHaveBeenCalledWith(true);
+  });
+
+  it('should set isExpanded to false when swipe distance exceeds negative threshold', () => {
+    component.isDragging = true;
+    component.startY = 200;
+    component.currentY = 300; // swipe downward by 100 (threshold 50)
+    spyOn(component, 'updateFooterUI');
+  
+    component.onDragEnd();
+  
+    expect(component.isExpanded).toBeFalse();
+    expect(component.updateFooterUI).toHaveBeenCalledWith(false);
+  });
+
+  it('should not change isExpanded when swipe distance is below threshold', () => {
+    component.isDragging = true;
+    component.startY = 300;
+    component.currentY = 280; // swipe of 20, below threshold 50
+    component.isExpanded = false; // initial state
+    spyOn(component, 'updateFooterUI');
+  
+    component.onDragEnd();
+  
+    expect(component.isExpanded).toBeFalse();
+    expect(component.updateFooterUI).toHaveBeenCalledWith(false);
+  });
 
 
 });
+
+

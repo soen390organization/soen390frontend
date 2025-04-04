@@ -2,11 +2,29 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { HomePage } from './home.page';
 import { provideMockStore, MockStore } from '@ngrx/store/testing';
 import { MapType } from 'src/app/store/app';
+import { IonicModule } from '@ionic/angular';
+import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+
+// ✅ Optional: Mocks for your components to avoid loading real dependencies
+import { Component } from '@angular/core';
+
+@Component({ selector: 'app-switch-campus-button', template: '' })
+class MockSwitchCampusButtonComponent {}
+
+@Component({ selector: 'app-user-profile', template: '' })
+class MockUserProfileComponent {}
+
+@Component({ selector: 'app-map-search', template: '' })
+class MockMapSearchComponent {}
+
+@Component({ selector: 'app-interaction-bar', template: '' })
+class MockInteractionBarComponent {}
 
 describe('HomePage', () => {
   let component: HomePage;
   let fixture: ComponentFixture<HomePage>;
   let store: MockStore;
+  
   const initialState = {
     app: {
       selectedCampus: 'sgw',
@@ -16,8 +34,20 @@ describe('HomePage', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [HomePage],
-      providers: [provideMockStore({ initialState })]
+      declarations: [
+        HomePage,
+        MockSwitchCampusButtonComponent,
+        MockUserProfileComponent,
+        MockMapSearchComponent,
+        MockInteractionBarComponent
+      ],
+      imports: [
+        IonicModule.forRoot() // ✅ Import IonicModule for ion-content and other Ionic components
+      ],
+      providers: [
+        provideMockStore({ initialState })
+      ],
+      schemas: [CUSTOM_ELEMENTS_SCHEMA] // ✅ Optional, to avoid schema errors from custom elements
     }).compileComponents();
 
     store = TestBed.inject(MockStore);
@@ -83,7 +113,6 @@ describe('HomePage', () => {
 
   describe('Search state tests', () => {
     it('should toggle search visibility', () => {
-      // Initially false
       expect(component.isSearchVisible).toBeFalse();
 
       component.showSearch();

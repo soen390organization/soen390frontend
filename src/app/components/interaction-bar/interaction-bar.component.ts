@@ -8,7 +8,7 @@ import { filter, forkJoin, Observable, switchMap } from 'rxjs';
 import { DirectionsComponent } from '../directions/directions.component';
 import { VisibilityService } from 'src/app/services/visibility.service';
 import { CommonModule } from '@angular/common';
-import { SwitchMapButtonComponent } from 'src/app/components/switch-map-button/switch-map-button.component';
+import { SwitchMapButtonComponent } from '../switch-map-button/switch-map-button.component';
 import { IndoorSelectsComponent } from '../indoor-selects/indoor-selects.component';
 import { CalendarService } from 'src/app/services/calendar/calendar.service';
 import { GoogleMapLocation } from 'src/app/interfaces/google-map-location.interface';
@@ -19,11 +19,10 @@ import { EventCardComponent } from '../event-card/event-card.component';
   selector: 'app-interaction-bar',
   imports: [
     IndoorSelectsComponent,
-    SwitchMapButtonComponent,
     LocationCardsComponent,
     DirectionsComponent,
     EventCardComponent,
-    InteractionBarComponent,
+    SwitchMapButtonComponent,
     CommonModule
   ],
   templateUrl: './interaction-bar.component.html',
