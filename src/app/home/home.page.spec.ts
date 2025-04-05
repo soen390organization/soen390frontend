@@ -1,123 +1,96 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { HomePage } from './home.page';
-import { provideMockStore, MockStore } from '@ngrx/store/testing';
-import { MapType } from 'src/app/store/app';
-import { IonicModule } from '@ionic/angular';
-import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
-
-// ✅ Optional: Mocks for your components to avoid loading real dependencies
-import { Component } from '@angular/core';
-
-@Component({ selector: 'app-switch-campus-button', template: '' })
-class MockSwitchCampusButtonComponent {}
-
-@Component({ selector: 'app-user-profile', template: '' })
-class MockUserProfileComponent {}
-
-@Component({ selector: 'app-map-search', template: '' })
-class MockMapSearchComponent {}
-
-@Component({ selector: 'app-interaction-bar', template: '' })
-class MockInteractionBarComponent {}
+import { Store } from '@ngrx/store';
+import { of, Subject } from 'rxjs';
+import { Router } from '@angular/router';
+import { MapType, selectCurrentMap } from 'src/app/store/app';
 
 describe('HomePage', () => {
   let component: HomePage;
   let fixture: ComponentFixture<HomePage>;
-  let store: MockStore;
-  
-  const initialState = {
-    app: {
-      selectedCampus: 'sgw',
-      currentMap: MapType.Outdoor
-    }
-  };
+  let storeSpy: jasmine.SpyObj<Store<any>>;
+  let routerSpy: jasmine.SpyObj<Router>;
+  let selectCurrentMapSubject: Subject<MapType>;
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      declarations: [
-        HomePage,
-        MockSwitchCampusButtonComponent,
-        MockUserProfileComponent,
-        MockMapSearchComponent,
-        MockInteractionBarComponent
-      ],
-      imports: [
-        IonicModule.forRoot() // ✅ Import IonicModule for ion-content and other Ionic components
-      ],
-      providers: [
-        provideMockStore({ initialState })
-      ],
-      schemas: [CUSTOM_ELEMENTS_SCHEMA] // ✅ Optional, to avoid schema errors from custom elements
-    }).compileComponents();
+    // Create a subject for selectCurrentMap so we can push new values
+    selectCurrentMapSubject = new Subject<MapType>();
 
-    store = TestBed.inject(MockStore);
-    fixture = TestBed.createComponent(HomePage);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
+    storeSpy = jasmine.createSpyObj('Store', ['select']);
+    // When the store's select is called with selectCurrentMap, return our subject.
+    storeSpy.select.and.callFake((selector: any) => {
+      if (selector === selectCurrentMap) {
+        return selectCurrentMapSubject.asObservable();
+      }
+      return of();
+    });
+
+    routerSpy = jasmine.createSpyObj('Router', ['navigate']);
+
+    await TestBed.configureTestingModule({
+      declarations: [HomePage],
+      providers: [
+        { provide: Store, useValue: storeSpy },
+        { provide: Router, useValue: routerSpy }
+      ]
+    }).compileComponents();
   });
 
-  afterEach(() => {
-    store.setState(initialState);
-    store.resetSelectors();
+  beforeEach(() => {
+    fixture = TestBed.createComponent(HomePage);
+    component = fixture.componentInstance;
+    // Trigger ngOnInit and constructor subscriptions.
+    fixture.detectChanges();
   });
 
   it('should create the component', () => {
     expect(component).toBeTruthy();
   });
 
-  describe('Store-related tests', () => {
-    it('should subscribe and set currentMap to the emitted value from the store', () => {
-      expect(component.currentMap).toBe(MapType.Outdoor);
-
-      store.setState({
-        app: {
-          selectedCampus: 'sgw',
-          currentMap: MapType.Indoor
-        }
-      });
-      fixture.detectChanges();
-
-      expect(component.currentMap).toBe(MapType.Indoor);
-    });
-
-    it('should set googleMapInitialized to true when onGoogleMapInitialized is called', () => {
-      expect(component.googleMapInitialized).toBeFalse();
-      component.onGoogleMapInitialized();
-      expect(component.googleMapInitialized).toBeTrue();
-    });
-
-    it('should set mappedinMapInitialized to true when onMappedinMapInitialized is called', () => {
-      expect(component.mappedinMapInitialized).toBeFalse();
-      component.onMappedinMapInitialized();
-      expect(component.mappedinMapInitialized).toBeTrue();
-    });
-
-    it('should keep loading true if only one map is initialized', () => {
-      expect(component.loading).toBeTrue();
-      component.onGoogleMapInitialized();
-      expect(component.googleMapInitialized).toBeTrue();
-      expect(component.mappedinMapInitialized).toBeFalse();
-      expect(component.loading).toBeTrue();
-    });
-
-    it('should set loading to false once both maps are initialized', () => {
-      expect(component.loading).toBeTrue();
-      component.onGoogleMapInitialized();
-      expect(component.loading).toBeTrue();
-      component.onMappedinMapInitialized();
-      expect(component.googleMapInitialized).toBeTrue();
-      expect(component.mappedinMapInitialized).toBeTrue();
-      expect(component.loading).toBeFalse();
-    });
+  it('ngOnInit should subscribe to store and update currentMap', () => {
+    // Emit a new value for current map
+    selectCurrentMapSubject.next(MapType.Indoor);
+    expect(component.currentMap).toEqual(MapType.Indoor);
   });
 
-  describe('Search state tests', () => {
-    it('should toggle search visibility', () => {
-      expect(component.isSearchVisible).toBeFalse();
+  it('openUserInfoPage should set loading to false and navigate to "profile"', () => {
+    component.loading = true;
+    component.openUserInfoPage();
+    expect(component.loading).toBeFalse();
+    expect(routerSpy.navigate).toHaveBeenCalledWith(['profile']);
+  });
 
+  it('onGoogleMapInitialized and onMappedinMapInitialized should update loading correctly', () => {
+    // Reset loading to true for test
+    component.loading = true;
+    // Initially, both initialization flags are false.
+    expect(component.googleMapInitialized).toBeFalse();
+    expect(component.mappedinMapInitialized).toBeFalse();
+
+    // Call onGoogleMapInitialized first.
+    component.onGoogleMapInitialized();
+    expect(component.googleMapInitialized).toBeTrue();
+    // Since mappedinMapInitialized is still false, loading should remain true.
+    expect(component.loading).toBeTrue();
+
+    // Now call onMappedinMapInitialized.
+    component.onMappedinMapInitialized();
+    expect(component.mappedinMapInitialized).toBeTrue();
+    // Now that both flags are true, checkInitialization should have set loading to false.
+    expect(component.loading).toBeFalse();
+  });
+
+  describe('Search visibility', () => {
+    it('showSearch should update isSearchVisible to true', () => {
+      // Initially false
+      component.isSearchVisible = false;
       component.showSearch();
       expect(component.isSearchVisible).toBeTrue();
+    });
 
+    it('hideSearch should update isSearchVisible to false', () => {
+      // Initially set to true
+      component.isSearchVisible = true;
       component.hideSearch();
       expect(component.isSearchVisible).toBeFalse();
     });
