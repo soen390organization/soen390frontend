@@ -32,7 +32,7 @@ export class NavigationCoordinatorService {
   ) {
     // Combine the four observables (outdoor start/destination and indoor start/destination)
   }
-  
+
   /**
    * Finds the best indoor location match for a given room or building code
    * Uses similar logic to the PlacesService's getPlaceSuggestions method
@@ -44,9 +44,9 @@ export class NavigationCoordinatorService {
       console.warn('Cannot find indoor location for empty room code');
       return null;
     }
-    
+
     console.log('Finding indoor location for room code:', roomCode);
-    
+
     try {
       // Get all campus building data
       const campusData = this.mappedInService.getCampusMapData() || {};
@@ -54,16 +54,16 @@ export class NavigationCoordinatorService {
         console.warn('No campus data available');
         return null;
       }
-      
+
       // Extract building code from room code (e.g., 'H-531' -> 'H')
       // This is a simple extraction - you may need more sophisticated parsing
       const buildingCode = roomCode.split(/[-\s]/)[0].toUpperCase();
       console.log('Extracted building code:', buildingCode);
-      
+
       // Find matching building
       let matchingBuilding: any = null;
       let matchingMapId = null;
-      
+
       for (const [mapId, building] of Object.entries(campusData) as [string, any][]) {
         if (building.abbreviation && building.abbreviation.toUpperCase() === buildingCode) {
           matchingBuilding = building;
@@ -72,20 +72,20 @@ export class NavigationCoordinatorService {
           break;
         }
       }
-      
+
       if (!matchingBuilding || !matchingMapId) {
         console.warn('No matching building found for code:', buildingCode);
-        
+
         // If no direct match, try a more fuzzy search
         const normalizeString = (str: string) => str.toLowerCase().replace(/[^a-z0-9]/g, '');
         const normalizedCode = normalizeString(buildingCode);
-        
+
         for (const [mapId, building] of Object.entries(campusData) as [string, any][]) {
           if (
-            building.abbreviation && 
+            building.abbreviation &&
             building.name &&
             (normalizeString(building.abbreviation).includes(normalizedCode) ||
-            normalizeString(building.name).includes(normalizedCode))
+              normalizeString(building.name).includes(normalizedCode))
           ) {
             matchingBuilding = building;
             matchingMapId = mapId;
@@ -93,7 +93,7 @@ export class NavigationCoordinatorService {
             break;
           }
         }
-        
+
         // If still no match, just take the first building (normally Hall building)
         if (!matchingBuilding) {
           const firstMapId = Object.keys(campusData)[0];
@@ -102,58 +102,63 @@ export class NavigationCoordinatorService {
           console.log('Using default building:', matchingBuilding?.name || 'Unknown');
         }
       }
-      
+
       // Now try to find the specific room within the building
       if (matchingBuilding && matchingMapId) {
         const mapData = matchingBuilding.mapData;
-        
+
         // Try to find room by name (exact match)
         const roomNumberPart = roomCode.split(/[-\s]/)[1] || '';
         console.log('Looking for room number:', roomNumberPart);
-        
+
         let bestRoom: any = null;
-        
+
         // First check spaces
         const spaces = mapData.getByType('space') || [];
         for (const space of spaces) {
-          if (space.name && (
-              space.name === roomNumberPart || 
+          if (
+            space.name &&
+            (space.name === roomNumberPart ||
               space.name.includes(roomNumberPart) ||
-              roomCode.includes(space.name))) {
+              roomCode.includes(space.name))
+          ) {
             bestRoom = space;
             console.log('Found matching space:', space.name);
             break;
           }
         }
-        
+
         // If no match in spaces, check points of interest
         if (!bestRoom) {
           const pois = mapData.getByType('point-of-interest') || [];
           for (const poi of pois) {
-            if (poi.name && (
-                poi.name === roomNumberPart ||
+            if (
+              poi.name &&
+              (poi.name === roomNumberPart ||
                 poi.name.includes(roomNumberPart) ||
-                roomCode.includes(poi.name))) {
+                roomCode.includes(poi.name))
+            ) {
               bestRoom = poi;
               console.log('Found matching POI:', poi.name);
               break;
             }
           }
-          
+
           // If still no match, use a room on the first floor as default
           if (!bestRoom && spaces.length > 0) {
             try {
               // Get rooms on the first floor
               const floors = mapData.getByType('floor') || [];
               const firstFloor = floors.length > 0 ? floors[0] : null;
-              
+
               if (firstFloor) {
-                const firstFloorRooms = spaces.filter(space => 
-                  space.geometries && 
-                  space.geometries[0] && 
-                  space.geometries[0].floor === firstFloor.id
+                const firstFloorRooms = spaces.filter(
+                  (space) =>
+                    space.geometries &&
+                    space.geometries[0] &&
+                    space.geometries[0].floor === firstFloor.id
                 );
-                
+
                 if (firstFloorRooms.length > 0) {
                   bestRoom = firstFloorRooms[0];
                   console.log('Using default room on first floor:', bestRoom.name);
@@ -172,11 +177,12 @@ export class NavigationCoordinatorService {
             }
           }
         }
-        
+
         // Create and return the indoor location
         if (matchingBuilding && matchingMapId) {
           const indoorLocation: MappedInLocation = {
-            title: `${matchingBuilding.abbreviation || ''} ${bestRoom ? bestRoom.name : roomCode}`.trim(),
+            title:
+              `${matchingBuilding.abbreviation || ''} ${bestRoom ? bestRoom.name : roomCode}`.trim(),
             address: matchingBuilding.address || 'No Address',
             image: matchingBuilding.image || 'assets/images/poi_fail.png',
             indoorMapId: matchingMapId,
@@ -186,12 +192,12 @@ export class NavigationCoordinatorService {
             coordinates: matchingBuilding.coordinates,
             type: 'indoor'
           };
-          
+
           console.log('Created indoor location:', indoorLocation);
           return indoorLocation;
         }
       }
-      
+
       return null;
     } catch (error) {
       console.error('Error finding indoor location:', error);
@@ -246,7 +252,7 @@ export class NavigationCoordinatorService {
       } catch (clearError) {
         console.warn('Error clearing previous routes:', clearError);
       }
-      
+
       // Get current location with fallback enabled
       const position = await this.currentLocationService.getCurrentLocation(true);
       if (!position) {
@@ -265,27 +271,34 @@ export class NavigationCoordinatorService {
       // Log points for debugging
       console.log('Start location:', startLocation);
       console.log('Original destination:', destination);
-      
+
       // Validate destination
       if (!destination) {
         throw new Error('Destination is undefined or null');
       }
-      
+
       // Make sure destination has valid coordinates
-      if (!destination.coordinates || 
-          !destination.coordinates.lat || 
-          typeof destination.coordinates.lat !== 'function') {
-        console.warn('Invalid destination coordinates - attempting to fix', destination.coordinates);
-        
+      if (
+        !destination.coordinates ||
+        !destination.coordinates.lat ||
+        typeof destination.coordinates.lat !== 'function'
+      ) {
+        console.warn(
+          'Invalid destination coordinates - attempting to fix',
+          destination.coordinates
+        );
+
         // Try to fix the coordinates if they're strings or numbers
-        if (destination.coordinates && 
-            (typeof destination.coordinates.lat === 'string' || 
-             typeof destination.coordinates.lat === 'number') &&
-            (typeof destination.coordinates.lng === 'string' || 
-             typeof destination.coordinates.lng === 'number')) {
+        if (
+          destination.coordinates &&
+          (typeof destination.coordinates.lat === 'string' ||
+            typeof destination.coordinates.lat === 'number') &&
+          (typeof destination.coordinates.lng === 'string' ||
+            typeof destination.coordinates.lng === 'number')
+        ) {
           try {
             destination.coordinates = new google.maps.LatLng(
-              parseFloat(destination.coordinates.lat), 
+              parseFloat(destination.coordinates.lat),
               parseFloat(destination.coordinates.lng)
             );
             console.log('Fixed coordinates:', destination.coordinates);
@@ -300,26 +313,27 @@ export class NavigationCoordinatorService {
 
       // Set start points in both services
       this.outdoorDirectionsService.setStartPoint(startLocation);
-      
+
       // Show start marker
       try {
         this.outdoorDirectionsService.showStartMarker();
       } catch (markerError) {
         console.warn('Error showing start marker:', markerError);
       }
-      
+
       // For indoor destinations, try to find a better match using the room code
       let indoorDestination = null;
       if (destination.type === 'indoor') {
         // Extract room code or location
-        const roomCode = destination.room || 
-                         (typeof destination.title === 'string' && destination.title.split(' ').pop()) || 
-                         '';
-        
+        const roomCode =
+          destination.room ||
+          (typeof destination.title === 'string' && destination.title.split(' ').pop()) ||
+          '';
+
         // Find a better indoor location match
         if (roomCode) {
           indoorDestination = await this.findIndoorLocation(roomCode);
-          
+
           if (indoorDestination) {
             console.log('Found better indoor location match:', indoorDestination);
             // Keep the original title and any other important info
@@ -331,15 +345,15 @@ export class NavigationCoordinatorService {
           }
         }
       }
-      
+
       // Set destination based on type
       if (destination.type === 'indoor') {
         // Use the better indoor destination if found, otherwise use the original
         const finalIndoorDestination = indoorDestination || destination;
-        
+
         // Set destination for indoor directions
         this.indoorDirectionService.setDestinationPoint(finalIndoorDestination);
-        
+
         // Also set for outdoor to maintain consistency
         const outdoorDestination: GoogleMapLocation = {
           title: finalIndoorDestination.fullName || finalIndoorDestination.title,
@@ -348,14 +362,14 @@ export class NavigationCoordinatorService {
           type: 'outdoor'
         };
         this.outdoorDirectionsService.setDestinationPoint(outdoorDestination);
-        
+
         // Show destination marker
         try {
           this.outdoorDirectionsService.showDestinationMarker();
         } catch (markerError) {
           console.warn('Error showing destination marker:', markerError);
         }
-        
+
         // If we have a match, set the proper map data
         if (indoorDestination && indoorDestination.indoorMapId) {
           try {
@@ -365,10 +379,10 @@ export class NavigationCoordinatorService {
             console.error('Error setting map data:', mapError);
           }
         }
-        
+
         // Set map type to indoor
         this.store.dispatch(setMapType({ mapType: MapType.Indoor }));
-        
+
         // Render indoor navigation
         try {
           await this.indoorDirectionService.renderNavigation();
@@ -376,7 +390,7 @@ export class NavigationCoordinatorService {
           console.error('Error rendering indoor navigation, falling back to outdoor:', navError);
           // Fall back to outdoor
           this.store.dispatch(setMapType({ mapType: MapType.Outdoor }));
-          
+
           // Try getting a walking route as fallback
           try {
             const strategy = await this.outdoorDirectionsService.getShortestRoute();
@@ -391,17 +405,17 @@ export class NavigationCoordinatorService {
       } else {
         // Set destination for outdoor directions - this part is left unchanged as requested
         this.outdoorDirectionsService.setDestinationPoint(destination);
-        
+
         // Show destination marker
         try {
           this.outdoorDirectionsService.showDestinationMarker();
         } catch (markerError) {
           console.warn('Error showing destination marker:', markerError);
         }
-        
+
         // Set map type to outdoor
         this.store.dispatch(setMapType({ mapType: MapType.Outdoor }));
-        
+
         // Get and render outdoor navigation
         try {
           const strategy = await this.outdoorDirectionsService.getShortestRoute();
@@ -409,14 +423,14 @@ export class NavigationCoordinatorService {
             console.warn('No valid routing strategy found');
             return;
           }
-          
+
           this.outdoorDirectionsService.setSelectedStrategy(strategy);
           this.outdoorDirectionsService.renderNavigation();
         } catch (routeError) {
           console.error('Error getting or rendering outdoor route:', routeError);
         }
       }
-      
+
       // Show the route
       this.store.dispatch(setShowRoute({ show: true }));
     } catch (error) {
