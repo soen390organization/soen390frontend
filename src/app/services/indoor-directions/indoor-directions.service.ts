@@ -55,8 +55,6 @@ export class IndoorDirectionsService extends DirectionsService<MappedInLocation>
       await this.getDestinationPoint()
     ]);
 
-    if (!origin || !destination) return null;
-
     // Load all Strategies
     const [sameBuildingStrategy, differentBuildingStrategy] = await Promise.all([
       await this.indoorSameBuildingStrategy.getRoutes(origin, destination),
@@ -71,11 +69,17 @@ export class IndoorDirectionsService extends DirectionsService<MappedInLocation>
   }
 
   public async renderNavigation() {
-    console.log('Render indoor');
     (await this.getSelectedStrategy()).renderRoutes();
   }
 
   public async clearNavigation(): Promise<void> {
-    (await this.getSelectedStrategy()).clearRenderedRoutes();
+    const mapView = this.mappedinService.mapView;
+    if (mapView && mapView.Navigation && typeof mapView.Navigation.clear === 'function') {
+      try {
+        mapView.Navigation.clear();
+      } catch (error) {
+        console.error('Error clearing indoor navigation:', error);
+      }
+    }
   }
 }

@@ -14,36 +14,33 @@ export class IndoorDifferentBuildingStrategy extends AbstractIndoorStrategy {
 
   public async getRoutes(startPoint: MappedInLocation, destinationPoint: MappedInLocation) {
     const [startMapData, destinationMapData]: MapData[] = await Promise.all([
-      this.mappedinService.getCampusMapData()[startPoint.indoorMapId].mapData,
-      this.mappedinService.getCampusMapData()[destinationPoint.indoorMapId].mapData
+      this.mappedinService.getCampusMapData()[startPoint?.indoorMapId].mapData,
+      this.mappedinService.getCampusMapData()[destinationPoint?.indoorMapId].mapData
     ]);
 
-    if (!startMapData || !destinationMapData || !startPoint || !destinationPoint) {
-      console.error('Missing startMapData, destinationMapData, startPoint or destinationPoint', {
-        startMapData,
-        destinationMapData,
-        startPoint,
-        destinationPoint
-      });
-      return null;
-    }
-
-    console.log('Entrances: ', startPoint);
     this.route = [
       {
-        indoorMapId: startPoint.indoorMapId,
-        directions: startMapData.getDirections(
+        indoorMapId: startPoint?.indoorMapId,
+        directions: startMapData?.getDirections(
           startPoint.room,
+          await this.getEntrances(startPoint)
+        ),
+        accessible_directions: startMapData?.getDirections(
+          startPoint?.room,
           await this.getEntrances(startPoint),
-          { accessible: this.isAccessibityEnabled() }
+          { accessible: true }
         )
       },
       {
-        indoorMapId: destinationPoint.indoorMapId,
-        directions: destinationMapData.getDirections(
+        indoorMapId: destinationPoint?.indoorMapId,
+        directions: destinationMapData?.getDirections(
           await this.getEntrances(destinationPoint),
-          destinationPoint.room,
-          { accessible: this.isAccessibityEnabled() }
+          destinationPoint?.room
+        ),
+        accessible_directions: destinationMapData?.getDirections(
+          await this.getEntrances(destinationPoint),
+          destinationPoint?.room,
+          { accessible: true }
         )
       }
     ];

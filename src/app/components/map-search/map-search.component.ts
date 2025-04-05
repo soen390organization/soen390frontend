@@ -104,10 +104,10 @@ export class MapSearchComponent implements OnInit {
             this.disableStart = false;
           });
           return;
-        } else if (indoorStartPoint && indoorDestinationPoint) {
+        } else if (indoorStartPoint || indoorDestinationPoint) {
           await this.indoorDirectionService.getInitializedRoutes().then(async (strategy) => {
-            console.log('Strategy: ', strategy);
             this.indoorDirectionService.setSelectedStrategy(strategy);
+            this.indoorDirectionService.renderNavigation();
             this.disableStart = false;
           });
           return;

@@ -49,9 +49,8 @@ export class MappedinMapComponent implements AfterViewInit {
       ])
         .pipe(filter(([start, destination, mapView]) => !!mapView))
         .subscribe(async ([start, destination, mapView]) => {
-          if (!start || !destination) {
-            await this.indoorDirectionsService.clearNavigation();
-          } else {
+          await this.indoorDirectionsService.clearNavigation();
+          if (start || destination) {
             await this.indoorDirectionsService.renderNavigation();
           }
         });

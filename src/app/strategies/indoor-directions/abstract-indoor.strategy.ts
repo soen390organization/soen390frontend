@@ -7,6 +7,7 @@ import { BehaviorSubject, firstValueFrom } from 'rxjs';
 export interface IndoorRoute {
   indoorMapId: string;
   directions: any;
+  accessible_directions: any;
 }
 
 export abstract class AbstractIndoorStrategy implements DirectionsStrategy<MappedInLocation> {
@@ -25,7 +26,6 @@ export abstract class AbstractIndoorStrategy implements DirectionsStrategy<Mappe
 
   public async getEntrances(room: MappedInLocation): Promise<Door[] | null> {
     if (room) {
-      console.log('working!');
       const mapData: MapData = this.mappedinService.getCampusMapData()[room.indoorMapId].mapData;
       return mapData.getByType('door').filter((door) => door.name === 'Door');
     }
@@ -46,7 +46,11 @@ export abstract class AbstractIndoorStrategy implements DirectionsStrategy<Mappe
 
     if (indoorRoute) {
       try {
-        mapView.Navigation.draw(indoorRoute.directions);
+        if (this.accessibility) {
+          mapView.Navigation.draw(indoorRoute.accessible_directions);
+        } else {
+          mapView.Navigation.draw(indoorRoute.directions);
+        }
       } catch (error) {
         console.error('Error drawing navigation route:', error);
       }
