@@ -1,8 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
+import { Store } from '@ngrx/store';
 import { EventInfo } from 'src/app/interfaces/event-info.interface';
 import { GoogleMapLocation } from 'src/app/interfaces/google-map-location.interface';
-import { OutdoorDirectionsService } from 'src/app/services/outdoor-directions/outdoor-directions.service';
+import { NavigationCoordinatorService } from 'src/app/services/navigation-coordinator.service';
 
 @Component({
   selector: 'app-event-card',
@@ -14,7 +15,9 @@ export class EventCardComponent {
   @Input() events: EventInfo[] = [];
   @Input() loading: boolean = false;
 
-  constructor(private readonly outdoorDirectionsService: OutdoorDirectionsService) {}
+  constructor(
+    private readonly navigationCoordinator: NavigationCoordinatorService
+  ) {}
 
   onImageError(event: Event) {
     const imgElement = event.target as HTMLImageElement;
@@ -44,7 +47,22 @@ export class EventCardComponent {
     return `${day}, ${startTime} - ${endTime}`;
   }
 
-  setDestination(location: GoogleMapLocation) {
-    this.outdoorDirectionsService.setDestinationPoint(location);
+  /**
+   * Sets the destination point and generates a route from the user's current location
+   * @param location The outdoor Google Map location
+   * @param mappedInLocation The indoor MappedIn location
+   */
+  async setDestination(location: GoogleMapLocation, mappedInLocation?: any) {
+    try {
+      if (mappedInLocation && mappedInLocation.type === 'indoor') {
+        // If we have indoor location data, use that
+        await this.navigationCoordinator.routeFromCurrentLocationToDestination(mappedInLocation);
+      } else {
+        // Otherwise use the outdoor location
+        await this.navigationCoordinator.routeFromCurrentLocationToDestination(location);
+      }
+    } catch (error) {
+      console.error('Error setting destination:', error);
+    }
   }
 }

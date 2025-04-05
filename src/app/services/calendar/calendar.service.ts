@@ -127,6 +127,25 @@ export class CalendarService {
 
   transformEvent(event: any): EventInfo {
     const eventType = event.summary.split(' ')[1] || 'LEC';
+    
+    // Process the location information
+    const roomInfo = this.getRoomInfo(event.location);
+    const buildingData = this.convertClassToAddress(roomInfo.buildingCode || event.location);
+    
+    console.log('Event location processing:', {
+      originalLocation: event.location,
+      extractedRoomInfo: roomInfo,
+      buildingData: buildingData
+    });
+    
+    // Clone the coordinates if they exist to ensure we have a proper LatLng object
+    const googleCoords = buildingData.coordinates ? 
+      new google.maps.LatLng(
+        buildingData.coordinates.lat(), 
+        buildingData.coordinates.lng()
+      ) : null;
+    
+    // Create event information
     return {
       title: event.summary,
       type: EventType[eventType.toUpperCase()],
@@ -134,17 +153,71 @@ export class CalendarService {
       endTime: event.end.dateTime,
       googleLoc: {
         title: event.summary,
-        ...this.convertClassToAddress(event.location),
+        address: buildingData.address,
+        coordinates: googleCoords,
+        image: buildingData.image,
         type: 'outdoor'
       },
       mappedInLoc: {
         title: event.summary,
-        address: this.convertClassToAddress(event.location).address,
-        image: this.convertClassToAddress(event.location).image,
+        address: buildingData.address,
+        image: buildingData.image,
         indoorMapId: this.mappedInService.getMapId(),
-        room: event.location,
-        type: 'outdoor'
+        // Store both the room ID and the original location for better matching
+        room: roomInfo.roomId || event.location,
+        roomName: roomInfo.roomName,
+        buildingCode: roomInfo.buildingCode,
+        coordinates: googleCoords, // Share the same coordinates
+        type: 'indoor'
       }
+    };
+  }
+  
+  getRoomInfo(classCode: string): { roomId: any; roomName: string; buildingCode: string } {
+    if (!classCode) {
+      return {
+        roomId: null,
+        roomName: 'Unknown Room',
+        buildingCode: ''
+      };
+    }
+    
+    // Extract building code and room number
+    // Common patterns: H-531, MB-S2.330, FG-B080, etc.
+    let buildingCode = '';
+    let roomNumber = '';
+    
+    // First try to match the pattern like "H-531" or "MB-S2.330"
+    const roomPattern = /^([A-Za-z\-]+)[- ]([A-Za-z0-9.\-]+)$/;
+    const match = classCode.trim().match(roomPattern);
+    
+    if (match) {
+      buildingCode = match[1].toUpperCase();
+      roomNumber = match[2];
+    } else {
+      // If no pattern match, try to extract the building code from the beginning
+      buildingCode = this.getBuildingCode(this.cleanUpInput(classCode));
+      
+      // Try to extract the room number part
+      const parts = classCode.split(/[-\s]/);
+      if (parts.length > 1) {
+        // If there are multiple parts, take everything after the building code
+        roomNumber = parts.slice(1).join('-');
+      } else {
+        // If no clear separation, assume the whole string is the room ID
+        roomNumber = classCode;
+      }
+    }
+    
+    // This is the full room ID that will be used for matching in MappedIn
+    const fullRoomId = buildingCode + '-' + roomNumber;
+    
+    console.log('Extracted room info:', { buildingCode, roomNumber, fullRoomId });
+    
+    return {
+      roomId: fullRoomId,
+      roomName: classCode,
+      buildingCode: buildingCode
     };
   }
 
@@ -153,11 +226,40 @@ export class CalendarService {
     coordinates: google.maps.LatLng | null;
     image: string;
   } {
+    if (!classCode) {
+      console.warn('Class code is undefined or empty');
+      return {
+        address: 'No Address',
+        coordinates: null,
+        image: 'assets/images/poi_fail.png'
+      };
+    }
+    
     const buildingCodeChars = this.cleanUpInput(classCode);
-
     const buildingCodeStr = this.getBuildingCode(buildingCodeChars);
+    
+    if (!buildingCodeStr) {
+      console.warn(`Unable to extract building code from: ${classCode}`);
+      return {
+        address: 'No Address',
+        coordinates: null,
+        image: 'assets/images/poi_fail.png'
+      };
+    }
 
-    return this.buildLocationObject(buildingCodeStr);
+    const locationObj = this.buildLocationObject(buildingCodeStr);
+    
+    // Ensure coordinates are a LatLng object if they exist in string form
+    if (locationObj.coordinates === null && 
+        this.dataService.coordinatesMap[buildingCodeStr]) {
+      const coords = this.dataService.coordinatesMap[buildingCodeStr];
+      locationObj.coordinates = new google.maps.LatLng(
+        parseFloat(coords.lat), 
+        parseFloat(coords.lng)
+      );
+    }
+    
+    return locationObj;
   }
 
   /**
@@ -205,10 +307,36 @@ export class CalendarService {
     coordinates: google.maps.LatLng | null;
     image: string;
   } {
+    if (!buildingCode) {
+      return {
+        address: 'No Address',
+        coordinates: null,
+        image: 'assets/images/poi_fail.png'
+      };
+    }
+
+    const address = this.dataService.addressMap[buildingCode] ?? 'No Address';
+    
+    // Convert coordinates map entry (which might be strings) to LatLng
+    let coordinates = null;
+    const coordsFromMap = this.dataService.coordinatesMap[buildingCode];
+    if (coordsFromMap) {
+      try {
+        coordinates = new google.maps.LatLng(
+          parseFloat(coordsFromMap.lat), 
+          parseFloat(coordsFromMap.lng)
+        );
+      } catch (error) {
+        console.error('Error creating LatLng for building code:', buildingCode, error);
+      }
+    }
+    
+    const image = this.dataService.imageMap[buildingCode] ?? 'assets/images/poi_fail.png';
+    
     return {
-      address: this.dataService.addressMap[buildingCode] ?? 'No Address',
-      coordinates: this.dataService.coordinatesMap[buildingCode] ?? null,
-      image: this.dataService.imageMap[buildingCode] ?? 'No Image'
+      address,
+      coordinates,
+      image
     };
   }
 

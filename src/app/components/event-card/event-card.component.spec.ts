@@ -2,25 +2,34 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { EventCardComponent } from './event-card.component';
 import { OutdoorDirectionsService } from 'src/app/services/outdoor-directions/outdoor-directions.service';
 import { GoogleMapLocation } from 'src/app/interfaces/google-map-location.interface';
+import { NavigationCoordinatorService } from 'src/app/services/navigation-coordinator.service';
+import { provideMockStore } from '@ngrx/store/testing';
+import { IndoorDirectionsService } from 'src/app/services/indoor-directions/indoor-directions.service';
+import { CurrentLocationService } from 'src/app/services/current-location/current-location.service';
+import { MappedinService } from 'src/app/services/mappedin/mappedin.service';
 
-class MockDirectionsService {
-  setDestinationPoint = jasmine.createSpy('setDestinationPoint');
+class MockNavigationCoordinatorService {
+  routeFromCurrentLocationToDestination = jasmine.createSpy('routeFromCurrentLocationToDestination')
+    .and.returnValue(Promise.resolve());
 }
 
 describe('EventCardComponent', () => {
   let component: EventCardComponent;
   let fixture: ComponentFixture<EventCardComponent>;
-  let outdoorDirectionsService: OutdoorDirectionsService;
+  let navigationCoordinator: NavigationCoordinatorService;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [EventCardComponent],
-      providers: [{ provide: OutdoorDirectionsService, useClass: MockDirectionsService }]
+      providers: [
+        provideMockStore({}),
+        { provide: NavigationCoordinatorService, useClass: MockNavigationCoordinatorService }
+      ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(EventCardComponent);
     component = fixture.componentInstance;
-    outdoorDirectionsService = TestBed.inject(OutdoorDirectionsService);
+    navigationCoordinator = TestBed.inject(NavigationCoordinatorService);
   });
 
   it('should create', () => {
@@ -62,15 +71,62 @@ describe('EventCardComponent', () => {
   });
 
   describe('setDestination()', () => {
-    it('should call directionsService.setDestinationPoint', () => {
+    it('should call navigationCoordinator.routeFromCurrentLocationToDestination', async () => {
       const mockLocation: GoogleMapLocation = {
         title: 'Some Place',
         address: '123 Street',
         coordinates: new google.maps.LatLng(45.5017, -73.5673),
         type: 'outdoor'
       };
-      component.setDestination(mockLocation);
-      expect(outdoorDirectionsService.setDestinationPoint).toHaveBeenCalledWith(mockLocation);
+      
+      await component.setDestination(mockLocation);
+      
+      expect(navigationCoordinator.routeFromCurrentLocationToDestination)
+        .toHaveBeenCalledWith(mockLocation);
+    });
+    
+    it('should handle indoor locations correctly', async () => {
+      const mockLocation: GoogleMapLocation = {
+        title: 'Some Place',
+        address: '123 Street',
+        coordinates: new google.maps.LatLng(45.5017, -73.5673),
+        type: 'outdoor'
+      };
+      
+      const mockIndoorLocation = {
+        title: 'Indoor Place',
+        address: 'Indoor Address',
+        coordinates: new google.maps.LatLng(45.5, -73.5),
+        type: 'indoor',
+        indoorMapId: 'map123',
+        room: 'H-531'
+      };
+      
+      await component.setDestination(mockLocation, mockIndoorLocation);
+      
+      expect(navigationCoordinator.routeFromCurrentLocationToDestination)
+        .toHaveBeenCalledWith(mockIndoorLocation);
+    });
+    
+    it('should handle errors gracefully', async () => {
+      const mockLocation: GoogleMapLocation = {
+        title: 'Some Place',
+        address: '123 Street',
+        coordinates: new google.maps.LatLng(45.5017, -73.5673),
+        type: 'outdoor'
+      };
+      
+      // Make the coordinator throw an error
+      (navigationCoordinator.routeFromCurrentLocationToDestination as jasmine.Spy)
+        .and.throwError('Test error');
+      
+      // Spy on console.error
+      const consoleSpy = spyOn(console, 'error');
+      
+      // This should not throw
+      await component.setDestination(mockLocation);
+      
+      expect(consoleSpy).toHaveBeenCalled();
     });
   });
 });

@@ -18,7 +18,7 @@
     <ng-template #showCards>
       <div
         *ngFor="let event of events"
-        (click)="setDestination(event.googleLoc)"
+        (click)="setDestination(event.googleLoc, event.mappedInLoc)"
         class="w-[224px] h-[230px] bg-white overflow-hidden shrink-0 hover:cursor-pointer"
       >
         <img

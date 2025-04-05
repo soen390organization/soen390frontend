@@ -197,7 +197,7 @@ describe('CalendarService', () => {
       const info = service.convertClassToAddress('UNKNOWN123');
       expect(info.address).toBe('No Address');
       expect(info.coordinates).toBeNull();
-      expect(info.image).toBe('No Image');
+      expect(info.image).toBe('assets/images/poi_fail.png');
     });
   });
 
