@@ -165,4 +165,17 @@ describe('InteractionBarComponent', () => {
       'transform 0.3s ease-out'
     );
   });
+
+  it('should collapse the interaction bar when a location is selected', () => {
+    component.isExpanded = true; // Start expanded
+
+    // Call the method under test
+    component.onLocationSelected();
+
+    // Assertions
+    expect(component.isExpanded).toBeFalse();
+    expect(component.footerContainer.nativeElement.style.transform).toBe('translateY(80%)');
+    expect(component.footerContainer.nativeElement.style.overflowY).toBe('');
+    expect(component.swipeProgress).toBe(0);
+  });
 });
