@@ -6,6 +6,7 @@ import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { MappedinService, BuildingData } from '../mappedin/mappedin.service';
 import { GoogleMapLocation } from 'src/app/interfaces/google-map-location.interface';
+import prioritizedBuildingsData from 'src/assets/concordia-data.json';
 
 @Injectable({
   providedIn: 'root'
@@ -63,26 +64,15 @@ export class PlacesService {
       }
     );
 
-    const prioritizedBuildingsManual: any[] = [
-      {
-        title: 'Central Building',
-        address: '7141 Sherbrooke St W',
-        coordinates: new google.maps.LatLng(45.458835704900814, -73.64063962288579),
-        type: 'outdoor'
-      },
-      {
-        title: 'EV Building',
-        address: '1515 Ste-Catherine St W',
-        coordinates: new google.maps.LatLng(45.49553376146312, -73.57800563627926),
-        type: 'outdoor'
-      },
-      {
-        title: 'Hall Building',
-        address: '1455 Blvd. De Maisonneuve Ouest',
-        coordinates: new google.maps.LatLng(45.49752531876128, -73.57902880362845),
-        type: 'outdoor'
-      }
-    ];    
+    const prioritizedBuildingsManual = [
+      ...prioritizedBuildingsData.sgw.buildings,
+      ...prioritizedBuildingsData.loy.buildings
+    ].map((b: any) => ({
+      title: b.name,
+      address: b.address,
+      coordinates: new google.maps.LatLng(b.coordinates.lat, b.coordinates.lng),
+      type: 'outdoor'
+    }));
     
     let rooms = [];
     // const campusBuildings:BuildingData[]= Object.values(this.mappedInService.getCampusMapData()) || [];
