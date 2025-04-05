@@ -68,9 +68,18 @@
               (keydown.enter)="setStart(place); clearList()"
               class="flex items-center hover:bg-gray-100 p-3 cursor-pointer"
             >
+            <ng-container *ngIf="place.icon; else defaultIcon">
+              <img 
+              [src]="place.icon"
+              alt="Concordia logo"
+              class="w-[32px] h-[32px] mr-3 border border-gray-300 rounded-full p-[4px] box-content bg-white object-contain"
+              />
+            </ng-container>
+            <ng-template #defaultIcon>
               <span class="material-symbols-outlined mr-3 p-2 border border-gray-300 rounded-full">
                 location_on
               </span>
+            </ng-template>            
               <div class="flex flex-col min-w-0">
                 <div>{{ place?.title }}</div>
                 <div class="text-sm text-gray-500 truncate">

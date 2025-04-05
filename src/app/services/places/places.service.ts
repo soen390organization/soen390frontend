@@ -53,19 +53,37 @@ export class PlacesService {
         autocompleteService.getPlacePredictions(
           {
             input,
-            componentRestrictions: { country: 'CA' },
-            locationBias: new google.maps.Circle({
-              center: new google.maps.LatLng(campusCoordinates),
-              radius: 500
-            })
+            location: new google.maps.LatLng(45.5017, -73.5673), // Montreal coordinates
+            radius: 10000 // Adjust radius as needed to cover the Montreal area
           },
           (predictions, status) => {
             resolve(predictions || []);
           }
-        );
+        );        
       }
     );
 
+    const prioritizedBuildingsManual: any[] = [
+      {
+        title: 'Central Building',
+        address: '7141 Sherbrooke St W',
+        coordinates: new google.maps.LatLng(45.458835704900814, -73.64063962288579),
+        type: 'outdoor'
+      },
+      {
+        title: 'EV Building',
+        address: '1515 Ste-Catherine St W',
+        coordinates: new google.maps.LatLng(45.49553376146312, -73.57800563627926),
+        type: 'outdoor'
+      },
+      {
+        title: 'Hall Building',
+        address: '1455 Blvd. De Maisonneuve Ouest',
+        coordinates: new google.maps.LatLng(45.49752531876128, -73.57902880362845),
+        type: 'outdoor'
+      }
+    ];    
+    
     let rooms = [];
     // const campusBuildings:BuildingData[]= Object.values(this.mappedInService.getCampusMapData()) || [];
     // campusBuildings.forEach((building: BuildingData) => {
@@ -84,7 +102,8 @@ export class PlacesService {
             abbreviation: building.abbreviation,
             indoorMapId: key,
             room: space,
-            type: 'indoor'
+            type: 'indoor',
+            icon: 'assets/icon/c-logo.png'
           })),
         ...building.mapData
           .getByType('point-of-interest')
@@ -104,6 +123,9 @@ export class PlacesService {
 
     const normalizeString = (str: string) => str.toLowerCase().replace(/[^a-zA-Z0-9]/g, '');
     const searchTerm = normalizeString(input);
+    const manualMatches = prioritizedBuildingsManual.filter((building) =>
+      normalizeString(building.title).includes(searchTerm)
+    );
 
     const selectedBuildingRooms = rooms.filter((room) =>
       [room.title, room.fullName, room.abbreviation] // Check abbreviation, full name, and short name
@@ -112,7 +134,7 @@ export class PlacesService {
 
     const detailsPromises = predictions.map((prediction) => this.getPlaceDetail(prediction));
     let details = await Promise.all(detailsPromises);
-    details = [...selectedBuildingRooms.slice(0, 3), ...details];
+    details = [...manualMatches, ...selectedBuildingRooms.slice(0, 3), ...details];
 
     // Filter out any null values (failed details)
     return details.filter(
