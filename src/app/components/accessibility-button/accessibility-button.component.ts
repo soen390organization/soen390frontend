@@ -11,8 +11,6 @@ import { IndoorDirectionsService } from 'src/app/services/indoor-directions/indo
 export class AccessibilityButtonComponent implements OnInit {
   constructor(public readonly indoorDirectionsService: IndoorDirectionsService) {}
 
-  ngOnInit() {}
-
   async toggleAccessibility() {
     const strategy = await this.indoorDirectionsService.getSelectedStrategy();
     strategy.toggleAccessibility();
