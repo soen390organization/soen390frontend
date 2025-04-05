@@ -220,4 +220,126 @@ describe('InteractionBarComponent', () => {
     expect(component.isExpanded).toBeFalse();
     expect(component.updateFooterUI).toHaveBeenCalledWith(false);
   });
+
+  it('should update footer UI correctly when expanded', () => {
+    // Test updateFooterUI directly for the expanded state.
+    const footerElement = document.createElement('div');
+    component.footerContainer = new ElementRef(footerElement);
+    component.updateFooterUI(true);
+    expect(footerElement.style.transition).toContain('transform 0.3s ease-out');
+    // Updated expectation: now expecting 'translateY(0px)' instead of 'translateY(0)'
+    expect(footerElement.style.transform).toBe('translateY(0px)');
+    expect(footerElement.style.overflowY).toBe('auto');
+    expect(component.swipeProgress).toBe(1);
+  });
+
+  it('should update footer UI correctly when collapsed', () => {
+    // Test updateFooterUI directly for the collapsed state.
+    const footerElement = document.createElement('div');
+    component.footerContainer = new ElementRef(footerElement);
+    component.updateFooterUI(false);
+    expect(footerElement.style.transition).toContain('transform 0.3s ease-out');
+    expect(footerElement.style.transform).toBe('translateY(80%)');
+    expect(footerElement.style.overflowY).toBe('hidden');
+    expect(component.swipeProgress).toBe(0);
+  });
+
+  it('should update transform and swipeProgress on drag move when expanded', () => {
+    // When expanded, baseTranslate should be 0.
+    const footerElement = document.createElement('div');
+    component.footerContainer = new ElementRef(footerElement);
+    component.isExpanded = true;
+    component.startY = 300;
+    component.onDragMove(350); // currentY = 350, diff = 300 - 350 = -50, translateY = 0 - (-50) = 50
+    const expectedTranslateY = 0 - (300 - 350); // = 50
+    const clampedTranslate = Math.min(Math.max(expectedTranslateY, 0), 80); // = 50
+    expect(footerElement.style.transform).toContain(`translateY(${clampedTranslate}%)`);
+    expect(component.swipeProgress).toBeCloseTo((80 - clampedTranslate) / 80, 2); // (80-50)/80 = 0.375
+  });
+
+  it('should reset startY and currentY after drag end', () => {
+    component.isDragging = true;
+    component.startY = 300;
+    component.currentY = 250;
+    component.onDragEnd();
+    expect(component.startY).toBe(0);
+    expect(component.currentY).toBe(0);
+  });
+
+  it('should not call onShowMore when handleClick is triggered while dragging', () => {
+    component.isDragging = true;
+    spyOn(component, 'onShowMore');
+    component.handleClick();
+    expect(component.onShowMore).not.toHaveBeenCalled();
+  });
+
+  it('should toggle isExpanded and update footer UI when onShowMore is called', () => {
+    spyOn(component, 'updateFooterUI');
+    component.isExpanded = false;
+    component.onShowMore();
+    expect(component.isExpanded).toBeTrue();
+    expect(component.updateFooterUI).toHaveBeenCalledWith(true);
+    component.onShowMore();
+    expect(component.isExpanded).toBeFalse();
+    expect(component.updateFooterUI).toHaveBeenCalledWith(false);
+  });
+
+  it('should not start dragging on touchstart if multiple touches are present', () => {
+    const element = document.createElement('div');
+    component.swipeArea = new ElementRef(element);
+    component.attachSwipeListeners(element);
+    spyOn(component, 'onDragStart');
+
+    // Create a proper TouchEvent with two touches.
+    const touchEvent = new TouchEvent('touchstart', {
+      bubbles: true,
+      cancelable: true,
+      touches: [
+        new Touch({
+          identifier: 0,
+          target: element,
+          clientX: 0,
+          clientY: 300,
+          screenX: 0,
+          screenY: 300,
+          pageX: 0,
+          pageY: 300
+        }),
+        new Touch({
+          identifier: 1,
+          target: element,
+          clientX: 0,
+          clientY: 310,
+          screenX: 0,
+          screenY: 310,
+          pageX: 0,
+          pageY: 310
+        })
+      ]
+    });
+    element.dispatchEvent(touchEvent);
+    expect(component.onDragStart).not.toHaveBeenCalled();
+  });
+
+  it('should set showIndoorSelects based on current map type', () => {
+    component.ngOnInit();
+    expect(component.showIndoorSelects).toBeFalse();
+    (mockStore.select as jasmine.Spy).and.callFake((selector: any) => {
+      if (selector === selectCurrentMap) {
+        return of(MapType.Indoor);
+      }
+      if (selector === selectSelectedCampus) {
+        return of('someCampus');
+      }
+      return of();
+    });
+    component.ngOnInit();
+    expect(component.showIndoorSelects).toBeTrue();
+  });
+
+  it('should update campusBuildings and pointsOfInterest after placesService isInitialized', () => {
+    component.ngOnInit();
+    expect(component.campusBuildings.loading).toBeFalse();
+    expect(component.pointsOfInterest.loading).toBeFalse();
+  });
 });
