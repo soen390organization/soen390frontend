@@ -19,8 +19,8 @@ export abstract class AbstractIndoorStrategy implements DirectionsStrategy<Mappe
     return this.accessibility;
   }
 
-  public setAccessibility(flag: boolean) {
-    this.accessibility = flag;
+  public toggleAccessibility() {
+    this.accessibility = !this.accessibility;
   }
 
   public async getEntrances(room: MappedInLocation): Promise<Door[] | null> {
