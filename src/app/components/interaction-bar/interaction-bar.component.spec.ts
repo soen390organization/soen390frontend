@@ -45,8 +45,13 @@ describe('InteractionBarComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [InteractionBarComponent,SwitchMapButtonComponent,
-        CommonModule],
+      imports: [
+        // Since InteractionBarComponent and SwitchMapButtonComponent are standalone,
+        // include them in the imports. CommonModule is also required.
+        InteractionBarComponent,
+        SwitchMapButtonComponent,
+        CommonModule
+      ],
       providers: [
         provideMockStore({ initialState: {} }),
         { provide: Store, useValue: mockStore },
@@ -59,6 +64,7 @@ describe('InteractionBarComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(InteractionBarComponent);
     component = fixture.componentInstance;
+    // Set a dummy footer container so that DOM updates are testable.
     component.footerContainer = new ElementRef(document.createElement('div'));
     fixture.detectChanges();
   });
@@ -83,8 +89,6 @@ describe('InteractionBarComponent', () => {
     expect(component.isDragging).toBeFalse();
   });
 
- 
-
   it('should collapse on swipe down', () => {
     component.isDragging = true;
     component.startY = 200;
@@ -95,6 +99,7 @@ describe('InteractionBarComponent', () => {
   });
 
   it('should toggle isExpanded when handleClick is called', () => {
+    // When not dragging, handleClick should toggle the expanded state.
     expect(component.isExpanded).toBeFalse();
     component.handleClick();
     expect(component.isExpanded).toBeTrue();
@@ -113,21 +118,20 @@ describe('InteractionBarComponent', () => {
     component.isDragging = true;
     component.isExpanded = false;
     component.startY = 300;
-    component.currentY = 280; // Swipe of 20, threshold is 50
+    component.currentY = 280; // Swipe of 20, below threshold (50)
   
     component.onDragEnd();
   
-    expect(component.isExpanded).toBeFalse(); // stays the same
+    expect(component.isExpanded).toBeFalse();
   });
 
   it('should update transform and swipeProgress on drag move', () => {
     const footerElement = component.footerContainer.nativeElement;
-  
     component.isExpanded = false;
     component.startY = 300;
     component.onDragMove(250); // drag upward by 50
   
-    const expectedTranslateY = 80 - (component.startY - 250);
+    const expectedTranslateY = 80 - (300 - 250);
     const clampedTranslate = Math.min(Math.max(expectedTranslateY, 0), 80);
   
     expect(footerElement.style.transform).toContain(`translateY(${clampedTranslate}%)`);
@@ -143,7 +147,6 @@ describe('InteractionBarComponent', () => {
       cancelable: true,
       touches: [{ clientY: 250 }] as any
     });
-  
     spyOn(touchEvent, 'preventDefault');
   
     component.swipeArea.nativeElement.dispatchEvent(touchEvent);
@@ -152,31 +155,24 @@ describe('InteractionBarComponent', () => {
   });
 
   it('should update transform and swipeProgress on touch drag move', () => {
-    // Create a dummy swipe area element
     const swipeElement = document.createElement('div');
     component.swipeArea = new ElementRef(swipeElement);
   
-    // Set initial state for dragging
     component.isDragging = true;
     component.startY = 300;
   
-    // Create a touch event using a custom event (since TouchEvent may not work in tests)
+    // Create a synthetic touch event.
     const touchEvent = new Event('touchmove', { bubbles: true, cancelable: true }) as TouchEvent;
-    // Define a touches property on the event
     Object.defineProperty(touchEvent, 'touches', {
-      value: [{ clientY: 250 }], // dragged upward by 50
+      value: [{ clientY: 250 }],
       writable: false,
     });
-  
-    // Spy on preventDefault on the event
     spyOn(touchEvent, 'preventDefault');
   
-    // Dispatch the event
     swipeElement.dispatchEvent(touchEvent);
     fixture.detectChanges();
   
-    // The component should update its footer transform style and swipeProgress accordingly.
-    const expectedTranslateY = 80 - (component.startY - 250);
+    const expectedTranslateY = 80 - (300 - 250);
     const clampedTranslate = Math.min(Math.max(expectedTranslateY, 0), 80);
     expect(swipeElement.style.transform).toContain(`translateY(${clampedTranslate}%)`);
     expect(component.swipeProgress).toBeCloseTo((80 - clampedTranslate) / 80, 2);
@@ -187,28 +183,24 @@ describe('InteractionBarComponent', () => {
     const swipeElement = document.createElement('div');
     component.swipeArea = new ElementRef(swipeElement);
     
-    // Set initial state for dragging
     component.isDragging = true;
     component.startY = 300;
   
-    // Create a synthetic MouseEvent for mousemove
     const mouseEvent = new MouseEvent('mousemove', {
       bubbles: true,
       cancelable: true,
       clientY: 250
     });
     
-    // Dispatch the event
     swipeElement.dispatchEvent(mouseEvent);
     fixture.detectChanges();
     
-    // Calculate expected values
     const expectedTranslateY = 80 - (300 - 250);
     const clampedTranslate = Math.min(Math.max(expectedTranslateY, 0), 80);
     expect(swipeElement.style.transform).toContain(`translateY(${clampedTranslate}%)`);
     expect(component.swipeProgress).toBeCloseTo((80 - clampedTranslate) / 80, 2);
   });
-  
+
   it('should set isExpanded to true when swipe distance exceeds threshold', () => {
     component.isDragging = true;
     component.startY = 300;
@@ -237,7 +229,7 @@ describe('InteractionBarComponent', () => {
     component.isDragging = true;
     component.startY = 300;
     component.currentY = 280; // swipe of 20, below threshold 50
-    component.isExpanded = false; // initial state
+    component.isExpanded = false;
     spyOn(component, 'updateFooterUI');
   
     component.onDragEnd();
@@ -245,8 +237,4 @@ describe('InteractionBarComponent', () => {
     expect(component.isExpanded).toBeFalse();
     expect(component.updateFooterUI).toHaveBeenCalledWith(false);
   });
-
-
 });
-
-
