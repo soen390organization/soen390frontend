@@ -210,4 +210,51 @@ describe('CalendarService', () => {
       expect(formatted).toContain('12:00');
     });
   });
+
+  describe('setTimeToNext(start)', () => {
+    it('should return NaN for an invalid date time', () => {
+      const invalidTime = new Date('2023-01-01TINVALID');
+      expect(service.setTimeToNext(invalidTime)).toEqual("NaN");
+    });
+    
+    it('should return \'Starts now.\' for the same start & current time', () => {
+      const currentTime = new Date();
+      expect(service.setTimeToNext(currentTime)).toEqual("Starts now.");
+    });
+
+    it('should return something for different start & current times (for day 1/7 of week)', () => {
+      const startTime = new Date('2024-01-01T12:00:00');
+      expect(service.setTimeToNext(startTime)).not.toEqual("Starts now.");
+    });
+
+    it('should return something for different start & current times (for day 2/7 of week)', () => {
+      const startTime = new Date('2024-01-02T12:00:00');
+      expect(service.setTimeToNext(startTime)).not.toEqual("Starts now.");
+    });
+
+    it('should return something for different start & current times (for day 3/7 of week)', () => {
+      const startTime = new Date('2024-01-03T12:00:00');
+      expect(service.setTimeToNext(startTime)).not.toEqual("Starts now.");
+    });
+
+    it('should return something for different start & current times (for day 4/7 of week)', () => {
+      const startTime = new Date('2024-01-04T12:00:00');
+      expect(service.setTimeToNext(startTime)).not.toEqual("Starts now.");
+    });
+
+    it('should return something for different start & current times (for day 5/7 of week)', () => {
+      const startTime = new Date('2024-01-05T12:00:00');
+      expect(service.setTimeToNext(startTime)).not.toEqual("Starts now.");
+    });
+
+    it('should return something for different start & current times (for day 6/7 of week)', () => {
+      const startTime = new Date('2024-01-06T12:00:00');
+      expect(service.setTimeToNext(startTime)).not.toEqual("Starts now.");
+    });
+
+    it('should return something for different start & current times (for day 7/7 of week)', () => {
+      const startTime = new Date('2024-01-07T12:00:00');
+      expect(service.setTimeToNext(startTime)).not.toEqual("Starts now.");
+    });
+  });
 });

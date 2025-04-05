@@ -12,6 +12,7 @@ import { MappedinService } from '../mappedin/mappedin.service';
   providedIn: 'root'
 })
 export class CalendarService {
+  private readonly weekdayFormatter = new Intl.DateTimeFormat('en-CA', { weekday: 'short' });
   private readonly auth = getAuth();
   private readonly googleProvider = new GoogleAuthProvider();
   private accessToken: string | null = null;
@@ -132,6 +133,7 @@ export class CalendarService {
       type: EventType[eventType.toUpperCase()],
       startTime: event.start.dateTime,
       endTime: event.end.dateTime,
+      timeToNext: this.setTimeToNext(event.start.dateTime),
       googleLoc: {
         title: event.summary,
         ...this.convertClassToAddress(event.location),
@@ -213,25 +215,87 @@ export class CalendarService {
   }
 
   formatEventTime(start: Date, end: Date): string {
-    const weekdayFormatter = new Intl.DateTimeFormat('en-CA', { weekday: 'short' });
     const timeFormatter = new Intl.DateTimeFormat('en-CA', {
       hour: '2-digit',
       minute: '2-digit',
       hour12: false
     });
 
-    const day = weekdayFormatter.format(start).slice(0, 2);
+    const day = this.weekdayFormatter.format(start).slice(0, 2);
     const startTime = timeFormatter.format(start);
     const endTime = timeFormatter.format(end);
 
     return `${day}, ${startTime} - ${endTime}`;
   }
+
   async setSelectedCalendar(calendarId: string) {
     this.selectedCalendarSubject.next(calendarId);
-    await this.fetchEvents(calendarId).then((events) => (this.currentCalendarEvents = events));
+    await this.fetchEvents(calendarId).then((events) => {
+      this.currentCalendarEvents = events;
+      this.currentCalendarEvents.forEach((event) => (this.setTimeToNext(event)));
+    });
   }
 
   getSelectedCalendar(): string | null {
     return this.selectedCalendarSubject.value;
+  }
+
+  setTimeToNext(start: Date | string): string {
+    var startDate = new Date(start);
+    if (isNaN(startDate.getTime())) {
+      return "NaN";
+    }
+    var currentDate = new Date();
+    var currentDay = currentDate.getDay();
+    var currentCalendarDay = currentDate.getDate();
+    if (currentDay == 0) {
+      currentDay = 7;
+    }
+    console.log(currentDay);
+    var startDayStr = this.weekdayFormatter.format(startDate).slice(0, 2);
+    console.log(startDayStr);
+    var startDayNum = 0;
+    switch(startDayStr) {
+      case "Su":
+        startDayNum = 7;
+        break;
+      case "Mo":
+        startDayNum = 1;
+        break;
+      case "Tu":
+        startDayNum = 2;
+        break;
+      case "We":
+        startDayNum = 3;
+        break;
+      case "Th":
+        startDayNum = 4;
+        break;  
+      case "Fr":
+        startDayNum = 5;
+        break;  
+      case "Sa":
+        startDayNum = 6;
+        break;  
+    }
+    var startCalendarDay = 0;
+    if (currentDay != startDayNum) {
+      startCalendarDay = currentCalendarDay + Math.abs(currentDay - startDayNum);
+    }
+    //Thank you to https://www.sitelint.com/blog/get-days-between-two-dates-in-javascript#:~:text=To%20get%20the%20number%20of,based%20on%20the%20millisecond%20difference.
+    var currentDateUTC = Date.UTC(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate());
+    var startDateUTC = Date.UTC(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
+    var daysInBetween = Math.abs((currentDateUTC.valueOf() - startDateUTC.valueOf()) / (24 * 60 * 60 * 1000));
+    console.log(daysInBetween);
+    var numMinutes = Math.floor(Math.abs(Math.floor((currentDate.getTime() - startDate.getTime()) / (1000 * 60))) % 60);
+    console.log(numMinutes);
+    var numHours = Math.floor(Math.abs(Math.floor((currentDate.getTime() - startDate.getTime()) / (1000 * 60 * 60))) % 24);
+    console.log(numHours);
+    if (daysInBetween <= 0 && numHours == 0 && numMinutes == 0) {
+      return "Starts now."
+    } else {
+      return "In " + (daysInBetween > 0 ? daysInBetween + " days " : "") + (numHours > 0 ? numHours + " hours " : "") + (numMinutes > 0 ? numMinutes + " minutes" : "");
+    }
+    
   }
 }
