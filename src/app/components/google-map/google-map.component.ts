@@ -113,18 +113,16 @@ export class GoogleMapComponent implements AfterViewInit {
       this.currentInfoWindow.close();
     }
 
-    const containerNode = document.getElementById('infoWindowContent')!.cloneNode(true);
-    if (!(containerNode instanceof HTMLElement)) {
-      throw new Error('Cloned node is not an HTMLElement');
-    }
-    const container = containerNode; // Now container is correctly typed as HTMLElement
-
+    const container = (document.getElementById('infoWindowContent') as HTMLElement).cloneNode(
+      true
+    ) as HTMLElement;
     container.style.display = 'block';
-    container.querySelector('#buildingName')!.textContent = building.name;
-    container.querySelector('#buildingAddress')!.textContent =
+
+    (container.querySelector('#buildingName') as HTMLElement).textContent = building.name;
+    (container.querySelector('#buildingAddress') as HTMLElement).textContent =
       building.address ?? 'No address available';
 
-    const facultiesDiv = container.querySelector('#buildingFaculties')!;
+    const facultiesDiv = container.querySelector('#buildingFaculties') as HTMLElement;
     facultiesDiv.innerHTML = building.faculties?.length
       ? building.faculties
           .map(
@@ -141,9 +139,7 @@ export class GoogleMapComponent implements AfterViewInit {
       iconImg.style.display = 'none';
     }
 
-    this.currentInfoWindow = new google.maps.InfoWindow({
-      maxWidth: 200
-    });
+    this.currentInfoWindow = new google.maps.InfoWindow({ maxWidth: 200 });
     this.currentInfoWindow.setContent(container);
     this.currentInfoWindow.setPosition(latLng);
     this.currentInfoWindow.open(this.googleMapService.getMap());
