@@ -5,7 +5,6 @@ import { getAuth, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { ConcordiaDataService } from 'src/app/services/concordia-data.service';
 import { EventInfo } from 'src/app/interfaces/event-info.interface';
 import { EventType } from 'src/app/enums/event-type.enum';
-import { GoogleMapLocation } from 'src/app/interfaces/google-map-location.interface';
 import { MappedinService } from '../mappedin/mappedin.service';
 
 @Injectable({
@@ -116,7 +115,9 @@ export class CalendarService {
 
       const data = await response.json();
 
-      const locationItems = data.items.map((event) => this.transformEvent(event));
+      const locationItemsPromises = data.items.map((event: any) => this.transformEvent(event));
+      const locationItems = await Promise.all(locationItemsPromises);
+
       this.previouslyFetchedEvents[calendarId] = locationItems;
       return locationItems || [];
     } catch (error) {
@@ -125,25 +126,33 @@ export class CalendarService {
     }
   }
 
-  transformEvent(event: any): EventInfo {
+  async transformEvent(event: any): Promise<EventInfo> {
     const eventType = event.summary.split(' ')[1] || 'LEC';
+    const address = this.convertClassToAddress(event.location);
+    const room = await this.getRoomId(
+      parseFloat(event.location.match(/\d+(\.\d+)?$/)[0]).toString(),
+      address.indoorMapId
+    );
+
     return {
       title: event.summary,
       type: EventType[eventType.toUpperCase()],
       startTime: event.start.dateTime,
       endTime: event.end.dateTime,
+      room: event.location,
       googleLoc: {
         title: event.summary,
-        ...this.convertClassToAddress(event.location),
+        coordinates: address.coordinates,
+        ...address,
         type: 'outdoor'
       },
       mappedInLoc: {
         title: event.summary,
-        address: this.convertClassToAddress(event.location).address,
-        image: this.convertClassToAddress(event.location).image,
-        indoorMapId: this.mappedInService.getMapId(),
-        room: event.location,
-        type: 'outdoor'
+        address: address.address,
+        image: address.image,
+        indoorMapId: address.indoorMapId,
+        room: room,
+        type: 'indoor'
       }
     };
   }
@@ -152,6 +161,7 @@ export class CalendarService {
     address: string;
     coordinates: google.maps.LatLng | null;
     image: string;
+    indoorMapId: string | null;
   } {
     const buildingCodeChars = this.cleanUpInput(classCode);
 
@@ -192,7 +202,6 @@ export class CalendarService {
       }
       i++;
     }
-
     return result;
   }
 
@@ -204,11 +213,13 @@ export class CalendarService {
     address: string;
     coordinates: google.maps.LatLng | null;
     image: string;
+    indoorMapId: string | null;
   } {
     return {
       address: this.dataService.addressMap[buildingCode] ?? 'No Address',
       coordinates: this.dataService.coordinatesMap[buildingCode] ?? null,
-      image: this.dataService.imageMap[buildingCode] ?? 'No Image'
+      image: this.dataService.imageMap[buildingCode] ?? 'No Image',
+      indoorMapId: this.dataService.indoorMapIdMap[buildingCode]
     };
   }
 
@@ -233,5 +244,12 @@ export class CalendarService {
 
   getSelectedCalendar(): string | null {
     return this.selectedCalendarSubject.value;
+  }
+
+  private async getRoomId(location: string, indoorMapId: string) {
+    const mapData = await this.mappedInService.fetchMapData(indoorMapId);
+
+    const room = mapData.getByType('space').filter((space) => space.name === location)[0];
+    return room;
   }
 }

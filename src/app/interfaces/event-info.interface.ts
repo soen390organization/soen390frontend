@@ -7,6 +7,7 @@ export interface EventInfo {
   type: EventType;
   startTime: string;
   endTime: string;
+  room: string;
   googleLoc: GoogleMapLocation;
   mappedInLoc?: MappedInLocation;
 }

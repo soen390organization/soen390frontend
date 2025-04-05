@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import data from 'src/assets/concordia-data.json';
-export type Campus = typeof data[keyof typeof data];
+export type Campus = (typeof data)[keyof typeof data];
 
 @Injectable({
   providedIn: 'root'
@@ -9,10 +9,13 @@ export class ConcordiaDataService {
   addressMap: Map<string, string>;
   coordinatesMap: Map<string, { lat: string; lng: string }>;
   imageMap: Map<string, string>;
+  indoorMapIdMap: Map<string, string>;
+
   constructor() {
     this.addressMap = this.createAbbreviationToAddressMap();
     this.coordinatesMap = this.createAbbreviationToCoordinatesMap();
     this.imageMap = this.createAbbreviationToImageMap();
+    this.indoorMapIdMap = this.createAbbreviationToMappedInMap();
   }
 
   public getCampus(campusKey: string) {
@@ -62,6 +65,16 @@ export class ConcordiaDataService {
     Object.values(data).forEach((campus) => {
       campus.buildings.forEach((building) => {
         map[building.abbreviation] = building.image;
+      });
+    });
+    return map;
+  }
+
+  createAbbreviationToMappedInMap() {
+    let map = new Map<string, string>();
+    Object.values(data).forEach((campus) => {
+      campus.buildings.forEach((building) => {
+        map[building.abbreviation] = building.indoorMapId;
       });
     });
     return map;

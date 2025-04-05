@@ -1,8 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
 import { EventInfo } from 'src/app/interfaces/event-info.interface';
-import { GoogleMapLocation } from 'src/app/interfaces/google-map-location.interface';
+import { CurrentLocationService } from 'src/app/services/current-location/current-location.service';
+import { IndoorDirectionsService } from 'src/app/services/indoor-directions/indoor-directions.service';
+import { MappedinService } from 'src/app/services/mappedin/mappedin.service';
 import { OutdoorDirectionsService } from 'src/app/services/outdoor-directions/outdoor-directions.service';
+import { Store } from '@ngrx/store';
+import { MapType, setMapType } from 'src/app/store/app';
 
 @Component({
   selector: 'app-event-card',
@@ -14,7 +18,13 @@ export class EventCardComponent {
   @Input() events: EventInfo[] = [];
   @Input() loading: boolean = false;
 
-  constructor(private readonly outdoorDirectionsService: OutdoorDirectionsService) {}
+  constructor(
+    private store: Store,
+    private readonly outdoorDirectionsService: OutdoorDirectionsService,
+    private readonly indoorDirectionsService: IndoorDirectionsService,
+    private readonly currentLocationService: CurrentLocationService,
+    private readonly mappedInService: MappedinService
+  ) {}
 
   onImageError(event: Event) {
     const imgElement = event.target as HTMLImageElement;
@@ -44,7 +54,27 @@ export class EventCardComponent {
     return `${day}, ${startTime} - ${endTime}`;
   }
 
-  setDestination(location: GoogleMapLocation) {
-    this.outdoorDirectionsService.setDestinationPoint(location);
+  async setDestination(event: EventInfo) {
+    const currentLocation = await this.currentLocationService.getCurrentLocation();
+    this.outdoorDirectionsService.setStartPoint({
+      title: 'Your Location',
+      address: `${currentLocation.lat}, ${currentLocation.lng}`,
+      coordinates: new google.maps.LatLng(currentLocation),
+      type: 'outdoor'
+    });
+
+    if (event.mappedInLoc.indoorMapId && event.mappedInLoc.room) {
+      console.log(event);
+      this.indoorDirectionsService.setDestinationPoint(event.mappedInLoc);
+      this.outdoorDirectionsService.setDestinationPoint(event.googleLoc);
+
+      if (event.mappedInLoc.indoorMapId !== this.mappedInService.getMapId()) {
+        await this.mappedInService.setMapData(event.mappedInLoc.indoorMapId);
+      }
+      this.store.dispatch(setMapType({ mapType: MapType.Indoor }));
+    } else {
+      this.outdoorDirectionsService.setDestinationPoint(event.googleLoc);
+      this.store.dispatch(setMapType({ mapType: MapType.Outdoor }));
+    }
   }
 }

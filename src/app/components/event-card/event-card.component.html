@@ -18,7 +18,7 @@
     <ng-template #showCards>
       <div
         *ngFor="let event of events"
-        (click)="setDestination(event.googleLoc)"
+        (click)="setDestination(event)"
         class="w-[224px] h-[230px] bg-white overflow-hidden shrink-0 hover:cursor-pointer"
       >
         <img
@@ -32,7 +32,7 @@
             {{ event.title.split(' ')[0] }} {{ event.type }}
           </h3>
           <p class="text-left truncate w-full text-sm text-gray-600">
-            {{ event.mappedInLoc.room }} - {{ event.mappedInLoc.address }}
+            {{ event.room }} - {{ event.mappedInLoc.address }}
           </p>
           <p class="mt-1 border-t text-left text-sm font-semibold text-green-800">
             {{ formatEventTime(event.startTime, event.endTime) }}
