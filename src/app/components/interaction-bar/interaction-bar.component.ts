@@ -49,6 +49,7 @@ export class InteractionBarComponent implements OnInit, AfterViewInit {
   events = { events: [] as EventInfo[], loading: true };
   showDirections$!: Observable<boolean>;
   showPOIs$!: Observable<boolean>;
+  COLLAPSED_PERCENTAGE = 65;
 
   constructor(
     private readonly store: Store,
@@ -111,7 +112,9 @@ export class InteractionBarComponent implements OnInit, AfterViewInit {
     this.isExpanded = !this.isExpanded;
     const footer = this.footerContainer.nativeElement;
     footer.style.transition = 'transform 0.3s ease-out';
-    footer.style.transform = this.isExpanded ? 'translateY(0)' : 'translateY(80%)';
+    footer.style.transform = this.isExpanded
+      ? 'translateY(0)'
+      : `translateY(${this.COLLAPSED_PERCENTAGE}%)`;
     footer.style.overflowY = this.isExpanded ? 'auto' : '';
     this.swipeProgress = this.isExpanded ? 1 : 0;
   }
@@ -134,11 +137,11 @@ export class InteractionBarComponent implements OnInit, AfterViewInit {
 
     // Adjust footer position dynamically
     const footer = this.footerContainer.nativeElement;
-    const baseTranslate = this.isExpanded ? 0 : 80;
+    const baseTranslate = this.isExpanded ? 0 : this.COLLAPSED_PERCENTAGE;
     const translateY = baseTranslate - diff;
-    const clampedTranslate = Math.min(Math.max(translateY, 0), 80);
-    footer.style.transform = `translateY(${Math.min(Math.max(translateY, 0), 80)}%)`;
-    this.swipeProgress = (80 - clampedTranslate) / 80;
+    const clampedTranslate = Math.min(Math.max(translateY, 0), this.COLLAPSED_PERCENTAGE);
+    footer.style.transform = `translateY(${Math.min(Math.max(translateY, 0), this.COLLAPSED_PERCENTAGE)}%)`;
+    this.swipeProgress = (this.COLLAPSED_PERCENTAGE - clampedTranslate) / this.COLLAPSED_PERCENTAGE;
   }
 
   /** End dragging & determine if expansion should happen */
@@ -155,7 +158,9 @@ export class InteractionBarComponent implements OnInit, AfterViewInit {
     // Reset position with smooth transition
     const footer = this.footerContainer.nativeElement;
     footer.style.transition = 'transform 0.3s ease-out';
-    footer.style.transform = this.isExpanded ? 'translateY(0)' : 'translateY(80%)';
+    footer.style.transform = this.isExpanded
+      ? 'translateY(0)'
+      : `translateY(${this.COLLAPSED_PERCENTAGE}%)`;
     this.swipeProgress = this.isExpanded ? 1 : 0;
   }
 
@@ -163,7 +168,7 @@ export class InteractionBarComponent implements OnInit, AfterViewInit {
     this.isExpanded = false;
     const footer = this.footerContainer.nativeElement;
     footer.style.transition = 'transform 0.3s ease-out';
-    footer.style.transform = 'translateY(80%)';
+    footer.style.transform = `translateY(${this.COLLAPSED_PERCENTAGE}%)`;
     footer.style.overflowY = '';
     this.swipeProgress = 0;
   }
