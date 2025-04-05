@@ -2,7 +2,12 @@ import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angula
 import { LocationCardsComponent } from '../location-cards/location-cards.component';
 import { Store } from '@ngrx/store';
 import { PlacesService } from 'src/app/services/places/places.service';
-import { MapType, selectCurrentMap, selectSelectedCampus, selectShowRoute } from 'src/app/store/app';
+import {
+  MapType,
+  selectCurrentMap,
+  selectSelectedCampus,
+  selectShowRoute
+} from 'src/app/store/app';
 import { Location } from 'src/app/interfaces/location.interface';
 import { filter, forkJoin, Observable, switchMap } from 'rxjs';
 import { DirectionsComponent } from '../directions/directions.component';
@@ -152,5 +157,14 @@ export class InteractionBarComponent implements OnInit, AfterViewInit {
     footer.style.transition = 'transform 0.3s ease-out';
     footer.style.transform = this.isExpanded ? 'translateY(0)' : 'translateY(80%)';
     this.swipeProgress = this.isExpanded ? 1 : 0;
+  }
+
+  onLocationSelected(): void {
+    this.isExpanded = false;
+    const footer = this.footerContainer.nativeElement;
+    footer.style.transition = 'transform 0.3s ease-out';
+    footer.style.transform = 'translateY(80%)';
+    footer.style.overflowY = '';
+    this.swipeProgress = 0;
   }
 }
