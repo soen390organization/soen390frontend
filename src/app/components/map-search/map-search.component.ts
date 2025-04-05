@@ -13,6 +13,7 @@ import { setMapType, MapType, setShowRoute, selectShowRoute } from 'src/app/stor
 import { MappedinService } from 'src/app/services/mappedin/mappedin.service';
 import { IndoorDirectionsService } from 'src/app/services/indoor-directions/indoor-directions.service';
 import { GoogleMapService } from 'src/app/services/google-map.service';
+import { HomePage } from 'src/app/home/home.page';
 
 export const MapSearchAnimation = [
   trigger('slideInOut', [
@@ -55,7 +56,7 @@ export class MapSearchComponent implements OnInit {
 
   constructor(
     private store: Store,
-    private googleMapService: GoogleMapService,
+    private readonly googleMapService: GoogleMapService,
     public readonly outdoorDirectionsService: OutdoorDirectionsService,
     public readonly indoorDirectionService: IndoorDirectionsService,
     private readonly mappedInService: MappedinService,
@@ -65,11 +66,7 @@ export class MapSearchComponent implements OnInit {
 
   ngOnInit(): void {
     this.store.select(selectShowRoute).subscribe((showRoute) => {
-      if (showRoute) {
-        this.disableStart = true;
-      } else {
-        this.disableStart = false;
-      }
+      this.setDisableStart(showRoute);
     });
 
     combineLatest([
@@ -85,11 +82,13 @@ export class MapSearchComponent implements OnInit {
         indoorDestinationPoint
       ]) => {
         if (outdoorStartPoint) {
+          this.startLocationInput = outdoorStartPoint.title;
           this.outdoorDirectionsService.showStartMarker();
           this.googleMapService.updateMapLocation(outdoorStartPoint.coordinates);
         }
 
         if (outdoorDestinationPoint) {
+          this.destinationLocationInput = outdoorDestinationPoint.title;
           this.outdoorDirectionsService.showDestinationMarker();
           this.googleMapService.updateMapLocation(outdoorDestinationPoint.coordinates);
         }
@@ -118,8 +117,17 @@ export class MapSearchComponent implements OnInit {
     );
   }
 
+  private setDisableStart(show) {
+    this.disableStart = show;
+  }
+
   toggleSearch() {
     this.isSearchVisible = !this.isSearchVisible;
+    if (this.isSearchVisible) {
+      HomePage.prototype.showSearch();
+    } else {
+      HomePage.prototype.hideSearch();
+    }
   }
 
   async onSetUsersLocationAsStart(): Promise<void> {
@@ -225,5 +233,29 @@ export class MapSearchComponent implements OnInit {
       this.store.dispatch(setMapType({ mapType: MapType.Outdoor }));
     }
     this.places = [];
+  }
+
+  private readonly highlightedPlaces = new Set<string>([
+    'H Building Concordia University',
+    'John Molson School of Business',
+    'Concordia University, John Molson Building',
+    'Concordia Engineering And Visual Arts (EV) Building',
+    'Pavillon Ev Building',
+    'LB Building, Concordia University',
+    'CL Annex',
+    'Concordia University ER Building',
+    'Vanier Library',
+    'Central Building (CC)',
+    'SP Building, Loyola Campus, Concordia University'
+  ]);
+
+  getPlaceIcon(title: string | undefined): string {
+    // If the title is in the highlightedPlaces Set, return the icon; otherwise, return the default icon.
+    return this.isHighlighted(title) ? 'location_city' : 'location_on';
+  }
+
+  isHighlighted(title: string | undefined): boolean {
+    // Simply check if the title exists in the Set of highlighted places
+    return this.highlightedPlaces.has(title);
   }
 }

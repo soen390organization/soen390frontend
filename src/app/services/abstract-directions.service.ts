@@ -13,9 +13,9 @@ import { AbstractIndoorStrategy } from '../strategies/indoor-directions/abstract
  * @template T - A type extending Location, representing the type of location used for navigation.
  */
 export abstract class DirectionsService<T extends Location> {
-  private startPointSubject = new BehaviorSubject<T | null>(null);
-  private destinationPointSubject = new BehaviorSubject<T | null>(null);
-  private travelModeSubject = new BehaviorSubject<string | null>(null);
+  private readonly startPointSubject = new BehaviorSubject<T | null>(null);
+  private readonly destinationPointSubject = new BehaviorSubject<T | null>(null);
+  private readonly travelModeSubject = new BehaviorSubject<string | null>(null);
 
   /**
    * Sets the starting point for navigation.
@@ -132,7 +132,7 @@ export abstract class DirectionsService<T extends Location> {
    * Subclasses must implement this method to provide specific logic for rendering
    * the navigation directions based on the current start and destination points.
    */
-  abstract renderNavigation(): void;
+  abstract renderNavigation();
 
   /**
    * Clears the current navigation directions.
@@ -142,5 +142,5 @@ export abstract class DirectionsService<T extends Location> {
    * to provide specific logic for clearing the navigation in the context of
    * the service being used (e.g., clearing directions on the map or in UI).
    */
-  abstract clearNavigation(): void;
+  abstract clearNavigation();
 }

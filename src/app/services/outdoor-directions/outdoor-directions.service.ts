@@ -7,9 +7,9 @@ import {
   OutdoorTransitStrategy,
   OutdoorShuttleStrategy
 } from 'src/app/strategies/outdoor-directions';
+import { AbstractOutdoorStrategy } from 'src/app/strategies/outdoor-directions/abstract-outdoor.strategy';
 import { GoogleMapService } from '../google-map.service';
 import { firstValueFrom, BehaviorSubject } from 'rxjs';
-import { AbstractOutdoorStrategy } from 'src/app/strategies/outdoor-directions/abstract-outdoor.strategy';
 
 @Injectable({
   providedIn: 'root'
@@ -20,7 +20,7 @@ export class OutdoorDirectionsService extends DirectionsService<GoogleMapLocatio
   public selectedStrategySubject = new BehaviorSubject<AbstractOutdoorStrategy>(null);
 
   constructor(
-    private googleMapService: GoogleMapService,
+    private readonly googleMapService: GoogleMapService,
     public readonly outdoorWalkingStrategy: OutdoorWalkingStrategy,
     public readonly outdoorDrivingStrategy: OutdoorDrivingStrategy,
     public readonly outdoorTransitStrategy: OutdoorTransitStrategy,
@@ -52,7 +52,7 @@ export class OutdoorDirectionsService extends DirectionsService<GoogleMapLocatio
         borderColor: '#ffffff',
         scale: 1.2
       });
-
+      pin.element.setAttribute('data-marker-id', 'start-marker');
       this.startPointMarker = new google.maps.marker.AdvancedMarkerElement({
         content: pin.element
       });
@@ -78,7 +78,7 @@ export class OutdoorDirectionsService extends DirectionsService<GoogleMapLocatio
         borderColor: '#ffffff',
         scale: 1.2
       });
-
+      pin.element.setAttribute('data-marker-id', 'destination-marker');
       this.destinationPointMarker = new google.maps.marker.AdvancedMarkerElement({
         content: pin.element
       });
@@ -110,18 +110,23 @@ export class OutdoorDirectionsService extends DirectionsService<GoogleMapLocatio
     ]);
 
     // Return the strategy with the smallest duration
-    return strategies
-      .filter((strategy) => strategy)
-      .reduce((prev, curr) =>
-        prev.getTotalDuration().value < curr.getTotalDuration().value ? prev : curr
-      );
+    const validStrategies = strategies.filter(Boolean);
+
+    if (validStrategies.length === 0) {
+      return null; // or handle appropriately
+    }
+
+    return validStrategies.reduce(
+      (prev, curr) => (prev.getTotalDuration().value < curr.getTotalDuration().value ? prev : curr),
+      validStrategies[0]
+    );
   }
 
   public async renderNavigation() {
     (await this.getSelectedStrategy()).renderRoutes();
   }
 
-  public async clearNavigation(): Promise<void> {
+  public async clearNavigation() {
     (await this.getSelectedStrategy()).clearRenderedRoutes();
   }
 }

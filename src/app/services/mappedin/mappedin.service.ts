@@ -131,7 +131,7 @@ export class MappedinService {
   }
 
   public clearNavigation(): void {
-    if (this.mapView && this.mapView.Navigation) {
+    if (this.mapView.Navigation) {
       try {
         // Navigation cleared
         this.mapView.Navigation.clear();

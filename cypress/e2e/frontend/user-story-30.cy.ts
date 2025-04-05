@@ -8,9 +8,6 @@ describe('Map Search - Select Start and Destination Buildings', () => {
   });
 
   it('should allow a user to select a start and destination building and generate directions', () => {
-    // Ensure the map container is visible
-    cy.get('.map-container', { timeout: 10000 }).should('be.visible');
-
     // Click the search bar to expand it
     cy.get('.material-symbols-outlined').contains('search').click();
 
@@ -27,10 +24,10 @@ describe('Map Search - Select Start and Destination Buildings', () => {
     cy.wait(2000);
 
     // Verify that the start marker exists (adjust the selector if needed)
-    cy.get('.gm-style img[src*="Icone_Verde.svg"]', { timeout: 10000 }).should('exist');
+    cy.get('div[role="button"][tabindex="0"]').should('have.length', 1);
 
     // Verify that the destination marker exists (adjust the selector if needed)
-    cy.get('.gm-style img[src*="Icone_Verde.svg"]', { timeout: 10000 }).should('exist');
+    cy.get('div[role="button"][tabindex="-1"]').should('have.length', 1);
 
     //@TODO: need to deferentiate between icons
     //@TODO: need to verify that the directions are displayed

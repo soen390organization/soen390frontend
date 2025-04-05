@@ -28,7 +28,6 @@ export class MappedinMapComponent implements AfterViewInit {
   @Output() initialized = new EventEmitter<void>();
 
   constructor(
-    private readonly store: Store,
     private readonly mappedinService: MappedinService,
     private readonly indoorDirectionsService: IndoorDirectionsService
   ) {}

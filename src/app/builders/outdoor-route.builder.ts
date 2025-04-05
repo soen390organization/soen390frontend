@@ -10,7 +10,7 @@ export class OutdoorRouteBuilder {
     return this;
   }
 
-  public addWalkingRoute(origin: string, destination: string): OutdoorRouteBuilder {
+  public addWalkingRoute(origin: string, destination: string): this {
     const renderer = new google.maps.DirectionsRenderer({
       map: this.map,
       polylineOptions: {
@@ -30,11 +30,11 @@ export class OutdoorRouteBuilder {
       }
     });
 
-    this.routes.push({ renderer, origin, destination, mode: google.maps.TravelMode.WALKING })
+    this.routes.push({ renderer, origin, destination, mode: google.maps.TravelMode.WALKING });
     return this;
   }
 
-  public addDrivingRoute(origin: string, destination: string): OutdoorRouteBuilder {
+  public addDrivingRoute(origin: string, destination: string): this {
     const renderer = new google.maps.DirectionsRenderer({
       map: this.map,
       polylineOptions: {
@@ -42,11 +42,11 @@ export class OutdoorRouteBuilder {
       }
     });
 
-    this.routes.push({ renderer, origin, destination, mode: google.maps.TravelMode.DRIVING })
+    this.routes.push({ renderer, origin, destination, mode: google.maps.TravelMode.DRIVING });
     return this;
   }
 
-  public addTransitRoute(origin: string, destination: string): OutdoorRouteBuilder {
+  public addTransitRoute(origin: string, destination: string): this {
     const renderer = new google.maps.DirectionsRenderer({
       map: this.map,
       polylineOptions: {
@@ -62,7 +62,12 @@ export class OutdoorRouteBuilder {
     return Promise.all(
       this.routes.map(async (route) => {
         console.log(route);
-        const outdoorRoute = new OutdoorRoute(route.origin, route.destination, route.mode, route.renderer);
+        const outdoorRoute = new OutdoorRoute(
+          route.origin,
+          route.destination,
+          route.mode,
+          route.renderer
+        );
         await outdoorRoute.getRouteFromGoogle();
         return outdoorRoute;
       })

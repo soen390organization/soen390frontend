@@ -28,7 +28,7 @@ export class IndoorDirectionsService extends DirectionsService<MappedInLocation>
    * @param mappedinService - An instance of MappedinService for accessing map data and view.
    */
   constructor(
-    private mappedinService: MappedinService,
+    private readonly mappedinService: MappedinService,
     private readonly indoorSameBuildingStrategy: IndoorSameBuildingStrategy,
     private readonly indoorDifferentBuildingStrategy: IndoorDifferentBuildingStrategy
   ) {
