@@ -250,6 +250,7 @@ describe('MapSearchComponent', () => {
     }));
   });
   
+
   it('should return the correct icon for highlighted places', () => {
     const highlightedPlaceTitle = 'H Building Concordia University';
     const defaultIcon = 'location_on';
