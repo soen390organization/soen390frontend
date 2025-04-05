@@ -127,8 +127,16 @@ export class CalendarService {
 
   transformEvent(event: any): EventInfo {
     const eventType = event.summary.split(' ')[1] || 'LEC';
-    const buildingData = this.convertClassToAddress(event.location);
+    
+    // Process the location information
     const roomInfo = this.getRoomInfo(event.location);
+    const buildingData = this.convertClassToAddress(roomInfo.buildingCode || event.location);
+    
+    console.log('Event location processing:', {
+      originalLocation: event.location,
+      extractedRoomInfo: roomInfo,
+      buildingData: buildingData
+    });
     
     // Clone the coordinates if they exist to ensure we have a proper LatLng object
     const googleCoords = buildingData.coordinates ? 
@@ -155,36 +163,61 @@ export class CalendarService {
         address: buildingData.address,
         image: buildingData.image,
         indoorMapId: this.mappedInService.getMapId(),
-        // Use room object from MappedinService if available, otherwise just use the location string
+        // Store both the room ID and the original location for better matching
         room: roomInfo.roomId || event.location,
+        roomName: roomInfo.roomName,
+        buildingCode: roomInfo.buildingCode,
         coordinates: googleCoords, // Share the same coordinates
         type: 'indoor'
       }
     };
   }
   
-  getRoomInfo(classCode: string): { roomId: any; roomName: string } {
-    // This is where you could add more sophisticated room ID extraction
-    // based on the class code format (e.g., H-531, MB-S2.330, etc.)
-    // For now, we'll assume the classCode is already a room ID or can be used as one
-    
-    const buildingCode = this.getBuildingCode(this.cleanUpInput(classCode));
-    let roomId = null;
-    
-    // Try to find the corresponding room in the mappedin data
-    // This is simplified - you would need to implement the actual room lookup
-    // based on your mappedin data structure
-    try {
-      const mapData = this.mappedInService.getCampusMapData();
-      // For now, we'll just return the classCode as the roomId
-      roomId = classCode;
-    } catch (error) {
-      console.error('Error finding room:', error);
+  getRoomInfo(classCode: string): { roomId: any; roomName: string; buildingCode: string } {
+    if (!classCode) {
+      return {
+        roomId: null,
+        roomName: 'Unknown Room',
+        buildingCode: ''
+      };
     }
     
+    // Extract building code and room number
+    // Common patterns: H-531, MB-S2.330, FG-B080, etc.
+    let buildingCode = '';
+    let roomNumber = '';
+    
+    // First try to match the pattern like "H-531" or "MB-S2.330"
+    const roomPattern = /^([A-Za-z\-]+)[- ]([A-Za-z0-9.\-]+)$/;
+    const match = classCode.trim().match(roomPattern);
+    
+    if (match) {
+      buildingCode = match[1].toUpperCase();
+      roomNumber = match[2];
+    } else {
+      // If no pattern match, try to extract the building code from the beginning
+      buildingCode = this.getBuildingCode(this.cleanUpInput(classCode));
+      
+      // Try to extract the room number part
+      const parts = classCode.split(/[-\s]/);
+      if (parts.length > 1) {
+        // If there are multiple parts, take everything after the building code
+        roomNumber = parts.slice(1).join('-');
+      } else {
+        // If no clear separation, assume the whole string is the room ID
+        roomNumber = classCode;
+      }
+    }
+    
+    // This is the full room ID that will be used for matching in MappedIn
+    const fullRoomId = buildingCode + '-' + roomNumber;
+    
+    console.log('Extracted room info:', { buildingCode, roomNumber, fullRoomId });
+    
     return {
-      roomId,
-      roomName: classCode
+      roomId: fullRoomId,
+      roomName: classCode,
+      buildingCode: buildingCode
     };
   }
 

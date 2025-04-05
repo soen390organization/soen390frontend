@@ -31,11 +31,11 @@ describe('CurrentLocationService', () => {
       expect(result).toEqual({ lat: 10, lng: 20 });
     });
 
-    it('should return null if an error occurs', async () => {
+    it('should return null if an error occurs and useFallback is false', async () => {
       spyOn(Geo, 'getCurrentPosition').and.returnValue(Promise.reject('some error'));
       const consoleSpy = spyOn(console, 'error');
 
-      const result = await service.getCurrentLocation();
+      const result = await service.getCurrentLocation(false); // Pass false to disable fallback
       expect(result).toBeNull();
       expect(consoleSpy).toHaveBeenCalledWith('Error getting location:', 'some error');
     });
