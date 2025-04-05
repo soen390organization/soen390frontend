@@ -113,12 +113,16 @@ export class GoogleMapComponent implements AfterViewInit {
       this.currentInfoWindow.close();
     }
 
-    const container = document.getElementById('infoWindowContent')!.cloneNode(true) as HTMLElement;
-    container.style.display = 'block';
+    const containerNode = document.getElementById('infoWindowContent')!.cloneNode(true);
+    if (!(containerNode instanceof HTMLElement)) {
+      throw new Error('Cloned node is not an HTMLElement');
+    }
+    const container = containerNode; // Now container is correctly typed as HTMLElement
 
+    container.style.display = 'block';
     container.querySelector('#buildingName')!.textContent = building.name;
     container.querySelector('#buildingAddress')!.textContent =
-      building.address || 'No address available';
+      building.address ?? 'No address available';
 
     const facultiesDiv = container.querySelector('#buildingFaculties')!;
     facultiesDiv.innerHTML = building.faculties?.length
