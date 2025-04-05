@@ -174,7 +174,7 @@ describe('InteractionBarComponent', () => {
 
     // Assertions
     expect(component.isExpanded).toBeFalse();
-    expect(component.footerContainer.nativeElement.style.transform).toBe('translateY(80%)');
+    expect(component.footerContainer.nativeElement.style.transform).toBe('translateY(65%)');
     expect(component.footerContainer.nativeElement.style.overflowY).toBe('');
     expect(component.swipeProgress).toBe(0);
   });
