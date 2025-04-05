@@ -6,8 +6,8 @@ import { Injectable } from '@angular/core';
 export class PolygonBuilder {
   map!: google.maps.Map;
   latLngCoords: google.maps.LatLngLiteral[] = [];
-  fill: string = '#FF0000';
-  outline: string = '#FF0000';
+  fill: string = '#852C3A';
+  outline: string = '#852C3A';
 
   setMap(map: google.maps.Map) {
     this.map = map;
