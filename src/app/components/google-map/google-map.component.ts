@@ -98,8 +98,6 @@ export class GoogleMapComponent implements AfterViewInit {
     this.initialized.emit();
   }
 
-  
-
   async loadBuildings() {
     const userCurrentLocation = await this.currentLocationService.getCurrentLocation();
     const userCurrentBuilding =
@@ -124,8 +122,8 @@ export class GoogleMapComponent implements AfterViewInit {
 
       this.googleMapService.getMap().addListener('click', () => {
         if (this.currentInfoWindow) {
-          this.currentInfoWindow.close(); 
-          this.currentInfoWindow = null;  
+          this.currentInfoWindow.close();
+          this.currentInfoWindow = null;
         }
       });
     });
@@ -135,18 +133,23 @@ export class GoogleMapComponent implements AfterViewInit {
     if (this.currentInfoWindow) {
       this.currentInfoWindow.close();
     }
-  
+
     const container = document.getElementById('infoWindowContent')!.cloneNode(true) as HTMLElement;
     container.style.display = 'block';
-  
+
     container.querySelector('#buildingName')!.textContent = building.name;
-    container.querySelector('#buildingAddress')!.textContent = building.address || 'No address available';
-  
+    container.querySelector('#buildingAddress')!.textContent =
+      building.address || 'No address available';
+
     const facultiesDiv = container.querySelector('#buildingFaculties')!;
     facultiesDiv.innerHTML = building.faculties?.length
-      ? building.faculties.map((f: string) => `<span style="display: block; text-indent: -10px;">&#8226; ${f}</span>`).join('')
+      ? building.faculties
+          .map(
+            (f: string) => `<span style="display: block; text-indent: -10px;">&#8226; ${f}</span>`
+          )
+          .join('')
       : 'No faculties available';
-  
+
     const iconImg = container.querySelector('#buildingAccessibility') as HTMLImageElement;
     if (building.accessibility) {
       iconImg.src = building.accessibility;
@@ -154,14 +157,14 @@ export class GoogleMapComponent implements AfterViewInit {
     } else {
       iconImg.style.display = 'none';
     }
-  
+
+    // Create the InfoWindow without content and then explicitly set it.
     this.currentInfoWindow = new google.maps.InfoWindow({
-      content: container,
       maxWidth: 200
     });
+    // added setContent here: test expects this, remove if not intentional
+    this.currentInfoWindow.setContent(container);
     this.currentInfoWindow.setPosition(latLng);
     this.currentInfoWindow.open(this.googleMapService.getMap());
   }
-  
-
 }

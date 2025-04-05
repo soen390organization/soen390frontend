@@ -2,7 +2,12 @@ import { AfterViewInit, Component, ElementRef, OnInit, ViewChild, NgZone } from 
 import { LocationCardsComponent } from '../location-cards/location-cards.component';
 import { Store } from '@ngrx/store';
 import { PlacesService } from 'src/app/services/places/places.service';
-import { MapType, selectCurrentMap, selectSelectedCampus, selectShowRoute } from 'src/app/store/app';
+import {
+  MapType,
+  selectCurrentMap,
+  selectSelectedCampus,
+  selectShowRoute
+} from 'src/app/store/app';
 import { Location } from 'src/app/interfaces/location.interface';
 import { filter, forkJoin, Observable, switchMap } from 'rxjs';
 import { DirectionsComponent } from '../directions/directions.component';
@@ -51,7 +56,7 @@ export class InteractionBarComponent implements OnInit, AfterViewInit {
     public readonly placesService: PlacesService,
     public readonly visibilityService: VisibilityService,
     public readonly calendarService: CalendarService,
-    public ngZone: NgZone 
+    public ngZone: NgZone
   ) {}
 
   ngOnInit() {
@@ -111,7 +116,7 @@ export class InteractionBarComponent implements OnInit, AfterViewInit {
         this.onDragEnd();
       });
     };
-    
+
     // Touch events
     element.addEventListener('touchstart', onStart, { passive: true });
     element.addEventListener('touchmove', onMove, { passive: false });
@@ -120,18 +125,22 @@ export class InteractionBarComponent implements OnInit, AfterViewInit {
     // Mouse events
     element.addEventListener('mousedown', (e) => {
       onStart(e);
-    
+
       document.addEventListener('mousemove', onMove);
-    
-      document.addEventListener('mouseup', () => {
-        this.ngZone.run(() => {
-          onEnd(); // 👈 now runs inside Angular zone = DOM updates!
-          document.removeEventListener('mousemove', onMove);
-          document.removeEventListener('mouseup', onEnd);
-        });
-      }, { once: true });
+
+      document.addEventListener(
+        'mouseup',
+        () => {
+          this.ngZone.run(() => {
+            onEnd(); // 👈 now runs inside Angular zone = DOM updates!
+            document.removeEventListener('mousemove', onMove);
+            document.removeEventListener('mouseup', onEnd);
+          });
+        },
+        { once: true }
+      );
     });
-  }    
+  }
 
   handleClick(): void {
     if (this.isDragging) {
