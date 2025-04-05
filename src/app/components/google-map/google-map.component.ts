@@ -158,11 +158,9 @@ export class GoogleMapComponent implements AfterViewInit {
       iconImg.style.display = 'none';
     }
 
-    // Create the InfoWindow without content and then explicitly set it.
     this.currentInfoWindow = new google.maps.InfoWindow({
       maxWidth: 200
     });
-    // added setContent here: test expects this, remove if not intentional
     this.currentInfoWindow.setContent(container);
     this.currentInfoWindow.setPosition(latLng);
     this.currentInfoWindow.open(this.googleMapService.getMap());

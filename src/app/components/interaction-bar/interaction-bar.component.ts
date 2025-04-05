@@ -132,7 +132,7 @@ export class InteractionBarComponent implements OnInit, AfterViewInit {
         'mouseup',
         () => {
           this.ngZone.run(() => {
-            onEnd(); // 👈 now runs inside Angular zone = DOM updates!
+            onEnd();
             document.removeEventListener('mousemove', onMove);
             document.removeEventListener('mouseup', onEnd);
           });
@@ -144,7 +144,7 @@ export class InteractionBarComponent implements OnInit, AfterViewInit {
 
   handleClick(): void {
     if (this.isDragging) {
-      console.log('🚫 Click ignored — user was swiping');
+      console.log('Click ignored — user was swiping');
       return;
     }
     this.onShowMore();
