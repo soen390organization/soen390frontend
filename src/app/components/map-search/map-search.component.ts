@@ -228,4 +228,30 @@ export class MapSearchComponent implements OnInit {
     }
     this.places = [];
   }
+
+  private readonly highlightedPlaces = new Set<string>([
+    'H Building Concordia University', 
+    'John Molson School of Business',
+    'Concordia University, John Molson Building',
+    'Concordia Engineering And Visual Arts (EV) Building',
+    'Pavillon Ev Building',
+    'LB Building, Concordia University',
+    'CL Annex',
+    'Concordia University ER Building',
+    'Vanier Library',
+    'Central Building (CC)',
+    'SP Building, Loyola Campus, Concordia University'
+  ]);
+  
+  getPlaceIcon(title: string | undefined): string {
+    // If the title is in the highlightedPlaces Set, return the icon; otherwise, return the default icon.
+    return this.isHighlighted(title) ? 'location_city' : 'location_on';
+  }
+  
+  isHighlighted(title: string | undefined): boolean {
+    // Simply check if the title exists in the Set of highlighted places
+    return this.highlightedPlaces.has(title);
+  }
+  
+
 }
