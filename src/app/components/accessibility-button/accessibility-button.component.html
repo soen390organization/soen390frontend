@@ -1,6 +1,7 @@
 <button
   class="flex bg-white items-center justify-center rounded-full p-3 shadow"
   (click)="toggleAccessibility()"
+  [ngClass]="getAccessibility() ? 'bg-black' : 'bg-white'"
 >
   <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" class="h-6 w-6" viewBox="0 0 24 24">
     <circle cx="9" cy="4" r="2" />
