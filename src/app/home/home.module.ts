@@ -1,4 +1,4 @@
-import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core';
+import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
 import { FormsModule } from '@angular/forms';
@@ -26,7 +26,6 @@ import { UserProfileComponent } from '../components/user-profile/user-profile.co
     UserProfileComponent
   ],
   declarations: [HomePage],
-  exports: [GoogleMapComponent],
-  schemas: [CUSTOM_ELEMENTS_SCHEMA]
+  exports: [GoogleMapComponent]
 })
 export class HomePageModule {}
