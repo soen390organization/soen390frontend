@@ -127,6 +127,17 @@ export class CalendarService {
 
   transformEvent(event: any): EventInfo {
     const eventType = event.summary.split(' ')[1] || 'LEC';
+    const buildingData = this.convertClassToAddress(event.location);
+    const roomInfo = this.getRoomInfo(event.location);
+    
+    // Clone the coordinates if they exist to ensure we have a proper LatLng object
+    const googleCoords = buildingData.coordinates ? 
+      new google.maps.LatLng(
+        buildingData.coordinates.lat(), 
+        buildingData.coordinates.lng()
+      ) : null;
+    
+    // Create event information
     return {
       title: event.summary,
       type: EventType[eventType.toUpperCase()],
@@ -134,17 +145,46 @@ export class CalendarService {
       endTime: event.end.dateTime,
       googleLoc: {
         title: event.summary,
-        ...this.convertClassToAddress(event.location),
+        address: buildingData.address,
+        coordinates: googleCoords,
+        image: buildingData.image,
         type: 'outdoor'
       },
       mappedInLoc: {
         title: event.summary,
-        address: this.convertClassToAddress(event.location).address,
-        image: this.convertClassToAddress(event.location).image,
+        address: buildingData.address,
+        image: buildingData.image,
         indoorMapId: this.mappedInService.getMapId(),
-        room: event.location,
-        type: 'outdoor'
+        // Use room object from MappedinService if available, otherwise just use the location string
+        room: roomInfo.roomId || event.location,
+        coordinates: googleCoords, // Share the same coordinates
+        type: 'indoor'
       }
+    };
+  }
+  
+  getRoomInfo(classCode: string): { roomId: any; roomName: string } {
+    // This is where you could add more sophisticated room ID extraction
+    // based on the class code format (e.g., H-531, MB-S2.330, etc.)
+    // For now, we'll assume the classCode is already a room ID or can be used as one
+    
+    const buildingCode = this.getBuildingCode(this.cleanUpInput(classCode));
+    let roomId = null;
+    
+    // Try to find the corresponding room in the mappedin data
+    // This is simplified - you would need to implement the actual room lookup
+    // based on your mappedin data structure
+    try {
+      const mapData = this.mappedInService.getCampusMapData();
+      // For now, we'll just return the classCode as the roomId
+      roomId = classCode;
+    } catch (error) {
+      console.error('Error finding room:', error);
+    }
+    
+    return {
+      roomId,
+      roomName: classCode
     };
   }
 
@@ -153,11 +193,40 @@ export class CalendarService {
     coordinates: google.maps.LatLng | null;
     image: string;
   } {
+    if (!classCode) {
+      console.warn('Class code is undefined or empty');
+      return {
+        address: 'No Address',
+        coordinates: null,
+        image: 'assets/images/poi_fail.png'
+      };
+    }
+    
     const buildingCodeChars = this.cleanUpInput(classCode);
-
     const buildingCodeStr = this.getBuildingCode(buildingCodeChars);
+    
+    if (!buildingCodeStr) {
+      console.warn(`Unable to extract building code from: ${classCode}`);
+      return {
+        address: 'No Address',
+        coordinates: null,
+        image: 'assets/images/poi_fail.png'
+      };
+    }
 
-    return this.buildLocationObject(buildingCodeStr);
+    const locationObj = this.buildLocationObject(buildingCodeStr);
+    
+    // Ensure coordinates are a LatLng object if they exist in string form
+    if (locationObj.coordinates === null && 
+        this.dataService.coordinatesMap[buildingCodeStr]) {
+      const coords = this.dataService.coordinatesMap[buildingCodeStr];
+      locationObj.coordinates = new google.maps.LatLng(
+        parseFloat(coords.lat), 
+        parseFloat(coords.lng)
+      );
+    }
+    
+    return locationObj;
   }
 
   /**
@@ -205,10 +274,36 @@ export class CalendarService {
     coordinates: google.maps.LatLng | null;
     image: string;
   } {
+    if (!buildingCode) {
+      return {
+        address: 'No Address',
+        coordinates: null,
+        image: 'assets/images/poi_fail.png'
+      };
+    }
+
+    const address = this.dataService.addressMap[buildingCode] ?? 'No Address';
+    
+    // Convert coordinates map entry (which might be strings) to LatLng
+    let coordinates = null;
+    const coordsFromMap = this.dataService.coordinatesMap[buildingCode];
+    if (coordsFromMap) {
+      try {
+        coordinates = new google.maps.LatLng(
+          parseFloat(coordsFromMap.lat), 
+          parseFloat(coordsFromMap.lng)
+        );
+      } catch (error) {
+        console.error('Error creating LatLng for building code:', buildingCode, error);
+      }
+    }
+    
+    const image = this.dataService.imageMap[buildingCode] ?? 'assets/images/poi_fail.png';
+    
     return {
-      address: this.dataService.addressMap[buildingCode] ?? 'No Address',
-      coordinates: this.dataService.coordinatesMap[buildingCode] ?? null,
-      image: this.dataService.imageMap[buildingCode] ?? 'No Image'
+      address,
+      coordinates,
+      image
     };
   }
 
