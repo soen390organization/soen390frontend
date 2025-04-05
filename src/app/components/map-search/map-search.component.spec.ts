@@ -250,7 +250,26 @@ describe('MapSearchComponent', () => {
     }));
   });
   
+  it('should return the correct icon for highlighted places', () => {
+    const highlightedPlaceTitle = 'H Building Concordia University';
+    const defaultIcon = 'location_on';
   
+    // Test when the place is in the highlightedPlaces map
+    const icon = component.getPlaceIcon(highlightedPlaceTitle);
+    expect(icon).toBe('location_city');
+  
+    // Test when the place is not in the highlightedPlaces map
+    const nonHighlightedPlaceTitle = 'Nonexistent Place';
+    const nonHighlightedIcon = component.getPlaceIcon(nonHighlightedPlaceTitle);
+    expect(nonHighlightedIcon).toBe(defaultIcon);
+  });
+  
+  it('should return the default icon if title is undefined or empty', () => {
+    const undefinedIcon = component.getPlaceIcon(undefined);
+    expect(undefinedIcon).toBe('location_on');
     
+    const emptyIcon = component.getPlaceIcon('');
+    expect(emptyIcon).toBe('location_on');
+  });
   
 });
