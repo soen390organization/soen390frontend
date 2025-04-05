@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { Location } from '../../interfaces/location.interface';
-import data from 'src/assets/concordia-data.json';
 import { selectSelectedCampus, AppState } from '../../store/app';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { Store } from '@ngrx/store';
@@ -14,7 +13,6 @@ import { ConcordiaDataService } from '../concordia-data.service';
 export class PlacesService {
   private placesService!: google.maps.places.PlacesService;
   private placesServiceReady = new BehaviorSubject<boolean>(false);
-  private campusData: any = data;
 
   constructor(
     private readonly store: Store<AppState>,
@@ -35,13 +33,16 @@ export class PlacesService {
 
   /**
    * Returns an observable that emits the readiness status of the PlacesService.
-   * This can be used to ensure the service is initialized before making API calls.
    * @returns An observable emitting a boolean indicating whether the PlacesService is ready.
    */
   public isInitialized() {
     return this.placesServiceReady.asObservable();
   }
 
+  /**
+   * Retrieves place suggestions based on the input query.
+   * If the input is empty, default building suggestions are returned from ConcordiaDataService.
+   */
   public async getPlaceSuggestions(input: string): Promise<Location[]> {
     const trimmedInput = input.trim();
     const campusKey = await firstValueFrom(this.store.select(selectSelectedCampus));
@@ -51,8 +52,8 @@ export class PlacesService {
       return this.concordiaDataService.getBuildingSuggestions(campusKey);
     }
 
-    const campusCoordinates = this.campusData[campusKey]?.coordinates;
-
+    // Get campus coordinates using our helper method.
+    const campusCoordinates = this.getCampusCoordinates(campusKey);
     if (!campusCoordinates) {
       return [];
     }
@@ -77,10 +78,11 @@ export class PlacesService {
     );
 
     let rooms = [];
-    // const campusBuildings:BuildingData[]= Object.values(this.mappedInService.getCampusMapData()) || [];
-    // campusBuildings.forEach((building: BuildingData) => {
-    const campusData = this.mappedInService.getCampusMapData() || {};
-    for (const [key, building] of Object.entries(campusData) as [string, BuildingData][]) {
+    const campusDataFromMappedIn = this.mappedInService.getCampusMapData() || {};
+    for (const [key, building] of Object.entries(campusDataFromMappedIn) as [
+      string,
+      BuildingData
+    ][]) {
       rooms = [
         ...rooms,
         ...building.mapData
@@ -116,15 +118,15 @@ export class PlacesService {
     const searchTerm = normalizeString(input);
 
     const selectedBuildingRooms = rooms.filter((room) =>
-      [room.title, room.fullName, room.abbreviation] // Check abbreviation, full name, and short name
-        .some((field) => field && normalizeString(field).includes(searchTerm))
+      [room.title, room.fullName, room.abbreviation].some(
+        (field) => field && normalizeString(field).includes(searchTerm)
+      )
     );
 
     const detailsPromises = predictions.map((prediction) => this.getPlaceDetail(prediction));
     let details = await Promise.all(detailsPromises);
     details = [...selectedBuildingRooms.slice(0, 3), ...details];
 
-    // Filter out any null values (failed details)
     return details.filter(
       (
         detail
@@ -135,6 +137,14 @@ export class PlacesService {
         type: 'outdoor';
       } => detail !== null
     );
+  }
+
+  /**
+   * Helper method to extract campus coordinates from the ConcordiaDataService.
+   */
+  private getCampusCoordinates(campusKey: string): { lat: number; lng: number } | undefined {
+    const campus = this.concordiaDataService.getCampus(campusKey);
+    return campus ? campus.coordinates : undefined;
   }
 
   private getPlaceDetail(
@@ -166,13 +176,12 @@ export class PlacesService {
   }
 
   /**
-   * Retrieves the buildings on the selected campus from the store.
-   * @returns A promise resolving to an array of LocationCard objects representing campus buildings.
+   * Retrieves the buildings on the selected campus.
+   * Delegates to ConcordiaDataService to obtain the buildings.
    */
   public async getCampusBuildings(): Promise<GoogleMapLocation[]> {
     const campusKey = await firstValueFrom(this.store.select(selectSelectedCampus));
-
-    return this.campusData[campusKey].buildings.map((building: any) => ({
+    return this.concordiaDataService.getBuildings(campusKey).map((building: any) => ({
       title: building.name,
       coordinates: new google.maps.LatLng(building.coordinates),
       address: building.address,
@@ -184,14 +193,12 @@ export class PlacesService {
   /**
    * Retrieves nearby points of interest (e.g., restaurants) around the selected campus.
    * Defaults to the current campus location but can be enhanced to prioritize the user's location.
-   * @TODO - Modify to prioritize the user's location if they are on campus.
-   * @returns A promise resolving to an array of LocationCard objects representing points of interest.
    */
   public async getPointsOfInterest(): Promise<GoogleMapLocation[]> {
     const campusKey = await firstValueFrom(this.store.select(selectSelectedCampus));
 
     const places = await this.getPlaces(
-      this.campusData[campusKey]?.coordinates,
+      new google.maps.LatLng(this.getCampusCoordinates(campusKey)!),
       250,
       'restaurant'
     ).catch(() => []); // Catch any error and return an empty array
@@ -210,7 +217,6 @@ export class PlacesService {
    * @param location The center point of the search.
    * @param radius The search radius in meters.
    * @param type The type of place to search for.
-   * @returns A promise resolving to an array of PlaceResult objects.
    */
   private getPlaces(
     location: google.maps.LatLng,
@@ -229,7 +235,6 @@ export class PlacesService {
           const operationalResults = results.filter(
             (place) => place.business_status === 'OPERATIONAL'
           );
-
           resolve(operationalResults);
         } else {
           console.error('Failed to get places:', status);
