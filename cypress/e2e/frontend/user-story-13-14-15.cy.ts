@@ -23,59 +23,115 @@ describe('Map - Directions and Route Generation for Multi-Transportation Modes',
     // Expand the search inputs.
     cy.get('.material-symbols-outlined').contains('search').click();
 
-    // 🚧 Skipping start location input for now due to selector issue
-    // cy.get('input[placeholder="Choose starting point..."]').clear().type('John Molson School of Business');
-    // cy.wait(3000);
-    // cy.contains('li#start-item', 'John Molson').click();
-    // cy.wait(2000);
+    // Enter start location (JMSB) then press Enter.
+    cy.get('input[placeholder="Choose starting point..."]').clear().type('John Molson Guy');
+    cy.wait(3000);
+    cy.contains('li#start-item', 'John Molson').click();
+    cy.wait(2000);
 
-    // 🚧 Skipping destination input for now due to selector issue
-    // cy.get('input[placeholder="Choose destination point..."]')
-    //   .clear()
-    //   .type('Vanier Library Loyola');
-    // cy.wait(3000);
-    // cy.contains('li#destination-item', 'Vanier Library').click();
-    // cy.wait(3000);
+    // Enter destination (Vanier Library) then press Enter.
+    cy.get('input[placeholder="Choose destination point..."]')
+      .clear()
+      .type('Vanier Library Loyola');
+    cy.wait(3000);
+    cy.contains('li#destination-item', 'Vanier Library').click();
+    cy.wait(3000);
 
-    // 🚧 Skipping marker checks for now due to selector issue
-    // cy.get('div[role="button"][tabindex="0"]').should('have.length', 1);
-    // cy.get('div[role="button"][tabindex="-1"]').should('have.length', 1);
+    // Verify that two markers are displayed (assuming markers contain "Icone_Verde.svg").
+    cy.get('div[role="button"][tabindex="0"]').should('have.length', 1);
+    cy.get('div[role="button"][tabindex="-1"]').should('have.length', 1);
 
-    // 🚧 Skipping ETA check for now due to selector issue
-    // cy.contains(/\d+ mins/, { timeout: 15000 }).should('be.visible');
+    // @TODO: CAREFUL - Shuttle Bus returns the word 'mins' as minutes rather than mins (like the rest)...
+    cy.contains(/\d+ mins/, { timeout: 15000 }).should('be.visible');
 
-    // 🚧 Skipping route generation since start/destination are skipped
-    // cy.contains('button', 'Start').click();
+    // Click the "Start" button to generate the route.
+    cy.contains('button', 'Start').click();
+    cy.wait(2000);
 
-    // 🚧 Skipping handle bar click (swipe area) to expand directions
-    // cy.get(
-    //   '.w-full.h-\\[35px\\].cursor-pointer.flex.flex-col.items-center.justify-start.my-\\[16px\\].mx-auto',
-    //   { timeout: 10000 }
-    // )
-    //   .should('be.visible')
-    //   .click();
+    // Click on the handle bar using the provided class.
+    cy.get(
+      '.w-\\[100px\\].h-\\[10px\\].bg-\\[\\#d5d5d5\\].my-\\[10px\\].mx-auto.rounded-full.cursor-pointer',
+      { timeout: 10000 }
+    )
+      .should('be.visible')
+      .click();
+    cy.wait(2000);
 
-    // 🚧 Skipping directions component check
-    // cy.get('app-directions', { timeout: 10000 }).should('exist');
+    // Verify that the directions component is displayed.
+    cy.get('app-directions', { timeout: 10000 }).should('exist');
 
-    // 🚧 Skipping direction text capture and travel mode updates
-    // cy.get('app-directions')
-    //   .invoke('text')
-    //   .then((initialText) => {
-    //     // Click the Bus button (icon: "directions_bus")
-    //     cy.get('app-directions').contains('span', 'directions_bus').parents('button').click();
+    // Capture the initial directions text.
+    cy.get('app-directions')
+      .invoke('text')
+      .then((initialText) => {
+        // Click the Bus button (icon: "directions_bus").
+        cy.get('app-directions').contains('span', 'directions_bus').parents('button').click();
+        cy.wait(3000);
+        cy.get('app-directions')
+          .invoke('text')
+          .should((busText) => {
+            expect(busText, 'Directions text should update for bus').to.not.equal(initialText);
+          });
 
-    //     cy.get('app-directions')
-    //       .invoke('text')
-    //       .should((busText) => {
-    //         expect(busText, 'Directions text should update for bus').to.not.equal(initialText);
-    //       });
+        // @TODO: we have to fix this as somethimes the button does not appear when there is no schedule for it at that time!
+        // Click the Shuttle button (icon: "directions_transit").
+        // cy.get('app-directions')
+        //   .invoke('text')
+        //   .then((busUpdatedText) => {
+        //     cy.get('app-directions')
+        //       .contains('span', 'directions_transit')
+        //       .parents('button')
+        //       .click();
+        //     cy.wait(3000);
+        //     cy.get('app-directions')
+        //       .invoke('text')
+        //       .should((shuttleText) => {
+        //         expect(shuttleText, 'Directions text should update for shuttle').to.not.equal(
+        //           busUpdatedText
+        //         );
+        //       });
 
-    //     // 🚧 Keeping other modes commented out for now
-    //   });
+        //     // Click the Car button (icon: "directions_car").
+        //     cy.get('app-directions')
+        //       .invoke('text')
+        //       .then((shuttleUpdatedText) => {
+        //         cy.get('app-directions')
+        //           .contains('span', 'directions_car')
+        //           .parents('button')
+        //           .click();
+        //         cy.wait(3000);
+        //         cy.get('app-directions')
+        //           .invoke('text')
+        //           .should((carText) => {
+        //             expect(carText, 'Directions text should update for car').to.not.equal(
+        //               shuttleUpdatedText
+        //             );
+        //           });
 
-    // 🚧 Skipping end button and directions removal check
-    // cy.contains('button', 'End').click();
-    // cy.get('app-directions').should('not.exist');
+        //         // Click the Walking button (icon: "directions_walk").
+        //         cy.get('app-directions')
+        //           .invoke('text')
+        //           .then((carUpdatedText) => {
+        //             cy.get('app-directions')
+        //               .contains('span', 'directions_walk')
+        //               .parents('button')
+        //               .click();
+        //             cy.wait(3000);
+        //             cy.get('app-directions')
+        //               .invoke('text')
+        //               .should((walkText) => {
+        //                 expect(walkText, 'Directions text should update for walking').to.not.equal(
+        //                   carUpdatedText
+        //                 );
+        //               });
+        //           });
+        //       });
+        //   });
+      });
+
+    // Click the "End" button to hide the directions.
+    cy.contains('button', 'End').click();
+    cy.wait(2000);
+    cy.get('app-directions').should('not.exist');
   });
 });
