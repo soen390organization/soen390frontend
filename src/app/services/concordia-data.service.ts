@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import data from 'src/assets/concordia-data.json';
-export type Campus = typeof data[keyof typeof data];
+export type Campus = (typeof data)[keyof typeof data];
 
 @Injectable({
   providedIn: 'root'
@@ -21,6 +21,15 @@ export class ConcordiaDataService {
 
   public getBuildings(campusKey: string) {
     return data[campusKey].buildings;
+  }
+
+  public getBuildingSuggestions(campusKey: string) {
+    return this.getBuildings(campusKey).map((building: any) => ({
+      title: building.name,
+      address: building.address,
+      coordinates: new google.maps.LatLng(building.coordinates),
+      type: 'outdoor'
+    }));
   }
 
   public getNearestCampus(coords: google.maps.LatLng): Campus {

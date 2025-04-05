@@ -6,6 +6,7 @@ import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { MappedinService, BuildingData } from '../mappedin/mappedin.service';
 import { GoogleMapLocation } from 'src/app/interfaces/google-map-location.interface';
+import { ConcordiaDataService } from '../concordia-data.service';
 
 @Injectable({
   providedIn: 'root'
@@ -17,7 +18,8 @@ export class PlacesService {
 
   constructor(
     private readonly store: Store<AppState>,
-    private mappedInService: MappedinService
+    private mappedInService: MappedinService,
+    private readonly concordiaDataService: ConcordiaDataService
   ) {}
 
   /**
@@ -41,8 +43,16 @@ export class PlacesService {
   }
 
   public async getPlaceSuggestions(input: string): Promise<Location[]> {
+    const trimmedInput = input.trim();
     const campusKey = await firstValueFrom(this.store.select(selectSelectedCampus));
+
+    if (!trimmedInput) {
+      // Use ConcordiaDataService to get the default building suggestions.
+      return this.concordiaDataService.getBuildingSuggestions(campusKey);
+    }
+
     const campusCoordinates = this.campusData[campusKey]?.coordinates;
+
     if (!campusCoordinates) {
       return [];
     }

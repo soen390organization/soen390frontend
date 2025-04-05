@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, Output, EventEmitter } from '@angular/core';
 import { GoogleMapComponent } from '../google-map/google-map.component';
 import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
@@ -46,6 +46,7 @@ export const MapSearchAnimation = [
   animations: MapSearchAnimation
 })
 export class MapSearchComponent implements OnInit {
+  @Output() searchStateChange = new EventEmitter<boolean>();
   @ViewChild(GoogleMapComponent) googleMap!: GoogleMapComponent;
   startLocationInput = '';
   destinationLocationInput = '';
@@ -117,6 +118,7 @@ export class MapSearchComponent implements OnInit {
 
   toggleSearch() {
     this.isSearchVisible = !this.isSearchVisible;
+    this.searchStateChange.emit(this.isSearchVisible);
     if (this.isSearchVisible) {
       HomePage.prototype.showSearch();
     } else {
@@ -156,6 +158,7 @@ export class MapSearchComponent implements OnInit {
   async onStartClick(): Promise<void> {
     this.store.dispatch(setShowRoute({ show: true }));
     this.isSearchVisible = false;
+    this.searchStateChange.emit(false);
   }
 
   clearStartInput() {
@@ -182,8 +185,35 @@ export class MapSearchComponent implements OnInit {
     this.indoorDirectionService.clearNavigation();
   }
 
+  async onFocus(type: 'start' | 'destination'): Promise<void> {
+    this.isSearchingFromStart = type === 'start';
+    // Call getPlaceSuggestions with an empty query to get default building suggestions.
+    const suggestions = await this.placesService.getPlaceSuggestions('');
+    // For start input, always prepend the custom "Your Location" suggestion.
+    this.places = [
+      {
+        title: 'Your Location',
+        address: 'Use your current location',
+        type: 'outdoor',
+        isYourLocation: true
+      },
+      ...suggestions
+    ];
+  }
+
+  onBlur(): void {
+    setTimeout(() => {
+      this.clearList();
+    }, 200);
+  }
+
   /* @TODO: we need to setFloor here for a better experience */
   async setStart(place: any) {
+    if (place.isYourLocation) {
+      await this.onSetUsersLocationAsStart();
+      this.places = [];
+      return;
+    }
     console.log(place);
     this.startLocationInput = place.title;
     if (place.type === 'indoor') {
@@ -208,6 +238,11 @@ export class MapSearchComponent implements OnInit {
   }
 
   async setDestination(place: any) {
+    if (place.isYourLocation) {
+      await this.onSetUsersLocationAsStart();
+      this.places = [];
+      return;
+    }
     this.destinationLocationInput = place.title;
     if (place.type === 'indoor') {
       this.indoorDirectionService.setDestinationPoint(place);

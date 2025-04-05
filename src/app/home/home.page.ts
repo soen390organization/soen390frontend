@@ -40,6 +40,10 @@ export class HomePage implements OnInit {
     });
   }
 
+  onSearchStateChanged(state: boolean): void {
+    this.isSearchVisible = state;
+  }
+
   openUserInfoPage() {
     this.loading = false;
     this.router.navigate(['profile']);

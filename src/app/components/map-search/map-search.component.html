@@ -31,6 +31,8 @@
       <div class="relative">
         <input
           [(ngModel)]="startLocationInput"
+          (focus)="onFocus('start')"
+          (blur)="onBlur()"
           (input)="onSearchChange($event, 'start')"
           (keyup.enter)="setStart(places[0]); clearList()"
           type="text"
@@ -39,22 +41,11 @@
           class="w-full bg-white px-4 py-3 pr-10 rounded-full border border-gray-300 focus:outline-none"
         />
         <div class="absolute inset-y-0 right-2 flex items-center">
-          <ng-container
-            *ngIf="startLocationInput && startLocationInput.trim().length > 0; else showLocationBtn"
-          >
+          <ng-container *ngIf="startLocationInput && startLocationInput.trim().length > 0">
             <button (click)="clearStartInput()">
               <span class="material-symbols-outlined text-gray-400 p-2">cancel</span>
             </button>
           </ng-container>
-          <ng-template #showLocationBtn>
-            <button (click)="onSetUsersLocationAsStart()">
-              <span
-                class="material-symbols-outlined leading-none bg-[#912338] rounded-full text-white p-2"
-              >
-                my_location
-              </span>
-            </button>
-          </ng-template>
         </div>
         <div
           *ngIf="isSearchingFromStart && places?.length > 0"
@@ -66,11 +57,22 @@
               *ngFor="let place of places"
               (click)="setStart(place); clearList()"
               (keydown.enter)="setStart(place); clearList()"
+              [ngClass]="{ 'bg-red-50': place.isYourLocation }"
               class="flex items-center hover:bg-gray-100 p-3 cursor-pointer"
             >
-              <span class="material-symbols-outlined mr-3 p-2 border border-gray-300 rounded-full">
-                location_on
+              <span
+                *ngIf="place.isYourLocation; else defaultIconStart"
+                class="material-symbols-outlined mr-3 p-2 bg-[#912338] rounded-full text-white"
+              >
+                my_location
               </span>
+              <ng-template #defaultIconStart>
+                <span
+                  class="material-symbols-outlined mr-3 p-2 border border-gray-300 rounded-full"
+                >
+                  location_on
+                </span>
+              </ng-template>
               <div class="flex flex-col min-w-0">
                 <div>{{ place?.title }}</div>
                 <div class="text-sm text-gray-500 truncate">
@@ -88,13 +90,14 @@
       <div class="relative z-10">
         <input
           [(ngModel)]="destinationLocationInput"
+          (focus)="onFocus('destination')"
+          (blur)="onBlur()"
           (input)="onSearchChange($event, 'destination')"
           (keyup.enter)="setDestination(places[0]); clearList()"
           type="text"
           placeholder="Choose destination point..."
           class="w-full bg-white px-4 py-3 pr-10 rounded-full border border-gray-300 focus:outline-none"
         />
-
         <div class="absolute inset-y-0 right-2 flex items-center">
           <ng-container
             *ngIf="destinationLocationInput && destinationLocationInput.trim().length > 0"
@@ -114,11 +117,22 @@
               *ngFor="let place of places"
               (click)="setDestination(place); clearList()"
               (keydown.enter)="setDestination(place); clearList()"
+              [ngClass]="{ 'bg-red-50': place.isYourLocation }"
               class="flex items-center hover:bg-gray-100 p-3 cursor-pointer"
             >
-              <span class="material-symbols-outlined mr-3 p-2 border border-gray-300 rounded-full">
-                location_on
+              <span
+                *ngIf="place.isYourLocation; else defaultIconDest"
+                class="material-symbols-outlined mr-3 p-2 bg-[#912338] rounded-full text-white"
+              >
+                my_location
               </span>
+              <ng-template #defaultIconDest>
+                <span
+                  class="material-symbols-outlined mr-3 p-2 border border-gray-300 rounded-full"
+                >
+                  location_on
+                </span>
+              </ng-template>
               <div class="flex flex-col min-w-0">
                 <div>{{ place?.title }}</div>
                 <div class="text-sm text-gray-500 truncate">
@@ -139,10 +153,18 @@
           <ng-container *ngIf="outdoorDirectionsService as svc">
             <ng-container *ngIf="svc.getSelectedStrategy$() | async as strategy">
               <ng-container [ngSwitch]="strategy.getMode()">
-                <span *ngSwitchCase="'WALKING'" class="material-symbols-outlined mr-1">directions_walk</span>
-                <span *ngSwitchCase="'DRIVING'" class="material-symbols-outlined mr-1">directions_car</span>
-                <span *ngSwitchCase="'TRANSIT'" class="material-symbols-outlined mr-1">directions_bus</span>
-                <span *ngSwitchCase="'SHUTTLE'" class="material-symbols-outlined mr-1">directions_transit</span>
+                <span *ngSwitchCase="'WALKING'" class="material-symbols-outlined mr-1"
+                  >directions_walk</span
+                >
+                <span *ngSwitchCase="'DRIVING'" class="material-symbols-outlined mr-1"
+                  >directions_car</span
+                >
+                <span *ngSwitchCase="'TRANSIT'" class="material-symbols-outlined mr-1"
+                  >directions_bus</span
+                >
+                <span *ngSwitchCase="'SHUTTLE'" class="material-symbols-outlined mr-1"
+                  >directions_transit</span
+                >
               </ng-container>
               <span>{{ strategy.getTotalDuration().text || '' }}</span>
               <span class="text-gray-500 font-bold ml-2">
