@@ -11,20 +11,28 @@ import { MappedinService } from '../mappedin/mappedin.service';
   providedIn: 'root'
 })
 export class CalendarService {
+  // ---------------------------
+  // Fields & Subjects
+  // ---------------------------
   private readonly auth = getAuth();
   private readonly googleProvider = new GoogleAuthProvider();
   private accessToken: string | null = null;
-  private previouslyFetchedEvents: {
-    [calendarId: string]: any[];
-  } = {};
-  currentCalendarEvents: any[];
 
+  // Cache previously fetched events by calendar
+  private previouslyFetchedEvents: Record<string, EventInfo[]> = {};
+
+  // Stores the current calendar events
+  currentCalendarEvents: EventInfo[] = [];
+
+  // BehaviorSubject for available calendars
   private readonly calendarsSubject = new BehaviorSubject<any[]>([]);
   calendars$ = this.calendarsSubject.asObservable();
 
-  public selectedCalendarSubject = new BehaviorSubject<string | null>(null);
+  // BehaviorSubject for selected calendar
+  private readonly selectedCalendarSubject = new BehaviorSubject<string | null>(null);
   selectedCalendar$ = this.selectedCalendarSubject.asObservable();
 
+  // Exposed events$ that depend on the selected calendar
   events$: Observable<EventInfo[]> = this.selectedCalendar$.pipe(
     switchMap((calendarId) => {
       if (!calendarId) return of([]);
@@ -32,15 +40,23 @@ export class CalendarService {
     })
   );
 
+  // ---------------------------
+  // Constructor
+  // ---------------------------
   constructor(
     private readonly dataService: ConcordiaDataService,
     private readonly mappedInService: MappedinService
   ) {
+    // Request read-only access to the user's Calendar data
     this.googleProvider.addScope('https://www.googleapis.com/auth/calendar.readonly');
   }
 
+  // ---------------------------
+  // Public Methods
+  // ---------------------------
+
   /**
-   * Initiates Google Sign-In and fetches calendars.
+   * Initiates Google Sign-In and fetches the user’s calendars.
    */
   async signInWithGoogle(): Promise<boolean> {
     try {
@@ -50,11 +66,17 @@ export class CalendarService {
       if (!credential?.accessToken) {
         throw new Error('No credential or access token found');
       }
-
       this.accessToken = credential.accessToken;
+
+      // Get all user calendars and push to calendarsSubject
       const calendars = await this.getUserCalendars();
       this.calendarsSubject.next(calendars);
-      this.setSelectedCalendar(calendars[0].id);
+
+      // Automatically select the first calendar
+      if (calendars.length > 0) {
+        await this.setSelectedCalendar(calendars[0].id);
+      }
+
       return true;
     } catch (error) {
       console.error('Error during Google Sign-In:', error);
@@ -63,166 +85,26 @@ export class CalendarService {
   }
 
   /**
-   * Fetches the user's Google Calendars.
+   * Sets the selected calendar and immediately fetches its events.
    */
-  async getUserCalendars(): Promise<any[]> {
-    try {
-      const response = await fetch('https://www.googleapis.com/calendar/v3/users/me/calendarList', {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${this.accessToken}`,
-          Accept: 'application/json'
-        }
-      });
+  async setSelectedCalendar(calendarId: string): Promise<void> {
+    this.selectedCalendarSubject.next(calendarId);
 
-      if (!response.ok) {
-        throw new Error(`Google Calendar API error: ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      return data.items || [];
-    } catch (error) {
-      console.error('Error fetching Google Calendars:', error);
-      return [];
-    }
-  }
-
-  async fetchEvents(calendarId: string): Promise<any[]> {
-    try {
-      if (calendarId in this.previouslyFetchedEvents) {
-        return this.previouslyFetchedEvents[calendarId];
-      }
-      const now = new Date().toISOString();
-      const endOfWeek = new Date();
-      endOfWeek.setDate(endOfWeek.getDate() + 7);
-      endOfWeek.setHours(23, 59, 59, 999);
-      const timeMax = endOfWeek.toISOString();
-
-      const response = await fetch(
-        `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events?timeMin=${now}&timeMax=${timeMax}&singleEvents=true&orderBy=startTime`,
-        {
-          method: 'GET',
-          headers: {
-            Authorization: `Bearer ${this.accessToken}`,
-            Accept: 'application/json'
-          }
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(`Google Calendar API error: ${response.statusText}`);
-      }
-
-      const data = await response.json();
-
-      const locationItemsPromises = data.items.map((event: any) => this.transformEvent(event));
-      const locationItems = await Promise.all(locationItemsPromises);
-
-      this.previouslyFetchedEvents[calendarId] = locationItems;
-      return locationItems || [];
-    } catch (error) {
-      console.error('Error fetching Google Calendar events:', error);
-      return [];
-    }
-  }
-
-  async transformEvent(event: any): Promise<EventInfo> {
-    const eventType = event.summary.split(' ')[1] || 'LEC';
-    const address = this.convertClassToAddress(event.location);
-    const room = await this.getRoomId(
-      parseFloat(event.location.match(/\d+(\.\d+)?$/)[0]).toString(),
-      address.indoorMapId
-    );
-
-    return {
-      title: event.summary,
-      type: EventType[eventType.toUpperCase()],
-      startTime: event.start.dateTime,
-      endTime: event.end.dateTime,
-      room: event.location,
-      googleLoc: {
-        title: event.summary,
-        coordinates: address.coordinates,
-        ...address,
-        type: 'outdoor'
-      },
-      mappedInLoc: {
-        title: event.summary,
-        address: address.address,
-        image: address.image,
-        indoorMapId: address.indoorMapId,
-        room: room,
-        type: 'indoor'
-      }
-    };
-  }
-
-  convertClassToAddress(classCode: string): {
-    address: string;
-    coordinates: google.maps.LatLng | null;
-    image: string;
-    indoorMapId: string | null;
-  } {
-    const buildingCodeChars = this.cleanUpInput(classCode);
-
-    const buildingCodeStr = this.getBuildingCode(buildingCodeChars);
-
-    return this.buildLocationObject(buildingCodeStr);
+    const events = await this.fetchEvents(calendarId);
+    this.currentCalendarEvents = events;
   }
 
   /**
-   * removes spaces and filters out invalid characters.
+   * Returns the currently selected calendar ID.
    */
-  private cleanUpInput(classCode: string): string[] {
-    return classCode
-      .split('')
-      .filter((char) => char.trim().length > 0)
-      .filter((char) => /[a-z0-9]/i.test(char));
+  getSelectedCalendar(): string | null {
+    return this.selectedCalendarSubject.value;
   }
 
   /**
-   * clean array of characters.
+   * Converts a start and end Date to a short weekday/time string.
+   * (e.g. "Mo, 14:00 - 15:00")
    */
-  private getBuildingCode(chars: string[]): string {
-    let result = '';
-
-    let i = 0;
-    while (i < chars.length) {
-      const char = chars[i].toUpperCase();
-
-      if (/[1-9]/.test(char)) {
-        break;
-      }
-
-      if (char === 'S' && i + 1 < chars.length && /[1-9]/.test(chars[i + 1])) {
-        i++;
-        continue;
-      } else {
-        result += char;
-      }
-      i++;
-    }
-    return result;
-  }
-
-  /**
-   * use the extracted building code to look up the address,
-   * coordinates, and image in one place.
-   */
-  private buildLocationObject(buildingCode: string): {
-    address: string;
-    coordinates: google.maps.LatLng | null;
-    image: string;
-    indoorMapId: string | null;
-  } {
-    return {
-      address: this.dataService.addressMap[buildingCode] ?? 'No Address',
-      coordinates: this.dataService.coordinatesMap[buildingCode] ?? null,
-      image: this.dataService.imageMap[buildingCode] ?? 'No Image',
-      indoorMapId: this.dataService.indoorMapIdMap[buildingCode]
-    };
-  }
-
   formatEventTime(start: Date, end: Date): string {
     const weekdayFormatter = new Intl.DateTimeFormat('en-CA', { weekday: 'short' });
     const timeFormatter = new Intl.DateTimeFormat('en-CA', {
@@ -237,19 +119,209 @@ export class CalendarService {
 
     return `${day}, ${startTime} - ${endTime}`;
   }
-  async setSelectedCalendar(calendarId: string) {
-    this.selectedCalendarSubject.next(calendarId);
-    await this.fetchEvents(calendarId).then((events) => (this.currentCalendarEvents = events));
+
+  // ---------------------------
+  // Private / Internal Methods
+  // ---------------------------
+
+  /**
+   * Fetches the user's Google Calendars from the Calendar API.
+   */
+  private async getUserCalendars(): Promise<any[]> {
+    try {
+      const url = 'https://www.googleapis.com/calendar/v3/users/me/calendarList';
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: this.getAuthHeaders()
+      });
+
+      if (!response.ok) {
+        throw new Error(`Google Calendar API error: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      return data.items || [];
+    } catch (error) {
+      console.error('Error fetching Google Calendars:', error);
+      return [];
+    }
   }
 
-  getSelectedCalendar(): string | null {
-    return this.selectedCalendarSubject.value;
+  /**
+   * Fetches events for a specific calendar, within a 7-day range,
+   * caching the results to avoid re-fetching.
+   */
+  private async fetchEvents(calendarId: string): Promise<EventInfo[]> {
+    try {
+      // Return cached events if we have them
+      if (this.previouslyFetchedEvents[calendarId]) {
+        return this.previouslyFetchedEvents[calendarId];
+      }
+
+      // Build the time range: from now to +7 days
+      const now = new Date().toISOString();
+      const endOfWeek = new Date();
+      endOfWeek.setDate(endOfWeek.getDate() + 7);
+      endOfWeek.setHours(23, 59, 59, 999);
+      const timeMax = endOfWeek.toISOString();
+
+      // Fetch the events
+      const url = `https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events?timeMin=${now}&timeMax=${timeMax}&singleEvents=true&orderBy=startTime`;
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: this.getAuthHeaders()
+      });
+
+      if (!response.ok) {
+        throw new Error(`Google Calendar API error: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      if (!data.items) {
+        return [];
+      }
+
+      // Transform raw events into EventInfo objects
+      const eventPromises = data.items.map((event: any) => this.mapToEventInfo(event));
+      const events = await Promise.all(eventPromises);
+
+      // Cache results and return
+      this.previouslyFetchedEvents[calendarId] = events;
+      return events;
+    } catch (error) {
+      console.error('Error fetching Google Calendar events:', error);
+      return [];
+    }
   }
 
-  private async getRoomId(location: string, indoorMapId: string) {
+  /**
+   * Converts a raw Google Calendar event into our custom EventInfo format.
+   */
+  private async mapToEventInfo(event: any): Promise<EventInfo> {
+    // Extract the event type from the summary if it exists (e.g., "COMP 123 LEC")
+    const summaryParts = event.summary?.split(' ') || [];
+    const eventTypeKey = summaryParts[1] || 'LEC';
+
+    // Convert building info from the location string
+    const address = this.convertClassToAddress(event.location);
+    const locationNumberMatch = event.location?.match(/\d+(\.\d+)?$/);
+    const locationNumber = locationNumberMatch ? locationNumberMatch[0] : null;
+
+    // If we have a room number + indoorMapId, get the Mappedin room
+    let mappedinRoom = null;
+    if (locationNumber && address.indoorMapId) {
+      mappedinRoom = await this.getRoomId(locationNumber, address.indoorMapId);
+    }
+
+    return {
+      title: event.summary,
+      type: EventType[eventTypeKey.toUpperCase()],
+      startTime: event.start.dateTime,
+      endTime: event.end.dateTime,
+      room: event.location,
+      googleLoc: {
+        title: event.summary,
+        coordinates: address.coordinates,
+        ...address,
+        type: 'outdoor'
+      },
+      mappedInLoc: {
+        title: event.summary,
+        address: address.address,
+        image: address.image,
+        indoorMapId: address.indoorMapId,
+        room: mappedinRoom,
+        type: 'indoor'
+      }
+    };
+  }
+
+  /**
+   * Cleans up the class code (e.g. "H-820") and builds the address details.
+   */
+  private convertClassToAddress(classCode: string): {
+    address: string;
+    coordinates: google.maps.LatLng | null;
+    image: string;
+    indoorMapId: string | null;
+  } {
+    const cleanedChars = this.cleanUpInput(classCode);
+    const buildingCodeStr = this.getBuildingCode(cleanedChars);
+    return this.buildLocationObject(buildingCodeStr);
+  }
+
+  /**
+   * Removes spaces and invalid characters, leaving only alphanumeric.
+   */
+  private cleanUpInput(classCode: string): string[] {
+    return classCode
+      .split('')
+      .filter((char) => char.trim().length > 0)
+      .filter((char) => /[a-z0-9]/i.test(char));
+  }
+
+  /**
+   * Extracts the building code portion from the array of characters,
+   * stopping when digits begin (except for certain edge cases).
+   */
+  private getBuildingCode(chars: string[]): string {
+    let result = '';
+    let i = 0;
+
+    while (i < chars.length) {
+      const char = chars[i].toUpperCase();
+
+      // Stop if we hit a digit
+      if (/\d/.test(char)) {
+        break;
+      }
+
+      // Skip "S" if it's followed by a digit
+      if (char === 'S' && i + 1 < chars.length && /\d/.test(chars[i + 1])) {
+        i++;
+        continue;
+      } else {
+        result += char;
+      }
+      i++;
+    }
+    return result;
+  }
+
+  /**
+   * Uses the building code to look up address, coordinates, image, etc.
+   */
+  private buildLocationObject(buildingCode: string): {
+    address: string;
+    coordinates: google.maps.LatLng | null;
+    image: string;
+    indoorMapId: string | null;
+  } {
+    return {
+      address: this.dataService.addressMap[buildingCode] ?? 'No Address',
+      coordinates: this.dataService.coordinatesMap[buildingCode] ?? null,
+      image: this.dataService.imageMap[buildingCode] ?? 'No Image',
+      indoorMapId: this.dataService.indoorMapIdMap[buildingCode] ?? null
+    };
+  }
+
+  /**
+   * Finds a matching room by name in the Mappedin data.
+   */
+  private async getRoomId(locationNumber: string, indoorMapId: string) {
     const mapData = await this.mappedInService.fetchMapData(indoorMapId);
-
-    const room = mapData.getByType('space').filter((space) => space.name === location)[0];
+    // Filter by name (exact match)
+    const [room] = mapData.getByType('space').filter((space) => space.name === locationNumber);
     return room;
+  }
+
+  /**
+   * Helper to construct headers for authorized fetch calls.
+   */
+  private getAuthHeaders(): Record<string, string> {
+    return {
+      Authorization: `Bearer ${this.accessToken}`,
+      Accept: 'application/json'
+    };
   }
 }
