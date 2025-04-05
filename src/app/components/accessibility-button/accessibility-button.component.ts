@@ -13,11 +13,6 @@ export class AccessibilityButtonComponent implements OnInit {
 
   ngOnInit() {}
 
-  async getAccessibility() {
-    const strategy = await this.indoorDirectionsService.getSelectedStrategy();
-    return strategy.accessibility;
-  }
-
   async toggleAccessibility() {
     const strategy = await this.indoorDirectionsService.getSelectedStrategy();
     strategy.toggleAccessibility();

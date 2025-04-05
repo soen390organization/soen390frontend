@@ -16,7 +16,7 @@ export abstract class AbstractIndoorStrategy implements DirectionsStrategy<Mappe
 
   constructor(public mappedinService: MappedinService) {}
 
-  public isAccessibityEnabled() {
+  public isAccessibilityEnabled() {
     return this.accessibility;
   }
 
