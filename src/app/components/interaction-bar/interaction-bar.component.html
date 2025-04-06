@@ -1,6 +1,10 @@
 <app-switch-map-button class="switch-map-container" [style.opacity]="1"></app-switch-map-button>
 
 <div #footerContainer class="swipe-footer-container">
+  <app-accessibility-button
+    class="accessibility-container"
+    *ngIf="showIndoorSelects"
+  ></app-accessibility-button>
   <app-indoor-selects
     *ngIf="showIndoorSelects"
     [style.opacity]="1 - swipeProgress"
@@ -15,28 +19,30 @@
   </div>
 
   <div class="footer-content px-5">
-    <div *ngIf="showDirections$ | async">
+    <ng-container *ngIf="showDirections$ | async; else showLocations">
       <h2 class="flex text-2xl font-bold text-gray-900 my-4">Directions</h2>
       <app-directions></app-directions>
-    </div>
+    </ng-container>
 
-    <div *ngIf="showPOIs$ | async">
+    <ng-template #showLocations>
       <h2 class="flex text-2xl font-bold text-gray-900 mb-4">Buildings</h2>
       <app-location-cards
         [locations]="campusBuildings.locations"
         [loading]="campusBuildings.loading"
         (locationSelected)="onLocationSelected()"
       ></app-location-cards>
+
       <h2 class="flex text-2xl font-bold text-gray-900 my-4">Points of Interest</h2>
       <app-location-cards
         [locations]="pointsOfInterest.locations"
         [loading]="pointsOfInterest.loading"
         (locationSelected)="onLocationSelected()"
       ></app-location-cards>
+
       <div *ngIf="events.events.length > 0">
         <h2 class="flex text-2xl font-bold text-gray-900 my-4">Your Classes</h2>
         <app-event-card [events]="events.events" [loading]="events.loading"></app-event-card>
       </div>
-    </div>
+    </ng-template>
   </div>
 </div>

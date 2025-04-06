@@ -1,6 +1,5 @@
 import { BehaviorSubject, firstValueFrom, Observable } from 'rxjs';
 import { Location } from '../interfaces/location.interface';
-
 /**
  * Abstract service for handling navigation directions.
  *

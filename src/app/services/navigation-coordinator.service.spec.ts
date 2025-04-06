@@ -1,7 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 import { NavigationCoordinatorService } from './navigation-coordinator.service';
 import { Store } from '@ngrx/store';
-import { OutdoorRoutingStrategy, IndoorRoutingStrategy } from '../strategies';
+import { IndoorRoutingStrategy } from 'src/app/strategies/indoor-routing.strategy';
+import { OutdoorRoutingStrategy } from 'src/app/strategies/outdoor-routing.strategy';
 import { GoogleMapLocation } from '../interfaces/google-map-location.interface';
 import { MappedInLocation } from '../interfaces/mappedin-location.interface';
 import { setMapType, MapType } from 'src/app/store/app';
