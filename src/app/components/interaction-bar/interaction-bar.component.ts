@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnInit, ViewChild, NgZone } from '@angular/core';
 import { LocationCardsComponent } from '../location-cards/location-cards.component';
 import { Store } from '@ngrx/store';
 import { PlacesService } from 'src/app/services/places/places.service';
@@ -13,7 +13,7 @@ import { filter, forkJoin, Observable, switchMap } from 'rxjs';
 import { DirectionsComponent } from '../directions/directions.component';
 import { VisibilityService } from 'src/app/services/visibility.service';
 import { CommonModule } from '@angular/common';
-import { SwitchMapButtonComponent } from 'src/app/components/switch-map-button/switch-map-button.component';
+import { SwitchMapButtonComponent } from '../switch-map-button/switch-map-button.component';
 import { IndoorSelectsComponent } from '../indoor-selects/indoor-selects.component';
 import { CalendarService } from 'src/app/services/calendar/calendar.service';
 import { GoogleMapLocation } from 'src/app/interfaces/google-map-location.interface';
@@ -24,10 +24,10 @@ import { EventCardComponent } from '../event-card/event-card.component';
   selector: 'app-interaction-bar',
   imports: [
     IndoorSelectsComponent,
-    SwitchMapButtonComponent,
     LocationCardsComponent,
     DirectionsComponent,
     EventCardComponent,
+    SwitchMapButtonComponent,
     CommonModule
   ],
   templateUrl: './interaction-bar.component.html',
@@ -35,7 +35,7 @@ import { EventCardComponent } from '../event-card/event-card.component';
 })
 export class InteractionBarComponent implements OnInit, AfterViewInit {
   @ViewChild('footerContainer', { static: false }) footerContainer!: ElementRef;
-  @ViewChild('handleBar', { static: false }) handleBar!: ElementRef;
+  @ViewChild('swipeArea', { static: false }) swipeArea!: ElementRef;
 
   public startY = 0;
   public currentY = 0;
@@ -50,12 +50,14 @@ export class InteractionBarComponent implements OnInit, AfterViewInit {
   showDirections$!: Observable<boolean>;
   showPOIs$!: Observable<boolean>;
   COLLAPSED_PERCENTAGE = 65;
+  switchMapButton: any;
 
   constructor(
-    private readonly store: Store,
-    private readonly placesService: PlacesService,
-    private readonly visibilityService: VisibilityService,
-    private readonly calendarService: CalendarService
+    public readonly store: Store,
+    public readonly placesService: PlacesService,
+    public readonly visibilityService: VisibilityService,
+    public readonly calendarService: CalendarService,
+    public ngZone: NgZone
   ) {}
 
   ngOnInit() {
@@ -91,51 +93,78 @@ export class InteractionBarComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    const handle = this.handleBar.nativeElement;
-
-    // **Touch Events (Mobile)**
-    handle.addEventListener('touchstart', (event: TouchEvent) =>
-      this.onDragStart(event.touches[0].clientY)
-    );
-    handle.addEventListener('touchmove', (event: TouchEvent) =>
-      this.onDragMove(event.touches[0].clientY, event)
-    );
-    handle.addEventListener('touchend', () => this.onDragEnd());
-
-    // **Mouse Events (Trackpad & Desktop)**
-    // footer.addEventListener('mousedown', (event: MouseEvent) => this.onDragStart(event.clientY));
-    // document.addEventListener('mousemove', (event: MouseEvent) => this.onDragMove(event.clientY));
-    // document.addEventListener('mouseup', () => this.onDragEnd());
+    this.attachSwipeListeners(this.swipeArea.nativeElement);
+    this.updateFooterUI(false); // Ensure the button is hidden when the footer is collapsed on load
   }
 
-  onShowMore() {
+  public attachSwipeListeners(element: HTMLElement): void {
+    const getClientY = (e: TouchEvent | MouseEvent): number =>
+      e instanceof TouchEvent ? e.touches[0].clientY : e.clientY;
+
+    const onStart = (e: TouchEvent | MouseEvent) => {
+      if (e instanceof TouchEvent && e.touches.length > 1) return;
+      this.onDragStart(getClientY(e));
+    };
+
+    const onMove = (e: TouchEvent | MouseEvent) => {
+      if (!this.isDragging) return;
+      e.preventDefault();
+      this.onDragMove(getClientY(e));
+    };
+
+    const onEnd = () => {
+      this.ngZone.run(() => {
+        this.onDragEnd();
+      });
+    };
+
+    // Touch events
+    element.addEventListener('touchstart', onStart, { passive: true });
+    element.addEventListener('touchmove', onMove, { passive: false });
+    element.addEventListener('touchend', onEnd);
+
+    // Mouse events
+    element.addEventListener('mousedown', (e) => {
+      onStart(e);
+
+      document.addEventListener('mousemove', onMove);
+
+      document.addEventListener(
+        'mouseup',
+        () => {
+          this.ngZone.run(() => {
+            onEnd();
+            document.removeEventListener('mousemove', onMove);
+            document.removeEventListener('mouseup', onEnd);
+          });
+        },
+        { once: true }
+      );
+    });
+  }
+
+  handleClick(): void {
+    if (this.isDragging) {
+      console.log('Click ignored — user was swiping');
+      return;
+    }
+    this.onShowMore();
+  }
+
+  onShowMore(): void {
     this.isExpanded = !this.isExpanded;
-    const footer = this.footerContainer.nativeElement;
-    footer.style.transition = 'transform 0.3s ease-out';
-    footer.style.transform = this.isExpanded
-      ? 'translateY(0)'
-      : `translateY(${this.COLLAPSED_PERCENTAGE}%)`;
-    footer.style.overflowY = this.isExpanded ? 'auto' : '';
-    this.swipeProgress = this.isExpanded ? 1 : 0;
+    this.updateFooterUI(this.isExpanded);
   }
 
-  /** Start dragging */
-  public onDragStart(startY: number): void {
+  onDragStart(startY: number): void {
     this.startY = startY;
     this.isDragging = true;
   }
 
-  /** Move while dragging */
-  public onDragMove(currentY: number, event?: Event): void {
-    if (!this.isDragging) return;
-
+  onDragMove(currentY: number): void {
     this.currentY = currentY;
-    const diff = this.startY - this.currentY;
+    const diff = this.startY - currentY;
 
-    // Prevent scrolling while swiping
-    if (event) event.preventDefault();
-
-    // Adjust footer position dynamically
     const footer = this.footerContainer.nativeElement;
     const baseTranslate = this.isExpanded ? 0 : this.COLLAPSED_PERCENTAGE;
     const translateY = baseTranslate - diff;
@@ -144,24 +173,34 @@ export class InteractionBarComponent implements OnInit, AfterViewInit {
     this.swipeProgress = (this.COLLAPSED_PERCENTAGE - clampedTranslate) / this.COLLAPSED_PERCENTAGE;
   }
 
-  /** End dragging & determine if expansion should happen */
-  public onDragEnd(): void {
+  onDragEnd(): void {
     if (!this.isDragging) return;
     this.isDragging = false;
 
     const swipeDistance = this.startY - this.currentY;
+    const shouldExpand = swipeDistance > this.threshold;
+    const shouldCollapse = swipeDistance < -this.threshold;
 
-    if (Math.abs(swipeDistance) > this.threshold) {
-      this.isExpanded = swipeDistance > 0; // Expand if swiped up, collapse if swiped down
+    if (shouldExpand) {
+      this.isExpanded = true;
+    } else if (shouldCollapse) {
+      this.isExpanded = false;
     }
 
-    // Reset position with smooth transition
+    this.updateFooterUI(this.isExpanded);
+
+    // Reset swipe state for next swipe
+    this.startY = 0;
+    this.currentY = 0;
+  }
+
+  public updateFooterUI(expand: boolean): void {
     const footer = this.footerContainer.nativeElement;
     footer.style.transition = 'transform 0.3s ease-out';
-    footer.style.transform = this.isExpanded
-      ? 'translateY(0)'
-      : `translateY(${this.COLLAPSED_PERCENTAGE}%)`;
-    this.swipeProgress = this.isExpanded ? 1 : 0;
+    footer.style.transform = expand ? 'translateY(0)' : `translateY(${this.COLLAPSED_PERCENTAGE}%)`;
+    // ** IMPORTANT ** Needs better solution, since this will hide the indoor selects
+    // footer.style.overflowY = expand ? 'auto' : 'hidden';
+    this.swipeProgress = expand ? 1 : 0;
   }
 
   onLocationSelected(): void {
