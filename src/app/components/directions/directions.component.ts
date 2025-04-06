@@ -154,42 +154,6 @@ export class DirectionsComponent implements AfterViewInit, OnDestroy {
     return R * c;
   }
 
-  async loadDirections(mode: string) {
-    this.isLoading = true;
-    this.hasArrived = false;
-    const start = await this.outdoorDirectionsService.getStartPoint();
-    const destination = await this.outdoorDirectionsService.getDestinationPoint();
-    if (!start || !destination) {
-      console.error('Missing start or destination.');
-      this.isLoading = false;
-      return;
-    }
-
-    //   try {
-    //     // Directly use the objects obtained from the getters.
-    //     const completeRoute: CompleteRoute = await this.navigationCoordinator.getCompleteRoute(
-    //       start,
-    //       destination,
-    //       mode
-    //     );
-    //     const { steps, eta } = completeRoute.segments[0].instructions;
-    //     this.steps = steps;
-    //     this.eta = eta;
-    //   } catch (error) {
-    //     console.error('Failed to fetch directions:', error);
-    //   } finally {
-    //     this.isLoading = false;
-    //   }
-  }
-  /**
-   * Updates the travel mode and loads new hardcoded directions.
-   */
-  async setMode(mode: string, event?: Event) {
-    if (event) event.stopPropagation();
-    this.selectedMode = mode;
-    this.loadDirections(mode);
-  }
-
   getDirectionIcon(instructions: string): string {
     const parser = new DOMParser();
     const doc = parser.parseFromString(instructions, 'text/html');
