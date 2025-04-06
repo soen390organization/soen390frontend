@@ -39,8 +39,10 @@ export abstract class AbstractIndoorStrategy implements DirectionsStrategy<Mappe
 
     if (Array.isArray(this.route)) {
       indoorRoute = this.route.find((item) => item.indoorMapId == this.mappedinService.getMapId());
+    } else if (this.route.indoorMapId == this.mappedinService.getMapId()) {
+      indoorRoute = this.route;
     } else {
-      if (this.route.indoorMapId == this.mappedinService.getMapId()) indoorRoute = this.route;
+      return null;
     }
 
     if (indoorRoute) {
