@@ -5,7 +5,6 @@ import { IndoorDirectionsService } from 'src/app/services/indoor-directions/indo
 @Component({
   selector: 'app-accessibility-button',
   templateUrl: './accessibility-button.component.html',
-  styleUrls: ['./accessibility-button.component.scss'],
   imports: [CommonModule]
 })
 export class AccessibilityButtonComponent {
