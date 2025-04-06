@@ -89,6 +89,71 @@ describe('IndoorDirectionsService', () => {
     expect(differentBuildingStrategySpy.getRoutes).toHaveBeenCalled();
     expect(result).toBe(mockStrategy);
   });
+
+  it('should return the selected strategy when getSelectedStrategy is called', async () => {
+    const mockStrategy = jasmine.createSpyObj('AbstractIndoorStrategy', ['renderRoutes']);
+    service.setSelectedStrategy(mockStrategy);
+
+    const result = await service.getSelectedStrategy();
+
+    expect(result).toBe(mockStrategy);
+  });
+
+  it('should emit selected strategy when getSelectedStrategy$ is called', (done) => {
+    const mockStrategy = jasmine.createSpyObj('AbstractIndoorStrategy', ['renderRoutes']);
+    service.setSelectedStrategy(mockStrategy);
+
+    service.getSelectedStrategy$().subscribe((strategy) => {
+      expect(strategy).toBe(mockStrategy);
+      done();
+    });
+  });
+
+  it('should call renderRoutes on the selected strategy', async () => {
+    const mockStrategy = jasmine.createSpyObj('AbstractIndoorStrategy', ['renderRoutes']);
+    service.setSelectedStrategy(mockStrategy);
+
+    await service.renderNavigation();
+
+    expect(mockStrategy.renderRoutes).toHaveBeenCalled();
+  });
+
+  // it('should call mapView.Navigation.clear() when mapView and Navigation are available', async () => {
+  //   // Mock mapView with Navigation and clear method
+  //   const mockMapView = jasmine.createSpyObj('MapView', ['clear']);
+  //   const mockNavigation = { clear: jasmine.createSpy('clear') };
+  //   mockMapView.Navigation = mockNavigation;
+
+  //   mappedinServiceSpy.mapView = mockMapView;
+
+  //   // Call clearNavigation and expect that clear() is called
+  //   await service.clearNavigation();
+
+  //   // Expect that clear() is called on Navigation
+  //   expect(mockNavigation.clear).toHaveBeenCalled();
+  // });
+
+  // it('should not call mapView.Navigation.clear() if mapView or Navigation is not available', async () => {
+  //   mappedinServiceSpy.mapView = null; // Simulate missing mapView
+
+  //   await service.clearNavigation();
+
+  //   expect(mappedinServiceSpy.mapView).toBeNull(); // Ensure no error or call happened
+  // });
+
+  // it('should catch and log errors if clearing navigation fails', async () => {
+  //   const consoleErrorSpy = spyOn(console, 'error');
+  //   const mockMapView = jasmine.createSpyObj('MapView', ['clear']);
+  //   mappedinServiceSpy.mapView = mockMapView;
+  //   mockMapView.Navigation.clear.and.throwError('Test error');
+
+  //   await service.clearNavigation();
+
+  //   expect(consoleErrorSpy).toHaveBeenCalledWith(
+  //     'Error clearing indoor navigation:',
+  //     jasmine.any(Error)
+  //   );
+  // });
 });
 
 // import { TestBed } from '@angular/core/testing';
