@@ -1,14 +1,14 @@
 export const environment = {
   production: true,
-  googleApiKey: "",
+  googleApiKey: '',
   firebaseConfig: {
-    apiKey: "",
-    authDomain: "",
-    databaseURL: "",
-    projectId: "",
-    storageBucket: "",
-    messagingSenderId: "",
-    appId: ""
+    apiKey: '',
+    authDomain: '',
+    databaseURL: '',
+    projectId: '',
+    storageBucket: '',
+    messagingSenderId: '',
+    appId: ''
   },
 
   mappedin: {
