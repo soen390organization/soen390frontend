@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { EventInfo } from 'src/app/interfaces/event-info.interface';
 import { GoogleMapLocation } from 'src/app/interfaces/google-map-location.interface';
@@ -18,6 +18,7 @@ import { setMapType, MapType } from 'src/app/store/app';
 export class EventCardComponent {
   @Input() events: EventInfo[] = [];
   @Input() loading: boolean = false;
+  @Output() eventSelected = new EventEmitter<GoogleMapLocation>();
 
   constructor(
     private readonly store: Store,
@@ -82,5 +83,6 @@ export class EventCardComponent {
       this.outdoorDirectionsService.setDestinationPoint(location);
       this.store.dispatch(setMapType({ mapType: MapType.Outdoor }));
     }
+    this.eventSelected.emit(location);
   }
 }

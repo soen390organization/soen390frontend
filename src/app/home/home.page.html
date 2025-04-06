@@ -9,7 +9,7 @@
     (keydown.enter)="openUserInfoPage()"
   ></app-user-profile>
 </div>
-<app-map-search searchStateChange="onSearchStateChanged($event)" class="pr-2"></app-map-search>
+<app-map-search (searchStateChange)="onSearchStateChanged($event)" class="pr-2"></app-map-search>
 
 <!-- Main content container with no bottom padding -->
 <ion-content [fullscreen]="true" scrollY="false" class="pb-0">

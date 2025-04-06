@@ -149,16 +149,16 @@ describe('MapSearchComponent', () => {
     spyOn(store, 'dispatch');
     const position = { lat: 45, lng: -73 };
     mockLocationService.getCurrentLocation.and.resolveTo(position);
-    await component.onSetUsersLocationAsStart();
+    await component.setUserLocation('start');
     expect(mockLocationService.getCurrentLocation).toHaveBeenCalled();
     expect(store.dispatch).toHaveBeenCalledWith(setMapType({ mapType: MapType.Outdoor }));
   }));
 
-  it('should throw error if user location is null', async () => {
+  it('should log a warning if user location is null', async () => {
+    spyOn(console, 'warn');
     mockLocationService.getCurrentLocation.and.resolveTo(null);
-    await expectAsync(component.onSetUsersLocationAsStart()).toBeRejectedWithError(
-      'Current location is null.'
-    );
+    await component.setUserLocation('start');
+    expect(console.warn).toHaveBeenCalledWith('Could not fetch user location:', jasmine.any(Error));
   });
 
   it('should set indoor start location', fakeAsync(async () => {
@@ -357,4 +357,66 @@ describe('MapSearchComponent', () => {
   it('should return false from isHighlighted if place is not in highlighted set', () => {
     expect(component.isHighlighted('Random Place')).toBeFalse();
   });
+
+  it('should prepend "Your Location" suggestion on onFocus (for start)', fakeAsync(async () => {
+    // Arrange: simulate getPlaceSuggestions returning a suggestion
+    mockPlacesService.getPlaceSuggestions.and.resolveTo([{ title: 'Suggestion 1' }]);
+    // Act:
+    await component.onFocus('start');
+    tick(); // flush any pending microtasks
+    // Assert:
+    expect(component.isSearchingFromStart).toBeTrue();
+    expect(component.places.length).toBe(2);
+    expect(component.places[0]).toEqual({
+      title: 'Your Location',
+      address: 'Use your current location',
+      type: 'outdoor',
+      isYourLocation: true
+    });
+    expect(component.places[1]).toEqual({ title: 'Suggestion 1' });
+  }));
+
+  it('should prepend "Your Location" suggestion on onFocus (for destination)', fakeAsync(async () => {
+    // Arrange: simulate getPlaceSuggestions returning an empty array
+    mockPlacesService.getPlaceSuggestions.and.resolveTo([]);
+    // Act:
+    await component.onFocus('destination');
+    tick();
+    // Assert: isSearchingFromStart should be false and places should have only the custom suggestion.
+    expect(component.isSearchingFromStart).toBeFalse();
+    expect(component.places).toEqual([
+      {
+        title: 'Your Location',
+        address: 'Use your current location',
+        type: 'outdoor',
+        isYourLocation: true
+      }
+    ]);
+  }));
+
+  it('should clear places on handleBlur when both inputs are not focused', fakeAsync(() => {
+    // Arrange: set some dummy places and mark both inputs as focused initially
+    component.places = [{ title: 'Test' }];
+    component.startInputFocused = true;
+    component.destinationInputFocused = true;
+    // Act: trigger blur on both inputs so that both flags become false.
+    component.handleBlur('start'); // sets startInputFocused to false
+    component.handleBlur('destination'); // sets destinationInputFocused to false
+    tick(200); // simulate the 200ms delay for setTimeout
+    // Assert: clearList should have been called (places cleared)
+    expect(component.places).toEqual([]);
+  }));
+
+  it('should call setUserLocation and clearList when setStart is called with a "Your Location" place', fakeAsync(async () => {
+    // Arrange: create a place object with isYourLocation set to true
+    const yourLocationPlace = { isYourLocation: true };
+    spyOn(component, 'setUserLocation').and.resolveTo();
+    spyOn(component, 'clearList');
+    // Act:
+    await component.setStart(yourLocationPlace);
+    tick();
+    // Assert: setUserLocation should be called with 'start' and clearList should be invoked
+    expect(component.setUserLocation).toHaveBeenCalledWith('start');
+    expect(component.clearList).toHaveBeenCalled();
+  }));
 });
