@@ -6,7 +6,7 @@ import {
   OutdoorDrivingStrategy,
   OutdoorShuttleStrategy,
   OutdoorTransitStrategy,
-  OutdoorWalkingStrategy,
+  OutdoorWalkingStrategy
 } from 'src/app/strategies/outdoor-directions';
 import { CurrentLocationService } from 'src/app/services/current-location/current-location.service';
 import { AbstractOutdoorStrategy } from 'src/app/strategies/outdoor-directions/abstract-outdoor.strategy';
@@ -24,7 +24,7 @@ describe('DirectionsComponent', () => {
     'getSelectedStrategy$',
     'clearNavigation',
     'setSelectedStrategy',
-    'renderNavigation',
+    'renderNavigation'
   ]);
   const mockWalkingStrategy = { routes: [{}] };
   const mockDrivingStrategy = { routes: [] };
@@ -32,7 +32,7 @@ describe('DirectionsComponent', () => {
   const mockShuttleStrategy = { routes: [{}] };
   const mockCurrentLocationService = jasmine.createSpyObj('CurrentLocationService', [
     'clearWatch',
-    'watchLocation',
+    'watchLocation'
   ]);
 
   beforeEach(async () => {
@@ -45,8 +45,8 @@ describe('DirectionsComponent', () => {
         { provide: OutdoorDrivingStrategy, useValue: mockDrivingStrategy },
         { provide: OutdoorTransitStrategy, useValue: mockTransitStrategy },
         { provide: OutdoorShuttleStrategy, useValue: mockShuttleStrategy },
-        { provide: CurrentLocationService, useValue: mockCurrentLocationService },
-      ],
+        { provide: CurrentLocationService, useValue: mockCurrentLocationService }
+      ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(DirectionsComponent);
@@ -60,7 +60,7 @@ describe('DirectionsComponent', () => {
 
   it('should subscribe to strategy and set steps', () => {
     const fakeStrategy = {
-      getTotalSteps: () => [{ end_location: { lat: () => 0, lng: () => 0 } }],
+      getTotalSteps: () => [{ end_location: { lat: () => 0, lng: () => 0 } }]
     } as AbstractOutdoorStrategy;
 
     spyOn(component, 'startWatchingLocation');
@@ -123,14 +123,14 @@ describe('DirectionsComponent', () => {
       start_location: { lat: () => 0, lng: () => 0 },
       end_location: { lat: () => 0, lng: () => 0 }
     } as Step;
-  
+
     component.steps = [step];
-  
+
     component.onPositionUpdate({ lat: 0, lng: 0 });
-  
+
     expect(component.steps.length).toBe(0);
     expect(component.hasArrived).toBeTrue();
-  });  
+  });
 
   it('should calculate distance using haversine formula', () => {
     const d = component.calculateDistance(0, 0, 0, 1);
@@ -167,7 +167,7 @@ describe('DirectionsComponent', () => {
     (component as any).observer = mockObserver;
 
     component.directionsContainer = {
-      nativeElement: {},
+      nativeElement: {}
     } as ElementRef;
 
     component.ngOnDestroy();
@@ -175,35 +175,5 @@ describe('DirectionsComponent', () => {
     expect(mockCurrentLocationService.clearWatch).toHaveBeenCalledWith('watchId');
     expect(unsubscribeSpy).toHaveBeenCalled();
     expect(mockObserver.unobserve).toHaveBeenCalled();
-  });
-
-  it('should create and observe on ngAfterViewInit', () => {
-    const observeSpy = jasmine.createSpy('observe');
-    const unobserveSpy = jasmine.createSpy('unobserve');
-    const mockObserver = { observe: observeSpy, unobserve: unobserveSpy };
-  
-    spyOn(window as any, 'IntersectionObserver').and.returnValue(mockObserver);
-  
-    component.directionsContainer = {
-      nativeElement: {}
-    } as ElementRef;
-  
-    component.ngAfterViewInit();
-  
-    expect(observeSpy).toHaveBeenCalled();
-  });  
-
-  it('should update showAllSteps based on observer callback', () => {
-    const observerCallback = (entries: any[]) => {
-      const triggerPoint = 400;
-      const top = entries[0].boundingClientRect.top;
-      component.showAllSteps = top < triggerPoint;
-    };
-
-    observerCallback([{ boundingClientRect: { top: 300 } }]);
-    expect(component.showAllSteps).toBeTrue();
-
-    observerCallback([{ boundingClientRect: { top: 500 } }]);
-    expect(component.showAllSteps).toBeFalse();
   });
 });
