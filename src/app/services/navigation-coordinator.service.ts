@@ -6,7 +6,7 @@ import { OutdoorRoutingStrategy, IndoorRoutingStrategy } from '../strategies';
 import { GoogleMapLocation } from '../interfaces/google-map-location.interface';
 import { MappedInLocation } from '../interfaces/mappedin-location.interface';
 import { Store } from '@ngrx/store';
-import { setMapType, MapType, setShowRoute } from 'src/app/store/app';
+import { setMapType, MapType } from 'src/app/store/app';
 import { IndoorDirectionsService } from './indoor-directions/indoor-directions.service';
 import { OutdoorDirectionsService } from './outdoor-directions/outdoor-directions.service';
 import { CurrentLocationService } from './current-location/current-location.service';

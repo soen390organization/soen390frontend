@@ -156,7 +156,7 @@ export class MappedinService {
     }
 
     const buildingCode = this.extractBuildingCode(roomCode);
-    const { mapId, building } = this.findBuildingByCode(campusData, buildingCode) || {};
+    const { mapId, building } = this.findBuildingByCode(campusData, buildingCode) ?? {};
     if (!building || !mapId) {
       console.warn(`No matching building found for code: ${buildingCode}`);
       return null;
@@ -179,7 +179,7 @@ export class MappedinService {
   }
 
   private getValidCampusData(): Record<string, BuildingData> | null {
-    const data = this.getCampusMapData() || {};
+    const data = this.getCampusMapData() ?? {};
     return Object.keys(data).length > 0 ? data : null;
   }
 
@@ -189,7 +189,7 @@ export class MappedinService {
 
   private extractRoomNumber(roomCode: string): string {
     // Safely return the second piece after splitting, or empty if missing
-    return roomCode.split(/[-\s]/)[1] || '';
+    return roomCode.split(/[-\s]/)[1] ?? '';
   }
 
   private findBuildingByCode(
@@ -205,7 +205,7 @@ export class MappedinService {
   }
 
   private findSpaceOrPoi(mapData: MapData, roomNumber: string, fullRoomCode: string): any {
-    const spaces = mapData.getByType('space') || [];
+    const spaces = mapData.getByType('space') ?? [];
     for (const space of spaces) {
       if (
         space?.name &&
@@ -217,7 +217,7 @@ export class MappedinService {
       }
     }
 
-    const pois = mapData.getByType('point-of-interest') || [];
+    const pois = mapData.getByType('point-of-interest') ?? [];
     for (const poi of pois) {
       if (
         poi?.name &&
@@ -237,12 +237,12 @@ export class MappedinService {
     mapId: string
   ): MappedInLocation {
     return {
-      title: `${building.abbreviation || ''} ${bestRoom.name}`.trim(),
-      address: building.address || 'No Address',
-      image: building.image || 'assets/images/poi_fail.png',
+      title: `${building.abbreviation ?? ''} ${bestRoom.name}`.trim(),
+      address: building.address ?? 'No Address',
+      image: building.image ?? 'assets/images/poi_fail.png',
       indoorMapId: mapId,
       room: bestRoom,
-      buildingCode: building.abbreviation || '',
+      buildingCode: building.abbreviation ?? '',
       roomName: bestRoom.name,
       coordinates: building.coordinates,
       type: 'indoor'

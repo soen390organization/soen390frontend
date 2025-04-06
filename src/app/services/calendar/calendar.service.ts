@@ -82,7 +82,7 @@ export class CalendarService {
       }
 
       const data = await response.json();
-      return data.items || [];
+      return data.items ?? [];
     } catch (error) {
       console.error('Error fetching Google Calendars:', error);
       return [];
@@ -128,7 +128,7 @@ export class CalendarService {
   }
 
   async transformEvent(event: any): Promise<EventInfo> {
-    const eventType = event.summary.split(' ')[1] || 'LEC';
+    const eventType = event.summary.split(' ')[1] ?? 'LEC';
     // Process the location information
     const roomInfo = this.getRoomInfo(event.location);
     const buildingData = this.convertClassToAddress(roomInfo.buildingCode || event.location);
@@ -174,7 +174,7 @@ export class CalendarService {
 
     // First try to match the pattern like "H-531" or "MB-S2.330"
     const roomPattern = /^([A-Za-z]+(?:-[A-Za-z]+)*)[ -]([A-Za-z0-9]+(?:[.\-][A-Za-z0-9]+)*)$/;
-    const match = classCode.trim().match(roomPattern);
+    const match = roomPattern.exec(classCode.trim());
 
     if (match) {
       buildingCode = match[1].toUpperCase();
