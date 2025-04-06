@@ -293,7 +293,7 @@ describe('MappedinService', () => {
       spyOn(console, 'warn');
       const result = await service.findIndoorLocation('');
       expect(result).toBeNull();
-      expect(console.warn).toHaveBeenCalledWith('Cannot find indoor location for empty room code');
+      expect(console.warn).toHaveBeenCalledWith('Cannot find indoor location for empty or invalid room code');
     });
 
     it('should return null if no campus data is available', async () => {
@@ -318,7 +318,7 @@ describe('MappedinService', () => {
       spyOn(console, 'warn');
       const result = await service.findIndoorLocation('XYZ-123');
       expect(result).toBeNull();
-      expect(console.warn).toHaveBeenCalledWith('No matching building found for code:', 'XYZ');
+      expect(console.warn).toHaveBeenCalledWith('No matching building found for code: XYZ');
     });
 
     it('should find a room from points of interest if not found in spaces', async () => {
@@ -337,8 +337,11 @@ describe('MappedinService', () => {
 
     it('should handle errors gracefully', async () => {
       spyOn(console, 'error');
-      // Cause an error by making campusMapData.getByType throw
-      (service as any).campusMapData['map1'].mapData.getByType = () => { throw new Error('Test error'); };
+      // Create a new function that will always throw an error when called
+      const throwingFunction = jasmine.createSpy('throwingFunction').and.throwError(new Error('Test error'));
+      
+      // Mock the service's findSpaceOrPoi method to throw an error
+      spyOn(service as any, 'findSpaceOrPoi').and.callFake(throwingFunction);
       
       const result = await service.findIndoorLocation('H-531');
       expect(result).toBeNull();

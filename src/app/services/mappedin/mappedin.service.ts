@@ -144,32 +144,37 @@ export class MappedinService {
   }
 
   public async findIndoorLocation(roomCode: string): Promise<MappedInLocation | null> {
-    if (!this.hasValidRoomCode(roomCode)) {
-      console.warn('Cannot find indoor location for empty or invalid room code');
+    try {
+      if (!this.hasValidRoomCode(roomCode)) {
+        console.warn('Cannot find indoor location for empty or invalid room code');
+        return null;
+      }
+
+      const campusData = this.getValidCampusData();
+      if (!campusData) {
+        console.warn('No campus data available');
+        return null;
+      }
+
+      const buildingCode = this.extractBuildingCode(roomCode);
+      const { mapId, building } = this.findBuildingByCode(campusData, buildingCode) ?? {};
+      if (!building || !mapId) {
+        console.warn(`No matching building found for code: ${buildingCode}`);
+        return null;
+      }
+
+      const roomNumberPart = this.extractRoomNumber(roomCode);
+      const bestRoom = this.findSpaceOrPoi(building.mapData, roomNumberPart, roomCode);
+      if (!bestRoom) {
+        console.warn(`No matching room found for ${roomCode} in building: ${building.name}`);
+        return null;
+      }
+
+      return this.buildIndoorLocation(building, bestRoom, mapId);
+    } catch (error) {
+      console.error('Error finding indoor location:', error);
       return null;
     }
-
-    const campusData = this.getValidCampusData();
-    if (!campusData) {
-      console.warn('No campus data available');
-      return null;
-    }
-
-    const buildingCode = this.extractBuildingCode(roomCode);
-    const { mapId, building } = this.findBuildingByCode(campusData, buildingCode) ?? {};
-    if (!building || !mapId) {
-      console.warn(`No matching building found for code: ${buildingCode}`);
-      return null;
-    }
-
-    const roomNumberPart = this.extractRoomNumber(roomCode);
-    const bestRoom = this.findSpaceOrPoi(building.mapData, roomNumberPart, roomCode);
-    if (!bestRoom) {
-      console.warn(`No matching room found for ${roomCode} in building: ${building.name}`);
-      return null;
-    }
-
-    return this.buildIndoorLocation(building, bestRoom, mapId);
   }
 
   /** === HELPER METHODS BELOW === **/
