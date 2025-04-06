@@ -384,10 +384,7 @@ export class CalendarService {
         startDayNum = 6;
         break;
     }
-    let startCalendarDay = 0;
-    if (currentDay != startDayNum) {
-      startCalendarDay = currentCalendarDay + Math.abs(currentDay - startDayNum);
-    }
+
     //Thank you to https://www.sitelint.com/blog/get-days-between-two-dates-in-javascript#:~:text=To%20get%20the%20number%20of,based%20on%20the%20millisecond%20difference.
     let currentDateUTC = Date.UTC(
       currentDate.getFullYear(),

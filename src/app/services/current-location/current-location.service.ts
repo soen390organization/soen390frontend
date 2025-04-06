@@ -7,7 +7,9 @@ import { BehaviorSubject } from 'rxjs';
 })
 export class CurrentLocationService {
   // Cache the last known position to avoid permission requests on every click
-  private lastKnownPosition = new BehaviorSubject<{ lat: number; lng: number } | null>(null);
+  private readonly lastKnownPosition = new BehaviorSubject<{ lat: number; lng: number } | null>(
+    null
+  );
 
   // Flag to determine if we're already trying to get the position
   private isGettingPosition = false;
