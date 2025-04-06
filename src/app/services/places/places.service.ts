@@ -53,19 +53,26 @@ export class PlacesService {
         autocompleteService.getPlacePredictions(
           {
             input,
-            componentRestrictions: { country: 'CA' },
-            locationBias: new google.maps.Circle({
-              center: new google.maps.LatLng(campusCoordinates),
-              radius: 500
-            })
+            location: new google.maps.LatLng(45.5017, -73.5673), // Montreal coordinates
+            radius: 10000 // Adjust radius as needed to cover the Montreal area
           },
           (predictions, status) => {
             resolve(predictions || []);
           }
-        );
+        );        
       }
     );
 
+    const prioritizedBuildingsManual = [
+      ...data.sgw.buildings,
+      ...data.loy.buildings
+    ].map((b: any) => ({
+      title: b.name,
+      address: b.address,
+      coordinates: new google.maps.LatLng(b.coordinates.lat, b.coordinates.lng),
+      type: 'outdoor'
+    }));
+    
     let rooms = [];
     // const campusBuildings:BuildingData[]= Object.values(this.mappedInService.getCampusMapData()) || [];
     // campusBuildings.forEach((building: BuildingData) => {
@@ -84,7 +91,8 @@ export class PlacesService {
             abbreviation: building.abbreviation,
             indoorMapId: key,
             room: space,
-            type: 'indoor'
+            type: 'indoor',
+            icon: 'assets/icon/c-logo.png'
           })),
         ...building.mapData
           .getByType('point-of-interest')
@@ -104,6 +112,9 @@ export class PlacesService {
 
     const normalizeString = (str: string) => str.toLowerCase().replace(/[^a-zA-Z0-9]/g, '');
     const searchTerm = normalizeString(input);
+    const manualMatches = prioritizedBuildingsManual.filter((building) =>
+      normalizeString(building.title).includes(searchTerm)
+    );
 
     const selectedBuildingRooms = rooms.filter((room) =>
       [room.title, room.fullName, room.abbreviation] // Check abbreviation, full name, and short name
@@ -112,7 +123,7 @@ export class PlacesService {
 
     const detailsPromises = predictions.map((prediction) => this.getPlaceDetail(prediction));
     let details = await Promise.all(detailsPromises);
-    details = [...selectedBuildingRooms.slice(0, 3), ...details];
+    details = [...manualMatches, ...selectedBuildingRooms.slice(0, 3), ...details];
 
     // Filter out any null values (failed details)
     return details.filter(
