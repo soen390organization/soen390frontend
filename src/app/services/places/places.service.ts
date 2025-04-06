@@ -16,7 +16,7 @@ export class PlacesService {
 
   constructor(
     private readonly store: Store<AppState>,
-    private mappedInService: MappedinService,
+    private readonly mappedInService: MappedinService,
     private readonly concordiaDataService: ConcordiaDataService
   ) {}
 
@@ -73,11 +73,9 @@ export class PlacesService {
     );
 
     let rooms = [];
-    const campusDataFromMappedIn = this.mappedInService.getCampusMapData() || {};
-    for (const [key, building] of Object.entries(campusDataFromMappedIn) as [
-      string,
-      BuildingData
-    ][]) {
+    const campusDataFromMappedIn: Record<string, BuildingData> =
+      this.mappedInService.getCampusMapData() || {};
+    for (const [key, building] of Object.entries(campusDataFromMappedIn)) {
       rooms = [
         ...rooms,
         ...building.mapData
@@ -214,8 +212,15 @@ export class PlacesService {
    */
   public async getPointsOfInterest(): Promise<GoogleMapLocation[]> {
     const campusKey = await firstValueFrom(this.store.select(selectSelectedCampus));
+    const campusCoordinates = this.getCampusCoordinates(campusKey);
+
+    // If campusCoordinates is undefined, return an empty array or handle the error as needed.
+    if (!campusCoordinates) {
+      return [];
+    }
+
     const places = await this.getPlaces(
-      new google.maps.LatLng(this.getCampusCoordinates(campusKey)!),
+      new google.maps.LatLng(campusCoordinates),
       250,
       'restaurant'
     ).catch(() => []); // Catch any error and return an empty array

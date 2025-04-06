@@ -9,7 +9,7 @@ export class ConcordiaDataService {
   addressMap: Map<string, string>;
   coordinatesMap: Map<string, { lat: string; lng: string }>;
   imageMap: Map<string, string>;
-  /* @TODO: We can have a better solution for this */
+  /* We can have a better solution for this */
   private readonly highlightedBuildings = new Set<string>([
     'H Building Concordia University',
     'John Molson School of Business',
