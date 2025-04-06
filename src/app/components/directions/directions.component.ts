@@ -26,7 +26,7 @@ const iconMapping = rawIconMapping as IconMapping;
   imports: [CommonModule],
   standalone: true
 })
-export class DirectionsComponent implements AfterViewInit, OnDestroy {
+export class DirectionsComponent implements OnDestroy {
   @ViewChild('directionsContainer') directionsContainer!: ElementRef;
 
   steps: Step[] = [];
@@ -35,7 +35,6 @@ export class DirectionsComponent implements AfterViewInit, OnDestroy {
   isLoading: boolean = false;
   currentWatchId: string | null = null;
   hasArrived: boolean = false;
-  showAllSteps: boolean = true;
   private readonly endNavigationSubscription: any;
   currentRouteData: { eta: string | null; distance: number } | null = null;
 
@@ -56,35 +55,16 @@ export class DirectionsComponent implements AfterViewInit, OnDestroy {
     this.outdoorDirectionsService.getSelectedStrategy$().subscribe((strategy) => {
       if (strategy) {
         this.steps = strategy.getTotalSteps();
+        console.log(this.steps);
         this.startWatchingLocation();
       }
     });
-  }
-
-  ngAfterViewInit(): void {
-    this.observeComponentPosition();
   }
 
   public setStrategy(strategy: AbstractOutdoorStrategy) {
     this.outdoorDirectionsService.clearNavigation();
     this.outdoorDirectionsService.setSelectedStrategy(strategy);
     this.outdoorDirectionsService.renderNavigation();
-  }
-
-  private observeComponentPosition(): void {
-    this.observer = new IntersectionObserver(
-      ([entry]) => {
-        const triggerPoint = window.innerHeight / 2;
-        this.showAllSteps = entry.boundingClientRect.top < triggerPoint;
-      },
-      {
-        threshold: [0, 1.0]
-      }
-    );
-
-    if (this.directionsContainer?.nativeElement) {
-      this.observer.observe(this.directionsContainer.nativeElement);
-    }
   }
 
   ngOnDestroy(): void {
