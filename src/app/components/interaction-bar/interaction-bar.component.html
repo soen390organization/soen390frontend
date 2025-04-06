@@ -1,6 +1,10 @@
 <app-switch-map-button class="switch-map-container" [style.opacity]="1"></app-switch-map-button>
 
 <div #footerContainer class="swipe-footer-container">
+  <app-accessibility-button
+    class="accessibility-container"
+    *ngIf="showIndoorSelects"
+  ></app-accessibility-button>
   <app-indoor-selects
     *ngIf="showIndoorSelects"
     [style.opacity]="1 - swipeProgress"

@@ -1,66 +1,119 @@
-import { ComponentFixture, TestBed, waitForAsync, fakeAsync, tick } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MappedinMapComponent } from './mappedin-map.component';
 import { MappedinService } from 'src/app/services/mappedin/mappedin.service';
 import { IndoorDirectionsService } from 'src/app/services/indoor-directions/indoor-directions.service';
-// import { NavigationCoordinatorService } from 'src/app/services/navigation-coordinator.service';
-import { Store } from '@ngrx/store';
-import { of } from 'rxjs';
-import { CommonModule } from '@angular/common';
-
-class MockMappedinService {
-  initialize = jasmine.createSpy('initialize').and.returnValue(Promise.resolve());
-  getMapId = jasmine.createSpy('getMapId').and.returnValue('mockMapId');
-}
-
-class MockIndoorDirectionsService {
-  getStartPoint = () => of(null);
-  getDestinationPoint = () => of(null);
-}
-
-// class MockNavigationCoordinatorService {
-//   getCompleteRoute = jasmine
-//     .createSpy('getCompleteRoute')
-//     .and.returnValue(Promise.resolve({ segments: [] }));
-// }
-
-// Create a dummy Store spy so that NavigationCoordinatorService can be constructed.
-const mockStore = jasmine.createSpyObj('Store', ['select', 'dispatch']);
-mockStore.select.and.returnValue(of(null));
+import { of, Subject } from 'rxjs';
+import { ElementRef } from '@angular/core';
 
 describe('MappedinMapComponent', () => {
   let component: MappedinMapComponent;
   let fixture: ComponentFixture<MappedinMapComponent>;
-  let mappedinService: MockMappedinService;
+  let mappedinServiceMock: jasmine.SpyObj<MappedinService>;
+  let indoorDirectionsServiceMock: jasmine.SpyObj<IndoorDirectionsService>;
+  let nativeElementMock: HTMLElement;
+  let errorSpy: jasmine.Spy;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      imports: [MappedinMapComponent, CommonModule],
+  const startPoint$ = new Subject<any>();
+  const destinationPoint$ = new Subject<any>();
+  const mapView$ = new Subject<any>();
+
+  beforeEach(async () => {
+    mappedinServiceMock = jasmine.createSpyObj('MappedinService', ['initialize', 'getMapView']);
+    indoorDirectionsServiceMock = jasmine.createSpyObj('IndoorDirectionsService', [
+      'getStartPoint$',
+      'getDestinationPoint$',
+      'clearNavigation',
+      'renderNavigation'
+    ]);
+
+    await TestBed.configureTestingModule({
+      imports: [MappedinMapComponent],
       providers: [
-        { provide: MappedinService, useClass: MockMappedinService },
-        { provide: IndoorDirectionsService, useClass: MockIndoorDirectionsService },
-        // { provide: NavigationCoordinatorService, useClass: MockNavigationCoordinatorService },
-        { provide: Store, useValue: mockStore }
+        { provide: MappedinService, useValue: mappedinServiceMock },
+        { provide: IndoorDirectionsService, useValue: indoorDirectionsServiceMock }
       ]
     }).compileComponents();
-  }));
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(MappedinMapComponent);
     component = fixture.componentInstance;
-    mappedinService = TestBed.inject(MappedinService) as unknown as MockMappedinService;
-    fixture.detectChanges(); // triggers ngAfterViewInit asynchronously
+
+    nativeElementMock = document.createElement('div');
+    component.mappedinContainer = new ElementRef(nativeElementMock);
+
+    mappedinServiceMock.getMapView.and.returnValue(mapView$.asObservable());
+    indoorDirectionsServiceMock.getStartPoint$.and.returnValue(startPoint$.asObservable());
+    indoorDirectionsServiceMock.getDestinationPoint$.and.returnValue(
+      destinationPoint$.asObservable()
+    );
+
+    errorSpy = spyOn(console, 'error');
   });
 
-  it('should create the component', () => {
-    expect(component).toBeTruthy();
+  it('should call initialize and emit initialized event', async () => {
+    const initializedSpy = spyOn(component.initialized, 'emit');
+    mappedinServiceMock.initialize.and.returnValue(Promise.resolve());
+
+    await component.ngAfterViewInit();
+
+    expect(mappedinServiceMock.initialize).toHaveBeenCalledWith(nativeElementMock);
+    expect(initializedSpy).toHaveBeenCalled();
   });
 
-  it('should call initialize with the mappedinContainer element', fakeAsync(() => {
-    // Allow the promise from initialize() to resolve.
-    tick();
-    expect(mappedinService.initialize).toHaveBeenCalled();
+  it('should catch and log error on initialize failure', async () => {
+    const error = new Error('init failed');
+    mappedinServiceMock.initialize.and.returnValue(Promise.reject(error));
 
-    const containerElement = fixture.nativeElement.querySelector('div');
-    expect(mappedinService.initialize).toHaveBeenCalledWith(containerElement);
-  }));
+    await component.ngAfterViewInit();
+
+    expect(errorSpy).toHaveBeenCalledWith(
+      'Error initializing mappedin map or computing route:',
+      error
+    );
+  });
+
+  it('should clear navigation and render if start or destination exists and mapView is truthy', async () => {
+    mappedinServiceMock.initialize.and.returnValue(Promise.resolve());
+
+    await component.ngAfterViewInit();
+
+    startPoint$.next({ id: 1 });
+    destinationPoint$.next(null);
+    mapView$.next({}); // Truthy
+
+    // allow async
+    await fixture.whenStable();
+
+    expect(indoorDirectionsServiceMock.clearNavigation).toHaveBeenCalled();
+    expect(indoorDirectionsServiceMock.renderNavigation).toHaveBeenCalled();
+  });
+
+  it('should clear navigation and skip render if both start and destination are falsy', async () => {
+    mappedinServiceMock.initialize.and.returnValue(Promise.resolve());
+
+    await component.ngAfterViewInit();
+
+    startPoint$.next(null);
+    destinationPoint$.next(null);
+    mapView$.next({}); // Truthy
+
+    await fixture.whenStable();
+
+    expect(indoorDirectionsServiceMock.clearNavigation).toHaveBeenCalled();
+    expect(indoorDirectionsServiceMock.renderNavigation).not.toHaveBeenCalled();
+  });
+
+  it('should skip all if mapView is falsy', async () => {
+    mappedinServiceMock.initialize.and.returnValue(Promise.resolve());
+
+    await component.ngAfterViewInit();
+
+    startPoint$.next({ id: 1 });
+    destinationPoint$.next({ id: 2 });
+    mapView$.next(null); // Falsy
+
+    await fixture.whenStable();
+
+    expect(indoorDirectionsServiceMock.clearNavigation).not.toHaveBeenCalled();
+    expect(indoorDirectionsServiceMock.renderNavigation).not.toHaveBeenCalled();
+  });
 });
