@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, Output, EventEmitter } from '@angular/core';
 import { GoogleMapComponent } from '../google-map/google-map.component';
 import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
@@ -14,6 +14,7 @@ import { MappedinService } from 'src/app/services/mappedin/mappedin.service';
 import { IndoorDirectionsService } from 'src/app/services/indoor-directions/indoor-directions.service';
 import { GoogleMapService } from 'src/app/services/google-map.service';
 import { HomePage } from 'src/app/home/home.page';
+import { ConcordiaDataService } from 'src/app/services/concordia-data.service';
 
 export const MapSearchAnimation = [
   trigger('slideInOut', [
@@ -46,13 +47,18 @@ export const MapSearchAnimation = [
   animations: MapSearchAnimation
 })
 export class MapSearchComponent implements OnInit {
+  @Output() searchStateChange = new EventEmitter<boolean>();
   @ViewChild(GoogleMapComponent) googleMap!: GoogleMapComponent;
+
   startLocationInput = '';
   destinationLocationInput = '';
   isSearchVisible = false;
-  places: any[] = []; // Array to store the search suggestions
-  isSearchingFromStart: boolean = false; // Flag to determine if the search is for the start or destination location
   disableStart: boolean = true;
+  // Single unified suggestions array for both inputs.
+  places: any[] = [];
+  isSearchingFromStart: boolean = false; // Indicates which input is active
+  startInputFocused = false;
+  destinationInputFocused = false;
 
   constructor(
     private store: Store,
@@ -61,7 +67,8 @@ export class MapSearchComponent implements OnInit {
     public readonly indoorDirectionService: IndoorDirectionsService,
     private readonly mappedInService: MappedinService,
     private readonly placesService: PlacesService,
-    private readonly currentLocationService: CurrentLocationService
+    private readonly currentLocationService: CurrentLocationService,
+    private readonly concordiaDataService: ConcordiaDataService
   ) {}
 
   ngOnInit(): void {
@@ -86,14 +93,11 @@ export class MapSearchComponent implements OnInit {
           this.outdoorDirectionsService.showStartMarker();
           this.googleMapService.updateMapLocation(outdoorStartPoint.coordinates);
         }
-
         if (outdoorDestinationPoint) {
           this.destinationLocationInput = outdoorDestinationPoint.title;
           this.outdoorDirectionsService.showDestinationMarker();
           this.googleMapService.updateMapLocation(outdoorDestinationPoint.coordinates);
         }
-
-        // Render indoor
         if (outdoorStartPoint && outdoorDestinationPoint) {
           await this.outdoorDirectionsService.getShortestRoute().then((strategy) => {
             this.outdoorDirectionsService.setSelectedStrategy(strategy);
@@ -113,22 +117,22 @@ export class MapSearchComponent implements OnInit {
         }
       }
     );
-    // Attempt to set the user's current location as the start point
+
+    // Optionally attempt to set user's current location as default start.
     this.setUserLocationAsDefaultStart();
   }
+
   private async setUserLocationAsDefaultStart(): Promise<void> {
     try {
       const position = await this.currentLocationService.getCurrentLocation();
       if (position) {
         const currentLocation = new google.maps.LatLng(position);
-
         const place = {
           title: 'Your Location',
           address: `${position.lat}, ${position.lng}`,
           coordinates: currentLocation,
           type: 'outdoor'
         };
-
         this.setStart(place);
         this.googleMapService.updateMapLocation(currentLocation);
       }
@@ -137,12 +141,13 @@ export class MapSearchComponent implements OnInit {
     }
   }
 
-  private setDisableStart(show) {
+  private setDisableStart(show: boolean) {
     this.disableStart = show;
   }
 
   toggleSearch() {
     this.isSearchVisible = !this.isSearchVisible;
+    this.searchStateChange.emit(this.isSearchVisible);
     if (this.isSearchVisible) {
       HomePage.prototype.showSearch();
     } else {
@@ -157,23 +162,35 @@ export class MapSearchComponent implements OnInit {
     }
   }
 
-  async onSetUsersLocationAsStart(): Promise<void> {
-    const position = await this.currentLocationService.getCurrentLocation();
-    console.log('Position: ', position);
-    if (position == null) {
-      throw new Error('Current location is null.');
+  async setUserLocation(type: 'start' | 'destination'): Promise<void> {
+    try {
+      const position = await this.currentLocationService.getCurrentLocation();
+      if (!position) {
+        throw new Error('Current location is null.');
+      }
+
+      const place = {
+        title: 'Your Location',
+        address: `${position.lat}, ${position.lng}`,
+        coordinates: new google.maps.LatLng(position),
+        type: 'outdoor'
+      };
+
+      if (type === 'start') {
+        this.setStart(place);
+      } else {
+        this.setDestination(place);
+      }
+
+      this.googleMapService.updateMapLocation(place.coordinates);
+      this.store.dispatch(setMapType({ mapType: MapType.Outdoor }));
+    } catch (error) {
+      console.warn('Could not fetch user location:', error);
     }
-    this.setStart({
-      title: 'Your Location',
-      address: `${position.lat}, ${position.lng}`,
-      coordinates: new google.maps.LatLng(position),
-      type: 'outdoor'
-    });
-    this.store.dispatch(setMapType({ mapType: MapType.Outdoor }));
   }
 
   async onSearchChange(event: any, type: 'start' | 'destination') {
-    this.isSearchingFromStart = type === 'start'; // Set the flag to 'start' or 'destination'
+    this.isSearchingFromStart = type === 'start';
     const query = event.target.value.trim();
     if (!query) {
       this.places = [];
@@ -189,6 +206,7 @@ export class MapSearchComponent implements OnInit {
   async onStartClick(): Promise<void> {
     this.store.dispatch(setShowRoute({ show: true }));
     this.isSearchVisible = false;
+    this.searchStateChange.emit(false);
   }
 
   clearStartInput() {
@@ -215,12 +233,45 @@ export class MapSearchComponent implements OnInit {
     this.indoorDirectionService.clearNavigation();
   }
 
-  /* @TODO: we need to setFloor here for a better experience */
+  async onFocus(type: 'start' | 'destination'): Promise<void> {
+    this.isSearchingFromStart = type === 'start';
+    // Retrieve default building suggestions.
+    const suggestions = await this.placesService.getPlaceSuggestions('');
+    // Prepend the custom "Your Location" suggestion for both inputs.
+    this.places = [
+      {
+        title: 'Your Location',
+        address: 'Use your current location',
+        type: 'outdoor',
+        isYourLocation: true
+      },
+      ...suggestions
+    ];
+  }
+
+  handleBlur(type: 'start' | 'destination') {
+    if (type === 'start') {
+      this.startInputFocused = false;
+    } else {
+      this.destinationInputFocused = false;
+    }
+
+    // Delay to allow click events on suggestions
+    setTimeout(() => {
+      if (!this.startInputFocused && !this.destinationInputFocused) {
+        this.clearList();
+      }
+    }, 200);
+  }
+
   async setStart(place: any) {
-    console.log(place);
+    if (place.isYourLocation) {
+      await this.setUserLocation('start');
+      this.clearList();
+      return;
+    }
     this.startLocationInput = place.title;
     if (place.type === 'indoor') {
-      console.log('Setting start point for indoor:', place);
       this.indoorDirectionService.setStartPoint(place);
       this.outdoorDirectionsService.setStartPoint({
         title: place.fullName,
@@ -228,7 +279,6 @@ export class MapSearchComponent implements OnInit {
         coordinates: place.coordinates,
         type: 'outdoor'
       });
-
       if (place.indoorMapId !== this.mappedInService.getMapId()) {
         await this.mappedInService.setMapData(place.indoorMapId);
       }
@@ -237,10 +287,15 @@ export class MapSearchComponent implements OnInit {
       this.outdoorDirectionsService.setStartPoint(place);
       this.store.dispatch(setMapType({ mapType: MapType.Outdoor }));
     }
-    this.places = [];
+    this.clearList();
   }
 
   async setDestination(place: any) {
+    if (place.isYourLocation) {
+      await this.setUserLocation('destination');
+      this.clearList();
+      return;
+    }
     this.destinationLocationInput = place.title;
     if (place.type === 'indoor') {
       this.indoorDirectionService.setDestinationPoint(place);
@@ -250,7 +305,6 @@ export class MapSearchComponent implements OnInit {
         coordinates: place.coordinates,
         type: 'outdoor'
       });
-
       if (place.indoorMapId !== this.mappedInService.getMapId()) {
         await this.mappedInService.setMapData(place.indoorMapId);
       }
@@ -259,30 +313,15 @@ export class MapSearchComponent implements OnInit {
       this.outdoorDirectionsService.setDestinationPoint(place);
       this.store.dispatch(setMapType({ mapType: MapType.Outdoor }));
     }
-    this.places = [];
+    this.clearList();
   }
 
-  private readonly highlightedPlaces = new Set<string>([
-    'H Building Concordia University',
-    'John Molson School of Business',
-    'Concordia University, John Molson Building',
-    'Concordia Engineering And Visual Arts (EV) Building',
-    'Pavillon Ev Building',
-    'LB Building, Concordia University',
-    'CL Annex',
-    'Concordia University ER Building',
-    'Vanier Library',
-    'Central Building (CC)',
-    'SP Building, Loyola Campus, Concordia University'
-  ]);
-
   getPlaceIcon(title: string | undefined): string {
-    // If the title is in the highlightedPlaces Set, return the icon; otherwise, return the default icon.
     return this.isHighlighted(title) ? 'location_city' : 'location_on';
   }
 
   isHighlighted(title: string | undefined): boolean {
-    // Simply check if the title exists in the Set of highlighted places
-    return this.highlightedPlaces.has(title);
+    if (!title) return false;
+    return this.concordiaDataService.getHighlightedBuildings().has(title);
   }
 }

@@ -23,6 +23,7 @@ export class LocationCardsComponent {
   }
 
   setDestination(location: any) {
+    this.outdoorDirectionsService.clearNavigation();
     this.outdoorDirectionsService.setDestinationPoint({
       title: location.title,
       coordinates: location.coordinates,

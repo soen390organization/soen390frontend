@@ -7,6 +7,7 @@
     class="rounded-3xl flex text-black bg-white shadow-lg p-2 pb-3 relative"
     [ngStyle]="{ height: isSearchVisible ? 'auto' : '48px' }"
   >
+    <!-- Toggle Search Button -->
     <div
       (click)="toggleSearch()"
       (keydown.enter)="toggleSearch()"
@@ -28,73 +29,87 @@
       }"
       class="w-full space-y-2"
     >
+      <!-- Start Input -->
       <div class="relative">
         <input
           [(ngModel)]="startLocationInput"
+          (focus)="onFocus('start'); startInputFocused = true"
+          (blur)="handleBlur('start')"
           (input)="onSearchChange($event, 'start')"
           (keyup.enter)="setStart(places[0]); clearList()"
           type="text"
           placeholder="Choose starting point..."
-          debounce="1000"
           class="w-full bg-white px-4 py-3 pr-10 rounded-full border border-gray-300 focus:outline-none"
         />
         <div class="absolute inset-y-0 right-2 flex items-center">
-          <ng-container
-            *ngIf="startLocationInput && startLocationInput.trim().length > 0; else showLocationBtn"
-          >
+          <ng-container *ngIf="startLocationInput && startLocationInput.trim().length > 0">
             <button (click)="clearStartInput()">
               <span class="material-symbols-outlined text-gray-400 p-2">cancel</span>
             </button>
           </ng-container>
-          <ng-template #showLocationBtn>
-            <button (click)="onSetUsersLocationAsStart()">
-              <span
-                class="material-symbols-outlined leading-none bg-[#912338] rounded-full text-white p-2"
-              >
-                my_location
-              </span>
-            </button>
-          </ng-template>
         </div>
+
+        <!-- Start Suggestions -->
         <div
           *ngIf="isSearchingFromStart && places?.length > 0"
           class="absolute left-0 w-full top-full mt-2 z-20"
         >
           <ul class="rounded-xl border border-gray-300 bg-white">
             <li
-              id="start-item"
               *ngFor="let place of places"
               (click)="setStart(place); clearList()"
               (keydown.enter)="setStart(place); clearList()"
               class="flex items-center hover:bg-gray-100 p-3 cursor-pointer"
+              [ngClass]="{ 'bg-red-50': place.isYourLocation }"
             >
-              <span class="material-symbols-outlined mr-3 p-2 border border-gray-300 rounded-full">
-                location_on
-              </span>
+              <ng-container *ngIf="place.isYourLocation; else checkStartIcon">
+                <span
+                  class="material-symbols-outlined mr-3 p-2 rounded-full text-white"
+                  style="background-color: #912338"
+                >
+                  my_location
+                </span>
+              </ng-container>
+              <ng-template #checkStartIcon>
+                <ng-container *ngIf="place.icon; else defaultStartIcon">
+                  <img
+                    [src]="place.icon"
+                    alt="Place Icon"
+                    class="w-[32px] h-[32px] mr-3 border border-gray-300 rounded-full p-[4px] box-content bg-white object-contain"
+                  />
+                </ng-container>
+                <ng-template #defaultStartIcon>
+                  <span
+                    class="material-symbols-outlined mr-3 p-2 border border-gray-300 rounded-full"
+                    [ngClass]="{ 'text-white border-transparent': isHighlighted(place?.title) }"
+                    [ngStyle]="isHighlighted(place?.title) ? { 'background-color': '#852C3A' } : {}"
+                  >
+                    {{ getPlaceIcon(place?.title) }}
+                  </span>
+                </ng-template>
+              </ng-template>
               <div class="flex flex-col min-w-0">
                 <div>{{ place?.title }}</div>
-                <div class="text-sm text-gray-500 truncate">
-                  {{ place?.address }}
-                </div>
+                <div class="text-sm text-gray-500 truncate">{{ place?.address }}</div>
               </div>
-              <span class="material-symbols-outlined ml-auto p-2 text-[#912338]">
-                arrow_insert
-              </span>
+              <span class="material-symbols-outlined ml-auto p-2 text-[#912338]">arrow_insert</span>
             </li>
           </ul>
         </div>
       </div>
 
+      <!-- Destination Input -->
       <div class="relative z-10">
         <input
           [(ngModel)]="destinationLocationInput"
+          (focus)="onFocus('destination'); destinationInputFocused = true"
+          (blur)="handleBlur('destination')"
           (input)="onSearchChange($event, 'destination')"
           (keyup.enter)="setDestination(places[0]); clearList()"
           type="text"
           placeholder="Choose destination point..."
           class="w-full bg-white px-4 py-3 pr-10 rounded-full border border-gray-300 focus:outline-none"
         />
-
         <div class="absolute inset-y-0 right-2 flex items-center">
           <ng-container
             *ngIf="destinationLocationInput && destinationLocationInput.trim().length > 0"
@@ -104,58 +119,85 @@
             </button>
           </ng-container>
         </div>
+
+        <!-- Destination Suggestions -->
         <div
           *ngIf="!isSearchingFromStart && places?.length > 0"
-          class="absolute left-0 w-full top-full mt-2"
+          class="absolute left-0 w-full top-full mt-2 z-20"
         >
           <ul class="rounded-xl border border-gray-300 bg-white">
             <li
-              id="destination-item"
               *ngFor="let place of places"
               (click)="setDestination(place); clearList()"
               (keydown.enter)="setDestination(place); clearList()"
               class="flex items-center hover:bg-gray-100 p-3 cursor-pointer"
+              [ngClass]="{ 'bg-red-50': place.isYourLocation }"
             >
-              <span class="material-symbols-outlined mr-3 p-2 border border-gray-300 rounded-full">
-                location_on
-              </span>
+              <ng-container *ngIf="place.isYourLocation; else checkDestIcon">
+                <span
+                  class="material-symbols-outlined mr-3 p-2 rounded-full text-white"
+                  style="background-color: #912338"
+                >
+                  my_location
+                </span>
+              </ng-container>
+              <ng-template #checkDestIcon>
+                <ng-container *ngIf="place.icon; else defaultDestIcon">
+                  <img
+                    [src]="place.icon"
+                    alt="Place Icon"
+                    class="w-[32px] h-[32px] mr-3 border border-gray-300 rounded-full p-[4px] box-content bg-white object-contain"
+                  />
+                </ng-container>
+                <ng-template #defaultDestIcon>
+                  <span
+                    class="material-symbols-outlined mr-3 p-2 border border-gray-300 rounded-full"
+                    [ngClass]="{ 'text-white border-transparent': isHighlighted(place?.title) }"
+                    [ngStyle]="isHighlighted(place?.title) ? { 'background-color': '#852C3A' } : {}"
+                  >
+                    {{ getPlaceIcon(place?.title) }}
+                  </span>
+                </ng-template>
+              </ng-template>
               <div class="flex flex-col min-w-0">
                 <div>{{ place?.title }}</div>
-                <div class="text-sm text-gray-500 truncate">
-                  {{ place?.address }}
-                </div>
+                <div class="text-sm text-gray-500 truncate">{{ place?.address }}</div>
               </div>
-              <span class="material-symbols-outlined ml-auto p-2 text-[#912338]">
-                arrow_insert
-              </span>
+              <span class="material-symbols-outlined ml-auto p-2 text-[#912338]">arrow_insert</span>
             </li>
           </ul>
         </div>
       </div>
 
-      <!-- ETA and Start Button -->
+      <!-- ETA + Start Button -->
       <div class="mt-2 flex items-center justify-between z-0">
         <div class="flex items-center text-lg font-bold text-[#912338]">
           <ng-container *ngIf="outdoorDirectionsService as svc">
             <ng-container *ngIf="svc.getSelectedStrategy$() | async as strategy">
               <ng-container [ngSwitch]="strategy.getMode()">
-                <span *ngSwitchCase="'WALKING'" class="material-symbols-outlined mr-1">directions_walk</span>
-                <span *ngSwitchCase="'DRIVING'" class="material-symbols-outlined mr-1">directions_car</span>
-                <span *ngSwitchCase="'TRANSIT'" class="material-symbols-outlined mr-1">directions_bus</span>
-                <span *ngSwitchCase="'SHUTTLE'" class="material-symbols-outlined mr-1">directions_transit</span>
+                <span *ngSwitchCase="'WALKING'" class="material-symbols-outlined mr-1">
+                  directions_walk
+                </span>
+                <span *ngSwitchCase="'DRIVING'" class="material-symbols-outlined mr-1">
+                  directions_car
+                </span>
+                <span *ngSwitchCase="'TRANSIT'" class="material-symbols-outlined mr-1">
+                  directions_bus
+                </span>
+                <span *ngSwitchCase="'SHUTTLE'" class="material-symbols-outlined mr-1">
+                  directions_transit
+                </span>
               </ng-container>
               <span>{{ strategy.getTotalDuration().text || '' }}</span>
-              <span class="text-gray-500 font-bold ml-2">
-                {{ strategy.getTotalDistance().text || '' }}
-              </span>
+              <span class="text-gray-500 font-bold ml-2">{{
+                strategy.getTotalDistance().text || ''
+              }}</span>
             </ng-container>
           </ng-container>
         </div>
         <button
           class="bg-[#912338] text-white py-3 px-8 rounded-full text-lg font-semibold"
-          [ngClass]="{
-            'opacity-50 cursor-not-allowed': disableStart
-          }"
+          [ngClass]="{ 'opacity-50 cursor-not-allowed': disableStart }"
           [disabled]="disableStart"
           (click)="onStartClick()"
         >

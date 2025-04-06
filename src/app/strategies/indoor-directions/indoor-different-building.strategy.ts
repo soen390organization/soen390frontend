@@ -13,38 +13,46 @@ export class IndoorDifferentBuildingStrategy extends AbstractIndoorStrategy {
   }
 
   public async getRoutes(startPoint: MappedInLocation, destinationPoint: MappedInLocation) {
-    const [startMapData, destinationMapData]: MapData[] = await Promise.all([
-      this.mappedinService.getCampusMapData()[startPoint?.indoorMapId].mapData,
-      this.mappedinService.getCampusMapData()[destinationPoint?.indoorMapId].mapData
-    ]);
+    let route = [];
+    if (startPoint) {
+      const startMapData = this.mappedinService.getCampusMapData()[startPoint?.indoorMapId].mapData;
+      route = [
+        {
+          indoorMapId: startPoint?.indoorMapId,
+          directions: startMapData?.getDirections(
+            startPoint.room,
+            await this.getEntrances(startPoint)
+          ),
+          accessible_directions: startMapData?.getDirections(
+            startPoint?.room,
+            await this.getEntrances(startPoint),
+            { accessible: true }
+          )
+        }
+      ];
+    }
 
-    this.route = [
-      {
-        indoorMapId: startPoint?.indoorMapId,
-        directions: startMapData?.getDirections(
-          startPoint.room,
-          await this.getEntrances(startPoint)
-        ),
-        accessible_directions: startMapData?.getDirections(
-          startPoint?.room,
-          await this.getEntrances(startPoint),
-          { accessible: true }
-        )
-      },
-      {
-        indoorMapId: destinationPoint?.indoorMapId,
-        directions: destinationMapData?.getDirections(
-          await this.getEntrances(destinationPoint),
-          destinationPoint?.room
-        ),
-        accessible_directions: destinationMapData?.getDirections(
-          await this.getEntrances(destinationPoint),
-          destinationPoint?.room,
-          { accessible: true }
-        )
-      }
-    ];
+    if (destinationPoint) {
+      const destinationMapData =
+        this.mappedinService.getCampusMapData()[destinationPoint?.indoorMapId].mapData;
+      route = [
+        ...route,
+        {
+          indoorMapId: destinationPoint?.indoorMapId,
+          directions: destinationMapData?.getDirections(
+            await this.getEntrances(destinationPoint),
+            destinationPoint?.room
+          ),
+          accessible_directions: destinationMapData?.getDirections(
+            await this.getEntrances(destinationPoint),
+            destinationPoint?.room,
+            { accessible: true }
+          )
+        }
+      ];
+    }
 
+    this.route = route;
     return this;
   }
 }

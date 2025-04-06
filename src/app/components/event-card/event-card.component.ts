@@ -1,8 +1,13 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Store } from '@ngrx/store';
 import { EventInfo } from 'src/app/interfaces/event-info.interface';
 import { GoogleMapLocation } from 'src/app/interfaces/google-map-location.interface';
+import { CurrentLocationService } from 'src/app/services/current-location/current-location.service';
+import { IndoorDirectionsService } from 'src/app/services/indoor-directions/indoor-directions.service';
+import { MappedinService } from 'src/app/services/mappedin/mappedin.service';
 import { OutdoorDirectionsService } from 'src/app/services/outdoor-directions/outdoor-directions.service';
+import { setMapType, MapType } from 'src/app/store/app';
 
 @Component({
   selector: 'app-event-card',
@@ -13,8 +18,15 @@ import { OutdoorDirectionsService } from 'src/app/services/outdoor-directions/ou
 export class EventCardComponent {
   @Input() events: EventInfo[] = [];
   @Input() loading: boolean = false;
+  @Output() eventSelected = new EventEmitter<GoogleMapLocation>();
 
-  constructor(private readonly outdoorDirectionsService: OutdoorDirectionsService) {}
+  constructor(
+    private readonly store: Store,
+    private readonly currentLocationService: CurrentLocationService,
+    private readonly outdoorDirectionsService: OutdoorDirectionsService,
+    private readonly indoorDirectionsService: IndoorDirectionsService,
+    private readonly mappedInService: MappedinService
+  ) {}
 
   onImageError(event: Event) {
     const imgElement = event.target as HTMLImageElement;
@@ -44,7 +56,33 @@ export class EventCardComponent {
     return `${day}, ${startTime} - ${endTime}`;
   }
 
-  setDestination(location: GoogleMapLocation) {
-    this.outdoorDirectionsService.setDestinationPoint(location);
+  /**
+   * Sets the destination point and generates a route from the user's current location
+   * @param location The outdoor Google Map location
+   * @param mappedInLocation The indoor MappedIn location, if it exists
+   */
+  async setDestination(location: GoogleMapLocation, mappedInLocation?: any) {
+    const currentLocation = await this.currentLocationService.getCurrentLocation();
+    console.log(currentLocation);
+    this.outdoorDirectionsService.setStartPoint({
+      title: 'Your Location',
+      address: `${currentLocation.lat}, ${currentLocation.lng}`,
+      coordinates: new google.maps.LatLng(currentLocation),
+      type: 'outdoor'
+    });
+
+    if (mappedInLocation) {
+      this.indoorDirectionsService.setDestinationPoint(mappedInLocation);
+      this.outdoorDirectionsService.setDestinationPoint(location);
+
+      if (mappedInLocation.indoorMapId !== this.mappedInService.getMapId()) {
+        await this.mappedInService.setMapData(mappedInLocation.indoorMapId);
+      }
+      this.store.dispatch(setMapType({ mapType: MapType.Indoor }));
+    } else {
+      this.outdoorDirectionsService.setDestinationPoint(location);
+      this.store.dispatch(setMapType({ mapType: MapType.Outdoor }));
+    }
+    this.eventSelected.emit(location);
   }
 }

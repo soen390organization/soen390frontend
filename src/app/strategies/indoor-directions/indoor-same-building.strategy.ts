@@ -13,8 +13,10 @@ export class IndoorSameBuildingStrategy extends AbstractIndoorStrategy {
   }
 
   public async getRoutes(startPoint: MappedInLocation, destinationPoint: MappedInLocation) {
+    if (!startPoint || !destinationPoint) return null;
+
     const mapData: MapData =
-      await this.mappedinService.getCampusMapData()[startPoint.indoorMapId].mapData;
+      await this.mappedinService.getCampusMapData()[startPoint?.indoorMapId].mapData;
 
     if (!mapData || !startPoint || !destinationPoint) {
       console.error('Missing mapData, startPoint or destinationPoint', {

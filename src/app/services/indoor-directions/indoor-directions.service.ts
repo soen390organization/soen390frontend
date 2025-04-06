@@ -61,11 +61,10 @@ export class IndoorDirectionsService extends DirectionsService<MappedInLocation>
       await this.indoorDifferentBuildingStrategy.getRoutes(origin, destination)
     ]);
 
-    if (origin.indoorMapId === destination.indoorMapId) {
+    if (origin?.indoorMapId === destination?.indoorMapId) {
       return sameBuildingStrategy;
-    } else {
-      return differentBuildingStrategy;
     }
+    return differentBuildingStrategy;
   }
 
   public async renderNavigation() {

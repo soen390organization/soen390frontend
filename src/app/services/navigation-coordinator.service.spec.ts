@@ -5,26 +5,71 @@ import { IndoorRoutingStrategy } from 'src/app/strategies/indoor-routing.strateg
 import { OutdoorRoutingStrategy } from 'src/app/strategies/outdoor-routing.strategy';
 import { GoogleMapLocation } from '../interfaces/google-map-location.interface';
 import { MappedInLocation } from '../interfaces/mappedin-location.interface';
-import { setMapType, MapType } from 'src/app/store/app';
+import { setMapType, MapType, setShowRoute } from 'src/app/store/app';
 import { RouteSegment } from '../interfaces/routing-strategy.interface';
+import { OutdoorDirectionsService } from './outdoor-directions/outdoor-directions.service';
+import { IndoorDirectionsService } from './indoor-directions/indoor-directions.service';
+import { CurrentLocationService } from './current-location/current-location.service';
+import { PlacesService } from './places/places.service';
+import { MappedinService } from './mappedin/mappedin.service';
+import { BehaviorSubject, of } from 'rxjs';
 
 describe('NavigationCoordinatorService', () => {
   let service: NavigationCoordinatorService;
   let storeSpy: jasmine.SpyObj<Store<any>>;
-  let outdoorSpy: jasmine.SpyObj<OutdoorRoutingStrategy>;
-  let indoorSpy: jasmine.SpyObj<IndoorRoutingStrategy>;
+  let outdoorStrategySpy: jasmine.SpyObj<OutdoorRoutingStrategy>;
+  let indoorStrategySpy: jasmine.SpyObj<IndoorRoutingStrategy>;
+  let outdoorDirectionsSpy: jasmine.SpyObj<OutdoorDirectionsService>;
+  let indoorDirectionsSpy: jasmine.SpyObj<IndoorDirectionsService>;
+  let currentLocationSpy: jasmine.SpyObj<CurrentLocationService>;
+  let placesSpy: jasmine.SpyObj<PlacesService>;
+  let mappedInSpy: jasmine.SpyObj<MappedinService>;
 
   beforeEach(() => {
     storeSpy = jasmine.createSpyObj('Store', ['dispatch']);
-    outdoorSpy = jasmine.createSpyObj('OutdoorRoutingStrategy', ['getRoute']);
-    indoorSpy = jasmine.createSpyObj('IndoorRoutingStrategy', ['getRoute']);
+    outdoorStrategySpy = jasmine.createSpyObj('OutdoorRoutingStrategy', ['getRoute']);
+    indoorStrategySpy = jasmine.createSpyObj('IndoorRoutingStrategy', ['getRoute']);
+    outdoorDirectionsSpy = jasmine.createSpyObj('OutdoorDirectionsService', [
+      'setStartPoint',
+      'setDestinationPoint',
+      'showStartMarker',
+      'showDestinationMarker',
+      'clearNavigation',
+      'renderNavigation',
+      'getShortestRoute',
+      'setSelectedStrategy'
+    ]);
+    indoorDirectionsSpy = jasmine.createSpyObj('IndoorDirectionsService', [
+      'setStartPoint',
+      'setDestinationPoint',
+      'clearNavigation',
+      'renderNavigation'
+    ]);
+    currentLocationSpy = jasmine.createSpyObj('CurrentLocationService', ['getCurrentLocation']);
+    placesSpy = jasmine.createSpyObj('PlacesService', ['getPlaceSuggestions']);
+    mappedInSpy = jasmine.createSpyObj('MappedinService', ['getCampusMapData', 'setMapData']);
+
+    // Default return values
+    currentLocationSpy.getCurrentLocation.and.resolveTo({ lat: 45, lng: -73 });
+    // Return a mock strategy object instead of a string
+    outdoorDirectionsSpy.getShortestRoute.and.resolveTo({ type: 'walking' } as any);
+
+    // Mock behavior subject for lastKnownPosition
+    Object.defineProperty(currentLocationSpy, 'lastKnownPosition', {
+      value: new BehaviorSubject<{ lat: number; lng: number } | null>(null)
+    });
 
     TestBed.configureTestingModule({
       providers: [
         NavigationCoordinatorService,
         { provide: Store, useValue: storeSpy },
-        { provide: OutdoorRoutingStrategy, useValue: outdoorSpy },
-        { provide: IndoorRoutingStrategy, useValue: indoorSpy }
+        { provide: OutdoorRoutingStrategy, useValue: outdoorStrategySpy },
+        { provide: IndoorRoutingStrategy, useValue: indoorStrategySpy },
+        { provide: OutdoorDirectionsService, useValue: outdoorDirectionsSpy },
+        { provide: IndoorDirectionsService, useValue: indoorDirectionsSpy },
+        { provide: CurrentLocationService, useValue: currentLocationSpy },
+        { provide: PlacesService, useValue: placesSpy },
+        { provide: MappedinService, useValue: mappedInSpy }
       ]
     });
 
@@ -68,22 +113,26 @@ describe('NavigationCoordinatorService', () => {
     } as const satisfies RouteSegment;
 
     it('should dispatch Outdoor map type and call outdoor strategy', async () => {
-      outdoorSpy.getRoute.and.resolveTo(mockSegment);
+      outdoorStrategySpy.getRoute.and.resolveTo(mockSegment);
 
       const result = await service.getCompleteRoute(outdoorStart, outdoorDest, 'walking');
 
       expect(storeSpy.dispatch).toHaveBeenCalledWith(setMapType({ mapType: MapType.Outdoor }));
-      expect(outdoorSpy.getRoute).toHaveBeenCalledWith(outdoorStart, outdoorDest, 'walking');
+      expect(outdoorStrategySpy.getRoute).toHaveBeenCalledWith(
+        outdoorStart,
+        outdoorDest,
+        'walking'
+      );
       expect(result).toEqual({ segments: [mockSegment] });
     });
 
     it('should dispatch Indoor map type and call indoor strategy', async () => {
-      indoorSpy.getRoute.and.resolveTo(mockSegment);
+      indoorStrategySpy.getRoute.and.resolveTo(mockSegment);
 
       const result = await service.getCompleteRoute(indoorStart, indoorDest, 'walking');
 
       expect(storeSpy.dispatch).toHaveBeenCalledWith(setMapType({ mapType: MapType.Indoor }));
-      expect(indoorSpy.getRoute).toHaveBeenCalledWith(indoorStart, indoorDest, 'walking');
+      expect(indoorStrategySpy.getRoute).toHaveBeenCalledWith(indoorStart, indoorDest, 'walking');
       expect(result).toEqual({ segments: [mockSegment] });
     });
 
@@ -97,8 +146,8 @@ describe('NavigationCoordinatorService', () => {
       ).toBeRejectedWithError('Mixed routing not implemented yet.');
 
       expect(storeSpy.dispatch).not.toHaveBeenCalled();
-      expect(outdoorSpy.getRoute).not.toHaveBeenCalled();
-      expect(indoorSpy.getRoute).not.toHaveBeenCalled();
+      expect(outdoorStrategySpy.getRoute).not.toHaveBeenCalled();
+      expect(indoorStrategySpy.getRoute).not.toHaveBeenCalled();
     });
   });
 });
