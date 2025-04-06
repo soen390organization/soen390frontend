@@ -139,11 +139,17 @@ describe('InteractionBarComponent', () => {
     component.startY = 300;
     component.onDragMove(250);
 
-    const expectedTranslateY = 80 - (300 - 250);
-    const clampedTranslate = Math.min(Math.max(expectedTranslateY, 0), 80);
+    const expectedTranslateY = component.COLLAPSED_PERCENTAGE - (300 - 250);
+    const clampedTranslate = Math.min(
+      Math.max(expectedTranslateY, 0),
+      component.COLLAPSED_PERCENTAGE
+    );
 
     expect(footerElement.style.transform).toContain(`translateY(${clampedTranslate}%)`);
-    expect(component.swipeProgress).toBeCloseTo((80 - clampedTranslate) / 80, 2);
+    expect(component.swipeProgress).toBeCloseTo(
+      (component.COLLAPSED_PERCENTAGE - clampedTranslate) / component.COLLAPSED_PERCENTAGE,
+      2
+    );
   });
 
   it('should handle touchmove event via attachSwipeListeners', () => {
@@ -171,11 +177,17 @@ describe('InteractionBarComponent', () => {
     component.startY = 300;
     component.onDragMove(250);
 
-    const expectedTranslateY = 80 - (300 - 250); // = 30
-    const clampedTranslate = Math.min(Math.max(expectedTranslateY, 0), 80);
+    const expectedTranslateY = component.COLLAPSED_PERCENTAGE - (300 - 250);
+    const clampedTranslate = Math.min(
+      Math.max(expectedTranslateY, 0),
+      component.COLLAPSED_PERCENTAGE
+    );
 
     expect(footerElement.style.transform).toContain(`translateY(${clampedTranslate}%)`);
-    expect(component.swipeProgress).toBeCloseTo((80 - clampedTranslate) / 80, 2);
+    expect(component.swipeProgress).toBeCloseTo(
+      (component.COLLAPSED_PERCENTAGE - clampedTranslate) / component.COLLAPSED_PERCENTAGE,
+      2
+    );
   });
 
   it('should update transform and swipeProgress on mouse drag move', () => {
@@ -204,8 +216,17 @@ describe('InteractionBarComponent', () => {
     document.dispatchEvent(mousemoveEvent);
     fixture.detectChanges();
 
-    expect(footerElement.style.transform).toContain('translateY(30%)');
-    expect(component.swipeProgress).toBeCloseTo(0.625, 2);
+    const expectedTranslateY = component.COLLAPSED_PERCENTAGE - (300 - 250);
+    const clampedTranslate = Math.min(
+      Math.max(expectedTranslateY, 0),
+      component.COLLAPSED_PERCENTAGE
+    );
+
+    expect(footerElement.style.transform).toContain(`translateY(${clampedTranslate}%)`);
+    expect(component.swipeProgress).toBeCloseTo(
+      (component.COLLAPSED_PERCENTAGE - clampedTranslate) / component.COLLAPSED_PERCENTAGE,
+      2
+    );
     expect(preventDefaultSpy).toHaveBeenCalled();
   });
 
@@ -235,37 +256,41 @@ describe('InteractionBarComponent', () => {
   });
 
   it('should update footer UI correctly when expanded', () => {
-    // Test updateFooterUI directly for the expanded state.
     const footerElement = document.createElement('div');
     component.footerContainer = new ElementRef(footerElement);
     component.updateFooterUI(true);
     expect(footerElement.style.transition).toContain('transform 0.3s ease-out');
-    // Updated expectation: now expecting 'translateY(0px)' instead of 'translateY(0)'
     expect(footerElement.style.transform).toBe('translateY(0px)');
     expect(component.swipeProgress).toBe(1);
   });
 
   it('should update footer UI correctly when collapsed', () => {
-    // Test updateFooterUI directly for the collapsed state.
     const footerElement = document.createElement('div');
     component.footerContainer = new ElementRef(footerElement);
     component.updateFooterUI(false);
     expect(footerElement.style.transition).toContain('transform 0.3s ease-out');
-    expect(footerElement.style.transform).toBe('translateY(80%)');
+    expect(footerElement.style.transform).toBe(`translateY(${component.COLLAPSED_PERCENTAGE}%)`);
     expect(component.swipeProgress).toBe(0);
   });
 
   it('should update transform and swipeProgress on drag move when expanded', () => {
-    // When expanded, baseTranslate should be 0.
     const footerElement = document.createElement('div');
     component.footerContainer = new ElementRef(footerElement);
     component.isExpanded = true;
     component.startY = 300;
-    component.onDragMove(350); // currentY = 350, diff = 300 - 350 = -50, translateY = 0 - (-50) = 50
+    component.onDragMove(350); // diff = -50
+
     const expectedTranslateY = 0 - (300 - 350); // = 50
-    const clampedTranslate = Math.min(Math.max(expectedTranslateY, 0), 80); // = 50
+    const clampedTranslate = Math.min(
+      Math.max(expectedTranslateY, 0),
+      component.COLLAPSED_PERCENTAGE
+    );
+
     expect(footerElement.style.transform).toContain(`translateY(${clampedTranslate}%)`);
-    expect(component.swipeProgress).toBeCloseTo((80 - clampedTranslate) / 80, 2); // (80-50)/80 = 0.375
+    expect(component.swipeProgress).toBeCloseTo(
+      (component.COLLAPSED_PERCENTAGE - clampedTranslate) / component.COLLAPSED_PERCENTAGE,
+      2
+    );
   });
 
   it('should reset startY and currentY after drag end', () => {
@@ -301,7 +326,6 @@ describe('InteractionBarComponent', () => {
     component.attachSwipeListeners(element);
     spyOn(component, 'onDragStart');
 
-    // Create a proper TouchEvent with two touches.
     const touchEvent = new TouchEvent('touchstart', {
       bubbles: true,
       cancelable: true,
@@ -328,6 +352,7 @@ describe('InteractionBarComponent', () => {
         })
       ]
     });
+
     element.dispatchEvent(touchEvent);
     expect(component.onDragStart).not.toHaveBeenCalled();
   });
@@ -335,6 +360,7 @@ describe('InteractionBarComponent', () => {
   it('should set showIndoorSelects based on current map type', () => {
     component.ngOnInit();
     expect(component.showIndoorSelects).toBeFalse();
+
     (mockStore.select as jasmine.Spy).and.callFake((selector: any) => {
       if (selector === selectCurrentMap) {
         return of(MapType.Indoor);
@@ -344,6 +370,7 @@ describe('InteractionBarComponent', () => {
       }
       return of();
     });
+
     component.ngOnInit();
     expect(component.showIndoorSelects).toBeTrue();
   });
