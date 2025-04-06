@@ -165,6 +165,20 @@ export class MapSearchComponent implements OnInit {
     this.store.dispatch(setMapType({ mapType: MapType.Outdoor }));
   }
 
+  async onSetUsersLocationAsDestination(): Promise<void> {
+    const position = await this.currentLocationService.getCurrentLocation();
+    if (position == null) {
+      throw new Error('Current location is null.');
+    }
+    this.setDestination({
+      title: 'Your Location',
+      address: `${position.lat}, ${position.lng}`,
+      coordinates: new google.maps.LatLng(position),
+      type: 'outdoor'
+    });
+    this.store.dispatch(setMapType({ mapType: MapType.Outdoor }));
+  }
+
   async onSearchChange(event: any, type: 'start' | 'destination') {
     this.isSearchingFromStart = type === 'start';
     const query = event.target.value.trim();
@@ -259,7 +273,7 @@ export class MapSearchComponent implements OnInit {
 
   async setDestination(place: any) {
     if (place.isYourLocation) {
-      await this.onSetUsersLocationAsStart();
+      await this.onSetUsersLocationAsDestination();
       this.clearList();
       return;
     }
