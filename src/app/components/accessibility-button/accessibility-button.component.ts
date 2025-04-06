@@ -1,11 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { IndoorDirectionsService } from 'src/app/services/indoor-directions/indoor-directions.service';
 
 @Component({
   selector: 'app-accessibility-button',
   templateUrl: './accessibility-button.component.html',
-  styleUrls: ['./accessibility-button.component.scss'],
   imports: [CommonModule]
 })
 export class AccessibilityButtonComponent {

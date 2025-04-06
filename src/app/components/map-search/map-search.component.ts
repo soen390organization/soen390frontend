@@ -102,36 +102,33 @@ export class MapSearchComponent implements OnInit {
             this.outdoorDirectionsService.renderNavigation();
             this.disableStart = false;
           });
-          return;
         } else if (indoorStartPoint || indoorDestinationPoint) {
           await this.indoorDirectionService.getInitializedRoutes().then(async (strategy) => {
             this.indoorDirectionService.setSelectedStrategy(strategy);
             this.indoorDirectionService.renderNavigation();
             this.disableStart = false;
           });
-          return;
         } else {
           this.disableStart = true;
         }
       }
     );
     // Attempt to set the user's current location as the start point
-this.setUserLocationAsDefaultStart();
-
+    this.setUserLocationAsDefaultStart();
   }
   private async setUserLocationAsDefaultStart(): Promise<void> {
     try {
       const position = await this.currentLocationService.getCurrentLocation();
       if (position) {
         const currentLocation = new google.maps.LatLng(position);
-  
+
         const place = {
           title: 'Your Location',
           address: `${position.lat}, ${position.lng}`,
           coordinates: currentLocation,
           type: 'outdoor'
         };
-  
+
         this.setStart(place);
         this.googleMapService.updateMapLocation(currentLocation);
       }
@@ -139,8 +136,6 @@ this.setUserLocationAsDefaultStart();
       console.warn('Could not fetch user location on init:', error);
     }
   }
-  
-
 
   private setDisableStart(show) {
     this.disableStart = show;

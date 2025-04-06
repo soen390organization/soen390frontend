@@ -1,8 +1,5 @@
 import { BehaviorSubject, firstValueFrom, Observable } from 'rxjs';
 import { Location } from '../interfaces/location.interface';
-import { AbstractOutdoorStrategy } from '../strategies/outdoor-directions/abstract-outdoor.strategy';
-import { AbstractIndoorStrategy } from '../strategies/indoor-directions/abstract-indoor.strategy';
-
 /**
  * Abstract service for handling navigation directions.
  *

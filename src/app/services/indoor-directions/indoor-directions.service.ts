@@ -74,7 +74,7 @@ export class IndoorDirectionsService extends DirectionsService<MappedInLocation>
 
   public async clearNavigation(): Promise<void> {
     const mapView = this.mappedinService.mapView;
-    if (mapView && mapView.Navigation && typeof mapView.Navigation.clear === 'function') {
+    if (mapView?.Navigation?.clear instanceof Function) {
       try {
         mapView.Navigation.clear();
       } catch (error) {

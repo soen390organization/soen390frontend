@@ -27,8 +27,6 @@ export class IndoorRoutingStrategy implements RoutingStrategy {
       await this.mappedInService.setMapData(start.indoorMapId);
     }
 
-    // await this.indoorDirectionsService.navigate(start.room, destination.room);
-
     const instructions = {};
     return { type: 'indoor', instructions };
   }

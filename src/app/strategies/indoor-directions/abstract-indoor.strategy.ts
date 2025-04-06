@@ -39,16 +39,18 @@ export abstract class AbstractIndoorStrategy implements DirectionsStrategy<Mappe
 
     if (Array.isArray(this.route)) {
       indoorRoute = this.route.find((item) => item.indoorMapId == this.mappedinService.getMapId());
+    } else if (this.route.indoorMapId == this.mappedinService.getMapId()) {
+      indoorRoute = this.route;
     } else {
-      if (this.route.indoorMapId == this.mappedinService.getMapId()) indoorRoute = this.route;
+      return null;
     }
 
     if (indoorRoute) {
       try {
         if (this.accessibility) {
-          mapView.Navigation.draw(indoorRoute.accessible_directions);
+          await mapView.Navigation.draw(indoorRoute.accessible_directions);
         } else {
-          mapView.Navigation.draw(indoorRoute.directions);
+          await mapView.Navigation.draw(indoorRoute.directions);
         }
       } catch (error) {
         console.error('Error drawing navigation route:', error);
