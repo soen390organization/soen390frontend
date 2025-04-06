@@ -18,21 +18,45 @@ describe('MapSearchComponent', () => {
   let store: MockStore;
 
   const mockOutdoorService = jasmine.createSpyObj('OutdoorDirectionsService', [
-    'getStartPoint$', 'getDestinationPoint$', 'showStartMarker', 'showDestinationMarker',
-    'getShortestRoute', 'setSelectedStrategy', 'clearStartMarker', 'clearDestinationMarker',
-    'renderNavigation', 'clearNavigation', 'clearStartPoint', 'clearDestinationPoint',
-    'setStartPoint', 'setDestinationPoint', 'getSelectedStrategy$'
+    'getStartPoint$',
+    'getDestinationPoint$',
+    'showStartMarker',
+    'showDestinationMarker',
+    'getShortestRoute',
+    'setSelectedStrategy',
+    'clearStartMarker',
+    'clearDestinationMarker',
+    'renderNavigation',
+    'clearNavigation',
+    'clearStartPoint',
+    'clearDestinationPoint',
+    'setStartPoint',
+    'setDestinationPoint',
+    'getSelectedStrategy$'
   ]);
 
   const mockIndoorService = jasmine.createSpyObj('IndoorDirectionsService', [
-    'getStartPoint$', 'getDestinationPoint$', 'clearStartPoint', 'clearDestinationPoint', 'clearNavigation',
-    'setStartPoint', 'setDestinationPoint'
+    'getStartPoint$',
+    'getDestinationPoint$',
+    'clearStartPoint',
+    'clearDestinationPoint',
+    'clearNavigation',
+    'setStartPoint',
+    'setDestinationPoint',
+    'setSelectedStrategy',
+    'renderNavigation',
+    'getInitializedRoutes'
   ]);
 
   const mockMappedinService = jasmine.createSpyObj('MappedinService', ['getMapId', 'setMapData']);
-  const mockGoogleMapService = jasmine.createSpyObj('GoogleMapService', ['updateMapLocation', 'getMap']);
+  const mockGoogleMapService = jasmine.createSpyObj('GoogleMapService', [
+    'updateMapLocation',
+    'getMap'
+  ]);
   const mockPlacesService = jasmine.createSpyObj('PlacesService', ['getPlaceSuggestions']);
-  const mockLocationService = jasmine.createSpyObj('CurrentLocationService', ['getCurrentLocation']);
+  const mockLocationService = jasmine.createSpyObj('CurrentLocationService', [
+    'getCurrentLocation'
+  ]);
 
   const initialState = { app: { showRoute: false } };
 
@@ -132,7 +156,9 @@ describe('MapSearchComponent', () => {
 
   it('should throw error if user location is null', async () => {
     mockLocationService.getCurrentLocation.and.resolveTo(null);
-    await expectAsync(component.onSetUsersLocationAsStart()).toBeRejectedWithError('Current location is null.');
+    await expectAsync(component.onSetUsersLocationAsStart()).toBeRejectedWithError(
+      'Current location is null.'
+    );
   });
 
   it('should set indoor start location', fakeAsync(async () => {
@@ -203,24 +229,72 @@ describe('MapSearchComponent', () => {
   it('should return the correct icon for highlighted places', () => {
     const highlightedPlaceTitle = 'H Building Concordia University';
     const defaultIcon = 'location_on';
-  
+
     // Test when the place is in the highlightedPlaces map
     const icon = component.getPlaceIcon(highlightedPlaceTitle);
     expect(icon).toBe('location_city');
-  
+
     // Test when the place is not in the highlightedPlaces map
     const nonHighlightedPlaceTitle = 'Nonexistent Place';
     const nonHighlightedIcon = component.getPlaceIcon(nonHighlightedPlaceTitle);
     expect(nonHighlightedIcon).toBe(defaultIcon);
   });
-  
+
   it('should return the default icon if title is undefined or empty', () => {
     const undefinedIcon = component.getPlaceIcon(undefined);
     expect(undefinedIcon).toBe('location_on');
-    
+
     const emptyIcon = component.getPlaceIcon('');
     expect(emptyIcon).toBe('location_on');
   });
-  
 
+  it('should trigger indoor navigation logic in ngOnInit', fakeAsync(() => {
+    const mockStrategy = {};
+    mockOutdoorService.getStartPoint$.and.returnValue(of(null));
+    mockOutdoorService.getDestinationPoint$.and.returnValue(of(null));
+    mockIndoorService.getStartPoint$.and.returnValue(of({ title: 'Indoor Start' }));
+    mockIndoorService.getDestinationPoint$.and.returnValue(of(null));
+
+    mockIndoorService.getInitializedRoutes = jasmine
+      .createSpy()
+      .and.returnValue(Promise.resolve(mockStrategy));
+
+    fixture.detectChanges();
+    tick();
+
+    expect(mockIndoorService.getInitializedRoutes).toHaveBeenCalled();
+    expect(mockIndoorService.setSelectedStrategy).toHaveBeenCalledWith(mockStrategy);
+    expect(mockIndoorService.renderNavigation).toHaveBeenCalled();
+    expect(component.disableStart).toBeFalse();
+  }));
+
+  it('should trigger outdoor routing logic in ngOnInit', fakeAsync(() => {
+    const mockStrategy = {};
+    const outdoorPoint = { title: 'Outdoor Point', coordinates: {} };
+
+    mockOutdoorService.getStartPoint$.and.returnValue(of(outdoorPoint));
+    mockOutdoorService.getDestinationPoint$.and.returnValue(of(outdoorPoint));
+    mockIndoorService.getStartPoint$.and.returnValue(of(null));
+    mockIndoorService.getDestinationPoint$.and.returnValue(of(null));
+
+    mockOutdoorService.getShortestRoute.and.returnValue(Promise.resolve(mockStrategy));
+
+    fixture.detectChanges();
+    tick();
+
+    expect(mockOutdoorService.getShortestRoute).toHaveBeenCalled();
+    expect(mockOutdoorService.setSelectedStrategy).toHaveBeenCalledWith(mockStrategy);
+    expect(mockOutdoorService.clearStartMarker).toHaveBeenCalled();
+    expect(mockOutdoorService.clearDestinationMarker).toHaveBeenCalled();
+    expect(mockOutdoorService.renderNavigation).toHaveBeenCalled();
+    expect(component.disableStart).toBeFalse();
+  }));
+
+  it('should return true from isHighlighted if place is in highlighted set', () => {
+    expect(component.isHighlighted('H Building Concordia University')).toBeTrue();
+  });
+
+  it('should return false from isHighlighted if place is not in highlighted set', () => {
+    expect(component.isHighlighted('Random Place')).toBeFalse();
+  });
 });
