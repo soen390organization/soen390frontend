@@ -53,10 +53,9 @@ export class MapSearchComponent implements OnInit {
   destinationLocationInput = '';
   isSearchVisible = false;
   disableStart: boolean = true;
-
-  // Separate suggestion arrays for start and destination inputs.
-  startPlaces: any[] = [];
-  destinationPlaces: any[] = [];
+  // Single unified suggestions array for both inputs.
+  places: any[] = [];
+  isSearchingFromStart: boolean = false; // Indicates which input is active
 
   constructor(
     private store: Store,
@@ -103,13 +102,39 @@ export class MapSearchComponent implements OnInit {
             this.outdoorDirectionsService.renderNavigation();
             this.disableStart = false;
           });
-        } else if (indoorStartPoint && indoorDestinationPoint) {
-          this.disableStart = false;
+        } else if (indoorStartPoint || indoorDestinationPoint) {
+          await this.indoorDirectionService.getInitializedRoutes().then(async (strategy) => {
+            this.indoorDirectionService.setSelectedStrategy(strategy);
+            this.indoorDirectionService.renderNavigation();
+            this.disableStart = false;
+          });
         } else {
           this.disableStart = true;
         }
       }
     );
+
+    // Optionally attempt to set user's current location as default start.
+    this.setUserLocationAsDefaultStart();
+  }
+
+  private async setUserLocationAsDefaultStart(): Promise<void> {
+    try {
+      const position = await this.currentLocationService.getCurrentLocation();
+      if (position) {
+        const currentLocation = new google.maps.LatLng(position);
+        const place = {
+          title: 'Your Location',
+          address: `${position.lat}, ${position.lng}`,
+          coordinates: currentLocation,
+          type: 'outdoor'
+        };
+        this.setStart(place);
+        this.googleMapService.updateMapLocation(currentLocation);
+      }
+    } catch (error) {
+      console.warn('Could not fetch user location on init:', error);
+    }
   }
 
   private setDisableStart(show: boolean) {
@@ -140,31 +165,18 @@ export class MapSearchComponent implements OnInit {
     this.store.dispatch(setMapType({ mapType: MapType.Outdoor }));
   }
 
-  // Update suggestions for each input separately.
   async onSearchChange(event: any, type: 'start' | 'destination') {
+    this.isSearchingFromStart = type === 'start';
     const query = event.target.value.trim();
     if (!query) {
-      if (type === 'start') {
-        this.startPlaces = [];
-      } else {
-        this.destinationPlaces = [];
-      }
+      this.places = [];
       return;
     }
-    const suggestions = await this.placesService.getPlaceSuggestions(query);
-    if (type === 'start') {
-      this.startPlaces = suggestions;
-    } else {
-      this.destinationPlaces = suggestions;
-    }
+    this.places = await this.placesService.getPlaceSuggestions(query);
   }
 
-  // Separate clear functions for each suggestion array.
-  clearStartList() {
-    this.startPlaces = [];
-  }
-  clearDestinationList() {
-    this.destinationPlaces = [];
+  clearList() {
+    this.places = [];
   }
 
   async onStartClick(): Promise<void> {
@@ -190,46 +202,39 @@ export class MapSearchComponent implements OnInit {
   }
 
   clearLocation() {
-    this.clearStartList();
-    this.clearDestinationList();
+    this.clearList();
     this.store.dispatch(setShowRoute({ show: false }));
     this.outdoorDirectionsService.clearNavigation();
     this.outdoorDirectionsService.setSelectedStrategy(null);
     this.indoorDirectionService.clearNavigation();
   }
 
-  // Both inputs now prepend the default "Your Location" suggestion.
   async onFocus(type: 'start' | 'destination'): Promise<void> {
+    this.isSearchingFromStart = type === 'start';
+    // Retrieve default building suggestions.
     const suggestions = await this.placesService.getPlaceSuggestions('');
-    const defaultLocationSuggestion = {
-      title: 'Your Location',
-      address: 'Use your current location',
-      type: 'outdoor',
-      isYourLocation: true
-    };
-    if (type === 'start') {
-      this.startPlaces = [defaultLocationSuggestion, ...suggestions];
-    } else {
-      this.destinationPlaces = [defaultLocationSuggestion, ...suggestions];
-    }
+    // Prepend the custom "Your Location" suggestion for both inputs.
+    this.places = [
+      {
+        title: 'Your Location',
+        address: 'Use your current location',
+        type: 'outdoor',
+        isYourLocation: true
+      },
+      ...suggestions
+    ];
   }
 
-  // Separate onBlur handlers.
-  onStartBlur(): void {
+  onBlur(): void {
     setTimeout(() => {
-      this.clearStartList();
-    }, 200);
-  }
-  onDestinationBlur(): void {
-    setTimeout(() => {
-      this.clearDestinationList();
+      this.clearList();
     }, 200);
   }
 
   async setStart(place: any) {
     if (place.isYourLocation) {
       await this.onSetUsersLocationAsStart();
-      this.clearStartList();
+      this.clearList();
       return;
     }
     this.startLocationInput = place.title;
@@ -249,13 +254,13 @@ export class MapSearchComponent implements OnInit {
       this.outdoorDirectionsService.setStartPoint(place);
       this.store.dispatch(setMapType({ mapType: MapType.Outdoor }));
     }
-    this.clearStartList();
+    this.clearList();
   }
 
   async setDestination(place: any) {
     if (place.isYourLocation) {
       await this.onSetUsersLocationAsStart();
-      this.clearDestinationList();
+      this.clearList();
       return;
     }
     this.destinationLocationInput = place.title;
@@ -275,7 +280,7 @@ export class MapSearchComponent implements OnInit {
       this.outdoorDirectionsService.setDestinationPoint(place);
       this.store.dispatch(setMapType({ mapType: MapType.Outdoor }));
     }
-    this.clearDestinationList();
+    this.clearList();
   }
 
   // Utility functions for highlighting.

@@ -22,7 +22,6 @@ export class PlacesService {
 
   /**
    * Initializes the PlacesService with a given Google Map instance.
-   * @param map The Google Map instance to associate with the PlacesService.
    */
   public initialize(map: google.maps.Map): void {
     if (!this.placesService) {
@@ -33,7 +32,6 @@ export class PlacesService {
 
   /**
    * Returns an observable that emits the readiness status of the PlacesService.
-   * @returns An observable emitting a boolean indicating whether the PlacesService is ready.
    */
   public isInitialized() {
     return this.placesServiceReady.asObservable();
@@ -64,11 +62,8 @@ export class PlacesService {
         autocompleteService.getPlacePredictions(
           {
             input,
-            componentRestrictions: { country: 'CA' },
-            locationBias: new google.maps.Circle({
-              center: new google.maps.LatLng(campusCoordinates),
-              radius: 500
-            })
+            location: new google.maps.LatLng(45.5017, -73.5673), // Montreal coordinates
+            radius: 10000 // Adjust radius as needed to cover the Montreal area
           },
           (predictions, status) => {
             resolve(predictions || []);
@@ -96,7 +91,8 @@ export class PlacesService {
             abbreviation: building.abbreviation,
             indoorMapId: key,
             room: space,
-            type: 'indoor'
+            type: 'indoor',
+            icon: 'assets/icon/c-logo.png'
           })),
         ...building.mapData
           .getByType('point-of-interest')
@@ -112,6 +108,29 @@ export class PlacesService {
             type: 'indoor'
           }))
       ];
+
+      // Group POIs by name.
+      const poiGroups: Record<string, any[]> = {};
+      for (const poi of building.mapData.getByType('point-of-interest')) {
+        if (poi.name) {
+          if (!poiGroups[poi.name]) {
+            poiGroups[poi.name] = [];
+          }
+          poiGroups[poi.name].push(poi);
+        }
+      }
+      // Convert grouped POIs into final array format.
+      for (const [poiName, pois] of Object.entries(poiGroups)) {
+        rooms.push({
+          title: building.abbreviation + ' ' + poiName,
+          address: building.address,
+          fullName: building.name + ' ' + poiName,
+          abbreviation: building.abbreviation,
+          indoorMapId: key,
+          room: pois, // Now an array of POIs with the same name.
+          type: 'indoor'
+        });
+      }
     }
 
     const normalizeString = (str: string) => str.toLowerCase().replace(/[^a-zA-Z0-9]/g, '');
@@ -192,11 +211,9 @@ export class PlacesService {
 
   /**
    * Retrieves nearby points of interest (e.g., restaurants) around the selected campus.
-   * Defaults to the current campus location but can be enhanced to prioritize the user's location.
    */
   public async getPointsOfInterest(): Promise<GoogleMapLocation[]> {
     const campusKey = await firstValueFrom(this.store.select(selectSelectedCampus));
-
     const places = await this.getPlaces(
       new google.maps.LatLng(this.getCampusCoordinates(campusKey)!),
       250,
@@ -214,9 +231,6 @@ export class PlacesService {
 
   /**
    * Retrieves places from Google Places API based on location, radius, and type.
-   * @param location The center point of the search.
-   * @param radius The search radius in meters.
-   * @param type The type of place to search for.
    */
   private getPlaces(
     location: google.maps.LatLng,

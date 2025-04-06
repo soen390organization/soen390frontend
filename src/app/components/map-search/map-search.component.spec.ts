@@ -42,7 +42,10 @@ describe('MapSearchComponent', () => {
     'clearDestinationPoint',
     'clearNavigation',
     'setStartPoint',
-    'setDestinationPoint'
+    'setDestinationPoint',
+    'setSelectedStrategy',
+    'renderNavigation',
+    'getInitializedRoutes'
   ]);
 
   const mockMappedinService = jasmine.createSpyObj('MappedinService', ['getMapId', 'setMapData']);
@@ -303,5 +306,55 @@ describe('MapSearchComponent', () => {
 
     const emptyIcon = component.getPlaceIcon('');
     expect(emptyIcon).toBe('location_on');
+  });
+
+  it('should trigger indoor navigation logic in ngOnInit', fakeAsync(() => {
+    const mockStrategy = {};
+    mockOutdoorService.getStartPoint$.and.returnValue(of(null));
+    mockOutdoorService.getDestinationPoint$.and.returnValue(of(null));
+    mockIndoorService.getStartPoint$.and.returnValue(of({ title: 'Indoor Start' }));
+    mockIndoorService.getDestinationPoint$.and.returnValue(of(null));
+
+    mockIndoorService.getInitializedRoutes = jasmine
+      .createSpy()
+      .and.returnValue(Promise.resolve(mockStrategy));
+
+    fixture.detectChanges();
+    tick();
+
+    expect(mockIndoorService.getInitializedRoutes).toHaveBeenCalled();
+    expect(mockIndoorService.setSelectedStrategy).toHaveBeenCalledWith(mockStrategy);
+    expect(mockIndoorService.renderNavigation).toHaveBeenCalled();
+    expect(component.disableStart).toBeFalse();
+  }));
+
+  it('should trigger outdoor routing logic in ngOnInit', fakeAsync(() => {
+    const mockStrategy = {};
+    const outdoorPoint = { title: 'Outdoor Point', coordinates: {} };
+
+    mockOutdoorService.getStartPoint$.and.returnValue(of(outdoorPoint));
+    mockOutdoorService.getDestinationPoint$.and.returnValue(of(outdoorPoint));
+    mockIndoorService.getStartPoint$.and.returnValue(of(null));
+    mockIndoorService.getDestinationPoint$.and.returnValue(of(null));
+
+    mockOutdoorService.getShortestRoute.and.returnValue(Promise.resolve(mockStrategy));
+
+    fixture.detectChanges();
+    tick();
+
+    expect(mockOutdoorService.getShortestRoute).toHaveBeenCalled();
+    expect(mockOutdoorService.setSelectedStrategy).toHaveBeenCalledWith(mockStrategy);
+    expect(mockOutdoorService.clearStartMarker).toHaveBeenCalled();
+    expect(mockOutdoorService.clearDestinationMarker).toHaveBeenCalled();
+    expect(mockOutdoorService.renderNavigation).toHaveBeenCalled();
+    expect(component.disableStart).toBeFalse();
+  }));
+
+  it('should return true from isHighlighted if place is in highlighted set', () => {
+    expect(component.isHighlighted('H Building Concordia University')).toBeTrue();
+  });
+
+  it('should return false from isHighlighted if place is not in highlighted set', () => {
+    expect(component.isHighlighted('Random Place')).toBeFalse();
   });
 });

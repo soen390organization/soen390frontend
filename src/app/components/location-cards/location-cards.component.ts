@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { Location } from 'src/app/interfaces/location.interface';
 import { OutdoorDirectionsService } from 'src/app/services/outdoor-directions/outdoor-directions.service';
 
@@ -12,6 +12,7 @@ import { OutdoorDirectionsService } from 'src/app/services/outdoor-directions/ou
 export class LocationCardsComponent {
   @Input() locations: Location[] = [];
   @Input() loading: boolean = false;
+  @Output() locationSelected = new EventEmitter<Location>();
 
   constructor(private readonly outdoorDirectionsService: OutdoorDirectionsService) {}
 
@@ -28,5 +29,6 @@ export class LocationCardsComponent {
       address: location.address,
       type: 'outdoor'
     });
+    this.locationSelected.emit(location);
   }
 }
