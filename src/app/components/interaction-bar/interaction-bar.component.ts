@@ -49,6 +49,7 @@ export class InteractionBarComponent implements OnInit, AfterViewInit {
   events = { events: [] as EventInfo[], loading: true };
   showDirections$!: Observable<boolean>;
   showPOIs$!: Observable<boolean>;
+  COLLAPSED_PERCENTAGE = 65;
   switchMapButton: any;
 
   constructor(
@@ -165,12 +166,11 @@ export class InteractionBarComponent implements OnInit, AfterViewInit {
     const diff = this.startY - currentY;
 
     const footer = this.footerContainer.nativeElement;
-    const baseTranslate = this.isExpanded ? 0 : 80;
+    const baseTranslate = this.isExpanded ? 0 : this.COLLAPSED_PERCENTAGE;
     const translateY = baseTranslate - diff;
-    const clampedTranslate = Math.min(Math.max(translateY, 0), 80);
-
-    footer.style.transform = `translateY(${clampedTranslate}%)`;
-    this.swipeProgress = (80 - clampedTranslate) / 80;
+    const clampedTranslate = Math.min(Math.max(translateY, 0), this.COLLAPSED_PERCENTAGE);
+    footer.style.transform = `translateY(${Math.min(Math.max(translateY, 0), this.COLLAPSED_PERCENTAGE)}%)`;
+    this.swipeProgress = (this.COLLAPSED_PERCENTAGE - clampedTranslate) / this.COLLAPSED_PERCENTAGE;
   }
 
   onDragEnd(): void {
@@ -197,9 +197,18 @@ export class InteractionBarComponent implements OnInit, AfterViewInit {
   public updateFooterUI(expand: boolean): void {
     const footer = this.footerContainer.nativeElement;
     footer.style.transition = 'transform 0.3s ease-out';
-    footer.style.transform = expand ? 'translateY(0)' : 'translateY(80%)';
+    footer.style.transform = expand ? 'translateY(0)' : `translateY(${this.COLLAPSED_PERCENTAGE}%)`;
     // ** IMPORTANT ** Needs better solution, since this will hide the indoor selects
     // footer.style.overflowY = expand ? 'auto' : 'hidden';
     this.swipeProgress = expand ? 1 : 0;
+  }
+
+  onLocationSelected(): void {
+    this.isExpanded = false;
+    const footer = this.footerContainer.nativeElement;
+    footer.style.transition = 'transform 0.3s ease-out';
+    footer.style.transform = `translateY(${this.COLLAPSED_PERCENTAGE}%)`;
+    footer.style.overflowY = '';
+    this.swipeProgress = 0;
   }
 }
