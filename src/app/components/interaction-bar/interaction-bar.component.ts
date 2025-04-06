@@ -52,7 +52,7 @@ export class InteractionBarComponent implements OnInit, AfterViewInit {
   events = { events: [] as EventInfo[], loading: true };
   showDirections$!: Observable<boolean>;
   showPOIs$!: Observable<boolean>;
-  COLLAPSED_PERCENTAGE = 65;
+  COLLAPSED_PERCENTAGE = 80;
   switchMapButton: any;
 
   constructor(
