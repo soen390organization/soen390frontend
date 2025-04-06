@@ -199,4 +199,82 @@ describe('MapSearchComponent', () => {
     tick();
     expect(component.disableStart).toBeTrue();
   }));
+
+  describe('setUserLocationAsDefaultStart', () => {
+    it('should set user location as start and update map location if position is available', fakeAsync(() => {
+      // Arrange: simulate a valid position and spy on the setStart method
+      const mockPosition = { lat: 45, lng: -73 };
+      mockLocationService.getCurrentLocation.and.resolveTo(mockPosition);
+      spyOn(component, 'setStart');
+  
+      // Act: call the private method using a type cast
+      (component as any).setUserLocationAsDefaultStart();
+      tick(); // flush pending microtasks
+  
+      // Assert: verify setStart is called with the expected place object
+      expect(component.setStart).toHaveBeenCalledWith(jasmine.objectContaining({
+        title: 'Your Location',
+        address: '45, -73',
+        type: 'outdoor'
+      }));
+      // Assert: verify updateMapLocation is called (receiving a google.maps.LatLng instance)
+      expect(mockGoogleMapService.updateMapLocation).toHaveBeenCalled();
+    }));
+  
+    it('should not set start or update map location if getCurrentLocation returns null', fakeAsync(() => {
+      // Arrange: simulate a null response for current location
+      mockLocationService.getCurrentLocation.and.resolveTo(null);
+      spyOn(component, 'setStart');
+  
+      // Act: call the private method
+      (component as any).setUserLocationAsDefaultStart();
+      tick();
+  
+      // Assert: ensure neither setStart nor updateMapLocation is called
+      expect(component.setStart).not.toHaveBeenCalled();
+      expect(mockGoogleMapService.updateMapLocation).not.toHaveBeenCalled();
+    }));
+  
+    it('should catch error and log warning when getCurrentLocation throws an error', fakeAsync(() => {
+      // Arrange: force getCurrentLocation to reject with an error
+      const errorMessage = 'Some error';
+      mockLocationService.getCurrentLocation.and.rejectWith(errorMessage);
+      spyOn(console, 'warn');
+  
+      // Act: call the private method
+      (component as any).setUserLocationAsDefaultStart();
+      tick();
+  
+      // Assert: verify that console.warn is called with the error message
+      expect(console.warn).toHaveBeenCalledWith('Could not fetch user location on init:', errorMessage);
+    }));
+  });
+  
+  
+    
+  
+
+  it('should return the correct icon for highlighted places', () => {
+    const highlightedPlaceTitle = 'H Building Concordia University';
+    const defaultIcon = 'location_on';
+  
+    // Test when the place is in the highlightedPlaces map
+    const icon = component.getPlaceIcon(highlightedPlaceTitle);
+    expect(icon).toBe('location_city');
+  
+    // Test when the place is not in the highlightedPlaces map
+    const nonHighlightedPlaceTitle = 'Nonexistent Place';
+    const nonHighlightedIcon = component.getPlaceIcon(nonHighlightedPlaceTitle);
+    expect(nonHighlightedIcon).toBe(defaultIcon);
+  });
+  
+  it('should return the default icon if title is undefined or empty', () => {
+    const undefinedIcon = component.getPlaceIcon(undefined);
+    expect(undefinedIcon).toBe('location_on');
+    
+    const emptyIcon = component.getPlaceIcon('');
+    expect(emptyIcon).toBe('location_on');
+  });
+  
+
 });
