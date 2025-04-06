@@ -11,7 +11,10 @@ describe('LocationCardsComponent', () => {
   let directionsServiceSpy: jasmine.SpyObj<OutdoorDirectionsService>;
 
   beforeEach(async () => {
-    const spy = jasmine.createSpyObj('DirectionsService', ['setDestinationPoint']);
+    const spy = jasmine.createSpyObj('DirectionsService', [
+      'setDestinationPoint',
+      'clearNavigation'
+    ]);
 
     await TestBed.configureTestingModule({
       imports: [LocationCardsComponent],
@@ -20,7 +23,9 @@ describe('LocationCardsComponent', () => {
 
     fixture = TestBed.createComponent(LocationCardsComponent);
     component = fixture.componentInstance;
-    directionsServiceSpy = TestBed.inject(OutdoorDirectionsService) as jasmine.SpyObj<OutdoorDirectionsService>;
+    directionsServiceSpy = TestBed.inject(
+      OutdoorDirectionsService
+    ) as jasmine.SpyObj<OutdoorDirectionsService>;
   });
 
   it('should create', () => {

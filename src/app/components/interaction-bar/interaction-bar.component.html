@@ -18,7 +18,7 @@
     <div class="w-[120px] h-[10px] bg-[#d5d5d5] rounded-full mt-2"></div>
   </div>
 
-  <div class="footer-content px-5">
+  <div class="footer-content px-5 overflow-y-auto max-h-[80vh]">
     <ng-container *ngIf="showDirections$ | async; else showLocations">
       <h2 class="flex text-2xl font-bold text-gray-900 my-4">Directions</h2>
       <app-directions></app-directions>

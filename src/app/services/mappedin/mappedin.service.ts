@@ -6,6 +6,7 @@ import { ConcordiaDataService } from 'src/app/services/concordia-data.service';
 import { environment } from 'src/environments/environment';
 import { map } from 'cypress/types/bluebird';
 import { MapViewBuilder } from 'src/app/builders/map-view.builder';
+import { MappedInLocation } from 'src/app/interfaces/mappedin-location.interface';
 
 export interface BuildingData {
   name: string;
@@ -13,6 +14,7 @@ export interface BuildingData {
   address: string;
   coordinates: google.maps.LatLng;
   mapData: MapData;
+  image?: string;
 }
 
 @Injectable({
@@ -139,5 +141,116 @@ export class MappedinService {
         console.error('Error clearing indoor navigation:', error);
       }
     }
+  }
+
+  public async findIndoorLocation(roomCode: string): Promise<MappedInLocation | null> {
+    try {
+      if (!this.hasValidRoomCode(roomCode)) {
+        console.warn('Cannot find indoor location for empty or invalid room code');
+        return null;
+      }
+
+      const campusData = this.getValidCampusData();
+      if (!campusData) {
+        console.warn('No campus data available');
+        return null;
+      }
+
+      const buildingCode = this.extractBuildingCode(roomCode);
+      const { mapId, building } = this.findBuildingByCode(campusData, buildingCode) ?? {};
+      if (!building || !mapId) {
+        console.warn(`No matching building found for code: ${buildingCode}`);
+        return null;
+      }
+
+      const roomNumberPart = this.extractRoomNumber(roomCode);
+      const bestRoom = this.findSpaceOrPoi(building.mapData, roomNumberPart, roomCode);
+      if (!bestRoom) {
+        console.warn(`No matching room found for ${roomCode} in building: ${building.name}`);
+        return null;
+      }
+
+      return this.buildIndoorLocation(building, bestRoom, mapId);
+    } catch (error) {
+      console.error('Error finding indoor location:', error);
+      return null;
+    }
+  }
+
+  /** === HELPER METHODS BELOW === **/
+
+  private hasValidRoomCode(roomCode: string): boolean {
+    return !!roomCode?.trim();
+  }
+
+  private getValidCampusData(): Record<string, BuildingData> | null {
+    const data = this.getCampusMapData() ?? {};
+    return Object.keys(data).length > 0 ? data : null;
+  }
+
+  private extractBuildingCode(roomCode: string): string {
+    return roomCode.split(/[-\s]/)[0].toUpperCase();
+  }
+
+  private extractRoomNumber(roomCode: string): string {
+    // Safely return the second piece after splitting, or empty if missing
+    return roomCode.split(/[-\s]/)[1] ?? '';
+  }
+
+  private findBuildingByCode(
+    campusData: Record<string, BuildingData>,
+    buildingCode: string
+  ): { mapId: string; building: BuildingData } | null {
+    for (const [mapId, building] of Object.entries(campusData)) {
+      if (building.abbreviation?.toUpperCase() === buildingCode) {
+        return { mapId, building };
+      }
+    }
+    return null;
+  }
+
+  private findSpaceOrPoi(mapData: MapData, roomNumber: string, fullRoomCode: string): any {
+    const spaces = mapData.getByType('space') ?? [];
+    for (const space of spaces) {
+      if (
+        space?.name &&
+        (space.name === roomNumber ||
+          space.name.includes(roomNumber) ||
+          fullRoomCode.includes(space.name))
+      ) {
+        return space;
+      }
+    }
+
+    const pois = mapData.getByType('point-of-interest') ?? [];
+    for (const poi of pois) {
+      if (
+        poi?.name &&
+        (poi.name === roomNumber ||
+          poi.name.includes(roomNumber) ||
+          fullRoomCode.includes(poi.name))
+      ) {
+        return poi;
+      }
+    }
+    return null;
+  }
+
+  private buildIndoorLocation(
+    building: BuildingData,
+    bestRoom: any,
+    mapId: string
+  ): MappedInLocation {
+    return {
+      title: `${building.abbreviation ?? ''} ${bestRoom.name}`.trim(),
+      address: building.address ?? 'No Address',
+      image: building.image ?? 'assets/images/poi_fail.png',
+      indoorMapId: mapId,
+      room: bestRoom,
+      buildingCode: building.abbreviation ?? '',
+      roomName: bestRoom.name,
+      coordinates: building.coordinates,
+      type: 'indoor'
+    };
   }
 }
