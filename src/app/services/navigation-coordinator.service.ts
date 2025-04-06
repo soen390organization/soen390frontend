@@ -8,6 +8,11 @@ import { GoogleMapLocation } from '../interfaces/google-map-location.interface';
 import { MappedInLocation } from '../interfaces/mappedin-location.interface';
 import { Store } from '@ngrx/store';
 import { setMapType, MapType } from 'src/app/store/app';
+import { IndoorDirectionsService } from './indoor-directions/indoor-directions.service';
+import { OutdoorDirectionsService } from './outdoor-directions/outdoor-directions.service';
+import { CurrentLocationService } from './current-location/current-location.service';
+import { PlacesService } from './places/places.service';
+import { MappedinService } from './mappedin/mappedin.service';
 
 @Injectable({
   providedIn: 'root'
@@ -19,9 +24,24 @@ export class NavigationCoordinatorService {
   constructor(
     private readonly store: Store,
     private readonly outdoorStrategy: OutdoorRoutingStrategy,
-    private readonly indoorStrategy: IndoorRoutingStrategy
+    private readonly indoorStrategy: IndoorRoutingStrategy,
+    private readonly outdoorDirectionsService: OutdoorDirectionsService,
+    private readonly indoorDirectionService: IndoorDirectionsService,
+    private readonly currentLocationService: CurrentLocationService,
+    private readonly placesService: PlacesService,
+    private readonly mappedInService: MappedinService
   ) {
     // Combine the four observables (outdoor start/destination and indoor start/destination)
+  }
+
+  /**
+   * Finds the best indoor location match for a given room or building code
+   * Delegates to the MappedinService's findIndoorLocation method
+   * @param roomCode The room code or classroom code to find
+   * @returns A promise that resolves to the best indoor location match
+   */
+  private async findIndoorLocation(roomCode: string): Promise<MappedInLocation | null> {
+    return this.mappedInService.findIndoorLocation(roomCode);
   }
 
   /* used for on demand calculation */

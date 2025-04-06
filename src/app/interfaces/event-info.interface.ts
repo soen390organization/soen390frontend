@@ -8,5 +8,7 @@ export interface EventInfo {
   startTime: string;
   endTime: string;
   googleLoc: GoogleMapLocation;
-  mappedInLoc?: MappedInLocation;
+  mappedInLoc?: MappedInLocation | null;
+  timeToNext?: string;
+  room?: string;
 }
