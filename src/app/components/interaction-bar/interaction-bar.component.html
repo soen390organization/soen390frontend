@@ -29,11 +29,13 @@
       <app-location-cards
         [locations]="campusBuildings.locations"
         [loading]="campusBuildings.loading"
+        (locationSelected)="onLocationSelected()"
       ></app-location-cards>
       <h2 class="flex text-2xl font-bold text-gray-900 my-4">Points of Interest</h2>
       <app-location-cards
         [locations]="pointsOfInterest.locations"
         [loading]="pointsOfInterest.loading"
+        (locationSelected)="onLocationSelected()"
       ></app-location-cards>
       <div *ngIf="events.events.length > 0">
         <h2 class="flex text-2xl font-bold text-gray-900 my-4">Your Classes</h2>
