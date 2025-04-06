@@ -175,7 +175,7 @@ export class MappedinService {
   /** === HELPER METHODS BELOW === **/
 
   private hasValidRoomCode(roomCode: string): boolean {
-    return Boolean(roomCode && roomCode.trim());
+    return !!roomCode?.trim();
   }
 
   private getValidCampusData(): Record<string, BuildingData> | null {

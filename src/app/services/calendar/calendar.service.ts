@@ -173,7 +173,7 @@ export class CalendarService {
     let roomNumber = '';
 
     // First try to match the pattern like "H-531" or "MB-S2.330"
-    const roomPattern = /^([A-Za-z]+(?:-[A-Za-z]+)*)[ -]([A-Za-z0-9]+(?:[.\-][A-Za-z0-9]+)*)$/;
+    const roomPattern = /^([A-Za-z]+(?:-[A-Za-z]+)*)[ -]([A-Za-z0-9]+(?:[.-][A-Za-z0-9]+)*)$/;
     const match = roomPattern.exec(classCode.trim());
 
     if (match) {
@@ -354,36 +354,6 @@ export class CalendarService {
       return 'NaN';
     }
     let currentDate = new Date();
-    let currentDay = currentDate.getDay();
-    let currentCalendarDay = currentDate.getDate();
-    if (currentDay == 0) {
-      currentDay = 7;
-    }
-    let startDayStr = this.weekdayFormatter.format(startDate).slice(0, 2);
-    let startDayNum = 0;
-    switch (startDayStr) {
-      case 'Su':
-        startDayNum = 7;
-        break;
-      case 'Mo':
-        startDayNum = 1;
-        break;
-      case 'Tu':
-        startDayNum = 2;
-        break;
-      case 'We':
-        startDayNum = 3;
-        break;
-      case 'Th':
-        startDayNum = 4;
-        break;
-      case 'Fr':
-        startDayNum = 5;
-        break;
-      case 'Sa':
-        startDayNum = 6;
-        break;
-    }
 
     //Thank you to https://www.sitelint.com/blog/get-days-between-two-dates-in-javascript#:~:text=To%20get%20the%20number%20of,based%20on%20the%20millisecond%20difference.
     let currentDateUTC = Date.UTC(
