@@ -1,3 +1,96 @@
+import { TestBed } from '@angular/core/testing';
+import { IndoorDirectionsService } from './indoor-directions.service';
+import { MappedinService } from '../mappedin/mappedin.service';
+import {
+  IndoorSameBuildingStrategy,
+  IndoorDifferentBuildingStrategy
+} from 'src/app/strategies/indoor-directions';
+import { of } from 'rxjs';
+
+describe('IndoorDirectionsService', () => {
+  let service: IndoorDirectionsService;
+  let mappedinServiceSpy: jasmine.SpyObj<MappedinService>;
+  let sameBuildingStrategySpy: jasmine.SpyObj<IndoorSameBuildingStrategy>;
+  let differentBuildingStrategySpy: jasmine.SpyObj<IndoorDifferentBuildingStrategy>;
+
+  const mockOrigin = { indoorMapId: 'buildingA' } as any;
+  const mockDestination = { indoorMapId: 'buildingA' } as any;
+
+  beforeEach(() => {
+    const mappedinSpy = jasmine.createSpyObj('MappedinService', ['getCampusMapData'], {
+      mapView: {
+        Navigation: {
+          clear: jasmine.createSpy('clear')
+        }
+      }
+    });
+
+    const sameBuildingSpy = jasmine.createSpyObj('IndoorSameBuildingStrategy', ['getRoutes']);
+    const differentBuildingSpy = jasmine.createSpyObj('IndoorDifferentBuildingStrategy', [
+      'getRoutes'
+    ]);
+
+    TestBed.configureTestingModule({
+      providers: [
+        IndoorDirectionsService,
+        { provide: MappedinService, useValue: mappedinSpy },
+        { provide: IndoorSameBuildingStrategy, useValue: sameBuildingSpy },
+        { provide: IndoorDifferentBuildingStrategy, useValue: differentBuildingSpy }
+      ]
+    });
+
+    service = TestBed.inject(IndoorDirectionsService);
+    mappedinServiceSpy = TestBed.inject(MappedinService) as jasmine.SpyObj<MappedinService>;
+    sameBuildingStrategySpy = TestBed.inject(
+      IndoorSameBuildingStrategy
+    ) as jasmine.SpyObj<IndoorSameBuildingStrategy>;
+    differentBuildingStrategySpy = TestBed.inject(
+      IndoorDifferentBuildingStrategy
+    ) as jasmine.SpyObj<IndoorDifferentBuildingStrategy>;
+
+    // Stub start/destination points
+    spyOn(service, 'getStartPoint').and.resolveTo(mockOrigin);
+    spyOn(service, 'getDestinationPoint').and.resolveTo(mockDestination);
+  });
+
+  it('should use same building strategy if origin and destination have the same indoorMapId', async () => {
+    const mockStrategy = {
+      renderRoutes: jasmine.createSpy('renderRoutes')
+    } as any;
+
+    sameBuildingStrategySpy.getRoutes.and.callFake(async (origin, dest) => {
+      expect(origin.indoorMapId).toBe('buildingA');
+      expect(dest.indoorMapId).toBe('buildingA');
+      return mockStrategy;
+    });
+
+    const result = await service.getInitializedRoutes();
+
+    expect(sameBuildingStrategySpy.getRoutes).toHaveBeenCalled();
+    expect(result).toBe(mockStrategy);
+  });
+
+  it('should use different building strategy if origin and destination have different indoorMapId', async () => {
+    const otherDestination = { indoorMapId: 'buildingB' } as any;
+    (service.getDestinationPoint as jasmine.Spy).and.resolveTo(otherDestination);
+
+    const mockStrategy = {
+      renderRoutes: jasmine.createSpy('renderRoutes')
+    } as any;
+
+    differentBuildingStrategySpy.getRoutes.and.callFake(async (origin, dest) => {
+      expect(origin.indoorMapId).toBe('buildingA');
+      expect(dest.indoorMapId).toBe('buildingB');
+      return mockStrategy;
+    });
+
+    const result = await service.getInitializedRoutes();
+
+    expect(differentBuildingStrategySpy.getRoutes).toHaveBeenCalled();
+    expect(result).toBe(mockStrategy);
+  });
+});
+
 // import { TestBed } from '@angular/core/testing';
 // import { IndoorDirectionsService } from './indoor-directions.service';
 // import { MappedinService } from '../mappedin/mappedin.service';
