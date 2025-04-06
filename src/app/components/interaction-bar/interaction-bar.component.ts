@@ -198,7 +198,8 @@ export class InteractionBarComponent implements OnInit, AfterViewInit {
     const footer = this.footerContainer.nativeElement;
     footer.style.transition = 'transform 0.3s ease-out';
     footer.style.transform = expand ? 'translateY(0)' : 'translateY(80%)';
-    footer.style.overflowY = expand ? 'auto' : 'hidden';
+    // ** IMPORTANT ** Needs better solution, since this will hide the indoor selects
+    // footer.style.overflowY = expand ? 'auto' : 'hidden';
     this.swipeProgress = expand ? 1 : 0;
   }
 }
