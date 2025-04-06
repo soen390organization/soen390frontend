@@ -73,6 +73,7 @@ describe('Map - Directions and Route Generation for Multi-Transportation Modes',
             expect(busText, 'Directions text should update for bus').to.not.equal(initialText);
           });
 
+        // @TODO: we have to fix this as somethimes the button does not appear when there is no schedule for it at that time!
         // Click the Shuttle button (icon: "directions_transit").
         // cy.get('app-directions')
         //   .invoke('text')
