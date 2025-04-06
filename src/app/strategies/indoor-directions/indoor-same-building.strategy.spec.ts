@@ -1,16 +1,23 @@
 import { IndoorSameBuildingStrategy } from './indoor-same-building.strategy';
 import { MappedinService } from 'src/app/services/mappedin/mappedin.service';
 import { MappedInLocation } from 'src/app/interfaces/mappedin-location.interface';
+import { Directions } from '@mappedin/mappedin-js';
 
 describe('IndoorSameBuildingStrategy', () => {
   let strategy: IndoorSameBuildingStrategy;
   let mappedinServiceMock: jasmine.SpyObj<MappedinService>;
   let fakeMapData: any;
 
+  const createMockDirections = (label: string): Directions => [label] as unknown as Directions;
+
   beforeEach(() => {
     fakeMapData = {
       getDirections: jasmine.createSpy('getDirections').and.callFake((start, end, options?) => {
-        return options?.accessible ? ['accessible path'] : ['regular path'];
+        if (options?.accessible) {
+          return createMockDirections('accessible path');
+        } else {
+          return createMockDirections('regular path');
+        }
       })
     };
 
@@ -65,8 +72,8 @@ describe('IndoorSameBuildingStrategy', () => {
     expect(result).toBe(strategy);
     expect(strategy.route).toEqual({
       indoorMapId: 'buildingA',
-      directions: ['regular path'],
-      accessible_directions: ['accessible path']
+      directions: createMockDirections('regular path'),
+      accessible_directions: createMockDirections('accessible path')
     });
   });
 });
