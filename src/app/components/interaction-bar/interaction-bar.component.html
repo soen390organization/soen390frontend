@@ -1,9 +1,4 @@
-<app-switch-map-button
-class="switch-map-container"
-
-[style.opacity]="1"
-
-></app-switch-map-button>
+<app-switch-map-button class="switch-map-container" [style.opacity]="1"></app-switch-map-button>
 
 <div #footerContainer class="swipe-footer-container">
   <app-indoor-selects
@@ -12,16 +7,12 @@ class="switch-map-container"
   ></app-indoor-selects>
 
   <div
-  #swipeArea
-  class="w-full h-[35px] cursor-pointer flex flex-col items-center justify-start my-[16px] mx-auto"
-  (click)="handleClick()"
->
-  <div class="w-[120px] h-[10px] bg-[#d5d5d5] rounded-full mt-2"></div>
-</div>
-
-
-
-
+    #swipeArea
+    class="w-full h-[35px] cursor-pointer flex flex-col items-center justify-start my-[16px] mx-auto"
+    (click)="handleClick()"
+  >
+    <div class="w-[120px] h-[10px] bg-[#d5d5d5] rounded-full mt-2"></div>
+  </div>
 
   <div class="footer-content px-5">
     <div *ngIf="showDirections$ | async">

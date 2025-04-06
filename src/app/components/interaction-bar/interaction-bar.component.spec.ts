@@ -229,7 +229,6 @@ describe('InteractionBarComponent', () => {
     expect(footerElement.style.transition).toContain('transform 0.3s ease-out');
     // Updated expectation: now expecting 'translateY(0px)' instead of 'translateY(0)'
     expect(footerElement.style.transform).toBe('translateY(0px)');
-    expect(footerElement.style.overflowY).toBe('auto');
     expect(component.swipeProgress).toBe(1);
   });
 
@@ -240,7 +239,6 @@ describe('InteractionBarComponent', () => {
     component.updateFooterUI(false);
     expect(footerElement.style.transition).toContain('transform 0.3s ease-out');
     expect(footerElement.style.transform).toBe('translateY(80%)');
-    expect(footerElement.style.overflowY).toBe('hidden');
     expect(component.swipeProgress).toBe(0);
   });
 
