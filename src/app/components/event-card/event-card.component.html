@@ -19,10 +19,10 @@
       <div
         *ngFor="let event of events"
         (click)="setDestination(event.googleLoc, event.mappedInLoc)"
-        class="w-[224px] h-[400px] bg-white overflow-hidden shrink-0 hover:cursor-pointer"
+        class="w-[224px] h-[250px] bg-white overflow-hidden shrink-0 hover:cursor-pointer"
       >
         <img
-          [src]="event.mappedInLoc.image"
+          [src]="event.googleLoc.image"
           class="bg-gray-200 w-[224px] h-[130px] object-cover rounded-2xl"
           (error)="onImageError($event)"
           alt="event"
@@ -32,7 +32,7 @@
             {{ event.title.split(' ')[0] }} {{ event.type }}
           </h3>
           <p class="text-left truncate w-full text-sm text-gray-600">
-            {{ event.mappedInLoc.room }} - {{ event.mappedInLoc.address }}
+            {{ event.room }} - {{ event.googleLoc.address }}
           </p>
           <p class="mt-1 border-t text-left text-sm font-semibold text-gray-800">
             <span style="color: green">

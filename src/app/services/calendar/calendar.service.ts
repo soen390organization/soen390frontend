@@ -117,7 +117,8 @@ export class CalendarService {
 
       const data = await response.json();
 
-      const locationItems = data.items.map((event) => this.transformEvent(event));
+      const locationItemsPromises = data.items.map((event) => this.transformEvent(event));
+      const locationItems = await Promise.all(locationItemsPromises);
       this.previouslyFetchedEvents[calendarId] = locationItems;
       return locationItems || [];
     } catch (error) {
@@ -126,26 +127,18 @@ export class CalendarService {
     }
   }
 
-  transformEvent(event: any): EventInfo {
+  async transformEvent(event: any): Promise<EventInfo> {
     const eventType = event.summary.split(' ')[1] || 'LEC';
-    
     // Process the location information
     const roomInfo = this.getRoomInfo(event.location);
     const buildingData = this.convertClassToAddress(roomInfo.buildingCode || event.location);
-    
-    console.log('Event location processing:', {
-      originalLocation: event.location,
-      extractedRoomInfo: roomInfo,
-      buildingData: buildingData
-    });
-    
     // Clone the coordinates if they exist to ensure we have a proper LatLng object
-    const googleCoords = buildingData.coordinates ? 
-      new google.maps.LatLng(
-        buildingData.coordinates.lat(), 
-        buildingData.coordinates.lng()
-      ) : null;
-    
+    const googleCoords = buildingData.coordinates
+      ? new google.maps.LatLng(buildingData.coordinates.lat(), buildingData.coordinates.lng())
+      : null;
+
+    const indoorLocation = await this.mappedInService.findIndoorLocation(event.location);
+
     // Create event information
     return {
       title: event.summary,
@@ -160,21 +153,11 @@ export class CalendarService {
         image: buildingData.image,
         type: 'outdoor'
       },
-      mappedInLoc: {
-        title: event.summary,
-        address: buildingData.address,
-        image: buildingData.image,
-        indoorMapId: this.mappedInService.getMapId(),
-        // Store both the room ID and the original location for better matching
-        room: roomInfo.roomId || event.location,
-        roomName: roomInfo.roomName,
-        buildingCode: roomInfo.buildingCode,
-        coordinates: googleCoords, // Share the same coordinates
-        type: 'indoor'
-      }
+      mappedInLoc: indoorLocation,
+      room: event.location
     };
   }
-  
+
   getRoomInfo(classCode: string): { roomId: any; roomName: string; buildingCode: string } {
     if (!classCode) {
       return {
@@ -183,23 +166,23 @@ export class CalendarService {
         buildingCode: ''
       };
     }
-    
+
     // Extract building code and room number
     // Common patterns: H-531, MB-S2.330, FG-B080, etc.
     let buildingCode = '';
     let roomNumber = '';
-    
+
     // First try to match the pattern like "H-531" or "MB-S2.330"
     const roomPattern = /^([A-Za-z\-]+)[- ]([A-Za-z0-9.\-]+)$/;
     const match = classCode.trim().match(roomPattern);
-    
+
     if (match) {
       buildingCode = match[1].toUpperCase();
       roomNumber = match[2];
     } else {
       // If no pattern match, try to extract the building code from the beginning
       buildingCode = this.getBuildingCode(this.cleanUpInput(classCode));
-      
+
       // Try to extract the room number part
       const parts = classCode.split(/[-\s]/);
       if (parts.length > 1) {
@@ -210,12 +193,10 @@ export class CalendarService {
         roomNumber = classCode;
       }
     }
-    
+
     // This is the full room ID that will be used for matching in MappedIn
     const fullRoomId = buildingCode + '-' + roomNumber;
-    
-    console.log('Extracted room info:', { buildingCode, roomNumber, fullRoomId });
-    
+
     return {
       roomId: fullRoomId,
       roomName: classCode,
@@ -236,10 +217,10 @@ export class CalendarService {
         image: 'assets/images/poi_fail.png'
       };
     }
-    
+
     const buildingCodeChars = this.cleanUpInput(classCode);
     const buildingCodeStr = this.getBuildingCode(buildingCodeChars);
-    
+
     if (!buildingCodeStr) {
       console.warn(`Unable to extract building code from: ${classCode}`);
       return {
@@ -250,17 +231,16 @@ export class CalendarService {
     }
 
     const locationObj = this.buildLocationObject(buildingCodeStr);
-    
+
     // Ensure coordinates are a LatLng object if they exist in string form
-    if (locationObj.coordinates === null && 
-        this.dataService.coordinatesMap[buildingCodeStr]) {
+    if (locationObj.coordinates === null && this.dataService.coordinatesMap[buildingCodeStr]) {
       const coords = this.dataService.coordinatesMap[buildingCodeStr];
       locationObj.coordinates = new google.maps.LatLng(
-        parseFloat(coords.lat), 
+        parseFloat(coords.lat),
         parseFloat(coords.lng)
       );
     }
-    
+
     return locationObj;
   }
 
@@ -318,23 +298,23 @@ export class CalendarService {
     }
 
     const address = this.dataService.addressMap[buildingCode] ?? 'No Address';
-    
+
     // Convert coordinates map entry (which might be strings) to LatLng
     let coordinates = null;
     const coordsFromMap = this.dataService.coordinatesMap[buildingCode];
     if (coordsFromMap) {
       try {
         coordinates = new google.maps.LatLng(
-          parseFloat(coordsFromMap.lat), 
+          parseFloat(coordsFromMap.lat),
           parseFloat(coordsFromMap.lng)
         );
       } catch (error) {
         console.error('Error creating LatLng for building code:', buildingCode, error);
       }
     }
-    
+
     const image = this.dataService.imageMap[buildingCode] ?? 'assets/images/poi_fail.png';
-    
+
     return {
       address,
       coordinates,
@@ -360,7 +340,7 @@ export class CalendarService {
     this.selectedCalendarSubject.next(calendarId);
     await this.fetchEvents(calendarId).then((events) => {
       this.currentCalendarEvents = events;
-      this.currentCalendarEvents.forEach((event) => (this.setTimeToNext(event)));
+      this.currentCalendarEvents.forEach((event) => this.setTimeToNext(event));
     });
   }
 
@@ -369,61 +349,70 @@ export class CalendarService {
   }
 
   setTimeToNext(start: Date | string): string {
-    var startDate = new Date(start);
+    let startDate = new Date(start);
     if (isNaN(startDate.getTime())) {
-      return "NaN";
+      return 'NaN';
     }
-    var currentDate = new Date();
-    var currentDay = currentDate.getDay();
-    var currentCalendarDay = currentDate.getDate();
+    let currentDate = new Date();
+    let currentDay = currentDate.getDay();
+    let currentCalendarDay = currentDate.getDate();
     if (currentDay == 0) {
       currentDay = 7;
     }
-    console.log(currentDay);
-    var startDayStr = this.weekdayFormatter.format(startDate).slice(0, 2);
-    console.log(startDayStr);
-    var startDayNum = 0;
-    switch(startDayStr) {
-      case "Su":
+    let startDayStr = this.weekdayFormatter.format(startDate).slice(0, 2);
+    let startDayNum = 0;
+    switch (startDayStr) {
+      case 'Su':
         startDayNum = 7;
         break;
-      case "Mo":
+      case 'Mo':
         startDayNum = 1;
         break;
-      case "Tu":
+      case 'Tu':
         startDayNum = 2;
         break;
-      case "We":
+      case 'We':
         startDayNum = 3;
         break;
-      case "Th":
+      case 'Th':
         startDayNum = 4;
-        break;  
-      case "Fr":
+        break;
+      case 'Fr':
         startDayNum = 5;
-        break;  
-      case "Sa":
+        break;
+      case 'Sa':
         startDayNum = 6;
-        break;  
+        break;
     }
-    var startCalendarDay = 0;
+    let startCalendarDay = 0;
     if (currentDay != startDayNum) {
       startCalendarDay = currentCalendarDay + Math.abs(currentDay - startDayNum);
     }
     //Thank you to https://www.sitelint.com/blog/get-days-between-two-dates-in-javascript#:~:text=To%20get%20the%20number%20of,based%20on%20the%20millisecond%20difference.
-    var currentDateUTC = Date.UTC(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate());
-    var startDateUTC = Date.UTC(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
-    var daysInBetween = Math.abs((currentDateUTC.valueOf() - startDateUTC.valueOf()) / (24 * 60 * 60 * 1000));
-    console.log(daysInBetween);
-    var numMinutes = Math.floor(Math.abs(Math.floor((currentDate.getTime() - startDate.getTime()) / (1000 * 60))) % 60);
-    console.log(numMinutes);
-    var numHours = Math.floor(Math.abs(Math.floor((currentDate.getTime() - startDate.getTime()) / (1000 * 60 * 60))) % 24);
-    console.log(numHours);
+    let currentDateUTC = Date.UTC(
+      currentDate.getFullYear(),
+      currentDate.getMonth(),
+      currentDate.getDate()
+    );
+    let startDateUTC = Date.UTC(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
+    let daysInBetween = Math.abs(
+      (currentDateUTC.valueOf() - startDateUTC.valueOf()) / (24 * 60 * 60 * 1000)
+    );
+    let numMinutes = Math.floor(
+      Math.abs(Math.floor((currentDate.getTime() - startDate.getTime()) / (1000 * 60))) % 60
+    );
+    let numHours = Math.floor(
+      Math.abs(Math.floor((currentDate.getTime() - startDate.getTime()) / (1000 * 60 * 60))) % 24
+    );
     if (daysInBetween <= 0 && numHours == 0 && numMinutes == 0) {
-      return "Starts now."
+      return 'Starts now.';
     } else {
-      return "In " + (daysInBetween > 0 ? daysInBetween + " days " : "") + (numHours > 0 ? numHours + " hours " : "") + (numMinutes > 0 ? numMinutes + " minutes" : "");
+      return (
+        'In ' +
+        (daysInBetween > 0 ? daysInBetween + ' days ' : '') +
+        (numHours > 0 ? numHours + ' hours ' : '') +
+        (numMinutes > 0 ? numMinutes + ' minutes' : '')
+      );
     }
-    
   }
 }

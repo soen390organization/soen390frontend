@@ -142,19 +142,11 @@ export class MappedinService {
     }
   }
 
-  /**
-   * Finds the best indoor location match for a given room or building code
-   * Uses similar logic to the PlacesService's getPlaceSuggestions method
-   * @param roomCode The room code or classroom code to find
-   * @returns A promise that resolves to the best indoor location match
-   */
   public async findIndoorLocation(roomCode: string): Promise<MappedInLocation | null> {
     if (!roomCode) {
       console.warn('Cannot find indoor location for empty room code');
       return null;
     }
-
-    console.log('Finding indoor location for room code:', roomCode);
 
     try {
       // Get all campus building data
@@ -165,149 +157,84 @@ export class MappedinService {
       }
 
       // Extract building code from room code (e.g., 'H-531' -> 'H')
-      // This is a simple extraction - you may need more sophisticated parsing
       const buildingCode = roomCode.split(/[-\s]/)[0].toUpperCase();
-      console.log('Extracted building code:', buildingCode);
 
-      // Find matching building
+      // Find matching building (no fuzzy matching, no default fallback)
       let matchingBuilding: any = null;
-      let matchingMapId = null;
+      let matchingMapId: string | null = null;
 
       for (const [mapId, building] of Object.entries(campusData) as [string, any][]) {
         if (building.abbreviation && building.abbreviation.toUpperCase() === buildingCode) {
           matchingBuilding = building;
           matchingMapId = mapId;
-          console.log('Found matching building:', building.name);
           break;
         }
       }
 
+      // If no exact building match, return null
       if (!matchingBuilding || !matchingMapId) {
         console.warn('No matching building found for code:', buildingCode);
-
-        // If no direct match, try a more fuzzy search
-        const normalizeString = (str: string) => str.toLowerCase().replace(/[^a-z0-9]/g, '');
-        const normalizedCode = normalizeString(buildingCode);
-
-        for (const [mapId, building] of Object.entries(campusData) as [string, any][]) {
-          if (
-            building.abbreviation &&
-            building.name &&
-            (normalizeString(building.abbreviation).includes(normalizedCode) ||
-              normalizeString(building.name).includes(normalizedCode))
-          ) {
-            matchingBuilding = building;
-            matchingMapId = mapId;
-            console.log('Found fuzzy matching building:', building.name);
-            break;
-          }
-        }
-
-        // If still no match, just take the first building (normally Hall building)
-        if (!matchingBuilding) {
-          const firstMapId = Object.keys(campusData)[0];
-          matchingBuilding = campusData[firstMapId];
-          matchingMapId = firstMapId;
-          console.log('Using default building:', matchingBuilding?.name || 'Unknown');
-        }
+        return null;
       }
 
       // Now try to find the specific room within the building
-      if (matchingBuilding && matchingMapId) {
-        const mapData = matchingBuilding.mapData;
+      const roomNumberPart = roomCode.split(/[-\s]/)[1] || '';
 
-        // Try to find room by name (exact match)
-        const roomNumberPart = roomCode.split(/[-\s]/)[1] || '';
-        console.log('Looking for room number:', roomNumberPart);
+      const mapData = matchingBuilding.mapData;
+      let bestRoom: any = null;
 
-        let bestRoom: any = null;
-
-        // First check spaces
-        const spaces = mapData.getByType('space') || [];
-        for (const space of spaces) {
-          if (
-            space.name &&
-            (space.name === roomNumberPart ||
-              space.name.includes(roomNumberPart) ||
-              roomCode.includes(space.name))
-          ) {
-            bestRoom = space;
-            console.log('Found matching space:', space.name);
-            break;
-          }
-        }
-
-        // If no match in spaces, check points of interest
-        if (!bestRoom) {
-          const pois = mapData.getByType('point-of-interest') || [];
-          for (const poi of pois) {
-            if (
-              poi.name &&
-              (poi.name === roomNumberPart ||
-                poi.name.includes(roomNumberPart) ||
-                roomCode.includes(poi.name))
-            ) {
-              bestRoom = poi;
-              console.log('Found matching POI:', poi.name);
-              break;
-            }
-          }
-
-          // If still no match, use a room on the first floor as default
-          if (!bestRoom && spaces.length > 0) {
-            try {
-              // Get rooms on the first floor
-              const floors = mapData.getByType('floor') || [];
-              const firstFloor = floors.length > 0 ? floors[0] : null;
-
-              if (firstFloor) {
-                const firstFloorRooms = spaces.filter(
-                  (space) =>
-                    space.geometries &&
-                    space.geometries[0] &&
-                    space.geometries[0].floor === firstFloor.id
-                );
-
-                if (firstFloorRooms.length > 0) {
-                  bestRoom = firstFloorRooms[0];
-                  console.log('Using default room on first floor:', bestRoom.name);
-                } else {
-                  bestRoom = spaces[0];
-                  console.log('Using first available space:', bestRoom.name);
-                }
-              } else {
-                bestRoom = spaces[0];
-                console.log('Using first available space:', bestRoom.name);
-              }
-            } catch (error) {
-              console.error('Error finding rooms on first floor:', error);
-              bestRoom = spaces[0];
-              console.log('Fallback to first available space');
-            }
-          }
-        }
-
-        // Create and return the indoor location
-        if (matchingBuilding && matchingMapId) {
-          const indoorLocation: MappedInLocation = {
-            title:
-              `${matchingBuilding.abbreviation || ''} ${bestRoom ? bestRoom.name : roomCode}`.trim(),
-            address: matchingBuilding.address || 'No Address',
-            image: matchingBuilding.image || 'assets/images/poi_fail.png',
-            indoorMapId: matchingMapId,
-            room: bestRoom || roomCode,
-            buildingCode: matchingBuilding.abbreviation || '',
-            roomName: bestRoom ? bestRoom.name : roomCode,
-            coordinates: matchingBuilding.coordinates,
-            type: 'indoor'
-          };
-
-          console.log('Created indoor location:', indoorLocation);
-          return indoorLocation;
+      // Check spaces
+      const spaces = mapData.getByType('space') || [];
+      for (const space of spaces) {
+        if (
+          space.name &&
+          (space.name === roomNumberPart ||
+            space.name.includes(roomNumberPart) ||
+            roomCode.includes(space.name))
+        ) {
+          bestRoom = space;
+          break;
         }
       }
 
-      return null;
+      // If no match in spaces, check POIs
+      if (!bestRoom) {
+        const pois = mapData.getByType('point-of-interest') || [];
+        for (const poi of pois) {
+          if (
+            poi.name &&
+            (poi.name === roomNumberPart ||
+              poi.name.includes(roomNumberPart) ||
+              roomCode.includes(poi.name))
+          ) {
+            bestRoom = poi;
+            break;
+          }
+        }
+      }
+
+      // If no specific room/POI is found, return null (no fallback)
+      if (!bestRoom) {
+        console.warn(
+          `No matching room found for ${roomCode} in building: ${matchingBuilding.name}`
+        );
+        return null;
+      }
+
+      // Create and return the indoor location object
+      const indoorLocation: MappedInLocation = {
+        title: `${matchingBuilding.abbreviation || ''} ${bestRoom.name}`.trim(),
+        address: matchingBuilding.address || 'No Address',
+        image: matchingBuilding.image || 'assets/images/poi_fail.png',
+        indoorMapId: matchingMapId,
+        room: bestRoom,
+        buildingCode: matchingBuilding.abbreviation || '',
+        roomName: bestRoom.name,
+        coordinates: matchingBuilding.coordinates,
+        type: 'indoor'
+      };
+
+      return indoorLocation;
     } catch (error) {
       console.error('Error finding indoor location:', error);
       return null;

@@ -3,7 +3,11 @@ import { Component, Input } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { EventInfo } from 'src/app/interfaces/event-info.interface';
 import { GoogleMapLocation } from 'src/app/interfaces/google-map-location.interface';
-import { NavigationCoordinatorService } from 'src/app/services/navigation-coordinator.service';
+import { CurrentLocationService } from 'src/app/services/current-location/current-location.service';
+import { IndoorDirectionsService } from 'src/app/services/indoor-directions/indoor-directions.service';
+import { MappedinService } from 'src/app/services/mappedin/mappedin.service';
+import { OutdoorDirectionsService } from 'src/app/services/outdoor-directions/outdoor-directions.service';
+import { setMapType, MapType } from 'src/app/store/app';
 
 @Component({
   selector: 'app-event-card',
@@ -16,7 +20,11 @@ export class EventCardComponent {
   @Input() loading: boolean = false;
 
   constructor(
-    private readonly navigationCoordinator: NavigationCoordinatorService
+    private readonly store: Store,
+    private readonly currentLocationService: CurrentLocationService,
+    private readonly outdoorDirectionsService: OutdoorDirectionsService,
+    private readonly indoorDirectionsService: IndoorDirectionsService,
+    private readonly mappedInService: MappedinService
   ) {}
 
   onImageError(event: Event) {
@@ -50,19 +58,29 @@ export class EventCardComponent {
   /**
    * Sets the destination point and generates a route from the user's current location
    * @param location The outdoor Google Map location
-   * @param mappedInLocation The indoor MappedIn location
+   * @param mappedInLocation The indoor MappedIn location, if it exists
    */
   async setDestination(location: GoogleMapLocation, mappedInLocation?: any) {
-    try {
-      if (mappedInLocation && mappedInLocation.type === 'indoor') {
-        // If we have indoor location data, use that
-        await this.navigationCoordinator.routeFromCurrentLocationToDestination(mappedInLocation);
-      } else {
-        // Otherwise use the outdoor location
-        await this.navigationCoordinator.routeFromCurrentLocationToDestination(location);
+    const currentLocation = await this.currentLocationService.getCurrentLocation();
+    console.log(currentLocation);
+    this.outdoorDirectionsService.setStartPoint({
+      title: 'Your Location',
+      address: `${currentLocation.lat}, ${currentLocation.lng}`,
+      coordinates: new google.maps.LatLng(currentLocation),
+      type: 'outdoor'
+    });
+
+    if (mappedInLocation) {
+      this.indoorDirectionsService.setDestinationPoint(mappedInLocation);
+      this.outdoorDirectionsService.setDestinationPoint(location);
+
+      if (mappedInLocation.indoorMapId !== this.mappedInService.getMapId()) {
+        await this.mappedInService.setMapData(mappedInLocation.indoorMapId);
       }
-    } catch (error) {
-      console.error('Error setting destination:', error);
+      this.store.dispatch(setMapType({ mapType: MapType.Indoor }));
+    } else {
+      this.outdoorDirectionsService.setDestinationPoint(location);
+      this.store.dispatch(setMapType({ mapType: MapType.Outdoor }));
     }
   }
 }
