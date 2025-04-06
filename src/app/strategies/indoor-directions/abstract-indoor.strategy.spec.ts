@@ -1,5 +1,5 @@
 import { AbstractIndoorStrategy } from 'src/app/strategies/indoor-directions/abstract-indoor.strategy';
-import { MapData, MapView, Door } from '@mappedin/mappedin-js';
+import { MapData, Door, Directions } from '@mappedin/mappedin-js';
 import { MappedInLocation } from 'src/app/interfaces/mappedin-location.interface';
 
 class MockMappedinService {
@@ -18,6 +18,14 @@ class TestIndoorStrategy extends AbstractIndoorStrategy {
   getRoutes(origin: MappedInLocation, destination: MappedInLocation) {
     return [];
   }
+}
+
+// ✅ Mock Directions object
+function createMockDirections(): Directions {
+  return {
+    path: []
+    // Add any other properties or methods if needed
+  } as unknown as Directions;
 }
 
 describe('AbstractIndoorStrategy', () => {
@@ -64,14 +72,16 @@ describe('AbstractIndoorStrategy', () => {
 
     strategy.route = {
       indoorMapId: 'map1',
-      directions: ['dir'],
-      accessible_directions: ['acc_dir']
+      directions: createMockDirections(),
+      accessible_directions: createMockDirections()
     };
 
     mockMappedinService.getMapId.and.returnValue('map1');
 
     await strategy.renderRoutes();
-    expect(mockMappedinService.mapView.Navigation.draw).toHaveBeenCalledWith(['acc_dir']);
+    expect(mockMappedinService.mapView.Navigation.draw).toHaveBeenCalledWith(
+      strategy.route.accessible_directions
+    );
   });
 
   it('should call Navigation.draw with normal directions if accessibility disabled', async () => {
@@ -79,38 +89,42 @@ describe('AbstractIndoorStrategy', () => {
 
     strategy.route = {
       indoorMapId: 'map1',
-      directions: ['dir'],
-      accessible_directions: ['acc_dir']
+      directions: createMockDirections(),
+      accessible_directions: createMockDirections()
     };
 
     mockMappedinService.getMapId.and.returnValue('map1');
 
     await strategy.renderRoutes();
-    expect(mockMappedinService.mapView.Navigation.draw).toHaveBeenCalledWith(['dir']);
+    expect(mockMappedinService.mapView.Navigation.draw).toHaveBeenCalledWith(
+      strategy.route.directions
+    );
   });
 
   it('should handle renderRoutes with an array of routes', async () => {
     strategy.accessibility = false;
 
+    const mockDirections = createMockDirections();
+
     strategy.route = [
       {
         indoorMapId: 'map2',
-        directions: ['array_dir'],
-        accessible_directions: ['array_acc_dir']
+        directions: mockDirections,
+        accessible_directions: createMockDirections()
       }
     ];
 
     mockMappedinService.getMapId.and.returnValue('map2');
 
     await strategy.renderRoutes();
-    expect(mockMappedinService.mapView.Navigation.draw).toHaveBeenCalledWith(['array_dir']);
+    expect(mockMappedinService.mapView.Navigation.draw).toHaveBeenCalledWith(mockDirections);
   });
 
   it('should not call draw if mapId does not match', async () => {
     strategy.route = {
       indoorMapId: 'wrong',
-      directions: ['x'],
-      accessible_directions: ['y']
+      directions: createMockDirections(),
+      accessible_directions: createMockDirections()
     };
 
     mockMappedinService.getMapId.and.returnValue('correct');
