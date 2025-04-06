@@ -5,8 +5,6 @@ import { CurrentLocationService } from 'src/app/services/current-location/curren
 import { OutdoorDirectionsService } from 'src/app/services/outdoor-directions/outdoor-directions.service';
 import { IconMapping } from 'src/app/interfaces/Icon-mapping';
 import rawIconMapping from 'src/assets/icon-mapping.json';
-// import { NavigationCoordinatorService } from 'src/app/services/navigation-coordinator.service';
-import { CompleteRoute } from 'src/app/interfaces/routing-strategy.interface';
 import { Store } from '@ngrx/store';
 import { setShowRoute } from 'src/app/store/app';
 import {
