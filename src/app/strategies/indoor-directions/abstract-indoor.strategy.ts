@@ -48,9 +48,9 @@ export abstract class AbstractIndoorStrategy implements DirectionsStrategy<Mappe
     if (indoorRoute) {
       try {
         if (this.accessibility) {
-          mapView.Navigation.draw(indoorRoute.accessible_directions);
+          await mapView.Navigation.draw(indoorRoute.accessible_directions);
         } else {
-          mapView.Navigation.draw(indoorRoute.directions);
+          await mapView.Navigation.draw(indoorRoute.directions);
         }
       } catch (error) {
         console.error('Error drawing navigation route:', error);
