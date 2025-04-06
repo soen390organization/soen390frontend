@@ -74,5 +74,84 @@ describe('EventCardComponent', () => {
     });
   });
 
-  // Empty describe block being removed to fix test error
+  describe('setDestination', () => {
+    let currentLocationSpy: jasmine.SpyObj<CurrentLocationService>;
+    let outdoorDirectionsSpy: jasmine.SpyObj<OutdoorDirectionsService>;
+    let indoorDirectionsSpy: jasmine.SpyObj<IndoorDirectionsService>;
+    let mappedInSpy: jasmine.SpyObj<MappedinService>;
+    let storeSpy: jasmine.SpyObj<Store>;
+
+    beforeEach(() => {
+      currentLocationSpy = TestBed.inject(CurrentLocationService) as jasmine.SpyObj<CurrentLocationService>;
+      outdoorDirectionsSpy = TestBed.inject(OutdoorDirectionsService) as jasmine.SpyObj<OutdoorDirectionsService>;
+      indoorDirectionsSpy = TestBed.inject(IndoorDirectionsService) as jasmine.SpyObj<IndoorDirectionsService>;
+      mappedInSpy = TestBed.inject(MappedinService) as jasmine.SpyObj<MappedinService>;
+      storeSpy = TestBed.inject(Store) as jasmine.SpyObj<Store>;
+      
+      // Setup default spy behavior
+      currentLocationSpy.getCurrentLocation.and.resolveTo({ lat: 45, lng: -73 });
+      mappedInSpy.getMapId.and.returnValue('mapId1');
+      spyOn(console, 'log'); // Suppress console logs
+    });
+
+    it('should set outdoor destination when no indoor location is provided', async () => {
+      const location: any = {
+        title: 'Test Location',
+        address: '123 Test St',
+        coordinates: new google.maps.LatLng(45, -73),
+        type: 'outdoor'
+      };
+
+      await component.setDestination(location);
+      
+      expect(currentLocationSpy.getCurrentLocation).toHaveBeenCalled();
+      expect(outdoorDirectionsSpy.setStartPoint).toHaveBeenCalled();
+      expect(outdoorDirectionsSpy.setDestinationPoint).toHaveBeenCalled();
+      expect(storeSpy.dispatch).toHaveBeenCalled();
+    });
+
+    it('should set both indoor and outdoor destinations when indoor location is provided', async () => {
+      const outdoorLocation: any = {
+        title: 'Test Location',
+        address: '123 Test St',
+        coordinates: new google.maps.LatLng(45, -73),
+        type: 'outdoor'
+      };
+      
+      const indoorLocation: any = {
+        title: 'Indoor Location',
+        address: '123 Test St',
+        indoorMapId: 'mapId1',
+        room: { id: 'room1', name: 'Room 1' },
+        type: 'indoor'
+      };
+
+      await component.setDestination(outdoorLocation, indoorLocation);
+      
+      expect(indoorDirectionsSpy.setDestinationPoint).toHaveBeenCalled();
+      expect(outdoorDirectionsSpy.setDestinationPoint).toHaveBeenCalled();
+      expect(storeSpy.dispatch).toHaveBeenCalled();
+    });
+
+    it('should change the map data if the indoor location has a different map ID', async () => {
+      const outdoorLocation: any = {
+        title: 'Test Location',
+        address: '123 Test St',
+        coordinates: new google.maps.LatLng(45, -73),
+        type: 'outdoor'
+      };
+      
+      const indoorLocation: any = {
+        title: 'Indoor Location',
+        address: '123 Test St',
+        indoorMapId: 'differentMapId',
+        room: { id: 'room1', name: 'Room 1' },
+        type: 'indoor'
+      };
+
+      await component.setDestination(outdoorLocation, indoorLocation);
+      
+      expect(mappedInSpy.setMapData).toHaveBeenCalledWith('differentMapId');
+    });
+  });
 });
