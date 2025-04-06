@@ -1,13 +1,12 @@
 import { MappedInLocation } from 'src/app/interfaces/mappedin-location.interface';
 import { DirectionsStrategy } from 'src/app/interfaces/directions-strategy.interface';
 import { MappedinService } from 'src/app/services/mappedin/mappedin.service';
-import { Door, MapData, MapView } from '@mappedin/mappedin-js';
-import { BehaviorSubject, firstValueFrom } from 'rxjs';
+import { Door, MapData, MapView, Directions } from '@mappedin/mappedin-js';
 
 export interface IndoorRoute {
   indoorMapId: string;
-  directions: any;
-  accessible_directions: any;
+  directions: Directions;
+  accessible_directions: Directions;
 }
 
 export abstract class AbstractIndoorStrategy implements DirectionsStrategy<MappedInLocation> {
