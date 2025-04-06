@@ -7,7 +7,6 @@ import { GoogleMapService } from 'src/app/services/google-map.service';
 import { CurrentLocationService } from 'src/app/services/current-location/current-location.service';
 import { GeolocationService } from 'src/app/services/geolocation/geolocation.service';
 
-
 describe('GoogleMapComponent', () => {
   let component: GoogleMapComponent;
   let fixture: ComponentFixture<GoogleMapComponent>;
@@ -19,7 +18,6 @@ describe('GoogleMapComponent', () => {
     TestBed.configureTestingModule({
       imports: [GoogleMapComponent],
       providers: [
-        // Provide a mock store to satisfy any service that depends on 'Store'
         provideMockStore({ initialState: {} }),
         GoogleMapService,
         CurrentLocationService,
@@ -51,7 +49,7 @@ describe('GoogleMapComponent', () => {
 
     spyOn(googleMapService, 'getMap').and.returnValue(fakeMap);
 
-    fixture.detectChanges(); // triggers lifecycle hooks
+    fixture.detectChanges();
   });
 
   it('should create the component', () => {
@@ -94,7 +92,5 @@ describe('GoogleMapComponent', () => {
 
       expect(component.currentInfoWindow).toBe(fakeInfoWindowInstance);
     });
-
   });
-
 });
