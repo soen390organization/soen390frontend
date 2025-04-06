@@ -6,7 +6,6 @@ import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { MappedinService, BuildingData } from '../mappedin/mappedin.service';
 import { GoogleMapLocation } from 'src/app/interfaces/google-map-location.interface';
-import prioritizedBuildingsData from 'src/assets/concordia-data.json';
 
 @Injectable({
   providedIn: 'root'
@@ -65,8 +64,8 @@ export class PlacesService {
     );
 
     const prioritizedBuildingsManual = [
-      ...prioritizedBuildingsData.sgw.buildings,
-      ...prioritizedBuildingsData.loy.buildings
+      ...data.sgw.buildings,
+      ...data.loy.buildings
     ].map((b: any) => ({
       title: b.name,
       address: b.address,
