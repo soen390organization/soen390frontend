@@ -1,6 +1,11 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { EventCardComponent } from './event-card.component';
 import { NavigationCoordinatorService } from 'src/app/services/navigation-coordinator.service';
+import { Store } from '@ngrx/store';
+import { CurrentLocationService } from 'src/app/services/current-location/current-location.service';
+import { OutdoorDirectionsService } from 'src/app/services/outdoor-directions/outdoor-directions.service';
+import { IndoorDirectionsService } from 'src/app/services/indoor-directions/indoor-directions.service';
+import { MappedinService } from 'src/app/services/mappedin/mappedin.service';
 
 describe('EventCardComponent', () => {
   let component: EventCardComponent;
@@ -8,8 +13,22 @@ describe('EventCardComponent', () => {
   let navigationCoordinator: NavigationCoordinatorService;
 
   beforeEach(async () => {
+    const storeSpy = jasmine.createSpyObj('Store', ['dispatch']);
+    const currentLocationSpy = jasmine.createSpyObj('CurrentLocationService', ['getCurrentLocation']);
+    const outdoorDirectionsSpy = jasmine.createSpyObj('OutdoorDirectionsService', ['setStartPoint', 'setDestinationPoint']);
+    const indoorDirectionsSpy = jasmine.createSpyObj('IndoorDirectionsService', ['setDestinationPoint']);
+    const mappedInSpy = jasmine.createSpyObj('MappedinService', ['getMapId', 'setMapData']);
+
     await TestBed.configureTestingModule({
-      imports: [EventCardComponent]
+      imports: [EventCardComponent],
+      providers: [
+        { provide: Store, useValue: storeSpy },
+        { provide: CurrentLocationService, useValue: currentLocationSpy },
+        { provide: OutdoorDirectionsService, useValue: outdoorDirectionsSpy },
+        { provide: IndoorDirectionsService, useValue: indoorDirectionsSpy },
+        { provide: MappedinService, useValue: mappedInSpy },
+        { provide: NavigationCoordinatorService, useValue: jasmine.createSpyObj('NavigationCoordinatorService', ['getCompleteRoute']) }
+      ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(EventCardComponent);
@@ -55,5 +74,5 @@ describe('EventCardComponent', () => {
     });
   });
 
-  describe('setDestination()', () => {});
+  // Empty describe block being removed to fix test error
 });

@@ -174,7 +174,7 @@ describe('CalendarService', () => {
   });
 
   describe('transformEvent()', () => {
-    it('should handle an event with a single-word summary (default type)', () => {
+    it('should handle an event with a single-word summary (default type)', async () => {
       const mockEvent = {
         summary: 'COMP248',
         start: { dateTime: '2023-01-01T10:00:00' },
@@ -183,7 +183,7 @@ describe('CalendarService', () => {
       };
 
       // This will call convertClassToAddress internally
-      const result = service.transformEvent(mockEvent);
+      const result = await service.transformEvent(mockEvent);
 
       expect(result.title).toBe('COMP248');
       expect(result.startTime).toBe('2023-01-01T10:00:00');
