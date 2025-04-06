@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { IndoorDirectionsService } from 'src/app/services/indoor-directions/indoor-directions.service';
 
 @Component({
