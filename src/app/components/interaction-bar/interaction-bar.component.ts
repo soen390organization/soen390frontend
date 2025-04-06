@@ -19,6 +19,7 @@ import { CalendarService } from 'src/app/services/calendar/calendar.service';
 import { GoogleMapLocation } from 'src/app/interfaces/google-map-location.interface';
 import { EventInfo } from 'src/app/interfaces/event-info.interface';
 import { EventCardComponent } from '../event-card/event-card.component';
+import { AccessibilityButtonComponent } from '../accessibility-button/accessibility-button.component';
 
 @Component({
   selector: 'app-interaction-bar',
@@ -27,6 +28,7 @@ import { EventCardComponent } from '../event-card/event-card.component';
     LocationCardsComponent,
     DirectionsComponent,
     EventCardComponent,
+    AccessibilityButtonComponent,
     SwitchMapButtonComponent,
     CommonModule
   ],
@@ -44,11 +46,13 @@ export class InteractionBarComponent implements OnInit, AfterViewInit {
   public swipeProgress: number = 0;
   isExpanded = false; // Track the footer's state
   showIndoorSelects = false;
+  showAccessibility = false;
   campusBuildings = { locations: [] as GoogleMapLocation[], loading: true };
   pointsOfInterest = { locations: [] as Location[], loading: true };
   events = { events: [] as EventInfo[], loading: true };
   showDirections$!: Observable<boolean>;
   showPOIs$!: Observable<boolean>;
+  COLLAPSED_PERCENTAGE = 65;
   switchMapButton: any;
 
   constructor(
@@ -63,6 +67,7 @@ export class InteractionBarComponent implements OnInit, AfterViewInit {
     this.showDirections$ = this.store.select(selectShowRoute);
     this.store.select(selectCurrentMap).subscribe((map) => {
       this.showIndoorSelects = map === MapType.Indoor;
+      this.showAccessibility = map === MapType.Indoor;
     });
 
     this.store.select(selectSelectedCampus).subscribe();
@@ -165,12 +170,11 @@ export class InteractionBarComponent implements OnInit, AfterViewInit {
     const diff = this.startY - currentY;
 
     const footer = this.footerContainer.nativeElement;
-    const baseTranslate = this.isExpanded ? 0 : 80;
+    const baseTranslate = this.isExpanded ? 0 : this.COLLAPSED_PERCENTAGE;
     const translateY = baseTranslate - diff;
-    const clampedTranslate = Math.min(Math.max(translateY, 0), 80);
-
-    footer.style.transform = `translateY(${clampedTranslate}%)`;
-    this.swipeProgress = (80 - clampedTranslate) / 80;
+    const clampedTranslate = Math.min(Math.max(translateY, 0), this.COLLAPSED_PERCENTAGE);
+    footer.style.transform = `translateY(${Math.min(Math.max(translateY, 0), this.COLLAPSED_PERCENTAGE)}%)`;
+    this.swipeProgress = (this.COLLAPSED_PERCENTAGE - clampedTranslate) / this.COLLAPSED_PERCENTAGE;
   }
 
   onDragEnd(): void {
@@ -197,9 +201,18 @@ export class InteractionBarComponent implements OnInit, AfterViewInit {
   public updateFooterUI(expand: boolean): void {
     const footer = this.footerContainer.nativeElement;
     footer.style.transition = 'transform 0.3s ease-out';
-    footer.style.transform = expand ? 'translateY(0)' : 'translateY(80%)';
+    footer.style.transform = expand ? 'translateY(0)' : `translateY(${this.COLLAPSED_PERCENTAGE}%)`;
     // ** IMPORTANT ** Needs better solution, since this will hide the indoor selects
     // footer.style.overflowY = expand ? 'auto' : 'hidden';
     this.swipeProgress = expand ? 1 : 0;
+  }
+
+  onLocationSelected(): void {
+    this.isExpanded = false;
+    const footer = this.footerContainer.nativeElement;
+    footer.style.transition = 'transform 0.3s ease-out';
+    footer.style.transform = `translateY(${this.COLLAPSED_PERCENTAGE}%)`;
+    footer.style.overflowY = '';
+    this.swipeProgress = 0;
   }
 }

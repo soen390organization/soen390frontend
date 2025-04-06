@@ -23,7 +23,6 @@ export class MappedinMapComponent implements AfterViewInit {
   mappedinContainer!: ElementRef;
   @Output() initialized = new EventEmitter<void>();
 
-
   constructor(
     private readonly mappedinService: MappedinService,
     private readonly indoorDirectionsService: IndoorDirectionsService
@@ -34,7 +33,6 @@ export class MappedinMapComponent implements AfterViewInit {
       try {
         await this.mappedinService.initialize(this.mappedinContainer.nativeElement);
         this.initialized.emit();
-
       } catch (error) {
         console.error('Error initializing mappedin map or computing route:', error);
       }
@@ -42,11 +40,14 @@ export class MappedinMapComponent implements AfterViewInit {
       combineLatest([
         this.indoorDirectionsService.getStartPoint$(),
         this.indoorDirectionsService.getDestinationPoint$(),
-        this.mappedinService.getMapView(),
+        this.mappedinService.getMapView()
       ])
         .pipe(filter(([start, destination, mapView]) => !!mapView))
         .subscribe(async ([start, destination, mapView]) => {
-          await this.indoorDirectionsService.renderNavigation();
+          await this.indoorDirectionsService.clearNavigation();
+          if (start || destination) {
+            await this.indoorDirectionsService.renderNavigation();
+          }
         });
     }
   }
