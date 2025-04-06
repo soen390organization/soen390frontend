@@ -8,16 +8,16 @@ import {
   OutdoorShuttleStrategy
 } from 'src/app/strategies/outdoor-directions';
 import { AbstractOutdoorStrategy } from 'src/app/strategies/outdoor-directions/abstract-outdoor.strategy';
-import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { GoogleMapService } from '../google-map.service';
+import { firstValueFrom, BehaviorSubject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class OutdoorDirectionsService extends DirectionsService<GoogleMapLocation> {
-  public selectedStrategySubject = new BehaviorSubject<AbstractOutdoorStrategy | null>(null);
   public startPointMarker: google.maps.marker.AdvancedMarkerElement;
   public destinationPointMarker: google.maps.marker.AdvancedMarkerElement;
+  public selectedStrategySubject = new BehaviorSubject<AbstractOutdoorStrategy>(null);
 
   constructor(
     private readonly googleMapService: GoogleMapService,

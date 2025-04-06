@@ -6,7 +6,7 @@
   height: calc(100vh - 96px);
   background: white;
   transition: transform 0.3s ease-out;
-  transform: translateY(90%);
+  transform: translateY(65%);
   border-radius: 24px 24px 0 0;
   box-shadow: 0px -2px 10px rgba(0, 0, 0, 0.2);
   touch-action: pan-y;
@@ -28,7 +28,12 @@
   z-index: 900;
   transition: opacity 0.3s ease;
 }
-
 .footer-content::-webkit-scrollbar {
   display: none;
+}
+
+.accessibility-container {
+  position: absolute;
+  top: -174px;
+  left: 8px;
 }
