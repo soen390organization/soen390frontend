@@ -33,42 +33,27 @@
         <input
           [(ngModel)]="startLocationInput"
           (focus)="onFocus('start')"
-          (blur)="onBlur()"
+          (blur)="onStartBlur()"
           (input)="onSearchChange($event, 'start')"
-          (keyup.enter)="setStart(places[0]); clearList()"
+          (keyup.enter)="setStart(startPlaces[0]); clearStartList()"
           type="text"
           placeholder="Choose starting point..."
           debounce="1000"
           class="w-full bg-white px-4 py-3 pr-10 rounded-full border border-gray-300 focus:outline-none"
         />
         <div class="absolute inset-y-0 right-2 flex items-center">
-          <ng-container
-            *ngIf="startLocationInput && startLocationInput.trim().length > 0; else showLocationBtn"
-          >
+          <ng-container *ngIf="startLocationInput && startLocationInput.trim().length > 0">
             <button (click)="clearStartInput()">
-              <span class="material-symbols-outlined text-gray-400 p-2"> cancel </span>
+              <span class="material-symbols-outlined text-gray-400 p-2">cancel</span>
             </button>
           </ng-container>
-          <ng-template #showLocationBtn>
-            <button (click)="onSetUsersLocationAsStart()">
-              <span
-                class="material-symbols-outlined leading-none bg-[#912338] rounded-full text-white p-2"
-              >
-                my_location
-              </span>
-            </button>
-          </ng-template>
         </div>
-        <div
-          *ngIf="isSearchingFromStart && places?.length > 0"
-          class="absolute left-0 w-full top-full mt-2 z-20"
-        >
+        <div *ngIf="startPlaces?.length > 0" class="absolute left-0 w-full top-full mt-2 z-20">
           <ul class="rounded-xl border border-gray-300 bg-white">
             <li
-              id="start-item"
-              *ngFor="let place of places"
-              (click)="setStart(place); clearList()"
-              (keydown.enter)="setStart(place); clearList()"
+              *ngFor="let place of startPlaces"
+              (click)="setStart(place); clearStartList()"
+              (keydown.enter)="setStart(place); clearStartList()"
               [ngClass]="{ 'bg-red-50': place.isYourLocation }"
               class="flex items-center hover:bg-gray-100 p-3 cursor-pointer"
             >
@@ -81,9 +66,7 @@
               <ng-template #defaultIconStart>
                 <span
                   class="material-symbols-outlined mr-3 p-2 border border-gray-300 rounded-full"
-                  [ngClass]="{
-                    'text-white border-transparent': isHighlighted(place?.title)
-                  }"
+                  [ngClass]="{ 'text-white border-transparent': isHighlighted(place?.title) }"
                   [ngStyle]="isHighlighted(place?.title) ? { 'background-color': '#852C3A' } : {}"
                 >
                   {{ getPlaceIcon(place?.title) }}
@@ -91,13 +74,9 @@
               </ng-template>
               <div class="flex flex-col min-w-0">
                 <div>{{ place?.title }}</div>
-                <div class="text-sm text-gray-500 truncate">
-                  {{ place?.address }}
-                </div>
+                <div class="text-sm text-gray-500 truncate">{{ place?.address }}</div>
               </div>
-              <span class="material-symbols-outlined ml-auto p-2 text-[#912338]">
-                arrow_insert
-              </span>
+              <span class="material-symbols-outlined ml-auto p-2 text-[#912338]">arrow_insert</span>
             </li>
           </ul>
         </div>
@@ -108,9 +87,9 @@
         <input
           [(ngModel)]="destinationLocationInput"
           (focus)="onFocus('destination')"
-          (blur)="onBlur()"
+          (blur)="onDestinationBlur()"
           (input)="onSearchChange($event, 'destination')"
-          (keyup.enter)="setDestination(places[0]); clearList()"
+          (keyup.enter)="setDestination(destinationPlaces[0]); clearDestinationList()"
           type="text"
           placeholder="Choose destination point..."
           class="w-full bg-white px-4 py-3 pr-10 rounded-full border border-gray-300 focus:outline-none"
@@ -120,20 +99,16 @@
             *ngIf="destinationLocationInput && destinationLocationInput.trim().length > 0"
           >
             <button (click)="clearDestinationInput()">
-              <span class="material-symbols-outlined text-gray-400 p-2"> cancel </span>
+              <span class="material-symbols-outlined text-gray-400 p-2">cancel</span>
             </button>
           </ng-container>
         </div>
-        <div
-          *ngIf="!isSearchingFromStart && places?.length > 0"
-          class="absolute left-0 w-full top-full mt-2"
-        >
+        <div *ngIf="destinationPlaces?.length > 0" class="absolute left-0 w-full top-full mt-2">
           <ul class="rounded-xl border border-gray-300 bg-white">
             <li
-              id="destination-item"
-              *ngFor="let place of places"
-              (click)="setDestination(place); clearList()"
-              (keydown.enter)="setDestination(place); clearList()"
+              *ngFor="let place of destinationPlaces"
+              (click)="setDestination(place); clearDestinationList()"
+              (keydown.enter)="setDestination(place); clearDestinationList()"
               [ngClass]="{ 'bg-red-50': place.isYourLocation }"
               class="flex items-center hover:bg-gray-100 p-3 cursor-pointer"
             >
@@ -146,9 +121,7 @@
               <ng-template #defaultIconDest>
                 <span
                   class="material-symbols-outlined mr-3 p-2 border border-gray-300 rounded-full"
-                  [ngClass]="{
-                    'text-white border-transparent': isHighlighted(place?.title)
-                  }"
+                  [ngClass]="{ 'text-white border-transparent': isHighlighted(place?.title) }"
                   [ngStyle]="isHighlighted(place?.title) ? { 'background-color': '#852C3A' } : {}"
                 >
                   {{ getPlaceIcon(place?.title) }}
@@ -156,13 +129,9 @@
               </ng-template>
               <div class="flex flex-col min-w-0">
                 <div>{{ place?.title }}</div>
-                <div class="text-sm text-gray-500 truncate">
-                  {{ place?.address }}
-                </div>
+                <div class="text-sm text-gray-500 truncate">{{ place?.address }}</div>
               </div>
-              <span class="material-symbols-outlined ml-auto p-2 text-[#912338]">
-                arrow_insert
-              </span>
+              <span class="material-symbols-outlined ml-auto p-2 text-[#912338]">arrow_insert</span>
             </li>
           </ul>
         </div>

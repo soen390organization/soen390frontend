@@ -48,12 +48,15 @@ export const MapSearchAnimation = [
 export class MapSearchComponent implements OnInit {
   @Output() searchStateChange = new EventEmitter<boolean>();
   @ViewChild(GoogleMapComponent) googleMap!: GoogleMapComponent;
+
   startLocationInput = '';
   destinationLocationInput = '';
   isSearchVisible = false;
-  places: any[] = []; // Array to store the search suggestions
-  isSearchingFromStart: boolean = false; // Flag to determine if the search is for the start or destination location
   disableStart: boolean = true;
+
+  // Separate suggestion arrays for start and destination inputs.
+  startPlaces: any[] = [];
+  destinationPlaces: any[] = [];
 
   constructor(
     private store: Store,
@@ -87,14 +90,11 @@ export class MapSearchComponent implements OnInit {
           this.outdoorDirectionsService.showStartMarker();
           this.googleMapService.updateMapLocation(outdoorStartPoint.coordinates);
         }
-
         if (outdoorDestinationPoint) {
           this.destinationLocationInput = outdoorDestinationPoint.title;
           this.outdoorDirectionsService.showDestinationMarker();
           this.googleMapService.updateMapLocation(outdoorDestinationPoint.coordinates);
         }
-
-        // Render indoor
         if (outdoorStartPoint && outdoorDestinationPoint) {
           await this.outdoorDirectionsService.getShortestRoute().then((strategy) => {
             this.outdoorDirectionsService.setSelectedStrategy(strategy);
@@ -110,34 +110,9 @@ export class MapSearchComponent implements OnInit {
         }
       }
     );
-    // Attempt to set the user's current location as the start point
-this.setUserLocationAsDefaultStart();
-
   }
-  private async setUserLocationAsDefaultStart(): Promise<void> {
-    try {
-      const position = await this.currentLocationService.getCurrentLocation();
-      if (position) {
-        const currentLocation = new google.maps.LatLng(position);
-  
-        const place = {
-          title: 'Your Location',
-          address: `${position.lat}, ${position.lng}`,
-          coordinates: currentLocation,
-          type: 'outdoor'
-        };
-  
-        this.setStart(place);
-        this.googleMapService.updateMapLocation(currentLocation);
-      }
-    } catch (error) {
-      console.warn('Could not fetch user location on init:', error);
-    }
-  }
-  
 
-
-  private setDisableStart(show) {
+  private setDisableStart(show: boolean) {
     this.disableStart = show;
   }
 
@@ -153,7 +128,6 @@ this.setUserLocationAsDefaultStart();
 
   async onSetUsersLocationAsStart(): Promise<void> {
     const position = await this.currentLocationService.getCurrentLocation();
-    console.log('Position: ', position);
     if (position == null) {
       throw new Error('Current location is null.');
     }
@@ -166,18 +140,31 @@ this.setUserLocationAsDefaultStart();
     this.store.dispatch(setMapType({ mapType: MapType.Outdoor }));
   }
 
+  // Update suggestions for each input separately.
   async onSearchChange(event: any, type: 'start' | 'destination') {
-    this.isSearchingFromStart = type === 'start'; // Set the flag to 'start' or 'destination'
     const query = event.target.value.trim();
     if (!query) {
-      this.places = [];
+      if (type === 'start') {
+        this.startPlaces = [];
+      } else {
+        this.destinationPlaces = [];
+      }
       return;
     }
-    this.places = await this.placesService.getPlaceSuggestions(query);
+    const suggestions = await this.placesService.getPlaceSuggestions(query);
+    if (type === 'start') {
+      this.startPlaces = suggestions;
+    } else {
+      this.destinationPlaces = suggestions;
+    }
   }
 
-  clearList() {
-    this.places = [];
+  // Separate clear functions for each suggestion array.
+  clearStartList() {
+    this.startPlaces = [];
+  }
+  clearDestinationList() {
+    this.destinationPlaces = [];
   }
 
   async onStartClick(): Promise<void> {
@@ -203,46 +190,50 @@ this.setUserLocationAsDefaultStart();
   }
 
   clearLocation() {
-    this.clearList();
+    this.clearStartList();
+    this.clearDestinationList();
     this.store.dispatch(setShowRoute({ show: false }));
     this.outdoorDirectionsService.clearNavigation();
     this.outdoorDirectionsService.setSelectedStrategy(null);
     this.indoorDirectionService.clearNavigation();
   }
 
+  // Both inputs now prepend the default "Your Location" suggestion.
   async onFocus(type: 'start' | 'destination'): Promise<void> {
-    this.isSearchingFromStart = type === 'start';
-    // Call getPlaceSuggestions with an empty query to get default building suggestions.
     const suggestions = await this.placesService.getPlaceSuggestions('');
-    // For start input, always prepend the custom "Your Location" suggestion.
-    this.places = [
-      {
-        title: 'Your Location',
-        address: 'Use your current location',
-        type: 'outdoor',
-        isYourLocation: true
-      },
-      ...suggestions
-    ];
+    const defaultLocationSuggestion = {
+      title: 'Your Location',
+      address: 'Use your current location',
+      type: 'outdoor',
+      isYourLocation: true
+    };
+    if (type === 'start') {
+      this.startPlaces = [defaultLocationSuggestion, ...suggestions];
+    } else {
+      this.destinationPlaces = [defaultLocationSuggestion, ...suggestions];
+    }
   }
 
-  onBlur(): void {
+  // Separate onBlur handlers.
+  onStartBlur(): void {
     setTimeout(() => {
-      this.clearList();
+      this.clearStartList();
+    }, 200);
+  }
+  onDestinationBlur(): void {
+    setTimeout(() => {
+      this.clearDestinationList();
     }, 200);
   }
 
-  /* @TODO: we need to setFloor here for a better experience */
   async setStart(place: any) {
     if (place.isYourLocation) {
       await this.onSetUsersLocationAsStart();
-      this.places = [];
+      this.clearStartList();
       return;
     }
-    console.log(place);
     this.startLocationInput = place.title;
     if (place.type === 'indoor') {
-      console.log('Setting start point for indoor:', place);
       this.indoorDirectionService.setStartPoint(place);
       this.outdoorDirectionsService.setStartPoint({
         title: place.fullName,
@@ -250,7 +241,6 @@ this.setUserLocationAsDefaultStart();
         coordinates: place.coordinates,
         type: 'outdoor'
       });
-
       if (place.indoorMapId !== this.mappedInService.getMapId()) {
         await this.mappedInService.setMapData(place.indoorMapId);
       }
@@ -259,13 +249,13 @@ this.setUserLocationAsDefaultStart();
       this.outdoorDirectionsService.setStartPoint(place);
       this.store.dispatch(setMapType({ mapType: MapType.Outdoor }));
     }
-    this.places = [];
+    this.clearStartList();
   }
 
   async setDestination(place: any) {
     if (place.isYourLocation) {
       await this.onSetUsersLocationAsStart();
-      this.places = [];
+      this.clearDestinationList();
       return;
     }
     this.destinationLocationInput = place.title;
@@ -277,7 +267,6 @@ this.setUserLocationAsDefaultStart();
         coordinates: place.coordinates,
         type: 'outdoor'
       });
-
       if (place.indoorMapId !== this.mappedInService.getMapId()) {
         await this.mappedInService.setMapData(place.indoorMapId);
       }
@@ -286,11 +275,12 @@ this.setUserLocationAsDefaultStart();
       this.outdoorDirectionsService.setDestinationPoint(place);
       this.store.dispatch(setMapType({ mapType: MapType.Outdoor }));
     }
-    this.places = [];
+    this.clearDestinationList();
   }
 
+  // Utility functions for highlighting.
   private readonly highlightedPlaces = new Set<string>([
-    'H Building Concordia University', 
+    'H Building Concordia University',
     'John Molson School of Business',
     'Concordia University, John Molson Building',
     'Concordia Engineering And Visual Arts (EV) Building',
@@ -300,18 +290,24 @@ this.setUserLocationAsDefaultStart();
     'Concordia University ER Building',
     'Vanier Library',
     'Central Building (CC)',
-    'SP Building, Loyola Campus, Concordia University'
+    'SP Building, Loyola Campus, Concordia University',
+
+    'Engineering and Visual Arts',
+    'ER Building',
+    'Webster Library',
+    'Hall',
+    '3 Amigos Building',
+    'Hall Building Auditorium',
+    'Central Building',
+    'Richard J. Renaud Science Complex',
+    'Vanier Extension'
   ]);
-  
+
   getPlaceIcon(title: string | undefined): string {
-    // If the title is in the highlightedPlaces Set, return the icon; otherwise, return the default icon.
     return this.isHighlighted(title) ? 'location_city' : 'location_on';
   }
-  
+
   isHighlighted(title: string | undefined): boolean {
-    // Simply check if the title exists in the Set of highlighted places
     return this.highlightedPlaces.has(title);
   }
-  
-
 }
