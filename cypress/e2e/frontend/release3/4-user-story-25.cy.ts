@@ -1,19 +1,6 @@
 describe('Hybrid indoor-outdoor route from H 281 to MB 5.457', () => {
   beforeEach(() => {
-    cy.visit('/', {
-      onBeforeLoad(win) {
-        cy.stub(win.navigator.geolocation, 'getCurrentPosition').callsFake((cb) => {
-          cb({
-            coords: {
-              latitude: 45.4971,
-              longitude: -73.5788,
-              accuracy: 100
-            }
-          });
-        });
-      }
-    });
-
+    cy.visit('/');
     cy.wait(2000);
   });
 
