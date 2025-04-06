@@ -14,6 +14,7 @@ export interface BuildingData {
   address: string;
   coordinates: google.maps.LatLng;
   mapData: MapData;
+  image?: string;
 }
 
 @Injectable({
@@ -143,101 +144,108 @@ export class MappedinService {
   }
 
   public async findIndoorLocation(roomCode: string): Promise<MappedInLocation | null> {
-    if (!roomCode) {
-      console.warn('Cannot find indoor location for empty room code');
+    if (!this.hasValidRoomCode(roomCode)) {
+      console.warn('Cannot find indoor location for empty or invalid room code');
       return null;
     }
 
-    try {
-      // Get all campus building data
-      const campusData = this.getCampusMapData() || {};
-      if (Object.keys(campusData).length === 0) {
-        console.warn('No campus data available');
-        return null;
-      }
-
-      // Extract building code from room code (e.g., 'H-531' -> 'H')
-      const buildingCode = roomCode.split(/[-\s]/)[0].toUpperCase();
-
-      // Find matching building (no fuzzy matching, no default fallback)
-      let matchingBuilding: any = null;
-      let matchingMapId: string | null = null;
-
-      for (const [mapId, building] of Object.entries(campusData) as [string, any][]) {
-        if (building.abbreviation && building.abbreviation.toUpperCase() === buildingCode) {
-          matchingBuilding = building;
-          matchingMapId = mapId;
-          break;
-        }
-      }
-
-      // If no exact building match, return null
-      if (!matchingBuilding || !matchingMapId) {
-        console.warn('No matching building found for code:', buildingCode);
-        return null;
-      }
-
-      // Now try to find the specific room within the building
-      const roomNumberPart = roomCode.split(/[-\s]/)[1] || '';
-
-      const mapData = matchingBuilding.mapData;
-      let bestRoom: any = null;
-
-      // Check spaces
-      const spaces = mapData.getByType('space') || [];
-      for (const space of spaces) {
-        if (
-          space.name &&
-          (space.name === roomNumberPart ||
-            space.name.includes(roomNumberPart) ||
-            roomCode.includes(space.name))
-        ) {
-          bestRoom = space;
-          break;
-        }
-      }
-
-      // If no match in spaces, check POIs
-      if (!bestRoom) {
-        const pois = mapData.getByType('point-of-interest') || [];
-        for (const poi of pois) {
-          if (
-            poi.name &&
-            (poi.name === roomNumberPart ||
-              poi.name.includes(roomNumberPart) ||
-              roomCode.includes(poi.name))
-          ) {
-            bestRoom = poi;
-            break;
-          }
-        }
-      }
-
-      // If no specific room/POI is found, return null (no fallback)
-      if (!bestRoom) {
-        console.warn(
-          `No matching room found for ${roomCode} in building: ${matchingBuilding.name}`
-        );
-        return null;
-      }
-
-      // Create and return the indoor location object
-      const indoorLocation: MappedInLocation = {
-        title: `${matchingBuilding.abbreviation || ''} ${bestRoom.name}`.trim(),
-        address: matchingBuilding.address || 'No Address',
-        image: matchingBuilding.image || 'assets/images/poi_fail.png',
-        indoorMapId: matchingMapId,
-        room: bestRoom,
-        buildingCode: matchingBuilding.abbreviation || '',
-        roomName: bestRoom.name,
-        coordinates: matchingBuilding.coordinates,
-        type: 'indoor'
-      };
-
-      return indoorLocation;
-    } catch (error) {
-      console.error('Error finding indoor location:', error);
+    const campusData = this.getValidCampusData();
+    if (!campusData) {
+      console.warn('No campus data available');
       return null;
     }
+
+    const buildingCode = this.extractBuildingCode(roomCode);
+    const { mapId, building } = this.findBuildingByCode(campusData, buildingCode) || {};
+    if (!building || !mapId) {
+      console.warn(`No matching building found for code: ${buildingCode}`);
+      return null;
+    }
+
+    const roomNumberPart = this.extractRoomNumber(roomCode);
+    const bestRoom = this.findSpaceOrPoi(building.mapData, roomNumberPart, roomCode);
+    if (!bestRoom) {
+      console.warn(`No matching room found for ${roomCode} in building: ${building.name}`);
+      return null;
+    }
+
+    return this.buildIndoorLocation(building, bestRoom, mapId);
+  }
+
+  /** === HELPER METHODS BELOW === **/
+
+  private hasValidRoomCode(roomCode: string): boolean {
+    return Boolean(roomCode && roomCode.trim());
+  }
+
+  private getValidCampusData(): Record<string, BuildingData> | null {
+    const data = this.getCampusMapData() || {};
+    return Object.keys(data).length > 0 ? data : null;
+  }
+
+  private extractBuildingCode(roomCode: string): string {
+    return roomCode.split(/[-\s]/)[0].toUpperCase();
+  }
+
+  private extractRoomNumber(roomCode: string): string {
+    // Safely return the second piece after splitting, or empty if missing
+    return roomCode.split(/[-\s]/)[1] || '';
+  }
+
+  private findBuildingByCode(
+    campusData: Record<string, BuildingData>,
+    buildingCode: string
+  ): { mapId: string; building: BuildingData } | null {
+    for (const [mapId, building] of Object.entries(campusData)) {
+      if (building.abbreviation?.toUpperCase() === buildingCode) {
+        return { mapId, building };
+      }
+    }
+    return null;
+  }
+
+  private findSpaceOrPoi(mapData: MapData, roomNumber: string, fullRoomCode: string): any {
+    const spaces = mapData.getByType('space') || [];
+    for (const space of spaces) {
+      if (
+        space?.name &&
+        (space.name === roomNumber ||
+          space.name.includes(roomNumber) ||
+          fullRoomCode.includes(space.name))
+      ) {
+        return space;
+      }
+    }
+
+    const pois = mapData.getByType('point-of-interest') || [];
+    for (const poi of pois) {
+      if (
+        poi?.name &&
+        (poi.name === roomNumber ||
+          poi.name.includes(roomNumber) ||
+          fullRoomCode.includes(poi.name))
+      ) {
+        return poi;
+      }
+    }
+    return null;
+  }
+
+  private buildIndoorLocation(
+    building: BuildingData,
+    bestRoom: any,
+    mapId: string
+  ): MappedInLocation {
+    return {
+      title: `${building.abbreviation || ''} ${bestRoom.name}`.trim(),
+      address: building.address || 'No Address',
+      image: building.image || 'assets/images/poi_fail.png',
+      indoorMapId: mapId,
+      room: bestRoom,
+      buildingCode: building.abbreviation || '',
+      roomName: bestRoom.name,
+      coordinates: building.coordinates,
+      type: 'indoor'
+    };
   }
 }

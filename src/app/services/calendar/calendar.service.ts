@@ -173,7 +173,7 @@ export class CalendarService {
     let roomNumber = '';
 
     // First try to match the pattern like "H-531" or "MB-S2.330"
-    const roomPattern = /^([A-Za-z\-]+)[- ]([A-Za-z0-9.\-]+)$/;
+    const roomPattern = /^([A-Za-z]+(?:-[A-Za-z]+)*)[ -]([A-Za-z0-9]+(?:[.\-][A-Za-z0-9]+)*)$/;
     const match = classCode.trim().match(roomPattern);
 
     if (match) {
