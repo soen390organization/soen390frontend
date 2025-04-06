@@ -151,32 +151,31 @@ export class MapSearchComponent implements OnInit {
     }
   }
 
-  async onSetUsersLocationAsStart(): Promise<void> {
-    const position = await this.currentLocationService.getCurrentLocation();
-    if (position == null) {
-      throw new Error('Current location is null.');
-    }
-    this.setStart({
-      title: 'Your Location',
-      address: `${position.lat}, ${position.lng}`,
-      coordinates: new google.maps.LatLng(position),
-      type: 'outdoor'
-    });
-    this.store.dispatch(setMapType({ mapType: MapType.Outdoor }));
-  }
+  async setUserLocation(type: 'start' | 'destination'): Promise<void> {
+    try {
+      const position = await this.currentLocationService.getCurrentLocation();
+      if (!position) {
+        throw new Error('Current location is null.');
+      }
 
-  async onSetUsersLocationAsDestination(): Promise<void> {
-    const position = await this.currentLocationService.getCurrentLocation();
-    if (position == null) {
-      throw new Error('Current location is null.');
+      const place = {
+        title: 'Your Location',
+        address: `${position.lat}, ${position.lng}`,
+        coordinates: new google.maps.LatLng(position),
+        type: 'outdoor'
+      };
+
+      if (type === 'start') {
+        this.setStart(place);
+      } else {
+        this.setDestination(place);
+      }
+
+      this.googleMapService.updateMapLocation(place.coordinates);
+      this.store.dispatch(setMapType({ mapType: MapType.Outdoor }));
+    } catch (error) {
+      console.warn('Could not fetch user location:', error);
     }
-    this.setDestination({
-      title: 'Your Location',
-      address: `${position.lat}, ${position.lng}`,
-      coordinates: new google.maps.LatLng(position),
-      type: 'outdoor'
-    });
-    this.store.dispatch(setMapType({ mapType: MapType.Outdoor }));
   }
 
   async onSearchChange(event: any, type: 'start' | 'destination') {
@@ -247,7 +246,7 @@ export class MapSearchComponent implements OnInit {
 
   async setStart(place: any) {
     if (place.isYourLocation) {
-      await this.onSetUsersLocationAsStart();
+      await this.setUserLocation('start');
       this.clearList();
       return;
     }
@@ -273,7 +272,7 @@ export class MapSearchComponent implements OnInit {
 
   async setDestination(place: any) {
     if (place.isYourLocation) {
-      await this.onSetUsersLocationAsDestination();
+      await this.setUserLocation('destination');
       this.clearList();
       return;
     }
