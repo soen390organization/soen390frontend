@@ -9,6 +9,29 @@ export class ConcordiaDataService {
   addressMap: Map<string, string>;
   coordinatesMap: Map<string, { lat: string; lng: string }>;
   imageMap: Map<string, string>;
+  private readonly highlightedBuildings = new Set<string>([
+    'H Building Concordia University',
+    'John Molson School of Business',
+    'Concordia University, John Molson Building',
+    'Concordia Engineering And Visual Arts (EV) Building',
+    'Pavillon Ev Building',
+    'LB Building, Concordia University',
+    'CL Annex',
+    'Concordia University ER Building',
+    'Vanier Library',
+    'Central Building (CC)',
+    'SP Building, Loyola Campus, Concordia University',
+    'Engineering and Visual Arts',
+    'ER Building',
+    'Webster Library',
+    'Hall',
+    '3 Amigos Building',
+    'Hall Building Auditorium',
+    'Central Building',
+    'Richard J. Renaud Science Complex',
+    'Vanier Extension'
+  ]);
+
   constructor() {
     this.addressMap = this.createAbbreviationToAddressMap();
     this.coordinatesMap = this.createAbbreviationToCoordinatesMap();
@@ -43,6 +66,10 @@ export class ConcordiaDataService {
     );
 
     return distanceToSGW < distanceToLOY ? data.sgw : data.loy;
+  }
+
+  getHighlightedBuildings(): Set<string> {
+    return this.highlightedBuildings;
   }
 
   createAbbreviationToAddressMap() {

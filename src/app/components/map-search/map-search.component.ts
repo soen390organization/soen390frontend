@@ -14,6 +14,7 @@ import { MappedinService } from 'src/app/services/mappedin/mappedin.service';
 import { IndoorDirectionsService } from 'src/app/services/indoor-directions/indoor-directions.service';
 import { GoogleMapService } from 'src/app/services/google-map.service';
 import { HomePage } from 'src/app/home/home.page';
+import { ConcordiaDataService } from 'src/app/services/concordia-data.service';
 
 export const MapSearchAnimation = [
   trigger('slideInOut', [
@@ -56,6 +57,8 @@ export class MapSearchComponent implements OnInit {
   // Single unified suggestions array for both inputs.
   places: any[] = [];
   isSearchingFromStart: boolean = false; // Indicates which input is active
+  startInputFocused = false;
+  destinationInputFocused = false;
 
   constructor(
     private store: Store,
@@ -64,7 +67,8 @@ export class MapSearchComponent implements OnInit {
     public readonly indoorDirectionService: IndoorDirectionsService,
     private readonly mappedInService: MappedinService,
     private readonly placesService: PlacesService,
-    private readonly currentLocationService: CurrentLocationService
+    private readonly currentLocationService: CurrentLocationService,
+    private readonly concordiaDataService: ConcordiaDataService
   ) {}
 
   ngOnInit(): void {
@@ -238,9 +242,18 @@ export class MapSearchComponent implements OnInit {
     ];
   }
 
-  onBlur(): void {
+  handleBlur(type: 'start' | 'destination') {
+    if (type === 'start') {
+      this.startInputFocused = false;
+    } else {
+      this.destinationInputFocused = false;
+    }
+
+    // Delay to allow click events on suggestions
     setTimeout(() => {
-      this.clearList();
+      if (!this.startInputFocused && !this.destinationInputFocused) {
+        this.clearList();
+      }
     }, 200);
   }
 
@@ -296,36 +309,12 @@ export class MapSearchComponent implements OnInit {
     this.clearList();
   }
 
-  // Utility functions for highlighting.
-  private readonly highlightedPlaces = new Set<string>([
-    'H Building Concordia University',
-    'John Molson School of Business',
-    'Concordia University, John Molson Building',
-    'Concordia Engineering And Visual Arts (EV) Building',
-    'Pavillon Ev Building',
-    'LB Building, Concordia University',
-    'CL Annex',
-    'Concordia University ER Building',
-    'Vanier Library',
-    'Central Building (CC)',
-    'SP Building, Loyola Campus, Concordia University',
-
-    'Engineering and Visual Arts',
-    'ER Building',
-    'Webster Library',
-    'Hall',
-    '3 Amigos Building',
-    'Hall Building Auditorium',
-    'Central Building',
-    'Richard J. Renaud Science Complex',
-    'Vanier Extension'
-  ]);
-
   getPlaceIcon(title: string | undefined): string {
     return this.isHighlighted(title) ? 'location_city' : 'location_on';
   }
 
   isHighlighted(title: string | undefined): boolean {
-    return this.highlightedPlaces.has(title);
+    if (!title) return false;
+    return this.concordiaDataService.getHighlightedBuildings().has(title);
   }
 }
