@@ -53,11 +53,8 @@ export class PlacesService {
         autocompleteService.getPlacePredictions(
           {
             input,
-            componentRestrictions: { country: 'CA' },
-            locationBias: new google.maps.Circle({
-              center: new google.maps.LatLng(campusCoordinates),
-              radius: 500
-            })
+            location: new google.maps.LatLng(45.5017, -73.5673), // Montreal coordinates
+            radius: 10000 // Adjust radius as needed to cover the Montreal area
           },
           (predictions, status) => {
             resolve(predictions || []);
@@ -66,9 +63,18 @@ export class PlacesService {
       }
     );
 
+    const prioritizedBuildingsManual = [...data.sgw.buildings, ...data.loy.buildings].map(
+      (b: any) => ({
+        title: b.name,
+        address: b.address,
+        coordinates: new google.maps.LatLng(b.coordinates.lat, b.coordinates.lng),
+        type: 'outdoor'
+      })
+    );
+
     const campusData = this.mappedInService.getCampusMapData() || {};
     let rooms = [];
-    
+
     for (const [key, building] of Object.entries(campusData) as [string, BuildingData][]) {
       // Process 'space' types normally
       rooms = [
@@ -83,14 +89,28 @@ export class PlacesService {
             fullName: building.name + ' ' + space.name,
             abbreviation: building.abbreviation,
             indoorMapId: key,
-            room: space, // Single room object
+            room: space,
+            type: 'indoor',
+            icon: 'assets/icon/c-logo.png'
+          })),
+        ...building.mapData
+          .getByType('point-of-interest')
+          .filter((poi) => poi.name)
+          .map((poi) => ({
+            title: building.abbreviation + ' ' + poi.name,
+            address: building.address,
+            coordinates: building.coordinates,
+            fullName: building.name + ' ' + poi.name,
+            abbreviation: building.abbreviation,
+            indoorMapId: key,
+            room: poi,
             type: 'indoor'
           }))
       ];
-    
+
       // Group POIs by name
       const poiGroups: Record<string, any[]> = {};
-    
+
       for (const poi of building.mapData.getByType('point-of-interest')) {
         if (poi.name) {
           if (!poiGroups[poi.name]) {
@@ -99,7 +119,7 @@ export class PlacesService {
           poiGroups[poi.name].push(poi);
         }
       }
-    
+
       // Convert grouped POIs into final array format
       for (const [poiName, pois] of Object.entries(poiGroups)) {
         rooms.push({
@@ -116,6 +136,9 @@ export class PlacesService {
 
     const normalizeString = (str: string) => str.toLowerCase().replace(/[^a-zA-Z0-9]/g, '');
     const searchTerm = normalizeString(input);
+    const manualMatches = prioritizedBuildingsManual.filter((building) =>
+      normalizeString(building.title).includes(searchTerm)
+    );
 
     const selectedBuildingRooms = rooms.filter((room) =>
       [room.title, room.fullName, room.abbreviation] // Check abbreviation, full name, and short name
@@ -124,7 +147,7 @@ export class PlacesService {
 
     const detailsPromises = predictions.map((prediction) => this.getPlaceDetail(prediction));
     let details = await Promise.all(detailsPromises);
-    details = [...selectedBuildingRooms.slice(0, 3), ...details];
+    details = [...manualMatches, ...selectedBuildingRooms.slice(0, 3), ...details];
 
     // Filter out any null values (failed details)
     return details.filter(
