@@ -1,6 +1,18 @@
 describe('Indoor directions with floor transition from Hall 281 to Hall 917', () => {
   beforeEach(() => {
-    cy.visit('/');
+    cy.visit('/', {
+      onBeforeLoad(win) {
+        cy.stub(win.navigator.geolocation, 'getCurrentPosition').callsFake((cb) => {
+          return cb({
+            coords: {
+              latitude: 45.4971,
+              longitude: -73.5788,
+              accuracy: 100
+            }
+          });
+        });
+      }
+    });
     cy.wait(5000); // allow map and components to load fully
   });
 

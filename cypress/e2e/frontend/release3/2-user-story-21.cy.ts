@@ -1,6 +1,18 @@
 describe('Indoor directions to a POI (Bathroom)', () => {
   beforeEach(() => {
-    cy.visit('/');
+    cy.visit('/', {
+      onBeforeLoad(win) {
+        cy.stub(win.navigator.geolocation, 'getCurrentPosition').callsFake((cb) => {
+          return cb({
+            coords: {
+              latitude: 45.4971,
+              longitude: -73.5788,
+              accuracy: 100
+            }
+          });
+        });
+      }
+    });
     cy.wait(5000); // allow map and app to load
   });
 
