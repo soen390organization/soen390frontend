@@ -26,7 +26,7 @@ describe('Map - Directions and Route Generation for Multi-Transportation Modes',
     // Enter start location (JMSB) then press Enter.
     cy.get('input[placeholder="Choose starting point..."]').clear().type('John Molson Guy');
     cy.wait(3000);
-    cy.contains('li#start-item', 'John Molson').click();
+    cy.contains('John Molson').click();
     cy.wait(2000);
 
     // Enter destination (Vanier Library) then press Enter.
@@ -34,7 +34,7 @@ describe('Map - Directions and Route Generation for Multi-Transportation Modes',
       .clear()
       .type('Vanier Library Loyola');
     cy.wait(3000);
-    cy.contains('li#destination-item', 'Vanier Library').click();
+    cy.contains('Vanier Library').click();
     cy.wait(3000);
 
     // Verify that two markers are displayed (assuming markers contain "Icone_Verde.svg").
@@ -49,10 +49,7 @@ describe('Map - Directions and Route Generation for Multi-Transportation Modes',
     cy.wait(2000);
 
     // Click on the handle bar using the provided class.
-    cy.get(
-      '.w-\\[100px\\].h-\\[10px\\].bg-\\[\\#d5d5d5\\].my-\\[10px\\].mx-auto.rounded-full.cursor-pointer',
-      { timeout: 10000 }
-    )
+    cy.get('.w-\\[120px\\].h-\\[10px\\].bg-\\[\\#d5d5d5\\]', { timeout: 5000 })
       .should('be.visible')
       .click();
     cy.wait(2000);

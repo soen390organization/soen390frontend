@@ -15,12 +15,12 @@ describe('Map Search - Select Start and Destination Buildings', () => {
 
     cy.get('input[placeholder="Choose starting point..."]').clear().type('Hall Building');
     cy.wait(3000);
-    cy.contains('li#start-item', 'Hall Building').click();
+    cy.contains('Hall Building').click();
     cy.wait(2000);
 
     cy.get('input[placeholder="Choose destination point..."]').clear().type('John Molson');
     cy.wait(3000);
-    cy.contains('li#destination-item', 'John Molson').click();
+    cy.contains('John Molson').click();
     cy.wait(2000);
 
     // Verify that the start marker exists (adjust the selector if needed)

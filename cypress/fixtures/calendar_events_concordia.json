@@ -1,0 +1,16 @@
+{
+  "items": [
+    {
+      "summary": "SOEN357",
+      "location": "H-531",
+      "start": { "dateTime": "2025-04-08T10:00:00-04:00" },
+      "end": { "dateTime": "2025-04-08T11:15:00-04:00" }
+    },
+    {
+      "summary": "COMP445",
+      "location": "MB-S2.330",
+      "start": { "dateTime": "2025-04-08T14:45:00-04:00" },
+      "end": { "dateTime": "2025-04-08T16:00:00-04:00" }
+    }
+  ]
+}

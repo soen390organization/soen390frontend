@@ -24,7 +24,11 @@ describe('Map - Directions to Mango Bay', () => {
     cy.wait(1000);
 
     // Click on the handle bar to reveal the locations section.
-    cy.get('[data-cy="swipe-area"]').should('be.visible').click();
+    cy.get('.w-\\[120px\\].h-\\[10px\\].bg-\\[\\#d5d5d5\\]')
+      .trigger('mousedown', { which: 1, clientY: 300 })
+      .trigger('mousemove', { clientY: 100 })
+      .trigger('mouseup', { force: true });
+    cy.wait(2000);
 
     cy.wait(1000);
 
@@ -38,14 +42,18 @@ describe('Map - Directions to Mango Bay', () => {
     cy.wait(1000);
 
     // Close the interaction bar by clicking the handle bar again.
-    cy.get('[data-cy="swipe-area"]').should('be.visible').click();
+    cy.get('.w-\\[120px\\].h-\\[10px\\].bg-\\[\\#d5d5d5\\]')
+      .trigger('mousedown', { which: 1, clientY: 100 })
+      .trigger('mousemove', { clientY: 300 })
+      .trigger('mouseup', { force: true });
+    cy.wait(5000);
 
     cy.wait(1000);
     // Expand the search inputs.
     cy.get('.material-symbols-outlined').contains('search').click();
     // Select user's current location as the start point by clicking the my_location icon.
-    cy.get('input[placeholder="Choose starting point..."]').should('be.visible');
-    cy.get('span.material-symbols-outlined').contains('my_location').click();
+    cy.get('input[placeholder="Choose starting point..."]').click();
+    cy.contains('Your Location').click();
     cy.wait(1000);
 
     // Click the Start button to generate directions.
@@ -53,7 +61,11 @@ describe('Map - Directions to Mango Bay', () => {
     cy.wait(1000);
 
     // // Click on the handle bar to reveal the locations section.
-    cy.get('[data-cy="swipe-area"]').should('be.visible').click();
+    cy.get('.w-\\[120px\\].h-\\[10px\\].bg-\\[\\#d5d5d5\\]')
+      .trigger('mousedown', { which: 1, clientY: 300 })
+      .trigger('mousemove', { clientY: 100 })
+      .trigger('mouseup', { force: true });
+    cy.wait(2000);
 
     cy.wait(1000);
 
