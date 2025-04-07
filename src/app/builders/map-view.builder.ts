@@ -3,9 +3,11 @@ import { show3dMap as defaultShow3dMap, MapData, MapView, DOORS } from '@mappedi
 export class MapViewBuilder {
   container: HTMLElement;
   mapData: MapData;
-  private _show3dMap: (container: HTMLElement, mapData: MapData) => Promise<MapView>;
+  private readonly _show3dMap: (container: HTMLElement, mapData: MapData) => Promise<MapView>;
 
-  constructor(show3dMap: (container: HTMLElement, mapData: MapData) => Promise<MapView> = defaultShow3dMap) {
+  constructor(
+    show3dMap: (container: HTMLElement, mapData: MapData) => Promise<MapView> = defaultShow3dMap
+  ) {
     this._show3dMap = show3dMap;
   }
 
@@ -44,7 +46,9 @@ export class MapViewBuilder {
       let label;
       let labelColor;
       // Find the coordinates for the current floor.
-      const coords = connection.coordinates.find((coord) => coord.floorId === mapView.currentFloor.id);
+      const coords = connection.coordinates.find(
+        (coord) => coord.floorId === mapView.currentFloor.id
+      );
       // Label the connection.
       if (connection.type == 'stairs') {
         label = 'Stairs';
@@ -60,7 +64,12 @@ export class MapViewBuilder {
     });
   }
 
-  private addMapViewLabel(mapView: MapView, mappedInObject: any, label: string, labelColor: string = '#000000'): void {
+  private addMapViewLabel(
+    mapView: MapView,
+    mappedInObject: any,
+    label: string,
+    labelColor: string = '#000000'
+  ): void {
     mapView.Labels.add(mappedInObject, label, {
       interactive: true,
       appearance: {

@@ -2,7 +2,6 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { take } from 'rxjs';
 import { ConcordiaDataService } from 'src/app/services/concordia-data.service';
 import { MappedinService } from 'src/app/services/mappedin/mappedin.service';
 import { selectSelectedCampus } from 'src/app/store/app';
@@ -21,9 +20,9 @@ export class IndoorSelectsComponent implements OnInit {
   isLoadingFloors: boolean = true;
 
   constructor(
-    private store: Store,
-    private mappedInService: MappedinService,
-    private concordiaDataService: ConcordiaDataService
+    private readonly store: Store,
+    private readonly mappedInService: MappedinService,
+    private readonly concordiaDataService: ConcordiaDataService
   ) {}
 
   ngOnInit() {
@@ -43,7 +42,7 @@ export class IndoorSelectsComponent implements OnInit {
     });
 
     // Sync dropdown values whenever mapData changes
-    this.mappedInService.getMapData().subscribe(async (map) => {
+    this.mappedInService.getMapData$().subscribe(async (map) => {
       if (!map) {
         return;
       }

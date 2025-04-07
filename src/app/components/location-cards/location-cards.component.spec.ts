@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { LocationCardsComponent } from './location-cards.component';
-import { DirectionsService } from 'src/app/services/directions/directions.service';
+import { OutdoorDirectionsService } from 'src/app/services/outdoor-directions/outdoor-directions.service';
 import { Location } from 'src/app/interfaces/location.interface';
 import { GoogleMapLocation } from 'src/app/interfaces/google-map-location.interface';
 import { By } from '@angular/platform-browser';
@@ -8,19 +8,24 @@ import { By } from '@angular/platform-browser';
 describe('LocationCardsComponent', () => {
   let component: LocationCardsComponent;
   let fixture: ComponentFixture<LocationCardsComponent>;
-  let directionsServiceSpy: jasmine.SpyObj<DirectionsService>;
+  let directionsServiceSpy: jasmine.SpyObj<OutdoorDirectionsService>;
 
   beforeEach(async () => {
-    const spy = jasmine.createSpyObj('DirectionsService', ['setDestinationPoint']);
+    const spy = jasmine.createSpyObj('DirectionsService', [
+      'setDestinationPoint',
+      'clearNavigation'
+    ]);
 
     await TestBed.configureTestingModule({
       imports: [LocationCardsComponent],
-      providers: [{ provide: DirectionsService, useValue: spy }]
+      providers: [{ provide: OutdoorDirectionsService, useValue: spy }]
     }).compileComponents();
 
     fixture = TestBed.createComponent(LocationCardsComponent);
     component = fixture.componentInstance;
-    directionsServiceSpy = TestBed.inject(DirectionsService) as jasmine.SpyObj<DirectionsService>;
+    directionsServiceSpy = TestBed.inject(
+      OutdoorDirectionsService
+    ) as jasmine.SpyObj<OutdoorDirectionsService>;
   });
 
   it('should create', () => {

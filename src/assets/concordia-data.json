@@ -2,10 +2,8 @@
   "sgw": {
     "name": "Sir George William",
     "abbreviation": "SGW",
-    "coordinates": {
-      "lat": 45.49508674774648,
-      "lng": -73.57795691041848
-    },
+    "address": "45.497234, -73.578384",
+    "coordinates": { "lat": 45.49508674774648, "lng": -73.57795691041848 },
     "shuttleBus": {
       "terminal": {
         "lat": 45.49713286141489,
@@ -345,7 +343,7 @@
         ]
       },
       {
-        "name": "3 Amigos Building",
+        "name": "CL Annex",
         "abbreviation": "CL",
         "address": "1665 Rue Sainte-Catherine 3e étage, Montréal, QC H3H 1L9",
         "coordinates": { "lat": 45.49420442796185, "lng": -73.579062279541164 },
@@ -374,10 +372,8 @@
   "loy": {
     "name": "Loyola",
     "abbreviation": "LOY",
-    "coordinates": {
-      "lat": 45.45812810976341,
-      "lng": -73.6393513063634
-    },
+    "address": "45.45842154460105, -73.63828307084489",
+    "coordinates": { "lat": 45.45812810976341, "lng": -73.6393513063634 },
     "shuttleBus": {
       "terminal": {
         "lat": 45.45789692831165,
@@ -552,9 +548,7 @@
             "lng": -73.6419273037453
           }
         ],
-        "faculties": [
-          "Faculty of Arts and Science"
-        ],
+        "faculties": ["Faculty of Arts and Science"],
         "accessibility": "https://img.icons8.com/?size=100&id=15959&format=png&color=000000",
         "funFact": "The Richard J. Renaud Science Complex at Loyola is known for housing state-of-the-art biology and chemistry laboratories."
       },
@@ -627,9 +621,7 @@
             "lng": -73.63889166238613
           }
         ],
-        "faculties": [
-          "Vanier Library"
-        ],
+        "faculties": ["Vanier Library"],
         "accessibility": "https://img.icons8.com/?size=100&id=15959&format=png&color=000000",
         "funFact": "The Vanier Library at Loyola Campus has a collection of rare books, including first editions of notable literary works."
       },

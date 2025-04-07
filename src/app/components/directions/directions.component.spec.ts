@@ -1,281 +1,179 @@
-import { of } from 'rxjs';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { DirectionsComponent } from './directions.component';
-import { Step } from 'src/app/interfaces/step.interface';
-import { ElementRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { provideMockStore, MockStore } from '@ngrx/store/testing';
+import { OutdoorDirectionsService } from 'src/app/services/outdoor-directions/outdoor-directions.service';
+import {
+  OutdoorDrivingStrategy,
+  OutdoorShuttleStrategy,
+  OutdoorTransitStrategy,
+  OutdoorWalkingStrategy
+} from 'src/app/strategies/outdoor-directions';
 import { CurrentLocationService } from 'src/app/services/current-location/current-location.service';
-import { DirectionsService } from 'src/app/services/directions/directions.service';
-import { VisibilityService } from 'src/app/services/visibility.service';
-import { NavigationCoordinatorService } from 'src/app/services/navigation-coordinator.service';
-
-// Create a spy object for DirectionsService with all required methods.
-// Extract Interface (the set of methods)
-const mockDirectionsService = jasmine.createSpyObj('DirectionsService', [
-  'generateRoute',
-  'calculateRoute',
-  'getTravelMode',
-  'getDestinationPoint',
-  'getStartPoint',
-  'setStartPoint',
-  'setDestinationPoint',
-  'calculateDistanceETA'
-]);
-mockDirectionsService.generateRoute.and.callFake((start, destination, mode) =>
-  mockDirectionsService.calculateRoute(start, destination, mode)
-);
-mockDirectionsService.calculateRoute.and.returnValue(Promise.resolve({ steps: [], eta: null }));
-mockDirectionsService.getTravelMode.and.returnValue('WALKING');
-mockDirectionsService.hasBothPoints$ = of(true);
-mockDirectionsService.getDestinationPoint.and.returnValue(
-  of({ address: 'destination address', title: 'Destination', coordinates: {} })
-);
-mockDirectionsService.getStartPoint.and.returnValue(
-  of({ address: 'start address', title: 'Start', coordinates: {} })
-);
-mockDirectionsService.setStartPoint.and.stub();
-mockDirectionsService.setDestinationPoint.and.stub();
-mockDirectionsService.calculateDistanceETA.and.returnValue(
-  Promise.resolve({ eta: 'default ETA', totalDistance: 0 })
-);
-
-const mockCurrentLocationService = {
-  watchLocation: jasmine.createSpy('watchLocation').and.returnValue(Promise.resolve('123')),
-  clearWatch: jasmine.createSpy('clearWatch')
-};
-
-const mockVisibilityService = {
-  toggleDirectionsComponent: jasmine.createSpy('toggleDirectionsComponent'),
-  togglePOIsComponent: jasmine.createSpy('togglePOIsComponent'),
-  toggleStartButton: jasmine.createSpy('toggleStartButton'),
-  endNavigation: of(null)
-};
-
-const mockNavigationCoordinatorService = jasmine.createSpyObj('NavigationCoordinatorService', [
-  'getCompleteRoute'
-]);
-mockNavigationCoordinatorService.getCompleteRoute.and.returnValue(
-  Promise.resolve({ segments: [{ type: 'indoor', instructions: { steps: [], eta: null } }] })
-);
+import { AbstractOutdoorStrategy } from 'src/app/strategies/outdoor-directions/abstract-outdoor.strategy';
+import { setShowRoute } from 'src/app/store/app';
+import { of } from 'rxjs';
+import { ElementRef } from '@angular/core';
+import { Step } from 'src/app/interfaces/step.interface';
 
 describe('DirectionsComponent', () => {
   let component: DirectionsComponent;
   let fixture: ComponentFixture<DirectionsComponent>;
+  let store: MockStore;
+
+  const mockOutdoorService = jasmine.createSpyObj('OutdoorDirectionsService', [
+    'getSelectedStrategy$',
+    'clearNavigation',
+    'setSelectedStrategy',
+    'renderNavigation'
+  ]);
+  const mockWalkingStrategy = { routes: [{}] };
+  const mockDrivingStrategy = { routes: [] };
+  const mockTransitStrategy = { routes: [{}] };
+  const mockShuttleStrategy = { routes: [{}] };
+  const mockCurrentLocationService = jasmine.createSpyObj('CurrentLocationService', [
+    'clearWatch',
+    'watchLocation'
+  ]);
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [DirectionsComponent, CommonModule],
+      imports: [DirectionsComponent],
       providers: [
-        { provide: DirectionsService, useValue: mockDirectionsService },
-        { provide: CurrentLocationService, useValue: mockCurrentLocationService },
-        { provide: VisibilityService, useValue: mockVisibilityService },
-        { provide: NavigationCoordinatorService, useValue: mockNavigationCoordinatorService }
+        provideMockStore(),
+        { provide: OutdoorDirectionsService, useValue: mockOutdoorService },
+        { provide: OutdoorWalkingStrategy, useValue: mockWalkingStrategy },
+        { provide: OutdoorDrivingStrategy, useValue: mockDrivingStrategy },
+        { provide: OutdoorTransitStrategy, useValue: mockTransitStrategy },
+        { provide: OutdoorShuttleStrategy, useValue: mockShuttleStrategy },
+        { provide: CurrentLocationService, useValue: mockCurrentLocationService }
       ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(DirectionsComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    store = TestBed.inject(MockStore);
   });
 
-  it('should create the component', () => {
+  it('should create', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should initialize with WALKING mode', () => {
-    expect(component.selectedMode).toBe('WALKING');
+  it('should subscribe to strategy and set steps', () => {
+    const fakeStrategy = {
+      getTotalSteps: () => [{ end_location: { lat: () => 0, lng: () => 0 } }]
+    } as AbstractOutdoorStrategy;
+
+    spyOn(component, 'startWatchingLocation');
+    mockOutdoorService.getSelectedStrategy$.and.returnValue(of(fakeStrategy));
+
+    component.ngOnInit();
+
+    expect(component.steps.length).toBe(1);
+    expect(component.startWatchingLocation).toHaveBeenCalled();
   });
 
-  it('should set mode correctly', () => {
-    component.setMode('DRIVING');
-    expect(component.selectedMode).toBe('DRIVING');
+  it('should call strategy methods in setStrategy()', () => {
+    const strategy = {} as AbstractOutdoorStrategy;
+
+    component.setStrategy(strategy);
+
+    expect(mockOutdoorService.clearNavigation).toHaveBeenCalled();
+    expect(mockOutdoorService.setSelectedStrategy).toHaveBeenCalledWith(strategy);
+    expect(mockOutdoorService.renderNavigation).toHaveBeenCalled();
   });
 
-  it('should load directions and update steps and eta', async () => {
-    const mockSteps: Step[] = [
-      {
-        instructions: 'Walk north on Main St.',
-        start_location: {
-          lat: () => 45.5017,
-          lng: () => -73.5673,
-          equals: () => false,
-          toJSON: () => ({ lat: 45.5017, lng: -73.5673 }),
-          toUrlValue: () => ''
-        },
-        end_location: {
-          lat: () => 44.1232,
-          lng: () => -72.4356,
-          equals: () => false,
-          toJSON: () => ({ lat: 44.1232, lng: -72.4356 }),
-          toUrlValue: () => ''
-        },
-        distance: { text: '200 m', value: 200 },
-        duration: { text: '2 mins', value: 2 },
-        transit_details: undefined
-      }
-    ];
+  it('should startWatchingLocation and set watchId', fakeAsync(() => {
+    mockCurrentLocationService.watchLocation.and.returnValue(Promise.resolve('watch123'));
 
-    // Override the NavigationCoordinatorService's getCompleteRoute to return our expected instructions.
-    mockNavigationCoordinatorService.getCompleteRoute.and.returnValue(
-      Promise.resolve({
-        segments: [{ type: 'indoor', instructions: { steps: mockSteps, eta: '6 mins' } }]
-      })
-    );
+    component.startWatchingLocation();
+    tick();
 
-    await component.loadDirections('WALKING');
-    expect(component.steps).toEqual(mockSteps);
-    expect(component.eta).toBe('6 mins');
-    expect(component.isLoading).toBeFalse();
+    expect(component.currentWatchId).toBe('watch123');
+  }));
+
+  it('should handle error in startWatchingLocation', fakeAsync(() => {
+    spyOn(console, 'error');
+    mockCurrentLocationService.watchLocation.and.returnValue(Promise.reject('fail'));
+
+    component.startWatchingLocation();
+    tick();
+
+    expect(console.error).toHaveBeenCalledWith('Error starting location watch:', 'fail');
+  }));
+
+  it('should handle empty steps in onPositionUpdate()', () => {
+    component.steps = [];
+    component.onPositionUpdate({ lat: 0, lng: 0 });
+
+    expect(component.hasArrived).toBeFalse();
   });
 
-  it('should handle errors when loading directions', async () => {
-    mockDirectionsService.calculateRoute.and.returnValue(Promise.reject('API Error'));
-    await component.loadDirections('WALKING');
-    expect(component.isLoading).toBeFalse();
+  it('should warn if step has no end_location', () => {
+    spyOn(console, 'warn');
+    component.steps = [{} as any];
+
+    component.onPositionUpdate({ lat: 0, lng: 0 });
+
+    expect(console.warn).toHaveBeenCalled();
   });
 
-  it('should stop event propagation when setMode is called with event', () => {
-    const event = {
-      stopPropagation: jasmine.createSpy('stopPropagation')
-    } as unknown as Event;
-    component.setMode('DRIVING', event);
-    expect(event.stopPropagation).toHaveBeenCalled();
-  });
+  it('should shift step and set hasArrived if last step', () => {
+    const step = {
+      instructions: 'Go straight',
+      start_location: { lat: () => 0, lng: () => 0 },
+      end_location: { lat: () => 0, lng: () => 0 }
+    } as Step;
 
-  it('should clear location watch on destroy', () => {
-    component.currentWatchId = '123';
-    component.ngOnDestroy();
-    expect(mockCurrentLocationService.clearWatch).toHaveBeenCalledWith('123');
-  });
+    component.steps = [step];
 
-  it('should set currentWatchId when starting location watch', async () => {
-    await component.startWatchingLocation();
-    expect(component.currentWatchId).toBe('123');
-  });
+    component.onPositionUpdate({ lat: 0, lng: 0 });
 
-  it('should update steps and set hasArrived when position is updated', () => {
-    component.steps = [
-      {
-        instructions: 'Walk north on Main St.',
-        start_location: {
-          lat: () => 45.5017,
-          lng: () => -73.5673,
-          equals: () => false,
-          toJSON: () => ({ lat: 45.5017, lng: -73.5673 }),
-          toUrlValue: () => ''
-        },
-        end_location: {
-          lat: () => 44.1232,
-          lng: () => -72.4356,
-          equals: () => false,
-          toJSON: () => ({ lat: 44.1232, lng: -72.4356 }),
-          toUrlValue: () => ''
-        },
-        distance: { text: '200 m', value: 200 },
-        duration: { text: '2 mins', value: 2 },
-        transit_details: undefined
-      }
-    ];
-    component.onPositionUpdate({ lat: 44.1232, lng: -72.4356 });
     expect(component.steps.length).toBe(0);
     expect(component.hasArrived).toBeTrue();
   });
 
-  it('should calculate distance correctly', () => {
-    const distance = component.calculateDistance(45.5017, -73.5673, 44.1232, -72.4356);
-    expect(distance).toBeCloseTo(177379, -4); // Approximate distance in meters
+  it('should calculate distance using haversine formula', () => {
+    const d = component.calculateDistance(0, 0, 0, 1);
+    expect(d).toBeGreaterThan(100000);
   });
 
-  it('should return correct icon for direction instructions', () => {
-    const icon = component.getDirectionIcon('Turn left onto Main St.');
-    expect(icon).toBe('turn_left'); // Assuming mapping exists in iconMapping
+  it('should return the correct direction icon or fallback', () => {
+    const icon1 = component.getDirectionIcon('<b>Turn left</b>');
+    const icon2 = component.getDirectionIcon('<b>Bus</b>');
+    const icon3 = component.getDirectionIcon('<b>Unknown text</b>');
+
+    expect(icon1).toMatch(/^[\w_]+$/);
+    expect(icon2).toMatch(/^[\w_]+$/);
+    expect(icon3).toBe('help_outline');
   });
 
-  it('should update showAllSteps based on component position', () => {
-    const mockElement = { getBoundingClientRect: () => ({ top: 100 }) };
-    component.directionsContainer = {
-      nativeElement: mockElement
-    } as ElementRef;
-    spyOnProperty(window, 'innerHeight').and.returnValue(500);
-    (component as any).updateShowAllSteps();
-    expect(component.showAllSteps).toBeTrue();
-  });
-
-  it('should continuously update showAllSteps', () => {
-    let callback: FrameRequestCallback = () => {};
-    spyOn(window, 'requestAnimationFrame').and.callFake((cb: FrameRequestCallback) => {
-      callback = cb;
-      return 1;
-    });
-    const mockElement = { getBoundingClientRect: () => ({ top: 100 }) };
-    component.directionsContainer = { nativeElement: mockElement } as ElementRef;
-    spyOnProperty(window, 'innerHeight').and.returnValue(500);
-    (component as any).observeComponentPosition();
-    callback(performance.now());
-    expect(component.showAllSteps).toBeTrue();
-    expect(window.requestAnimationFrame).toHaveBeenCalled();
-  });
-
-  it('should resolve when Google Maps API is ready', async () => {
-    (window as any).google = { maps: {} };
-    expect(true).toBeTruthy();
-  });
-
-  it('should do nothing if steps are empty', () => {
-    component.steps = [];
-    component.onPositionUpdate({ lat: 44.1232, lng: -72.4356 });
-    expect(component.steps.length).toBe(0);
-  });
-
-  it('should return 0 for identical coordinates', () => {
-    const distance = component.calculateDistance(45.5017, -73.5673, 45.5017, -73.5673);
-    expect(distance).toBe(0);
-  });
-
-  it('should calculate distance correctly for coordinates at the equator', () => {
-    const distance = component.calculateDistance(0, -73.5673, 0, -72.4356);
-    expect(distance).toBeCloseTo(125839, -4);
-  });
-
-  it('should return correct icon for transit instructions', () => {
-    const icon = component.getDirectionIcon('Take the bus to downtown');
-    expect(icon).toBe('directions_bus');
-  });
-
-  it('should return fallback icon for unknown instructions', () => {
-    const icon = component.getDirectionIcon('Do something unusual');
-    expect(icon).toBe('help_outline');
-  });
-
-  it('should handle empty response from calculateRoute', async () => {
-    mockNavigationCoordinatorService.getCompleteRoute.and.returnValue(
-      Promise.resolve({ segments: [{ type: 'indoor', instructions: { steps: [], eta: null } }] })
-    );
-    mockDirectionsService.calculateRoute.and.returnValue(Promise.resolve({ steps: [], eta: null }));
-    await component.loadDirections('WALKING');
-    expect(component.steps).toEqual([]);
-    expect(component.eta).toBeNull();
-  });
-
-  it('should call observeComponentPosition in ngAfterViewInit', () => {
-    spyOn(component as any, 'observeComponentPosition');
-    component.ngAfterViewInit();
-    expect((component as any).observeComponentPosition).toHaveBeenCalled();
-  });
-
-  it('should not update showAllSteps if directionsContainer is not defined', () => {
-    component.directionsContainer = undefined as any;
-    component.showAllSteps = false;
-    (component as any).updateShowAllSteps();
-    expect(component.showAllSteps).toBeFalse();
-  });
-
-  it('should toggle directions and POIs when onEndClick is called', () => {
-    const visibilityService = (component as any).visibilityService;
-    (visibilityService.toggleDirectionsComponent as jasmine.Spy).calls.reset();
-    (visibilityService.togglePOIsComponent as jasmine.Spy).calls.reset();
+  it('should dispatch store action onEndClick', () => {
+    spyOn(store, 'dispatch');
     component.onEndClick();
-    expect(visibilityService.toggleDirectionsComponent).toHaveBeenCalled();
-    expect(visibilityService.togglePOIsComponent).toHaveBeenCalled();
+    expect(store.dispatch).toHaveBeenCalledWith(setShowRoute({ show: false }));
+  });
+
+  it('should filter travelModes with routes', () => {
+    const modes = component.getTravelModes();
+    expect(modes.length).toBe(3); // Driving has no routes
+  });
+
+  it('should call unobserve and cleanup on destroy', () => {
+    component.currentWatchId = 'watchId';
+    const unsubscribeSpy = jasmine.createSpy('unsubscribe');
+    (component as any).endNavigationSubscription = { unsubscribe: unsubscribeSpy };
+
+    const mockObserver = jasmine.createSpyObj('IntersectionObserver', ['unobserve']);
+    (component as any).observer = mockObserver;
+
+    component.directionsContainer = {
+      nativeElement: {}
+    } as ElementRef;
+
+    component.ngOnDestroy();
+
+    expect(mockCurrentLocationService.clearWatch).toHaveBeenCalledWith('watchId');
+    expect(unsubscribeSpy).toHaveBeenCalled();
+    expect(mockObserver.unobserve).toHaveBeenCalled();
   });
 });

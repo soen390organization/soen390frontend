@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { Location } from 'src/app/interfaces/location.interface';
-import { DirectionsService } from 'src/app/services/directions/directions.service';
+import { OutdoorDirectionsService } from 'src/app/services/outdoor-directions/outdoor-directions.service';
 
 @Component({
   selector: 'app-location-cards',
@@ -12,8 +12,9 @@ import { DirectionsService } from 'src/app/services/directions/directions.servic
 export class LocationCardsComponent {
   @Input() locations: Location[] = [];
   @Input() loading: boolean = false;
+  @Output() locationSelected = new EventEmitter<Location>();
 
-  constructor(private readonly directionsService: DirectionsService) {}
+  constructor(private readonly outdoorDirectionsService: OutdoorDirectionsService) {}
 
   onImageError(event: Event) {
     const imgElement = event.target as HTMLImageElement;
@@ -22,11 +23,13 @@ export class LocationCardsComponent {
   }
 
   setDestination(location: any) {
-    this.directionsService.setDestinationPoint({
+    this.outdoorDirectionsService.clearNavigation();
+    this.outdoorDirectionsService.setDestinationPoint({
       title: location.title,
       coordinates: location.coordinates,
       address: location.address,
       type: 'outdoor'
     });
+    this.locationSelected.emit(location);
   }
 }

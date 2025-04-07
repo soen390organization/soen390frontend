@@ -1,12 +1,15 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { HomePage } from './home.page';
 import { provideMockStore, MockStore } from '@ngrx/store/testing';
-import { MapType } from 'src/app/store/app';
+import { MapType, selectCurrentMap } from 'src/app/store/app';
+import { Router } from '@angular/router';
+import { EventEmitter } from '@angular/core';
 
 describe('HomePage', () => {
   let component: HomePage;
   let fixture: ComponentFixture<HomePage>;
   let store: MockStore;
+  let routerSpy: jasmine.SpyObj<Router>;
   const initialState = {
     app: {
       selectedCampus: 'sgw',
@@ -15,9 +18,10 @@ describe('HomePage', () => {
   };
 
   beforeEach(async () => {
+    routerSpy = jasmine.createSpyObj('Router', ['navigate']);
     await TestBed.configureTestingModule({
       declarations: [HomePage],
-      providers: [provideMockStore({ initialState })]
+      providers: [provideMockStore({ initialState }), { provide: Router, useValue: routerSpy }]
     }).compileComponents();
 
     store = TestBed.inject(MockStore);
@@ -81,16 +85,13 @@ describe('HomePage', () => {
     });
   });
 
-  describe('Search state tests', () => {
-    it('should toggle search visibility', () => {
-      // Initially false
-      expect(component.isSearchVisible).toBeFalse();
-
-      component.showSearch();
-      expect(component.isSearchVisible).toBeTrue();
-
-      component.hideSearch();
-      expect(component.isSearchVisible).toBeFalse();
+  describe('Navigation and other methods', () => {
+    it('should navigate to profile page when openUserInfoPage is called', () => {
+      // Initially, loading is true.
+      expect(component.loading).toBeTrue();
+      component.openUserInfoPage();
+      expect(component.loading).toBeFalse();
+      expect(routerSpy.navigate).toHaveBeenCalledWith(['profile']);
     });
   });
 });

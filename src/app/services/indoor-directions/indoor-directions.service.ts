@@ -1,92 +1,84 @@
 import { Injectable } from '@angular/core';
-import { filter, firstValueFrom } from 'rxjs';
-import { map } from 'rxjs/operators';
 import { MappedinService } from '../mappedin/mappedin.service';
-import { Door, MapData, MapView } from '@mappedin/mappedin-js';
-import { BehaviorSubject, Observable } from 'rxjs';
 import { MappedInLocation } from 'src/app/interfaces/mappedin-location.interface';
+import { DirectionsService } from '../abstract-directions.service';
+import {
+  IndoorDifferentBuildingStrategy,
+  IndoorSameBuildingStrategy
+} from 'src/app/strategies/indoor-directions';
+import { firstValueFrom, BehaviorSubject } from 'rxjs';
+import { AbstractIndoorStrategy } from 'src/app/strategies/indoor-directions/abstract-indoor.strategy';
 
+/**
+ * Service for handling indoor directions using the Mappedin system.
+ *
+ * This service extends the abstract DirectionsService with a MappedInLocation type and
+ * provides functionality to retrieve entrances for start and destination points, generate
+ * navigation directions, and render these directions on the map view.
+ */
 @Injectable({
   providedIn: 'root'
 })
-export class IndoorDirectionsService {
-  constructor(private mappedinService: MappedinService) {}
-
-  private startRoom$ = new BehaviorSubject<MappedInLocation | null>(null);
-  private destinationRoom$ = new BehaviorSubject<MappedInLocation | null>(null);
-
-  public setStartPoint(room: any): void {
-    this.startRoom$.next(room);
-  }
-
-  public getStartPoint(): Observable<any | null> {
-    return this.startRoom$.asObservable();
-  }
-
-  public getStartPointEntrances(): Promise<Door[] | null> {
-    return firstValueFrom(this.startRoom$).then((room) => {
-      if (room) {
-        const mapData: MapData = this.mappedinService.getCampusMapData()[room.indoorMapId].mapData;
-        return mapData.getByType('door').filter((door) => door.name === 'Door');
-      }
-      return null;
-    });
-  }
-
-  public setDestinationPoint(room: any): void {
-    this.destinationRoom$.next(room);
-  }
-
-  public getDestinationPoint(): Observable<any | null> {
-    return this.destinationRoom$.asObservable();
-  }
-
-  public async getDestinationPointEntrances(): Promise<Door[] | null> {
-    const room = await firstValueFrom(this.destinationRoom$);
-    if (room) {
-      const mapData: MapData = this.mappedinService.getCampusMapData()[room.indoorMapId].mapData;
-      return mapData.getByType('door').filter((door) => door.name === 'Door');
-    }
-    return null;
-  }
-
-  public clearStartPoint(): void {
-    this.startRoom$.next(null);
-    this.mappedinService.clearNavigation();
-  }
-
-  public clearDestinationPoint(): void {
-    this.destinationRoom$.next(null);
-    this.mappedinService.clearNavigation();
-  }
+export class IndoorDirectionsService extends DirectionsService<MappedInLocation> {
+  public selectedStrategySubject = new BehaviorSubject<AbstractIndoorStrategy>(null);
 
   /**
-   * Ensure that your map has been fully initialized before calling this method.
+   * Creates an instance of IndoorDirectionsService.
+   *
+   * @param mappedinService - An instance of MappedinService for accessing map data and view.
    */
-  public async navigate(startRoom: any, destinationRoom: any): Promise<void> {
-    const mapData: MapData = await firstValueFrom(this.mappedinService.getMapData());
-    const mapView: MapView = this.mappedinService.mapView;
+  constructor(
+    private readonly mappedinService: MappedinService,
+    private readonly indoorSameBuildingStrategy: IndoorSameBuildingStrategy,
+    private readonly indoorDifferentBuildingStrategy: IndoorDifferentBuildingStrategy
+  ) {
+    super();
+  }
 
-    if (!mapData || !startRoom || !destinationRoom) {
-      return console.error('Missing mapData/start/destination', {
-        mapData,
-        startRoom,
-        destinationRoom
-      });
+  // Make observable
+  public getSelectedStrategy$() {
+    return this.selectedStrategySubject.asObservable();
+  }
+
+  public async getSelectedStrategy() {
+    return await firstValueFrom(this.getSelectedStrategy$());
+  }
+
+  public setSelectedStrategy(strategy: AbstractIndoorStrategy) {
+    this.selectedStrategySubject.next(strategy);
+  }
+
+  public async getInitializedRoutes() {
+    // Grab origin from StartPoint & destination from DestinationPoint
+    const [origin, destination] = await Promise.all([
+      await this.getStartPoint(),
+      await this.getDestinationPoint()
+    ]);
+
+    // Load all Strategies
+    const [sameBuildingStrategy, differentBuildingStrategy] = await Promise.all([
+      await this.indoorSameBuildingStrategy.getRoutes(origin, destination),
+      await this.indoorDifferentBuildingStrategy.getRoutes(origin, destination)
+    ]);
+
+    if (origin?.indoorMapId === destination?.indoorMapId) {
+      return sameBuildingStrategy;
     }
+    return differentBuildingStrategy;
+  }
 
-    const directions = mapData.getDirections(startRoom, destinationRoom);
-    if (!directions) {
-      return console.error('Unable to generate directions between rooms', {
-        startRoom,
-        destinationRoom
-      });
-    }
+  public async renderNavigation() {
+    (await this.getSelectedStrategy()).renderRoutes();
+  }
 
-    try {
-      mapView.Navigation.draw(directions);
-    } catch (err) {
-      console.error('Error drawing navigation route:', err);
+  public async clearNavigation(): Promise<void> {
+    const mapView = this.mappedinService.mapView;
+    if (mapView?.Navigation?.clear instanceof Function) {
+      try {
+        mapView.Navigation.clear();
+      } catch (error) {
+        console.error('Error clearing indoor navigation:', error);
+      }
     }
   }
 }
