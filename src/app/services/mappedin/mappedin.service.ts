@@ -1,10 +1,9 @@
 // mappedin.service.ts
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, firstValueFrom, Observable, take } from 'rxjs';
-import { getMapData, show3dMap, MapData, MapView, DOORS } from '@mappedin/mappedin-js';
+import { BehaviorSubject, firstValueFrom, Observable } from 'rxjs';
+import { getMapData, MapData, MapView } from '@mappedin/mappedin-js';
 import { ConcordiaDataService } from 'src/app/services/concordia-data.service';
 import { environment } from 'src/environments/environment';
-import { map } from 'cypress/types/bluebird';
 import { MapViewBuilder } from 'src/app/builders/map-view.builder';
 import { MappedInLocation } from 'src/app/interfaces/mappedin-location.interface';
 
@@ -109,7 +108,7 @@ export class MappedinService {
     this.mapId = mapId;
 
     this.mapView = await new MapViewBuilder()
-      .setContainer(this.mappedInContainer!)
+      .setContainer(this.mappedInContainer)
       .setMapData(mapData)
       .build();
 

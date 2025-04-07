@@ -2,7 +2,6 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { take } from 'rxjs';
 import { ConcordiaDataService } from 'src/app/services/concordia-data.service';
 import { MappedinService } from 'src/app/services/mappedin/mappedin.service';
 import { selectSelectedCampus } from 'src/app/store/app';

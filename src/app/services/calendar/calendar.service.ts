@@ -5,7 +5,6 @@ import { getAuth, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { ConcordiaDataService } from 'src/app/services/concordia-data.service';
 import { EventInfo } from 'src/app/interfaces/event-info.interface';
 import { EventType } from 'src/app/enums/event-type.enum';
-import { GoogleMapLocation } from 'src/app/interfaces/google-map-location.interface';
 import { MappedinService } from '../mappedin/mappedin.service';
 
 @Injectable({
@@ -120,7 +119,7 @@ export class CalendarService {
       const locationItemsPromises = data.items.map((event) => this.transformEvent(event));
       const locationItems = await Promise.all(locationItemsPromises);
       this.previouslyFetchedEvents[calendarId] = locationItems;
-      return locationItems || [];
+      return locationItems ?? [];
     } catch (error) {
       console.error('Error fetching Google Calendar events:', error);
       return [];
@@ -131,7 +130,7 @@ export class CalendarService {
     const eventType = event.summary.split(' ')[1] ?? 'LEC';
     // Process the location information
     const roomInfo = this.getRoomInfo(event.location);
-    const buildingData = this.convertClassToAddress(roomInfo.buildingCode || event.location);
+    const buildingData = this.convertClassToAddress(roomInfo.buildingCode ?? event.location);
     // Clone the coordinates if they exist to ensure we have a proper LatLng object
     const googleCoords = buildingData.coordinates
       ? new google.maps.LatLng(buildingData.coordinates.lat(), buildingData.coordinates.lng())

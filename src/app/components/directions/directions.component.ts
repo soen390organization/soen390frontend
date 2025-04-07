@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+import { Component, OnDestroy, ViewChild, ElementRef } from '@angular/core';
 import { Step } from 'src/app/interfaces/step.interface';
 import { CurrentLocationService } from 'src/app/services/current-location/current-location.service';
 import { OutdoorDirectionsService } from 'src/app/services/outdoor-directions/outdoor-directions.service';
