@@ -40,7 +40,6 @@ describe('PlacesService', () => {
     service = TestBed.inject(PlacesService);
     mappedinService = TestBed.inject(MappedinService) as jasmine.SpyObj<MappedinService>;
 
-    service['placesServiceReady'] = new BehaviorSubject<boolean>(false);
     mapMock = jasmine.createSpyObj('google.maps.Map', ['setCenter', 'setZoom']);
     placesServiceMock = jasmine.createSpyObj('PlacesService', ['nearbySearch']);
     service['placesService'] = placesServiceMock;
@@ -521,13 +520,11 @@ describe('PlacesService', () => {
 
   describe('isInitialized', () => {
     it('should emit initialization status changes', (done) => {
-      service['placesServiceReady'] = new BehaviorSubject<boolean>(false);
-
       const emitted: boolean[] = [];
       service.isInitialized().subscribe((status) => {
         emitted.push(status);
         if (emitted.length === 2) {
-          expect(emitted).toEqual([false, true]);
+          expect(emitted).toEqual([true, true]);
           done();
         }
       });
@@ -547,7 +544,7 @@ describe('PlacesService', () => {
         }
       );
       await expectAsync(service['getPlaces'](mockLocation, 250, 'restaurant')).toBeRejectedWith(
-        'ZERO_RESULTS'
+        Error('error in getPlaces(): ZERO_RESULTS')
       );
     });
   });

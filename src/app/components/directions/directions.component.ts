@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+import { Component, OnDestroy, ViewChild, ElementRef } from '@angular/core';
 import { Step } from 'src/app/interfaces/step.interface';
 import { CurrentLocationService } from 'src/app/services/current-location/current-location.service';
 import { OutdoorDirectionsService } from 'src/app/services/outdoor-directions/outdoor-directions.service';
@@ -39,11 +39,11 @@ export class DirectionsComponent implements OnDestroy {
   currentRouteData: { eta: string | null; distance: number } | null = null;
 
   private readonly stepCompletionThreshold = 30;
-  private observer!: IntersectionObserver;
+  private readonly observer!: IntersectionObserver;
 
   constructor(
     private readonly store: Store,
-    public outdoorDirectionsService: OutdoorDirectionsService,
+    public readonly outdoorDirectionsService: OutdoorDirectionsService,
     public readonly outdoorWalkingStrategy: OutdoorWalkingStrategy,
     public readonly outdoorDrivingStrategy: OutdoorDrivingStrategy,
     public readonly outdoorTransitStrategy: OutdoorTransitStrategy,

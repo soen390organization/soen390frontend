@@ -8,10 +8,6 @@ import { GoogleMapLocation } from '../interfaces/google-map-location.interface';
 import { MappedInLocation } from '../interfaces/mappedin-location.interface';
 import { Store } from '@ngrx/store';
 import { setMapType, MapType } from 'src/app/store/app';
-import { IndoorDirectionsService } from './indoor-directions/indoor-directions.service';
-import { OutdoorDirectionsService } from './outdoor-directions/outdoor-directions.service';
-import { CurrentLocationService } from './current-location/current-location.service';
-import { PlacesService } from './places/places.service';
 import { MappedinService } from './mappedin/mappedin.service';
 
 @Injectable({
@@ -19,16 +15,12 @@ import { MappedinService } from './mappedin/mappedin.service';
 })
 export class NavigationCoordinatorService {
   // Global observable that emits a new route when any of the location points update.
-  public globalRoute$: Observable<CompleteRoute>;
+  public readonly globalRoute$: Observable<CompleteRoute>;
 
   constructor(
     private readonly store: Store,
     private readonly outdoorStrategy: OutdoorRoutingStrategy,
     private readonly indoorStrategy: IndoorRoutingStrategy,
-    private readonly outdoorDirectionsService: OutdoorDirectionsService,
-    private readonly indoorDirectionService: IndoorDirectionsService,
-    private readonly currentLocationService: CurrentLocationService,
-    private readonly placesService: PlacesService,
     private readonly mappedInService: MappedinService
   ) {
     // Combine the four observables (outdoor start/destination and indoor start/destination)
@@ -59,11 +51,7 @@ export class NavigationCoordinatorService {
 
     let segment: RouteSegment;
     if (start.type === 'outdoor' && destination.type === 'outdoor') {
-      segment = await this.outdoorStrategy.getRoute(
-        start as GoogleMapLocation,
-        destination as GoogleMapLocation,
-        mode
-      );
+      segment = await this.outdoorStrategy.getRoute(start, destination, mode);
     } else if (start.type === 'indoor' && destination.type === 'indoor') {
       segment = await this.indoorStrategy.getRoute(
         start as MappedInLocation,
