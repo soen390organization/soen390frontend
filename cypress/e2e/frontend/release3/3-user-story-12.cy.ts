@@ -19,12 +19,13 @@ describe('Google Maps InfoWindow opens after clicking Hall marker', () => {
   });
 
   it('should display building info when clicking the Hall Building marker', () => {
-    // Wait for and click the advanced marker element near the Hall Building
-    cy.get('gmp-advanced-marker[aria-label="Your Location"]', { timeout: 10000 }).should('exist');
-    cy.wait(1000);
-    cy.get('gmp-advanced-marker[aria-label="Your Location"]').click({ force: true });
+    cy.get('.material-symbols-outlined').contains('search').click();
 
-    cy.wait(1000); // wait for InfoWindow to render
+    cy.get('input[placeholder="Choose starting point..."]').clear().type('Hall Building');
+    cy.wait(2000);
+    cy.contains('Hall Building').click();
+    cy.wait(2000);
+    cy.get('[data-marker-id="start-marker"]').should('have.length', 1).click(10, 10); // X and Y coordinates in pixels from top-left
 
     // Assert content of the InfoWindow
     cy.get('div[role="dialog"].gm-style-iw')

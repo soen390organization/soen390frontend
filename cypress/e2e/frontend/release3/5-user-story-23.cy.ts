@@ -22,7 +22,7 @@ describe('Indoor route with accessibility toggle from H 281 to H 131', () => {
     cy.wait(1000);
 
     // Clear default start location
-    cy.get('input[placeholder="Choose starting point..."]').parent().find('button').click();
+    cy.get('input[placeholder="Choose starting point..."]').click();
     cy.wait(1000);
 
     // Set Start: H 281

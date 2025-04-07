@@ -22,7 +22,7 @@ describe('Hybrid indoor-outdoor route from H 281 to MB 5.457', () => {
     cy.wait(1000);
 
     // Clear default start
-    cy.get('input[placeholder="Choose starting point..."]').parent().find('button').click();
+    cy.get('input[placeholder="Choose starting point..."]').click();
     cy.wait(1000);
 
     // Start: H 281

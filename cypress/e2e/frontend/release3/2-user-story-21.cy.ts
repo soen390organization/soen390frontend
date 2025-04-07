@@ -22,7 +22,7 @@ describe('Indoor directions to a POI (Bathroom)', () => {
     cy.wait(1000);
 
     // Clear default start location
-    cy.get('input[placeholder="Choose starting point..."]').parent().find('button').click();
+    cy.get('input[placeholder="Choose starting point..."]').click();
     cy.wait(1000);
 
     // Type and select Hall 281 as start
