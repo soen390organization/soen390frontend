@@ -44,6 +44,14 @@ export class CalendarService {
    * Initiates Google Sign-In and fetches calendars.
    */
   async signInWithGoogle(): Promise<boolean> {
+    if ((window as any).Cypress) {
+      // Cypress Test Mode
+      this.accessToken = 'mock-access-token';
+      const calendars = await this.getUserCalendars();
+      this.calendarsSubject.next(calendars);
+      this.setSelectedCalendar(calendars[0].id);
+      return true;
+    }
     try {
       const result = await signInWithPopup(this.auth, this.googleProvider);
       const credential = GoogleAuthProvider.credentialFromResult(result);

@@ -1,0 +1,14 @@
+{
+  "items": [
+    {
+      "id": "concordia-classes",
+      "summary": "Concordia Class Schedule",
+      "backgroundColor": "#4285F4"
+    },
+    {
+      "id": "personal",
+      "summary": "Personal",
+      "backgroundColor": "#F4B400"
+    }
+  ]
+}

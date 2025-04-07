@@ -32,6 +32,7 @@ describe('Map - Highlight Current Building with Polygon', () => {
     cy.get('.material-symbols-outlined').contains('search').click();
 
     // Click the "Use Current Location" button
+    cy.get('input[placeholder="Choose starting point..."]').click();
     cy.get('.material-symbols-outlined').contains('my_location').click();
 
     // Verify that a pin appears on the map (marker for the current location)

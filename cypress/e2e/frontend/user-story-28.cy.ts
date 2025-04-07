@@ -35,12 +35,10 @@ describe('Map - Directions and Route Generation', () => {
     cy.wait(2000);
 
     // Click the handle bar using the provided class.
-    cy.get(
-      '.w-\\[100px\\].h-\\[10px\\].bg-\\[\\#d5d5d5\\].my-\\[10px\\].mx-auto.rounded-full.cursor-pointer',
-      { timeout: 10000 }
-    )
+    cy.get('.w-\\[120px\\].h-\\[10px\\].bg-\\[\\#d5d5d5\\]', { timeout: 5000 })
       .should('be.visible')
       .click();
+    cy.wait(2000);
 
     cy.wait(2000);
 
@@ -61,13 +59,10 @@ describe('Map - Directions and Route Generation', () => {
 
     // Verify that the directions component disappears.
     cy.get('app-directions').should('not.exist');
-
-    cy.get(
-      '.w-\\[100px\\].h-\\[10px\\].bg-\\[\\#d5d5d5\\].my-\\[10px\\].mx-auto.rounded-full.cursor-pointer',
-      { timeout: 10000 }
-    )
+    cy.get('.w-\\[120px\\].h-\\[10px\\].bg-\\[\\#d5d5d5\\]', { timeout: 5000 })
       .should('be.visible')
       .click();
+    cy.wait(2000);
 
     cy.wait(2000);
   });
