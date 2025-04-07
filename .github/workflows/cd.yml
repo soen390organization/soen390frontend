@@ -4,6 +4,12 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Deploy branch'
+        required: true
+        default: 'staging'
 
 jobs:
   build:
@@ -17,6 +23,8 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.branch || 'main' }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
@@ -32,7 +40,6 @@ jobs:
             firebaseConfig: {
               apiKey: '${{ secrets.FIREBASE_API_KEY }}',
               authDomain: '${{ secrets.FIREBASE_AUTH_DOMAIN }}',
-              databaseURL: '${{ secrets.FIREBASE_DB_URL }}',
               projectId: '${{ secrets.FIREBASE_PID }}',
               storageBucket: '${{ secrets.FIREBASE_STORAGE_BUCKET }}',
               messagingSenderId: '${{ secrets.FIREBASE_MESSENGER_SENDER_ID }}',
