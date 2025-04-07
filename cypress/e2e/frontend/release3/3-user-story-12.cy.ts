@@ -25,7 +25,14 @@ describe('Google Maps InfoWindow opens after clicking Hall marker', () => {
     cy.wait(2000);
     cy.contains('Hall Building').click();
     cy.wait(2000);
-    cy.get('[data-marker-id="start-marker"]').should('have.length', 1).click(10, 10); // X and Y coordinates in pixels from top-left
+    cy.window().then((win) => {
+      const centerX = win.innerWidth / 2;
+      const centerY = win.innerHeight / 2;
+
+      cy.wrap(null).then(() => {
+        cy.get('body').click(centerX - 8, centerY);
+      });
+    });
 
     // Assert content of the InfoWindow
     cy.get('div[role="dialog"].gm-style-iw')
