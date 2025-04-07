@@ -15,35 +15,43 @@ describe('Google Maps InfoWindow opens after clicking Hall marker', () => {
       }
     });
 
-    cy.wait(5000); // wait for map + markers to load
+    cy.wait(1000); // wait for map + markers to load
   });
 
   it('should display building info when clicking the Hall Building marker', () => {
-    // Wait for and click the advanced marker element near the Hall Building
-    cy.get('gmp-advanced-marker[aria-label="Your Location"]', { timeout: 10000 }).should('exist');
-    cy.wait(5000);
-    cy.get('gmp-advanced-marker[aria-label="Your Location"]').click({ force: true });
+    cy.get('.material-symbols-outlined').contains('search').click();
 
-    cy.wait(5000); // wait for InfoWindow to render
+    cy.get('input[placeholder="Choose starting point..."]').clear().type('Hall Building');
+    cy.wait(2000);
+    cy.contains('Hall Building').click();
+    cy.wait(2000);
+    cy.window().then((win) => {
+      const centerX = win.innerWidth / 2;
+      const centerY = win.innerHeight / 2;
+
+      cy.wrap(null).then(() => {
+        cy.get('body').click(centerX - 8, centerY);
+      });
+    });
 
     // Assert content of the InfoWindow
     cy.get('div[role="dialog"].gm-style-iw')
       .should('be.visible')
       .within(() => {
-        cy.wait(5000);
+        cy.wait(1000);
         cy.get('#buildingName').should('contain.text', 'Hall');
-        cy.wait(5000);
+        cy.wait(1000);
         cy.get('#buildingAddress').should('contain.text', '1455 Blvd. De Maisonneuve');
-        cy.wait(5000);
+        cy.wait(1000);
         cy.get('#buildingFaculties').within(() => {
           cy.contains('Gina Cody School').should('exist');
-          cy.wait(5000);
+          cy.wait(1000);
           cy.contains('Faculty of Arts and Science').should('exist');
         });
-        cy.wait(5000);
+        cy.wait(1000);
         cy.get('#buildingAccessibility').should('have.attr', 'src').and('include', 'icons8');
       });
 
-    cy.wait(5000); // allow Cypress recording to show result
+    cy.wait(1000); // allow Cypress recording to show result
   });
 });
