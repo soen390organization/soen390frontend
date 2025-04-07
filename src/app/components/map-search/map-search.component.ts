@@ -151,6 +151,13 @@ export class MapSearchComponent implements OnInit {
     if (this.isSearchVisible) {
       HomePage.prototype.showSearch();
     } else {
+      // When hiding search, check if either input is empty and clear it
+      if (this.startLocationInput.trim() === '') {
+        this.clearStartInput();
+      }
+      if (this.destinationLocationInput.trim() === '') {
+        this.clearDestinationInput();
+      }
       HomePage.prototype.hideSearch();
     }
   }
