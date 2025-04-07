@@ -22,15 +22,14 @@ export class ApiService {
       isUnique = !snapshot.exists();
     }
 
-    return <string>uniqueId;
+    return uniqueId;
   }
 
   public async updateOrCreate(route: string, data: any) {
     try {
       // Generate a unique ID if data.id is null or undefined
-      if (!data.id) {
-        data.id = await this.generateUniqueId(route);
-      }
+
+      data.id ??= await this.generateUniqueId(route);
 
       const { id, ...dataWithoutId } = data;
       const dataRef = ref(database, `${route}/${id}`);

@@ -1,17 +1,13 @@
 import { Injectable } from '@angular/core';
 import { RoutingStrategy, RouteSegment } from '../interfaces/routing-strategy.interface';
 import { MappedInLocation } from '../interfaces/mappedin-location.interface';
-import { IndoorDirectionsService } from '../services/indoor-directions/indoor-directions.service';
 import { MappedinService } from '../services/mappedin/mappedin.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class IndoorRoutingStrategy implements RoutingStrategy {
-  constructor(
-    private indoorDirectionsService: IndoorDirectionsService,
-    private mappedInService: MappedinService
-  ) {}
+  constructor(private readonly mappedInService: MappedinService) {}
 
   async getRoute(
     start: MappedInLocation,

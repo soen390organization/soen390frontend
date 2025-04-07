@@ -1,13 +1,12 @@
 import { Injectable } from '@angular/core';
 import { RoutingStrategy, RouteSegment } from '../interfaces/routing-strategy.interface';
 import { GoogleMapLocation } from '../interfaces/google-map-location.interface';
-import { OutdoorDirectionsService } from '../services/outdoor-directions/outdoor-directions.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class OutdoorRoutingStrategy implements RoutingStrategy {
-  constructor(private readonly outdoorDirectionsService: OutdoorDirectionsService) {}
+  constructor() {}
 
   async getRoute(
     start: GoogleMapLocation,

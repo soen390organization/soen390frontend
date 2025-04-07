@@ -87,7 +87,7 @@ export class ConcordiaDataService {
     let map = new Map<string, { lat: string; lng: string }>();
     Object.values(data).forEach((campus) => {
       campus.buildings.forEach((building) => {
-        var coordsObj = { lat: building.coordinates.lat, lng: building.coordinates.lng };
+        let coordsObj = { lat: building.coordinates.lat, lng: building.coordinates.lng };
         map[building.abbreviation] = coordsObj;
       });
     });
