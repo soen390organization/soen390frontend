@@ -8,9 +8,7 @@ export class GoogleMapService {
   private map!: google.maps.Map;
   private googlePlacesService!: google.maps.places.PlacesService;
 
-  constructor(
-    private readonly placesService: PlacesService
-  ) {}
+  constructor(private readonly placesService: PlacesService) {}
 
   initialize(map: google.maps.Map) {
     this.map = map;

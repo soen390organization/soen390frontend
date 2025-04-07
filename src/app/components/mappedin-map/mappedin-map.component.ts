@@ -28,27 +28,31 @@ export class MappedinMapComponent implements AfterViewInit {
     private readonly indoorDirectionsService: IndoorDirectionsService
   ) {}
 
-  async ngAfterViewInit(): Promise<void> {
+  ngAfterViewInit(): void {
     if (this.mappedinContainer) {
-      try {
-        await this.mappedinService.initialize(this.mappedinContainer.nativeElement);
-        this.initialized.emit();
-      } catch (error) {
-        console.error('Error initializing mappedin map or computing route:', error);
-      }
+      (async () => {
+        try {
+          await this.mappedinService.initialize(this.mappedinContainer.nativeElement);
+          this.initialized.emit();
+        } catch (error) {
+          console.error('Error initializing mappedin map or computing route:', error);
+        }
 
-      combineLatest([
-        this.indoorDirectionsService.getStartPoint$(),
-        this.indoorDirectionsService.getDestinationPoint$(),
-        this.mappedinService.getMapView()
-      ])
-        .pipe(filter(([start, destination, mapView]) => !!mapView))
-        .subscribe(async ([start, destination, mapView]) => {
-          await this.indoorDirectionsService.clearNavigation();
-          if (start || destination) {
-            await this.indoorDirectionsService.renderNavigation();
-          }
-        });
+        combineLatest([
+          this.indoorDirectionsService.getStartPoint$(),
+          this.indoorDirectionsService.getDestinationPoint$(),
+          this.mappedinService.getMapView()
+        ])
+          .pipe(filter(([start, destination, mapView]) => !!mapView))
+          .subscribe(([start, destination, mapView]) => {
+            (async () => {
+              await this.indoorDirectionsService.clearNavigation();
+              if (start || destination) {
+                await this.indoorDirectionsService.renderNavigation();
+              }
+            })();
+          });
+      })();
     }
   }
 }

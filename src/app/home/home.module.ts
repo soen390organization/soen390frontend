@@ -9,7 +9,6 @@ import { MapSearchComponent } from '../components/map-search/map-search.componen
 import { SwitchCampusButtonComponent } from '../components/switch-campus-button/switch-campus-button.component';
 import { InteractionBarComponent } from '../components/interaction-bar/interaction-bar.component';
 import { MappedinMapComponent } from '../components/mappedin-map/mappedin-map.component';
-import { SwitchMapButtonComponent } from '../components/switch-map-button/switch-map-button.component';
 import { UserProfileComponent } from '../components/user-profile/user-profile.component';
 
 @NgModule({

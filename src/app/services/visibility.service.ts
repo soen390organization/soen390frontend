@@ -5,10 +5,10 @@ import { BehaviorSubject, Subject } from 'rxjs';
   providedIn: 'root'
 })
 export class VisibilityService {
-  private showDirections$ = new BehaviorSubject<boolean>(false);
-  private showPOIs$ = new BehaviorSubject<boolean>(true);
-  private enableStart$ = new BehaviorSubject<boolean>(true);
-  private endNavigation$ = new Subject<void>();
+  private readonly showDirections$ = new BehaviorSubject<boolean>(false);
+  private readonly showPOIs$ = new BehaviorSubject<boolean>(true);
+  private readonly enableStart$ = new BehaviorSubject<boolean>(true);
+  private readonly endNavigation$ = new Subject<void>();
 
   constructor() {}
 

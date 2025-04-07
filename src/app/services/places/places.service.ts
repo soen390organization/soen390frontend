@@ -12,7 +12,7 @@ import { ConcordiaDataService } from '../concordia-data.service';
 })
 export class PlacesService {
   private placesService!: google.maps.places.PlacesService;
-  private placesServiceReady = new BehaviorSubject<boolean>(false);
+  private readonly placesServiceReady = new BehaviorSubject<boolean>(false);
 
   constructor(
     private readonly store: Store<AppState>,
@@ -230,7 +230,7 @@ export class PlacesService {
       coordinates: place.geometry?.location as google.maps.LatLng,
       address: place.vicinity ?? 'No address available',
       image: place.photos[0]?.getUrl(),
-      type: 'outdoor' as 'outdoor'
+      type: 'outdoor' as const
     }));
   }
 
@@ -257,7 +257,7 @@ export class PlacesService {
           resolve(operationalResults);
         } else {
           console.error('Failed to get places:', status);
-          reject(status);
+          reject(Error('error in getPlaces(): ' + status));
         }
       });
     });

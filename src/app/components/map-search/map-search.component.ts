@@ -61,7 +61,7 @@ export class MapSearchComponent implements OnInit {
   destinationInputFocused = false;
 
   constructor(
-    private store: Store,
+    private readonly store: Store,
     private readonly googleMapService: GoogleMapService,
     public readonly outdoorDirectionsService: OutdoorDirectionsService,
     public readonly indoorDirectionService: IndoorDirectionsService,
