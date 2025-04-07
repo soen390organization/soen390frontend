@@ -24,14 +24,14 @@ export class MappedinService {
   public mapView: MapView | undefined;
   private mappedInContainer: HTMLElement | undefined;
   private mapId: string;
-  private mapData$ = new BehaviorSubject<MapData | null>(null);
-  private mapView$ = new BehaviorSubject<MapView | null>(null);
+  private readonly mapData$ = new BehaviorSubject<MapData | null>(null);
+  private readonly mapView$ = new BehaviorSubject<MapView | null>(null);
   private campusMapData = {};
 
   private readonly _isMappedin$ = new BehaviorSubject<boolean>(false);
   public isMappedin$ = this._isMappedin$.asObservable();
 
-  constructor(private concordiaDataService: ConcordiaDataService) {}
+  constructor(private readonly concordiaDataService: ConcordiaDataService) {}
 
   async getFloors() {
     // Fetch the map data first

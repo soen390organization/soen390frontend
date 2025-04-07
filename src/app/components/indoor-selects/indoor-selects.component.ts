@@ -21,9 +21,9 @@ export class IndoorSelectsComponent implements OnInit {
   isLoadingFloors: boolean = true;
 
   constructor(
-    private store: Store,
-    private mappedInService: MappedinService,
-    private concordiaDataService: ConcordiaDataService
+    private readonly store: Store,
+    private readonly mappedInService: MappedinService,
+    private readonly concordiaDataService: ConcordiaDataService
   ) {}
 
   ngOnInit() {

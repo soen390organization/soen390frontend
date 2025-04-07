@@ -39,11 +39,11 @@ export class DirectionsComponent implements OnDestroy {
   currentRouteData: { eta: string | null; distance: number } | null = null;
 
   private readonly stepCompletionThreshold = 30;
-  private observer!: IntersectionObserver;
+  private readonly observer!: IntersectionObserver;
 
   constructor(
     private readonly store: Store,
-    public outdoorDirectionsService: OutdoorDirectionsService,
+    public readonly outdoorDirectionsService: OutdoorDirectionsService,
     public readonly outdoorWalkingStrategy: OutdoorWalkingStrategy,
     public readonly outdoorDrivingStrategy: OutdoorDrivingStrategy,
     public readonly outdoorTransitStrategy: OutdoorTransitStrategy,

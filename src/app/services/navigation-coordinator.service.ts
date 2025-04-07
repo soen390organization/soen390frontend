@@ -19,16 +19,12 @@ import { MappedinService } from './mappedin/mappedin.service';
 })
 export class NavigationCoordinatorService {
   // Global observable that emits a new route when any of the location points update.
-  public globalRoute$: Observable<CompleteRoute>;
+  public readonly globalRoute$: Observable<CompleteRoute>;
 
   constructor(
     private readonly store: Store,
     private readonly outdoorStrategy: OutdoorRoutingStrategy,
     private readonly indoorStrategy: IndoorRoutingStrategy,
-    private readonly outdoorDirectionsService: OutdoorDirectionsService,
-    private readonly indoorDirectionService: IndoorDirectionsService,
-    private readonly currentLocationService: CurrentLocationService,
-    private readonly placesService: PlacesService,
     private readonly mappedInService: MappedinService
   ) {
     // Combine the four observables (outdoor start/destination and indoor start/destination)
