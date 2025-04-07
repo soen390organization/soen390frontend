@@ -75,4 +75,4 @@ jobs:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_SOEN390_AAB1A }}
           channelId: live
-          projectId: minicap-recovery
+          projectId: ${{ secrets.FIREBASE_PID }}
